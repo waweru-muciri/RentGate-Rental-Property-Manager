@@ -3,10 +3,7 @@ import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
 import {
-    AppBar,
     Box,
-    Tabs,
-    Tab,
     TextField,
     Button,
     MenuItem,
@@ -188,25 +185,6 @@ let TransactionPage = ({
 
     return (
         <Layout pageTitle="Transactions">
-            <AppBar
-                style={{
-                    position: "sticky",
-                    top: 70,
-                }}
-                color="default"
-            >
-                <Tabs
-                    value={tabValue}
-                    onChange={handleTabChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    centered
-                >
-                    <Tab label="Transactions" />
-                    <Tab label="Property Expenditure" />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={tabValue} index={0}>
             <Grid
                 container
                 spacing={3}
@@ -426,9 +404,6 @@ let TransactionPage = ({
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-            </TabPanel>
         </Layout>
     );
 };

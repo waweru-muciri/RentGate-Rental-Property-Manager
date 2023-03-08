@@ -1,4 +1,5 @@
 import Layout from "../components/myLayout";
+import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
@@ -11,10 +12,7 @@ import {
     TextField,
     Button,
     MenuItem,
-    Tab,
-    AppBar,
     Box,
-    Tabs,
 } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
@@ -24,7 +22,6 @@ import { commonStyles } from "../components/commonStyles";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import VacatingNoticesPage from "../components/notices/VacatingNotices";
 import { getGendersList } from "../assets/commonAssets.js";
 
 const GENDERS_LIST = getGendersList();
@@ -59,30 +56,25 @@ const contactsTableHeadCells = [
 ];
 
 function TabPanel(props) {
-        const { children, value, index, ...other } = props;
+    const { children, value, index, ...other } = props;
 
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && <Box m={2}>{children}</Box>}
-            </div>
-        );
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && <Box m={2}>{children}</Box>}
+        </div>
+    );
 }
 
 let ContactsPage = ({
     isLoading,
     contacts,
-    properties,
-    users, 
-    currentUser,
-    notices,
-    contact_emails,
-    contact_addresses,
+    users,
     match,
     error,
 }) => {
@@ -92,11 +84,6 @@ let ContactsPage = ({
     let [assignedToFilter, setAssignedToFilter] = useState("");
     let [genderFilter, setGenderFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
 
     const classes = commonStyles();
 
@@ -125,7 +112,7 @@ let ContactsPage = ({
                 !lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
             )
             .filter(({ gender }) =>
-                !genderFilter ? true : gender == genderFilter
+                !genderFilter ? true : gender === genderFilter
             )
             .filter(({ assigned_to }) =>
                 !assignedToFilter ? true : assigned_to === assignedToFilter
@@ -144,260 +131,234 @@ let ContactsPage = ({
     };
 
     return (
-        <Layout pageTitle="Contacts">
-            <AppBar
-                style={{
-                    position: "-webkit-sticky" /* Safari */,
-                    position: "sticky",
-                    top: 70,
-                }}
-                color="default"
-            >
-                <Tabs
-                    value={tabValue}
-                    onChange={handleTabChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    centered
-                >
-                    <Tab label="Contacts" />
-                    <Tab label="Vacating Notices"></Tab>
-                </Tabs>
-            </AppBar>
-            <TabPanel value={tabValue} index={0}>
+        <Layout pageTitle="Tenants">
+            <Grid
+                container
+                spacing={3}
+                alignItems="center"
+            ><Grid item key={2}>
+                    <PageHeading paddingLeft={2} text={'Tenants'} />
+                </Grid>
                 <Grid
                     container
-                    spacing={3}
-                    justify="space-evenly"
+                    spacing={2}
+                    item
                     alignItems="center"
+                    direction="row"
+                    key={1}
                 >
-                    <Grid
-                        container
-                        spacing={2}
-                        item
-                        alignItems="center"
-                        direction="row"
-                        key={1}
-                    >
-                        <Grid item>
-                            <Button
-                                type="button"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                startIcon={<AddIcon />}
-                                component={Link}
-                                to={`${match.url}/new`}
-                            >
-                                NEW
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                type="button"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                startIcon={<EditIcon />}
-                                disabled={selected.length <= 0}
-                                component={Link}
-                                to={`${match.url}/${selected[0]}/edit`}
-                            >
-                                Edit
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <ExportToExcelBtn
-                                aria-label="Export to Excel"
-                                disabled={selected.length <= 0}
-                                onClick={(event) => {
-                                    exportContactRecordsToExcel();
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={12}>
-                        <Box
-                            border={1}
-                            borderRadius="borderRadius"
-                            borderColor="grey.400"
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<AddIcon />}
+                            component={Link}
+                            to={`${match.url}/new`}
                         >
-                            <form
-                                className={classes.form}
-                                id="contactSearchForm"
-                                onSubmit={handleSearchFormSubmit}
-                            >
-                                <Grid
-                                    container
-                                    spacing={2}
-                                    justify="center"
-                                    direction="row"
-                                >
-                                    <Grid item lg={6} md={6} xs={6}>
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            id="contact_first_name"
-                                            name="contact_first_name"
-                                            label="First Name"
-                                            value={firstNameFilter}
-                                            onChange={(event) => {
-                                                setFirstNameFilter(
-                                                    event.target.value.trim()
-                                                );
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item lg={6} md={6} xs={6}>
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            name="last_name"
-                                            label="Last Name"
-                                            id="last_name"
-                                            onChange={(event) => {
-                                                setLastNameFilter(
-                                                    event.target.value.trim()
-                                                );
-                                            }}
-                                            value={lastNameFilter}
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <Grid
-                                    container
-                                    spacing={2}
-                                    justify="center"
-                                    direction="row"
-                                >
-                                    <Grid item lg={6} md={6} xs={6}>
-                                        <TextField
-                                            fullWidth
-                                            select
-                                            variant="outlined"
-                                            id="assigned_to"
-                                            name="assigned_to"
-                                            label="Assinged To"
-                                            value={assignedToFilter }
-                                            onChange={(event) => {
-                                                setAssignedToFilter(
-                                                    event.target.value
-                                                );
-                                            }}
-                                        ></TextField>
-                                    </Grid>
-                                    <Grid item lg={6} md={6} xs={6}>
-                                        <TextField
-                                            fullWidth
-                                            select
-                                            variant="outlined"
-                                            name="gender"
-                                            label="Gender"
-                                            id="gender"
-                                            onChange={(event) => {
-                                                setGenderFilter(
-                                                    event.target.value
-                                                );
-                                            }}
-                                            value={genderFilter}
-                                        >
-                                            {GENDERS_LIST.map(
-                                                (gender_type, index) => (
-                                                    <MenuItem
-                                                        key={index}
-                                                        value={gender_type}
-                                                    >
-                                                        {gender_type}
-                                                    </MenuItem>
-                                                )
-                                            )}
-                                        </TextField>
-                                    </Grid>
-                                </Grid>
-                                <Grid
-                                    container
-                                    spacing={2}
-                                    item
-                                    justify="flex-end"
-                                    alignItems="center"
-                                    direction="row"
-                                    key={1}
-                                >
-                                    <Grid item>
-                                        <Button
-                                            onClick={(event) =>
-                                                handleSearchFormSubmit(event)
-                                            }
-                                            type="submit"
-                                            form="contactSearchForm"
-                                            color="primary"
-                                            variant="contained"
-                                            size="medium"
-                                            startIcon={<SearchIcon />}
-                                        >
-                                            SEARCH
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button
-                                            onClick={(event) => {
-                                                resetSearchForm(event);
-                                            }}
-                                            type="reset"
-                                            form="propertySearchForm"
-                                            color="primary"
-                                            variant="contained"
-                                            size="medium"
-                                            startIcon={<UndoIcon />}
-                                        >
-                                            RESET
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </form>
-                        </Box>
+                            NEW
+                            </Button>
                     </Grid>
-                    <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                        {error && (
-                            <div>
-                                <CustomizedSnackbar
-                                    variant="error"
-                                    message={error.message}
-                                />
-                            </div>
-                        )}
-                        <CommonTable
-                            selected={selected}
-                            setSelected={setSelected}
-                            rows={contactItems}
-                            headCells={contactsTableHeadCells}
-                            handleDelete={handleDelete}
-                            deleteUrl={"contacts"}
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<EditIcon />}
+                            disabled={selected.length <= 0}
+                            component={Link}
+                            to={`${match.url}/${selected[0]}/edit`}
+                        >
+                            Edit
+                            </Button>
+                    </Grid>
+                    <Grid item>
+                        <ExportToExcelBtn
+                            aria-label="Export to Excel"
+                            disabled={selected.length <= 0}
+                            onClick={(event) => {
+                                exportContactRecordsToExcel();
+                            }}
                         />
                     </Grid>
-                    {isLoading && <LoadingBackdrop open={isLoading} />}
                 </Grid>
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-             <VacatingNoticesPage properties={properties}
-             users={users} currentUser={currentUser} notices={notices}
-             contact_addresses={contact_addresses} contacts={contacts} contact_emails={contact_emails} match={match}/>
-            </TabPanel>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Box
+                        border={1}
+                        borderRadius="borderRadius"
+                        borderColor="grey.400"
+                    >
+                        <form
+                            className={classes.form}
+                            id="contactSearchForm"
+                            onSubmit={handleSearchFormSubmit}
+                        >
+                            <Grid
+                                container
+                                spacing={2}
+                                justify="center"
+                                direction="row"
+                            >
+                                <Grid item lg={6} md={6} xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        id="contact_first_name"
+                                        name="contact_first_name"
+                                        label="First Name"
+                                        value={firstNameFilter}
+                                        onChange={(event) => {
+                                            setFirstNameFilter(
+                                                event.target.value.trim()
+                                            );
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item lg={6} md={6} xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        name="last_name"
+                                        label="Last Name"
+                                        id="last_name"
+                                        onChange={(event) => {
+                                            setLastNameFilter(
+                                                event.target.value.trim()
+                                            );
+                                        }}
+                                        value={lastNameFilter}
+                                    />
+                                </Grid>
+                            </Grid>
+                            <Grid
+                                container
+                                spacing={2}
+                                justify="center"
+                                direction="row"
+                            >
+                                <Grid item lg={6} md={6} xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        variant="outlined"
+                                        id="assigned_to"
+                                        name="assigned_to"
+                                        label="Assinged To"
+                                        value={assignedToFilter}
+                                        onChange={(event) => {
+                                            setAssignedToFilter(
+                                                event.target.value
+                                            );
+                                        }}
+                                    >
+                                        {users.map((user, index) => (
+                                            <MenuItem key={index} value={user.id}>
+                                                {user.first_name + " " + user.last_name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
+                                <Grid item lg={6} md={6} xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        variant="outlined"
+                                        name="gender"
+                                        label="Gender"
+                                        id="gender"
+                                        onChange={(event) => {
+                                            setGenderFilter(
+                                                event.target.value
+                                            );
+                                        }}
+                                        value={genderFilter}
+                                    >
+                                        {GENDERS_LIST.map(
+                                            (gender_type, index) => (
+                                                <MenuItem
+                                                    key={index}
+                                                    value={gender_type}
+                                                >
+                                                    {gender_type}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </TextField>
+                                </Grid>
+                            </Grid>
+                            <Grid
+                                container
+                                spacing={2}
+                                item
+                                justify="flex-end"
+                                alignItems="center"
+                                direction="row"
+                                key={1}
+                            >
+                                <Grid item>
+                                    <Button
+                                        onClick={(event) =>
+                                            handleSearchFormSubmit(event)
+                                        }
+                                        type="submit"
+                                        form="contactSearchForm"
+                                        color="primary"
+                                        variant="contained"
+                                        size="medium"
+                                        startIcon={<SearchIcon />}
+                                    >
+                                        SEARCH
+                                        </Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        onClick={(event) => {
+                                            resetSearchForm(event);
+                                        }}
+                                        type="reset"
+                                        form="propertySearchForm"
+                                        color="primary"
+                                        variant="contained"
+                                        size="medium"
+                                        startIcon={<UndoIcon />}
+                                    >
+                                        RESET
+                                        </Button>
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </Box>
+                </Grid>
+                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                    {error && (
+                        <div>
+                            <CustomizedSnackbar
+                                variant="error"
+                                message={error.message}
+                            />
+                        </div>
+                    )}
+                    <CommonTable
+                        selected={selected}
+                        setSelected={setSelected}
+                        rows={contactItems}
+                        headCells={contactsTableHeadCells}
+                        handleDelete={handleDelete}
+                        deleteUrl={"contacts"}
+                    />
+                </Grid>
+                {isLoading && <LoadingBackdrop open={isLoading} />}
+            </Grid>
         </Layout>
     );
 };
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        notices: state.notices,
-        properties: state.properties,
-        users: state.users, 
-        currentUser: state.currentUser,
+        users: state.users,
         contacts: state.contacts,
-        contact_phone_numbers: state.contact_phone_numbers,
-        contact_emails: state.contact_emails,
-        contact_faxes: state.contact_faxes,
-        contact_addresses: state.contact_addresses,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,

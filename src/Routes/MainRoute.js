@@ -15,6 +15,7 @@ import {
   withRouter,
   Link,
 } from "react-router-dom";
+import TenantStatementsPage from "./ContactStatements";
 import PropertiesPage from "./Properties";
 import MaintenancesPage from "./Maintenances";
 import ReportsPage from "./Reports";
@@ -33,6 +34,7 @@ import PropertyPage from "./PropertyPage";
 import ContactPage from "./ContactPage";
 import ContactsPage from "./Contacts";
 import NoticesPage from "./Notices";
+import NoticePage from "./NoticePage";
 import TransactionPage from "./TransactionPage";
 import DashBoard from "./DashBoard";
 import clsx from "clsx";
@@ -71,7 +73,11 @@ import HouseIcon from "@material-ui/icons/House";
 import EventNoteIcon from "@material-ui/icons/EventNote";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
+import AssessmentIcon from '@material-ui/icons/Assessment';
+import NoteIcon from '@material-ui/icons/Note';
+import PaymentIcon from '@material-ui/icons/Payment';
 import Head from "../components/Head";
+
 
 const drawerWidth = 240;
 
@@ -151,17 +157,29 @@ const navigationLinks = [
     to: "/maintenance-requests",
     icon: <EventNoteIcon />,
   },
-  { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
   { text: "Email", to: "/emails", icon: <ContactMailIcon /> },
-  { text: "Reports", to: "/reports", icon: <TimelineIcon /> },
   { text: "Audit Logs", to: "/audit-logs", icon: <HistoryIcon /> },
 ];
-
+const othersLinkNestedLinks = [
+  { text: "Vacating Notices", to: "/notices", icon: <NoteIcon /> },
+  { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
+];
 const reportLinkNestedLinks = [
+  {
+    text: "Property Performance",
+    to: "/property-performance",
+    icon: <AssessmentIcon />,
+  }, {
+    text: "Tenant Statements",
+    to: "/tenant-statements",
+    icon: <PaymentIcon />,
+  },
+];
+const accountsLinkNestedLinks = [
   { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
   {
     text: "Property Expenditure",
-    to: "/expenses",
+    to: "/property_expenditure",
     icon: <AccountBalanceWalletIcon />,
   },
 ];
@@ -172,7 +190,6 @@ let MainPage = ({
   selectedTab,
   setSelectedTab,
   match,
-  error,
   fetchData,
   setUser,
 }) => {
@@ -193,7 +210,7 @@ let MainPage = ({
         "notices",
         "to-dos",
         "users",
-        "expenses",
+        "property_expenditure",
       ]);
     }
   }, [properties]);
@@ -213,6 +230,15 @@ let MainPage = ({
               phoneNumber: user.phoneNumber,
               providerData: user.providerData,
             };
+            user.getIdTokenResult().then((idTokenResult) => {
+              // Confirm the user is an Admin.
+              if (!!idTokenResult.claims.isAdmin) {
+                userDetails.isAdmin = true
+              } else {
+                userDetails.isAdmin = false
+              }
+
+            });
             setUser(userDetails);
           } else {
             // User is signed out.
@@ -231,11 +257,10 @@ let MainPage = ({
     let { currentUser, pageTitle } = props;
     const classes = useStyles();
     const theme = useTheme();
-    const [open, setOpen] = React.useState(false);
     const { selectedTab, setSelectedTab } = props;
+    const { drawerOpen } = selectedTab;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isProfileMenuOpen = Boolean(anchorEl);
-    const [accountNavOpen, setAccountNavOpen] = React.useState(false);
 
     const handleProfileMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
@@ -247,15 +272,11 @@ let MainPage = ({
     const menuId = "primary-search-account-menu";
 
     const handleDrawerToggle = () => {
-      setOpen(!open);
+      handleListItemClick({ drawerOpen: !drawerOpen });
     };
 
-    const toggleAccountsNav = () => {
-      setAccountNavOpen(!accountNavOpen);
-    };
-
-    const handleListItemClick = (index) => {
-      setSelectedTab(index);
+    const handleListItemClick = (indexObject) => {
+      setSelectedTab(Object.assign({}, selectedTab, { ...indexObject }));
     };
 
     return (
@@ -264,7 +285,7 @@ let MainPage = ({
         <AppBar
           position="fixed"
           className={clsx(classes.appBar, {
-            [classes.appBarShift]: open,
+            [classes.appBarShift]: drawerOpen,
           })}
         >
           <Toolbar>
@@ -273,7 +294,7 @@ let MainPage = ({
               aria-label="open drawer"
               onClick={handleDrawerToggle}
               edge="start"
-              className={clsx(classes.menuButton, open && classes.hide)}
+              className={clsx(classes.menuButton, drawerOpen && classes.hide)}
             >
               <MenuIcon />
             </IconButton>
@@ -343,7 +364,7 @@ let MainPage = ({
           className={classes.drawer}
           variant="temporary"
           anchor="left"
-          open={open}
+          open={drawerOpen}
           classes={{
             paper: classes.drawerPaper,
           }}
@@ -353,23 +374,25 @@ let MainPage = ({
               {theme.direction === "ltr" ? (
                 <ChevronLeftIcon />
               ) : (
-                <ChevronRightIcon />
-              )}
+                  <ChevronRightIcon />
+                )}
             </IconButton>
           </div>
           <Divider />
           <List component="div" disablePadding>
-            {navigationLinks.map((linkItem, index) => (
-              <React.Fragment key={index}>
+            {navigationLinks.map((linkItem, parentIndex) => (
+              <React.Fragment key={parentIndex}>
                 <ListItem
                   component={Link}
                   to={linkItem.to}
                   button
                   key={linkItem.text}
-                  selected={selectedTab === index}
+                  selected={selectedTab.parent === parentIndex}
                   onClick={(event) => {
-                    handleDrawerToggle();
-                    handleListItemClick(index);
+                    handleListItemClick({
+                      parent: parentIndex,
+                      drawerOpen: false,
+                    });
                   }}
                 >
                   <ListItemIcon>{linkItem.icon}</ListItemIcon>
@@ -379,20 +402,136 @@ let MainPage = ({
             ))}
             <ListItem
               button
-              key={20}
-              selected={selectedTab === 20}
+              key={10}
               onClick={(event) => {
                 event.preventDefault();
-                toggleAccountsNav();
+                if (selectedTab.parent === 10) {
+                  handleListItemClick({ parent: -1 });
+                }
+                else {
+                  handleListItemClick({ parent: 10 });
+                }
+              }}
+            >
+              <ListItemIcon>
+                <EventNoteIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Events"} />
+              {selectedTab.parent === 10 ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse
+              in={selectedTab.parent === 10}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {othersLinkNestedLinks.map(
+                  (innerLinkItem, innerLinkItemIndex) => (
+                    <ListItem
+                      component={Link}
+                      to={innerLinkItem.to}
+                      button
+                      className={classes.nested}
+                      key={innerLinkItem.text}
+                      selected={
+                        selectedTab.parent === 10 &&
+                        selectedTab.nestedLink === 'other' + innerLinkItemIndex
+                      }
+                      onClick={(event) => {
+                        handleDrawerToggle();
+                        handleListItemClick({
+                          parent: 10,
+                          nestedLink: 'other' + innerLinkItemIndex,
+                          drawerOpen: false,
+                        });
+                      }}
+                    >
+                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
+                      <ListItemText primary={innerLinkItem.text} />
+                    </ListItem>
+                  )
+                )}
+              </List>
+            </Collapse>
+            {/*accounts tab here*/}
+            <ListItem
+              button
+              key={20}
+              onClick={(event) => {
+                event.preventDefault();
+                if (selectedTab.parent === 20) {
+                  handleListItemClick({ parent: -1 });
+                }
+                else {
+                  handleListItemClick({ parent: 20 });
+                }
               }}
             >
               <ListItemIcon>
                 <MoneyIcon />
               </ListItemIcon>
               <ListItemText primary={"Accounts"} />
-              {accountNavOpen ? <ExpandLess /> : <ExpandMore />}
+              {selectedTab.parent === 20 ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
-            <Collapse in={accountNavOpen} timeout="auto" unmountOnExit>
+            <Collapse
+              in={selectedTab.parent === 20}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {accountsLinkNestedLinks.map(
+                  (innerLinkItem, innerLinkItemIndex) => (
+                    <ListItem
+                      component={Link}
+                      to={innerLinkItem.to}
+                      button
+                      className={classes.nested}
+                      key={innerLinkItem.text}
+                      selected={
+                        selectedTab.parent === 20 &&
+                        selectedTab.nestedLink === 'account' + innerLinkItemIndex
+                      }
+                      onClick={(event) => {
+                        handleDrawerToggle();
+                        handleListItemClick({
+                          parent: 20,
+                          nestedLink: 'account' + innerLinkItemIndex,
+                          drawerOpen: false,
+                        });
+                      }}
+                    >
+                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
+                      <ListItemText primary={innerLinkItem.text} />
+                    </ListItem>
+                  )
+                )}
+              </List>
+            </Collapse>
+            {/*reports tab here*/}
+            <ListItem
+              button
+              key={30}
+              onClick={(event) => {
+                event.preventDefault();
+                if (selectedTab.parent === 30) {
+                  handleListItemClick({ parent: -1 });
+                }
+                else {
+                  handleListItemClick({ parent: 30 });
+                }
+              }}
+            >
+              <ListItemIcon>
+                <TimelineIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Reports"} />
+              {selectedTab.parent === 30 ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse
+              in={selectedTab.parent === 30}
+              timeout="auto"
+              unmountOnExit
+            >
               <List component="div" disablePadding>
                 {reportLinkNestedLinks.map(
                   (innerLinkItem, innerLinkItemIndex) => (
@@ -400,11 +539,19 @@ let MainPage = ({
                       component={Link}
                       to={innerLinkItem.to}
                       button
+                      className={classes.nested}
                       key={innerLinkItem.text}
-                      selected={selectedTab === innerLinkItemIndex}
+                      selected={
+                        selectedTab.parent === 30 &&
+                        selectedTab.nestedLink === 'report' + innerLinkItemIndex
+                      }
                       onClick={(event) => {
                         handleDrawerToggle();
-                        handleListItemClick(20);
+                        handleListItemClick({
+                          parent: 30,
+                          nestedLink: 'report' + innerLinkItemIndex,
+                          drawerOpen: false,
+                        });
                       }}
                     >
                       <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
@@ -432,7 +579,7 @@ let MainPage = ({
         />
         <Switch>
           <Route exact path={`${match.path}`} component={DashBoard} />
-          <Route exact path={`${match.path}reports`} component={ReportsPage} />
+          <Route exact path={`${match.path}property-performance`} component={ReportsPage} />
           <Route exact path={`${match.path}emails`} component={EmailsPage} />
           <Route
             exact
@@ -499,17 +646,17 @@ let MainPage = ({
           />
           <Route
             exact
-            path={`${match.path}expenses/new`}
+            path={`${match.path}property_expenditure/new`}
             component={ExpensePage}
           />
           <Route
             exact
-            path={`${match.path}expenses`}
+            path={`${match.path}property_expenditure`}
             component={ExpensesPage}
           />
           <Route
             exact
-            path={`${match.path}expenses/:expenseId/edit`}
+            path={`${match.path}property_expenditure/:expenseId/edit`}
             component={ExpensePage}
           />
 
@@ -521,15 +668,21 @@ let MainPage = ({
           />
           <Route
             exact
-            path={`${match.path}contacts/notices/new`}
+            path={`${match.path}notices/new`}
+            component={NoticePage}
+          />
+          <Route
+            exact
+            path={`${match.path}notices`}
             component={NoticesPage}
           />
           <Route
             exact
-            path={`${match.path}contacts/notices/:noticeId/edit`}
-            component={NoticesPage}
+            path={`${match.path}notices/:noticeId/edit`}
+            component={NoticePage}
           />
           <Route path={`${match.path}properties`} component={PropertiesPage} />
+          <Route exact path={`${match.path}tenant-statements`} component={TenantStatementsPage} />
           <Route
             exact
             path={`${match.path}transactions`}

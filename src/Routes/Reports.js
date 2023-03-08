@@ -1,12 +1,10 @@
 import Layout from "../components/myLayout";
+import PageHeading from "../components/PageHeading";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
 import {
-    AppBar,
     Box,
-    Tabs,
-    Tab,
     TextField,
     Button,
     MenuItem,
@@ -24,7 +22,6 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import TenantStatementsPage from "../components/contacts/ContactStatements";
 
 const headCells = [
     {
@@ -78,20 +75,20 @@ const headCells = [
 ];
 
 function TabPanel(props) {
-        const { children, value, index, ...other } = props;
+    const { children, value, index, ...other } = props;
 
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && <Box m={2}>{children}</Box>}
-            </div>
-        );
-    }
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && <Box m={2}>{children}</Box>}
+        </div>
+    );
+}
 
 let ReportsPage = ({
     isLoading,
@@ -110,15 +107,10 @@ let ReportsPage = ({
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
         setTransactionItems(getMappedTransactions());
     }, [transactions, contacts]);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
 
     const getMappedTransactions = () => {
         const mappedTransactions = transactions.map((transaction) => {
@@ -189,32 +181,14 @@ let ReportsPage = ({
 
     return (
         <Layout pageTitle="Transactions">
-            <AppBar
-                style={{
-                    position: "-webkit-sticky" /* Safari */,
-                    position: "sticky",
-                    top: 70,
-                }}
-                color="default"
-            >
-                <Tabs
-                    value={tabValue}
-                    onChange={handleTabChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    centered
-                >
-                    <Tab label="Property Performance" />
-                    <Tab label="Tenant Statements" />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={tabValue} index={0}>
             <Grid
                 container
                 spacing={3}
-                justify="space-evenly"
                 alignItems="center"
             >
+                <Grid item key={2}>
+                    <PageHeading paddingLeft={2} text={'Property Performance'} />
+                </Grid>
                 <Grid
                     container
                     spacing={2}
@@ -428,16 +402,6 @@ let ReportsPage = ({
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-                <TenantStatementsPage
-                    contacts={contacts}
-                    users={users}
-                    transactions={transactions}
-                    isLoading={isLoading}
-                    properties={properties}
-                />
-            </TabPanel>
         </Layout>
     );
 };

@@ -87,7 +87,7 @@ let ExpensesPage = ({
                 !toDateFilter ? true : expense_date <= toDateFilter
             )
             .filter(({ property }) =>
-                !propertyFilter ? true : property == propertyFilter
+                !propertyFilter ? true : property === propertyFilter
             )
 
         setExpenseItems(filteredExpenses);
@@ -129,7 +129,7 @@ let ExpensesPage = ({
                             size="medium"
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`expenses/new`}
+                            to={`${match.url}/new`}
                         >
                             NEW
                         </Button>
@@ -143,7 +143,7 @@ let ExpensesPage = ({
                             startIcon={<EditIcon />}
                             disabled={selected.length <= 0}
                             component={Link}
-                            to={`expenses/${selected[0]}/edit`}
+                            to={`${match.url}/${selected[0]}/edit`}
                         >
                             Edit
                         </Button>

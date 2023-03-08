@@ -48,36 +48,6 @@ const maintenanceRequestsTableHeadCells = [
 	{ id: "status", numeric: false, disablePadding: true, label: "Status" },
 ];
 
-const rows = [
-	{
-		id: 1,
-		name: "Brian Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		created_by: "User 2",
-		phone_number: "254742654637",
-	},
-	{
-		id: 2,
-		name: "Brian Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		created_by: "User 2",
-		phone_number: "254742654637",
-	},
-	{
-		id: 3,
-		name: "Brian Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		created_by: "User 2",
-		phone_number: "254742654637",
-	},
-];
-
 let MaintenanceRequestsPage = ({
 	isLoading,
 	maintenanceRequests,

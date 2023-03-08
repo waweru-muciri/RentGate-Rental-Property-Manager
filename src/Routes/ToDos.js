@@ -105,7 +105,6 @@ let ToDosPage = ({ toDos, error, users }) => {
 						]}
 						editable
 						events={mappedToDos}
-						editable={true}
 						eventResize={handleEventResize}
 						eventDrop={handleEventDrop}
 						eventClick={handleEventClick}

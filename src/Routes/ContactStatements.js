@@ -1,12 +1,15 @@
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../../assets/printToExcel";
+import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import ExportToExcelBtn from "../../components/ExportToExcelBtn";
-import CommonTable from "../../components/table/commonTable";
-import { commonStyles } from "../../components/commonStyles";
+import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import CommonTable from "../components/table/commonTable";
+import { connect } from "react-redux";
+import { commonStyles } from "../components/commonStyles";
+import Layout from "../components/myLayout";
+import PageHeading from "../components/PageHeading";
 
 const headCells = [
     {
@@ -163,13 +166,15 @@ let TenantStatementsPage = ({
     };
 
     return (
-        <React.Fragment>
+        <Layout pageTitle="Tenant Statements">
             <Grid
                 container
                 spacing={3}
-                justify="space-evenly"
-                alignItems="center"
+                justify="center" direction="column"
             >
+            <Grid item key={2}>
+                    <PageHeading paddingLeft={2} text={"Tenant Statements"} />
+                </Grid>
                 <Grid
                     container
                     spacing={2}
@@ -376,9 +381,17 @@ let TenantStatementsPage = ({
                     />
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </Layout>
     );
 };
 
+const mapStateToProps = (state, ownProps) => {
+  return {
+    properties: state.properties,
+    transactions: state.transactions,
+    contacts: state.contacts,
+    users: state.users,
+  };
+};
 
-export default TenantStatementsPage;
+export default connect(mapStateToProps)(TenantStatementsPage);

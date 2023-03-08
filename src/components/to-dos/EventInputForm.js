@@ -34,7 +34,6 @@ let ToDoInputForm = (props) => {
 	const {
 		open,
 		handleClose,
-		error,
 		eventToShow,
 		users,
 		setEventToShow,

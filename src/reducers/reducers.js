@@ -23,7 +23,7 @@ export function itemsHasErrored(state = null, action) {
     }
 }
 
-export function setPaginationPage(state = 0, action) {
+export function setPaginationPage(state = { parent: 0 , nestedLink: -1 , drawerOpen: false}, action) {
     switch (action.type) {
         case actionTypes.SET_PAGINATION_PAGE:
             return action.index;

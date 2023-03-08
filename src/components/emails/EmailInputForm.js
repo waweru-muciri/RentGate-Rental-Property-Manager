@@ -83,7 +83,6 @@ export default function HorizontalLinearStepper(props) {
                     email_subject: values.email_subject,
                     email_message: values.email_message,
                     email_cc: values.email_cc,
-                    email_subject: values.email_subject,
                   };
                   console.log(email);
                   handleNext();

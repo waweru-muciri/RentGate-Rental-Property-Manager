@@ -8,7 +8,6 @@ import { withRouter } from "react-router-dom";
 
 let UserPage = (props) => {
 	const {match, currentUser} = props
-	let userToEdit = currentUser;
 	let pageTitle = "Edit Profile"
 	return (
 		<Layout pageTitle="User Profile">

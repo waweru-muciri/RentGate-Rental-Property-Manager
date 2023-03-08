@@ -15,17 +15,48 @@ import * as expensesActions from "./expenses";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import app from "../firebase";
 
+
+// Initialize Cloud Functions through Firebase
+var functions = app.functions();
 const storageRef = app.storage().ref();
 const db = app.firestore().collection("tenant").doc("wPEY7XfSReuoOEOa22aX");
 
-export function setCurrentUser(user){
+export function setCurrentUser(user) {
     return {
         type: actionTypes.SET_CURRENT_USER,
         user,
     };
 }
 
-export function deleteUploadedFileByUrl(fileUrl){
+export function sendEmails(email, recipients) {
+    var sendEmail = functions.httpsCallable('sendEmail');
+    sendEmail({ email: email, recipients: recipients }).then(function (result) {
+        // Read result of the Cloud Function.
+        var response = result.data;
+        if (response.error) {
+            console.log('Error sending emails => ', response.error)
+        }
+        else {
+            console.log('Successfully sent emails => ', response.success)
+        }
+    });
+}
+
+export function addRolesToUserByEmail(email, rolesToAddObject) {
+    var addRolesToUser = functions.httpsCallable('addRolesToUser');
+    addRolesToUser({ email: email, roles: rolesToAddObject }).then(function (result) {
+        // Read result of the Cloud Function.
+        var response = result.data;
+        if (response.error) {
+            console.log('Error adding roles to user => ', response.error)
+        }
+        else {
+            console.log('Successfully added roles to user => ', response.success)
+        }
+    });
+}
+
+export function deleteUploadedFileByUrl(fileUrl) {
     storageRef.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
 }
 
@@ -71,95 +102,259 @@ export function itemsFetchData(collectionsUrls) {
     return (dispatch) => {
         dispatch(itemsIsLoading(true));
         collectionsUrls.forEach((url) => {
-            db.collection(url).onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        let addedItem = Object.assign({}, change.doc.data(), {
-                            id: change.doc.id,
-                        });
-                        switch (url) {
-                            case "properties":
-                                dispatch(
-                                    propertyActions.addProperty(addedItem)
-                                );
-                                break;
-
-                            case "contacts":
-                                dispatch(contactsActions.addContact(addedItem));
-                                break;
-
-                            case "contact_emails":
-                                dispatch(emailsActions.addEmail(addedItem));
-                                break;
-
-                            case "contact_phone_numbers":
-                                dispatch(
-                                    phoneNumbersActions.addPhoneNumber(
-                                        addedItem
-                                    )
-                                );
-                                break;
-
-                            case "contact_faxes":
-                                dispatch(faxesActions.addFax(addedItem));
-                                break;
-
-                            case "contact_addresses":
-                                dispatch(
-                                    addressesActions.addAddress(addedItem)
-                                );
-                                break;
-
-                            case "transactions":
-                                dispatch(
-                                    transactionsActions.addTransaction(
-                                        addedItem
-                                    )
-                                );
-                                break;
-
-                            case "to-dos":
-                                dispatch(toDoActions.addToDo(addedItem));
-                                break;
-
-                            case "maintenance-requests":
-                                dispatch(
-                                    maintenanceRequestsActions.addMaintenanceRequest(
-                                        addedItem
-                                    )
-                                );
-                                break;
-
-                            case "logs":
-                                dispatch(logActions.addAuditLog(addedItem));
-                                break;
-
-                            case "notices":
-                                dispatch(vacatingNoticesActions.addNotice(addedItem));
-                                break;
-
-                            case "property_media":
-                                dispatch(mediaFilesActions.addMediaFile(addedItem));
-                                break;
-
-                            case "expenses":
-                                dispatch(expensesActions.addExpense(addedItem));
-                                break;
-
-                            case "users":
-                                dispatch(usersActions.addUser(addedItem));
-                                break;
-
-                            default:
-                                break;
+            db.collection(url).get().then((snapshot) => {
+                let fetchedItems = []
+                snapshot.forEach((doc) => {
+                    let fetchedObject = Object.assign(
+                        {},
+                        doc.data(),
+                        {
+                            id: doc.id,
                         }
-                    }
-                    if (change.type === "modified") {
+                    );
+                    fetchedItems.push(fetchedObject)
+                });
+                switch (url) {
+                    case "properties":
+                        dispatch(
+                            propertyActions.propertiesFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "contacts":
+                        dispatch(
+                            contactsActions.contactsFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "contact_emails":
+                        dispatch(
+                            emailsActions.emailsFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "contact_phone_numbers":
+                        dispatch(
+                            phoneNumbersActions.phoneNumbersFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "contact_addresses":
+                        dispatch(
+                            addressesActions.addressesFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "transactions":
+                        dispatch(
+                            transactionsActions.transactionsFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "to-dos":
+                        dispatch(toDoActions.toDosFetchDataSuccess(fetchedItems));
+                        break;
+
+                    case "maintenance-requests":
+                        dispatch(
+                            maintenanceRequestsActions.maintenanceRequestsFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "logs":
+                        dispatch(
+                            logActions.auditLogsFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "notices":
+                        dispatch(
+                            vacatingNoticesActions.noticesFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "property_media":
+                        dispatch(
+                            mediaFilesActions.mediaFilesFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "expenses":
+                        dispatch(
+                            expensesActions.expensesFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    case "users":
+                        dispatch(
+                            usersActions.usersFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+        })
+        dispatch(itemsIsLoading(false));
+    }
+}
+export function setPaginationPage(index) {
+    return {
+        type: actionTypes.SET_PAGINATION_PAGE,
+        index,
+    };
+}
+
+export function itemsHasErrored(error) {
+    return {
+        type: actionTypes.ITEMS_HAS_ERRORED,
+        error,
+    };
+}
+export function itemsIsLoading(bool) {
+    return {
+        type: actionTypes.ITEMS_IS_LOADING,
+        isLoading: bool,
+    };
+}
+export function handleDelete(itemId, url) {
+    //send request to server to delete selected item
+    return (dispatch) => {
+        return db
+            .collection(url)
+            .doc(itemId)
+            .delete().then(() => {
+                console.log("Document successfully deleted!");
+                switch (url) {
+                    case "properties":
+                        dispatch(
+                            propertyActions.deleteProperty(
+                                itemId
+                            )
+                        );
+                        break;
+
+                    case "contacts":
+                        dispatch(
+                            contactsActions.deleteContact(itemId)
+                        );
+                        break;
+
+                    case "contact_emails":
+                        dispatch(
+                            emailsActions.deleteEmail(itemId)
+                        );
+                        break;
+
+                    case "contact_phone_numbers":
+                        dispatch(
+                            phoneNumbersActions.deletePhoneNumber(
+                                itemId
+                            )
+                        );
+                        break;
+
+                    case "contact_faxes":
+                        dispatch(faxesActions.deleteFax(itemId));
+                        break;
+
+                    case "contact_addresses":
+                        dispatch(
+                            addressesActions.deleteAddress(
+                                itemId
+                            )
+                        );
+                        break;
+
+                    case "transactions":
+                        dispatch(
+                            transactionsActions.deleteTransaction(
+                                itemId
+                            )
+                        );
+                        break;
+
+                    case "to-dos":
+                        dispatch(toDoActions.deleteToDo(itemId));
+                        break;
+
+                    case "maintenance-requests":
+                        dispatch(
+                            maintenanceRequestsActions.deleteMaintenanceRequest(
+                                itemId
+                            )
+                        );
+                        break;
+
+                    case "logs":
+                        dispatch(
+                            logActions.deleteAuditLog(itemId)
+                        );
+                        break;
+
+                    case "notices":
+                        dispatch(
+                            vacatingNoticesActions.deleteNotice(itemId)
+                        );
+                        break;
+
+                    case "property_media":
+                        dispatch(
+                            mediaFilesActions.deleteMediaFile(itemId)
+                        );
+                        break;
+
+                    case "expenses":
+                        dispatch(
+                            expensesActions.deleteExpense(itemId)
+                        );
+                        break;
+
+                    case "users":
+                        dispatch(
+                            usersActions.deleteUser(itemId)
+                        );
+                        break;
+
+                    default:
+                        break;
+                }
+            }).catch((error) => {
+                console.log("Failed to Delete Document!", error);
+
+            })
+    }
+}
+
+export function handleItemFormSubmit(data, url) {
+    if (typeof data.id === "undefined") {
+        delete data.id;
+    }
+    return (dispatch) => {
+        return new Promise(function (resolve, reject) {
+            typeof data.id !== "undefined"
+                ? //send post request to edit the item
+                db
+                    .collection(url)
+                    .doc(data.id)
+                    .update(data)
+                    .then((docRef) => {
                         let modifiedObject = Object.assign(
                             {},
-                            change.doc.data(),
+                            data,
                             {
-                                id: change.doc.id,
+                                id: docRef.id,
                             }
                         );
                         switch (url) {
@@ -248,169 +443,101 @@ export function itemsFetchData(collectionsUrls) {
                             default:
                                 break;
                         }
-                    }
-                    if (change.type === "removed") {
-                        let deletedItemId = change.doc.id;
+                        resolve(docRef.id);
+                    })
+                    .catch((error) => {
+                        console.log("Error => ", error.response);
+                        reject(error)
+                    })
+                : //send post to create item
+                db
+                    .collection(url)
+                    .add(data)
+                    .then((docRef) => {
+                        let addedItem = Object.assign({}, data, {
+                            id: docRef.id,
+                        });
                         switch (url) {
                             case "properties":
                                 dispatch(
-                                    propertyActions.deleteProperty(
-                                        deletedItemId
-                                    )
+                                    propertyActions.addProperty(addedItem)
                                 );
                                 break;
 
                             case "contacts":
-                                dispatch(
-                                    contactsActions.deleteContact(deletedItemId)
-                                );
+                                dispatch(contactsActions.addContact(addedItem));
                                 break;
 
                             case "contact_emails":
-                                dispatch(
-                                    emailsActions.deleteEmail(deletedItemId)
-                                );
+                                dispatch(emailsActions.addEmail(addedItem));
                                 break;
 
                             case "contact_phone_numbers":
                                 dispatch(
-                                    phoneNumbersActions.deletePhoneNumber(
-                                        deletedItemId
+                                    phoneNumbersActions.addPhoneNumber(
+                                        addedItem
                                     )
                                 );
                                 break;
 
                             case "contact_faxes":
-                                dispatch(faxesActions.deleteFax(deletedItemId));
+                                dispatch(faxesActions.addFax(addedItem));
                                 break;
 
                             case "contact_addresses":
                                 dispatch(
-                                    addressesActions.deleteAddress(
-                                        deletedItemId
-                                    )
+                                    addressesActions.addAddress(addedItem)
                                 );
                                 break;
 
                             case "transactions":
                                 dispatch(
-                                    transactionsActions.deleteTransaction(
-                                        deletedItemId
+                                    transactionsActions.addTransaction(
+                                        addedItem
                                     )
                                 );
                                 break;
 
                             case "to-dos":
-                                dispatch(toDoActions.deleteToDo(deletedItemId));
+                                dispatch(toDoActions.addToDo(addedItem));
                                 break;
 
                             case "maintenance-requests":
                                 dispatch(
-                                    maintenanceRequestsActions.deleteMaintenanceRequest(
-                                        deletedItemId
+                                    maintenanceRequestsActions.addMaintenanceRequest(
+                                        addedItem
                                     )
                                 );
                                 break;
 
                             case "logs":
-                                dispatch(
-                                    logActions.deleteAuditLog(deletedItemId)
-                                );
+                                dispatch(logActions.addAuditLog(addedItem));
                                 break;
 
                             case "notices":
-                                dispatch(
-                                    vacatingNoticesActions.deleteNotice(deletedItemId)
-                                );
+                                dispatch(vacatingNoticesActions.addNotice(addedItem));
                                 break;
 
                             case "property_media":
-                                dispatch(
-                                    mediaFilesActions.deleteMediaFile(deletedItemId)
-                                );
+                                dispatch(mediaFilesActions.addMediaFile(addedItem));
                                 break;
 
                             case "expenses":
-                                dispatch(
-                                    expensesActions.deleteExpense(deletedItemId)
-                                );
-								break;
+                                dispatch(expensesActions.addExpense(addedItem));
+                                break;
 
                             case "users":
-                                dispatch(
-                                    usersActions.deleteUser(deletedItemId)
-                                );
+                                dispatch(usersActions.addUser(addedItem));
                                 break;
 
                             default:
                                 break;
                         }
-                    }
-                    dispatch(itemsIsLoading(false));
-                });
-            });
-        });
-        // console.log("Fetched items => ", items);
-    };
-}
-
-export function setPaginationPage(index) {
-    return {
-        type: actionTypes.SET_PAGINATION_PAGE,
-        index,
-    };
-}
-
-export function itemsHasErrored(error) {
-    return {
-        type: actionTypes.ITEMS_HAS_ERRORED,
-        error,
-    };
-}
-export function itemsIsLoading(bool) {
-    return {
-        type: actionTypes.ITEMS_IS_LOADING,
-        isLoading: bool,
-    };
-}
-export function handleDelete(itemId, url) {
-    //send request to server to delete selected item
-    return db
-        .collection(url)
-        .doc(itemId)
-        .delete()
-        .then(() => {
-            console.log("Deleted document");
+                        resolve(docRef.id);
+                    })
+                    .catch((error) => {
+                        console.log("Error => ", error.response);
+                    });
         })
-        .catch((error) => {
-            console.log(error);
-        });
-}
-
-export function handleItemFormSubmit(data, url) {
-    if (typeof data.id === "undefined") {
-        delete data.id;
     }
-    return typeof data.id !== "undefined"
-        ? //send post request to edit the item
-          db
-              .collection(url)
-              .doc(data.id)
-              .update(data)
-              .then((docRef) => {
-                  return docRef.id;
-              })
-              .catch((error) => {
-                  console.log("Error => ", error.response);
-              })
-        : //send post to create item
-          db
-              .collection(url)
-              .add(data)
-              .then((docRef) => {
-                  return docRef.id;
-              })
-              .catch((error) => {
-                  console.log("Error => ", error.response);
-              });
 }
