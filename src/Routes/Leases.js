@@ -35,18 +35,19 @@ const headCells = [
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
+const LEASE_TERMINATED_STATUS_TYPES = [{ id: false, name: "Active" }, { id: true, name: "In-Active" }]
+
 let TransactionPage = ({
     leases,
     properties,
     match,
-    users,
     handleItemDelete,
 }) => {
     const classes = commonStyles();
     let [leaseItems, setLeaseItems] = useState([]);
     let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState('');
+    let [activeStatusFilter, setActiveStatusFilter] = useState('');
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -69,8 +70,8 @@ let TransactionPage = ({
             .filter(({ property_id }) =>
                 !propertyFilter ? true : property_id === propertyFilter
             )
-            .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord === assignedToFilter
+            .filter(({ terminated }) =>
+                activeStatusFilter === '' ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter
             );
         setFilteredLeaseItems(filteredLeases);
     };
@@ -79,7 +80,7 @@ let TransactionPage = ({
         event.preventDefault();
         setFilteredLeaseItems(leaseItems);
         setPropertyFilter("");
-        setAssignedToFilter("");
+        setActiveStatusFilter('');
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -127,6 +128,17 @@ let TransactionPage = ({
                             to={`${match.url}/${selected[0]}/edit`}
                         >
                             Edit
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                        >
+                            Apply Charge To Deposit
                         </Button>
                     </Grid>
                     <Grid item>
@@ -184,22 +196,22 @@ let TransactionPage = ({
                                         fullWidth
                                         select
                                         variant="outlined"
-                                        id="assigned_to"
-                                        name="assigned_to"
-                                        label="Assigned To"
-                                        value={assignedToFilter}
+                                        id="lease_status"
+                                        name="lease_status"
+                                        label="Agreement Status"
+                                        value={activeStatusFilter}
                                         onChange={(event) => {
-                                            setAssignedToFilter(
+                                            setActiveStatusFilter(
                                                 event.target.value
                                             );
                                         }}
                                     >
-                                        {users.map((user, index) => (
+                                        {LEASE_TERMINATED_STATUS_TYPES.map((leaseStatus, index) => (
                                             <MenuItem
                                                 key={index}
-                                                value={user.id}
+                                                value={leaseStatus.id}
                                             >
-                                                {user.first_name} {user.last_name}
+                                                {leaseStatus.name}
                                             </MenuItem>
                                         ))}
                                     </TextField>
@@ -336,7 +348,6 @@ const mapStateToProps = (state) => {
                         property_ref: property.ref,
                     });
             }),
-        users: state.users,
         properties: state.properties,
     };
 };

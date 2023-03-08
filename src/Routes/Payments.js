@@ -17,8 +17,8 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
-import { getTransactionsFilterOptions } from "../assets/commonAssets";
-import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
+import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { parse, isWithinInterval } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
@@ -48,7 +48,7 @@ let PaymentsPage = ({
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState(0);
+    let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
@@ -66,23 +66,33 @@ let PaymentsPage = ({
         let filteredPayments = paymentsItems
         let startOfPeriod;
         let endOfPeriod;
-       if(periodFilter !== '') {
+        let dateRange = []
+        if (periodFilter) {
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
-                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'year-to-date':
-                    startOfPeriod = startOfYear(startOfToday())
-                    endOfPeriod = startOfToday()
+                    dateRange = getYearToDateFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'last-year':
-                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
+                    dateRange = getLastYearFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
-                default:
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
-                    endOfPeriod = endOfMonth(subMonths(startOfToday(), periodFilter))
+                case 'month-to-date':
+                    dateRange = getCurrentMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case '3-months-to-date':
+                    dateRange = getLastThreeMonthsFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
             }
             filteredPayments = filteredPayments.filter((paymentItem) => {

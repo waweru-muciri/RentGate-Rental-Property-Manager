@@ -38,7 +38,7 @@ function CommonTable(props) {
     const [order, setOrder] = React.useState("asc");
     const [orderBy, setOrderBy] = React.useState("Beds");
     const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(20);
+    const [rowsPerPage, setRowsPerPage] = React.useState(50);
 
     const handleRequestSort = (event, property) => {
         const isDesc = orderBy === property && order === "desc";
@@ -246,7 +246,7 @@ function CommonTable(props) {
                 </Table>
             </TableContainer>
             <TablePagination
-                rowsPerPageOptions={[20, 30, 40, 50]}
+                rowsPerPageOptions={[50, 100, 200, 300]}
                 component="div"
                 count={rows.length}
                 rowsPerPage={rowsPerPage}

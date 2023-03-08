@@ -1,3 +1,5 @@
+import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
+
 //general contact titles
 export function getContactTitles() {
 	return ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"];
@@ -98,9 +100,29 @@ export function getPaymentOptions() {
 
 export function getTransactionsFilterOptions() {
 	return [
-		{ id: 0, text: 'Month To Date' }, { id: 'last-month', text: 'Last Month' },
-		{ id: 3, text: '3 Months To Date' }, { id: 'year-to-date', text: 'Year To Date' },
+		{ id: 'month-to-date', text: 'Month To Date' }, { id: 'last-month', text: 'Last Month' },
+		{ id: '3-months-to-date', text: '3 Months To Date' }, { id: 'year-to-date', text: 'Year To Date' },
 		{ id: 'last-year', text: 'Last Year' },];
+}
+
+export function getLastMonthFromToDates(){
+	return [startOfMonth(subMonths(startOfToday(), 1)), endOfMonth(subMonths(startOfToday(), 1))]
+}
+
+export function getLastYearFromToDates(){
+	return [startOfYear(subYears(startOfToday(), 1)), endOfYear(subYears(startOfToday(), 1))]
+}
+
+export function getYearToDateFromToDates(){
+	return [startOfYear(startOfToday()), startOfToday()]
+}
+
+export function getCurrentMonthFromToDates(){
+	return [startOfMonth(startOfToday()), endOfMonth(startOfToday())]
+}
+
+export function getLastThreeMonthsFromToDates(){
+	return [startOfMonth(subMonths(startOfToday(), 1)), endOfMonth(subMonths(startOfToday(), 1))]
 }
 
 // Create our number formatter.

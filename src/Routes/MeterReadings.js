@@ -15,8 +15,8 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
-import { getTransactionsFilterOptions } from "../assets/commonAssets";
-import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
+import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, dateRange, getYearToDateFromToDates } from "../assets/commonAssets";
+import { parse, isWithinInterval } from "date-fns";
 
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -77,26 +77,35 @@ let MeterReadingsPage = ({
         event.preventDefault();
         //filter the meterReadings here according to search criteria
         let filteredMeterReadings = meterReadingItems
-       if(periodFilter !== '') {
+        if (periodFilter) {
+            let dateRange = []
             let startOfPeriod;
             let endOfPeriod;
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
-                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'year-to-date':
-                    startOfPeriod = startOfYear(startOfToday())
-                    endOfPeriod = startOfToday()
+                    dateRange = getYearToDateFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'last-year':
-                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
-
+                    dateRange = getLastYearFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
-                default:
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
-                    endOfPeriod = startOfToday()
+                case 'month-to-date':
+                    dateRange = getCurrentMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case '3-months-to-date':
+                    dateRange = getLastThreeMonthsFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
             }
             filteredMeterReadings = filteredMeterReadings.filter((meterReading) => {

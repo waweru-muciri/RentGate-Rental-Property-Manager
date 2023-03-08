@@ -41,7 +41,7 @@ const ToDosPage = lazy(() => import('./ToDos'));
 const NoticePage = lazy(() => import('./NoticePage'));
 const NoticesPage = lazy(() => import('./Notices'));
 const PropertyIncomeStatement = lazy(() => import('./PropertyIncomeStatement'));
-const TenantStatementsPage = lazy(() => import('./ContactStatements'));
+const TenantsStatementsPage = lazy(() => import('./TenantsStatements'));
 const EmailPage = lazy(() => import('./EmailPage'));
 const EmailsPage = lazy(() => import('./Emails'));
 const MeterReadingPage = lazy(() => import('./MeterReadingPage'));
@@ -252,7 +252,7 @@ let MainPage = ({
                 <Route exact path={`${match.path}properties`} component={PropertiesPage} />
                 <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
                 <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
-                <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
+                <Route exact path={`${match.path}reports/tenant-statements`} component={TenantsStatementsPage} />
                 <Route exact path={`${match.path}leases`} component={LeasesPage} />
                 <Route exact path={`${match.path}payments`} component={PaymentsPage} />
               </Switch>

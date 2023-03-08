@@ -10,8 +10,9 @@ import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
-import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
-import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
+import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, currencyFormatter, getYearToDateFromToDates } from "../assets/commonAssets";
+import { parse, isWithinInterval } from "date-fns";
+
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -36,9 +37,11 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState(0);
+    let [periodFilter, setPeriodFilter] = useState('month-to-date');
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges.map((chargeItem) => chargeItem.charge_type)))
+    const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges
+        .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
+        .map(chargeType => JSON.parse(chargeType))
 
     const totalRentCharges = filteredChargeItems.filter(charge => charge.charge_type === 'rent')
         .reduce((total, currentValue) => {
@@ -69,26 +72,35 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         //filter the tenantTransactionCharges according to the search criteria here
         let filteredStatements = tenantChargesItems
+        let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
-       if(periodFilter !== '') {
+        if (periodFilter) {
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
-                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'year-to-date':
-                    startOfPeriod = startOfYear(startOfToday())
-                    endOfPeriod = startOfToday()
+                    dateRange = getYearToDateFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
                 case 'last-year':
-                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
-
+                    dateRange = getLastYearFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
-                default:
-                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
-                    endOfPeriod = startOfToday()
+                case 'month-to-date':
+                    dateRange = getCurrentMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case '3-months-to-date':
+                    dateRange = getLastThreeMonthsFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
                     break;
             }
             filteredStatements = filteredStatements.filter((chargeItem) => {
@@ -106,7 +118,7 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter(1);
+        setPeriodFilter("");
     };
 
     return (
@@ -115,6 +127,16 @@ let TenantChargesStatementPage = ({
                 <Typography variant="h6">Tenant Charges Statement</Typography>
             </Grid>
             <Grid item container spacing={2} alignItems="center" direction="row">
+                <Grid item>
+                    <Button
+                        type="button"
+                        color="primary"
+                        variant="contained"
+                        size="medium"
+                    >
+                        Remove Late Fees
+                    </Button>
+                </Grid>
                 <Grid item>
                     <ExportToExcelBtn
                         disabled={selected.length <= 0}
@@ -193,9 +215,9 @@ let TenantChargesStatementPage = ({
                                                 (charge_type, index) => (
                                                     <MenuItem
                                                         key={index}
-                                                        value={charge_type}
+                                                        value={charge_type.value}
                                                     >
-                                                        {charge_type}
+                                                        {charge_type.label}
                                                     </MenuItem>
                                                 )
                                             )}

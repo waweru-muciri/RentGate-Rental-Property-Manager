@@ -46,7 +46,7 @@ let RentRollPage = ({
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
-    let [periodFilter, setPeriodFilter] = useState(0);
+    let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [fromDateFilter, setFromDateFilter] = useState('');
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -92,7 +92,7 @@ let RentRollPage = ({
         setFilteredChargeItems(chargeItems);
         setPropertyFilter("");
         setContactFilter("");
-        setPeriodFilter(1);
+        setPeriodFilter("");
         setFromDateFilter("");
         setToDateFilter("");
     };

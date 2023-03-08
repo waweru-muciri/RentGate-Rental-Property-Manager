@@ -12,8 +12,8 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
-import { startOfToday, parse, subMonths, subYears, startOfYear, addMonths, getMonth, format, isSameMonth } from 'date-fns'
+import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
+import { startOfToday, parse, subMonths, addMonths, getMonth, format, isSameMonth } from 'date-fns'
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -31,24 +31,29 @@ let PropertyIncomeStatement = ({
     let [headCells, setHeadCells] = useState([]);
     let [expensesStatements, setExpensesStatements] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [fromFilter, setFromFilter] = useState(0);
+    let [fromFilter, setFromFilter] = useState('month-to-date');
 
     useEffect(() => {
         //go back [numMonths] months from current date
         let eachPastMonthDate;
-        switch (fromFilter) {
-            case 'last-month':
-                eachPastMonthDate = [subMonths(startOfToday(), 1)]
-                break;
-            case 'year-to-date':
-                eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(startOfYear(startOfToday()), value))
-                break;
-            case 'last-year':
-                eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(startOfYear(subYears(startOfToday(), 1)), value))
-                break;
-            default:
-                eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => subMonths(startOfToday(), value))
-                break;
+        if (fromFilter) {
+            switch (fromFilter) {
+                case 'last-month':
+                    eachPastMonthDate = [getLastMonthFromToDates()[0]]
+                    break;
+                case 'year-to-date':
+                    eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(getYearToDateFromToDates()[0], value))
+                    break;
+                case 'last-year':
+                    eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(getLastYearFromToDates()[0], value))
+                    break;
+                case 'month-to-date':
+                    eachPastMonthDate = [...Array(1).keys()].reverse().map((value) => subMonths(startOfToday(), value))
+                    break;
+                case '3-months-to-date':
+                    eachPastMonthDate = [...Array(3).keys()].reverse().map((value) => subMonths(startOfToday(), value))
+                    break;
+            }
         }
         const headCellsForMonths = [...eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')), `Total as of ${format(eachPastMonthDate[eachPastMonthDate.length - 1], 'MMMM yyyy')}`]
         // calculate income from rent
@@ -167,7 +172,7 @@ let PropertyIncomeStatement = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setPropertyFilter("");
-        setFromFilter(1);
+        setFromFilter("month-to-date");
         setExpensesItems(expenses)
         setPaymentItems(transactions)
     };
