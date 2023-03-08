@@ -1,5 +1,5 @@
 import React from "react";
-import Layout from "../components/myLayout";
+import Layout from "../components/GeneralLayout";
 import PageHeading from "../components/PageHeading";
 import { useHistory, Link } from "react-router-dom";
 import {

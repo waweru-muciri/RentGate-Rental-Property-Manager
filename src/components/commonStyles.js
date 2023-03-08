@@ -34,8 +34,8 @@ let useStyles = makeStyles((theme) => ({
 		display: 'none',
 	},
 	largeAvatar: {
-		width: theme.spacing(16),
-		height: theme.spacing(16),
+		width: theme.spacing(20),
+		height: theme.spacing(20),
 	},
 	chip: {
 		margin: theme.spacing(0.5),
@@ -146,8 +146,8 @@ let useStyles = makeStyles((theme) => ({
         marginLeft: 0,
     },
     profileAvatar: {
-        width: theme.spacing(10),
-        height: theme.spacing(10),
+        width: theme.spacing(16),
+        height: theme.spacing(16),
     },
 }));
 

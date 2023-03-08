@@ -1,4 +1,4 @@
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import React, { useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";

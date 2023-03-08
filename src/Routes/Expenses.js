@@ -12,7 +12,7 @@ import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { connect } from "react-redux";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 

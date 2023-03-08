@@ -13,25 +13,25 @@ import {
   withRouter,
 } from "react-router-dom";
 import DashBoard from "./DashBoard";
-import AppNav from "../components/AppNav";
+import LoadingBackdrop from '../components/LoadingBackdrop'
 import app from '../firebase'
 import PropertiesPage from "./Properties";
 import PropertyPage from "./PropertyPage";
 import PropertyUnitPage from "./PropertyUnitPage";
 import TenantDetailsPage from "./TenantDetailsPage";
-import ReportsPage from "./Reports";
-import UsersPage from "./Users";
-import ExpensePage from "./ExpensePage";
-import ExpensesPage from "./Expenses";
-import LeaseRenewalsPage from "./LeaseRenewals";
-import AuditLogsPage from "./AuditLogs";
-import TransactionsPage from "./Transactions";
-import TransactionPage from "./TransactionPage";
-import PaymentsPage from "./Payments";
-import PaymentPage from "./PaymentPage";
-import ContactPage from "./ContactPage";
-import ContactsPage from "./Contacts";
-import RentRollPage from "./RentRoll";
+const ReportsPage = lazy(() => import('./Reports'));
+const ExpensesPage = lazy(() => import('./Expenses'));
+const ExpensePage = lazy(() => import('./ExpensePage'));
+const UsersPage = lazy(() => import('./Users'));
+const TransactionPage = lazy(() => import('./TransactionPage'));
+const TransactionsPage = lazy(() => import('./Transactions'));
+const AuditLogsPage = lazy(() => import('./AuditLogs'));
+const LeaseRenewalsPage = lazy(() => import('./LeaseRenewals'));
+const RentRollPage = lazy(() => import('./RentRoll'));
+const ContactsPage = lazy(() => import('./Contacts'));
+const ContactPage = lazy(() => import('./ContactPage'));
+const PaymentPage = lazy(() => import('./PaymentPage'));
+const PaymentsPage = lazy(() => import('./Payments'));
 const MaintenancesPage = lazy(() => import('./Maintenances'));
 const PropertyDetailsPage = lazy(() => import('./PropertyDetails'));
 const UserProfilePage = lazy(() => import('./UserProfilePage'));
@@ -98,12 +98,9 @@ let MainPage = ({
 
   return (
     <React.Fragment>
-      {currentUser ?
+      { currentUser ?
         <Router>
-          <AppNav
-            pageTitle={"Yarra Property Management"}
-          />
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<LoadingBackdrop open={true}/>}>
             <Switch>
               <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
               <Route exact path={`${match.path}`} component={DashBoard} />

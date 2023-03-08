@@ -1,4 +1,4 @@
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -18,7 +18,7 @@ import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-import LoadingBackdrop from "../components/loadingBackdrop";
+
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { getGendersList } from "../assets/commonAssets.js";
@@ -353,7 +353,7 @@ let ContactsPage = ({
                         deleteUrl={"contacts"}
                     />
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
+                
             </Grid>
         </Layout>
     );

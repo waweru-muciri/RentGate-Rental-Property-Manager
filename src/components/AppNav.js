@@ -120,7 +120,6 @@ let AppNavLayout = ({
     pageTitle,
     match,
 }) => {
-    const history = useHistory();
     const theme = useTheme();
     const classes = commonStyles()
     const [anchorEl, setAnchorEl] = React.useState(null);

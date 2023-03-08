@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -20,7 +20,7 @@ import { handleDelete } from "../actions/actions";
 import IndividualPropertyIncomeStatement from "./IndividualPropertyIncomeStament";
 import TabPanel from "../components/TabPanel";
 import CommonTable from "../components/table/commonTable";
-import LoadingBackdrop from "../components/loadingBackdrop";
+
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -325,7 +325,7 @@ let PropertyDetailsPage = ({
                             handleDelete={handleItemDelete}
                         />
                     </Grid>
-                    {isLoading && <LoadingBackdrop open={isLoading} />}
+                    
                 </Grid>
             </TabPanel>
         </Layout>

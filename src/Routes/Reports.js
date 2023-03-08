@@ -1,4 +1,4 @@
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import CommonTable from "../components/table/commonTable";
-import LoadingBackdrop from "../components/loadingBackdrop";
+
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -386,7 +386,7 @@ let ReportsPage = ({
                         deleteUrl={"transactions"}
                     />
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
+                
             </Grid>
         </Layout>
     );

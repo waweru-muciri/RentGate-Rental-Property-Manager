@@ -1,4 +1,4 @@
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";

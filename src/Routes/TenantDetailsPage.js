@@ -1,5 +1,5 @@
 import React from "react";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Tab from '@material-ui/core/Tab';

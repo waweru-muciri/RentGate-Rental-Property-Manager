@@ -8,7 +8,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
 import { connect } from "react-redux";
 import { commonStyles } from "../components/commonStyles";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import moment from "moment";
 

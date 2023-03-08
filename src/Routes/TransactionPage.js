@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import UnitLeaseInputForm from "../components/property/UnitLeaseInputForm";
 import { withRouter } from "react-router-dom";

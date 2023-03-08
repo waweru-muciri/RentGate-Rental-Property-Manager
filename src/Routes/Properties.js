@@ -1,4 +1,4 @@
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
@@ -12,7 +12,6 @@ import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
-import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -285,7 +284,7 @@ let PropertyPage = ({
                         handleDelete={handleItemDelete}
                     />
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
+                
             </Grid>
         </Layout>
     );

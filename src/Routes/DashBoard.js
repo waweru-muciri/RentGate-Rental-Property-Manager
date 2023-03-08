@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import PageHeading from "../components/PageHeading";
 import InfoDisplayPaper from "../components/InfoDisplayPaper";

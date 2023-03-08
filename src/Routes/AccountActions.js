@@ -1,6 +1,6 @@
 import React from "react";
 import app from "../firebase";
-import Layout from "../components/myLayout";
+import Layout from "../components/PrivateLayout";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
