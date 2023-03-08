@@ -14,7 +14,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
-import moment from "moment";
+import { startOfToday, parse, differenceInDays } from "date-fns";
 
 
 const noticesTableHeadCells = [
@@ -87,7 +87,8 @@ let VacatingNoticesPage = ({
                 noticeDetails.tenant_phone_number = tenant.personal_mobile_number
                 noticeDetails.tenant_email = tenant.contact_email
             }
-            noticeDetails.days_left = moment(notice.vacating_date).diff(moment(), 'days') + ' Days'
+            const days_left = differenceInDays(parse(notice.vacating_date, 'yyyy-MM-dd', new Date()), startOfToday()) 
+            noticeDetails.days_left = days_left >= 0 ? days_left : 0
             if (typeof landlord !== "undefined") {
                 noticeDetails.landlord_name = landlord.first_name + " " + landlord.last_name
                 noticeDetails.landlord_email = landlord.email

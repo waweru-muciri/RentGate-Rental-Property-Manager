@@ -13,7 +13,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
-import moment from "moment";
+import { startOfToday, parse, subMonths, subYears, startOfYear, addMonths, getMonth, format, isSameMonth } from 'date-fns'
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -26,7 +26,7 @@ let PropertyIncomeStatement = ({
 }) => {
     const classes = commonStyles();
     let [expensesItems, setExpensesItems] = useState([]);
-    let [transactionItems, setTransactionItems] = useState([]);
+    let [paymentItems, setPaymentItems] = useState([]);
     let [meterReadingItems, setMeterReadingItems] = useState([]);
     let [propertiesItems, setPropertiesItems] = useState([]);
     let [incomeStatements, setIncomeStatements] = useState([]);
@@ -35,25 +35,24 @@ let PropertyIncomeStatement = ({
     let [propertyFilter, setPropertyFilter] = useState("");
     let [fromFilter, setFromFilter] = useState(1);
 
-
     useEffect(() => {
         //go back [numMonths] months from current date
         let eachPastMonthDate;
         switch (fromFilter) {
             case 'last-month':
-                eachPastMonthDate = [moment().subtract(1, 'months').format('YYYY-MM-DD')]
+                eachPastMonthDate = [subMonths(startOfToday(), 1)]
                 break;
             case 'year-to-date':
-                eachPastMonthDate = [...Array((moment().month() + 1)).keys()].map((value) => moment().startOf('year').add(value, 'months').format('YYYY-MM-DD'))
+                eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(startOfYear(startOfToday()), value))
                 break;
             case 'last-year':
-                eachPastMonthDate = [...Array(12).keys()].map((value) => moment().subtract(1, 'years').startOf('year').add(value, 'months').format('YYYY-MM-DD'))
+                eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(startOfYear(subYears(startOfToday(), 1)), value))
                 break;
             default:
-                eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
+                eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => subMonths(startOfToday(), value))
                 break;
         }
-        setHeadCells(eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')))
+        setHeadCells(eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')))
         const incomeMappedByMonth = []
         const expensesMappedByMonth = []
         const totalIncomeObject = { income_type: 'Total Income' }
@@ -62,12 +61,12 @@ let PropertyIncomeStatement = ({
         let totalRentalIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
             //get transactions recorded in the same month and year as monthDate
-            const totalRentalIncome = transactionItems.filter((transaction) => {
-                const momentTransactionDate = moment(transaction.transaction_date)
-                return momentTransactionDate.isSame(monthDate, 'year') && momentTransactionDate.isSame(monthDate, 'month')
-            }).reduce((total, currentTransaction) => total + parseFloat(currentTransaction.transaction_price), 0)
+            const totalRentalIncome = paymentItems.filter((transaction) => {
+                const transactionDate = parse(transaction.transaction_date, 'yyyy-MM-dd', new Date())
+                return isSameMonth(monthDate, transactionDate)
+            }).reduce((total, currentTransaction) => total + parseFloat(currentTransaction.payment_amount), 0)
             totalRentalIncomeForPeriod += totalRentalIncome
-            rentalIncomeObject[moment(monthDate).format('MMMM YYYY')] = totalRentalIncome
+            rentalIncomeObject[format(monthDate, 'MMMM yyyy')] = totalRentalIncome
         })
         rentalIncomeObject[headCells[headCells.length - 1]] = totalRentalIncomeForPeriod
         incomeMappedByMonth.push(rentalIncomeObject)
@@ -77,14 +76,14 @@ let PropertyIncomeStatement = ({
             //get utility bills recorded in the same month and year
             //as monthDate
             const totalUtilityIncome = meterReadingItems.filter((meterReading) => {
-                const momentMeterReadingDate = moment(meterReading.reading_date)
-                return momentMeterReadingDate.isSame(monthDate, 'year') && momentMeterReadingDate.isSame(monthDate, 'month')
+                const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
+                return isSameMonth(monthDate, meterReadingDate)
             }).reduce((total, currentMeterReading) => {
                 const usage = parseFloat(currentMeterReading.current_value) - parseFloat(currentMeterReading.prior_value)
                 return total + ((usage * parseFloat(currentMeterReading.unit_charge)) + parseFloat(currentMeterReading.base_charge))
             }, 0)
             totalUtilityIncomeForPeriod += totalUtilityIncome
-            utilityIncomeObject[moment(monthDate).format('MMMM YYYY')] = totalUtilityIncome
+            utilityIncomeObject[format(monthDate, 'MMMM yyyy')] = totalUtilityIncome
         })
         utilityIncomeObject[headCells[headCells.length - 1]] = totalUtilityIncomeForPeriod
         incomeMappedByMonth.push(utilityIncomeObject)
@@ -100,14 +99,14 @@ let PropertyIncomeStatement = ({
             //get expenses recorded in the same month and year
             //as monthDate
             expensesItems.filter((expense) => {
-                const momentExpenseDate = moment(expense.expense_date)
-                return momentExpenseDate.isSame(monthDate, 'year') && momentExpenseDate.isSame(monthDate, 'month')
+                const expenseDate = parse(expense.expense_date, 'yyyy-MM-dd', new Date())
+                return isSameMonth(monthDate, expenseDate)
             }).forEach((monthExpense) => {
                 const { type, amount } = monthExpense
                 const expenseObject = {};
                 expenseObject['expense_type'] = type
                 expenseObject['amount'] = (parseFloat(amount) || 0)
-                expenseObject['month'] = moment(monthDate).format('MMMM YYYY')
+                expenseObject['month'] = format(monthDate, 'MMMM yyyy')
                 expenseObjectsInMonth.push(expenseObject)
             })
         })
@@ -137,7 +136,7 @@ let PropertyIncomeStatement = ({
         expensesMappedByMonth.push(totalExpensesObject)
         setIncomeStatements(incomeMappedByMonth);
         setExpensesStatements(expensesMappedByMonth);
-    }, [expensesItems, transactionItems, meterReadingItems])
+    }, [expensesItems, paymentItems, meterReadingItems])
 
     useEffect(() => {
         setExpensesItems(expenses)
@@ -152,16 +151,16 @@ let PropertyIncomeStatement = ({
     }, [meterReadings])
 
     useEffect(() => {
-        setTransactionItems(transactions)
+        setPaymentItems(transactions)
     }, [transactions])
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = transactionItems
+        let filteredTransactions = paymentItems
             .filter((transaction_item) =>
                 !propertyFilter ? true : transaction_item.property === propertyFilter)
-        setTransactionItems(filteredTransactions)
+        setPaymentItems(filteredTransactions)
     };
 
     const resetSearchForm = (event) => {
@@ -189,7 +188,7 @@ let PropertyIncomeStatement = ({
                     key={1}
                 >
                     <Grid item>
-                    <ExportToExcelBtn
+                        <ExportToExcelBtn
                             reportName={'Income Statements Records'}
                             reportTitle={'Income Statements Records'}
                             headCells={headCells}

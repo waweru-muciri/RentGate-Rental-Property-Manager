@@ -8,8 +8,9 @@ import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
-import moment from "moment";
-const defaultDate = moment().format("YYYY-MM-DD");
+import { format, startOfToday } from "date-fns";
+
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const VacatingNoticeSchema = Yup.object().shape({
   tenant: Yup.string().required("Tenant is required"),

@@ -24,6 +24,7 @@ const ToDoSchema = Yup.object().shape({
 	start: Yup.string().required("Start Date is Required"),
 	end: Yup.date().required("End Date is Required"),
 	description: Yup.string().required("Event Description is Required"),
+	complete_status: Yup.boolean().default(false),
 	reminder_date: Yup.date()
 		.when("start", (start, schema) => start && schema.min(start, "Reminder date must be greater than start date")),
 });

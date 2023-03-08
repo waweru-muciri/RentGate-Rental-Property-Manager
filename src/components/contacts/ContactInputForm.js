@@ -23,7 +23,7 @@ import {
 } from "../../assets/commonAssets.js";
 import { DropzoneDialogBase } from "material-ui-dropzone";
 import * as Yup from "yup";
-import moment from "moment";
+import { format, startOfToday } from "date-fns";
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -41,8 +41,8 @@ const ContactSchema = Yup.object().shape({
 	personal_mobile_number: Yup.string().trim().required('Personal Mobile Number is Required'),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
-const currentDate = moment().format("YYYY-MM-DD");
 
+const currentDate = format(startOfToday(), 'yyyy-MM-dd')
 let ContactInputForm = (props) => {
 
 	const {history, handleItemSubmit } = props;

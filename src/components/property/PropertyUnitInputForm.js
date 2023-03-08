@@ -1,13 +1,10 @@
-import React, { useState } from "react";
-import ChargesTable from './ChargesTable'
-import ChargeInputModal from './ChargeInputModal'
+import React from "react";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
-import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
 import { Formik } from "formik";
@@ -21,26 +18,12 @@ import {
 	getUnitTypes,
 	getPropertyBeds,
 	getPropertyBaths,
-	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import moment from "moment";
 
 const UNIT_TYPES = getUnitTypes();
 const PROPERTY_BEDS = getPropertyBeds();
 const PROPERTY_BATHS = getPropertyBaths();
-
-const defaultDate = moment().format("YYYY-MM-DD");
-
-const recurringChargesTableHeadCells = [
-	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
-	{ id: "account", numeric: false, disablePadding: true, label: "Charge Name" },
-	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
-	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
-	{ id: "frequency", numeric: false, disablePadding: true, label: "Frequency" },
-	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
-]
 
 const PropertyUnitSchema = Yup.object().shape({
 	property_id: Yup.string().trim().required("Property is Required"),
@@ -54,7 +37,7 @@ const PropertyUnitSchema = Yup.object().shape({
 
 let PropertyUnitInputForm = (props) => {
 	const classes = commonStyles();
-	const { properties, propertyUnitCharges, history, handleItemDelete, handleItemSubmit } = props
+	const { properties, history, handleItemSubmit } = props
 	let propertyUnitToEdit = props.propertyUnitToEdit || {};
 	//get both unit values and latest lease information
 	const propertyValues = {
@@ -68,37 +51,6 @@ let PropertyUnitInputForm = (props) => {
 		sqft: propertyUnitToEdit.sqft || '',
 		tenants: propertyUnitToEdit.tenants || [],
 	};
-
-	const defaultChargeValues = {
-		unit_id: propertyUnitToEdit.id,
-		frequency: '',
-		amount: '',
-		due_date: defaultDate,
-		account: '',
-		type: 'recurring_charge',
-	}
-
-	const [modalOpenState, toggleModalState] = useState(false)
-	const [chargeToEdit, setChargeToEdit] = useState(defaultChargeValues)
-	propertyValues.unit_charges = propertyUnitCharges.filter((unit_charge) => unit_charge.unit_id === propertyUnitToEdit.id)
-
-
-	const handleModalStateToggle = () => {
-		toggleModalState(!modalOpenState)
-	}
-
-	const handleAddChargeClick = () => {
-		//don't open the modal if unit_id has no value
-		if (defaultChargeValues.unit_id) {
-			setChargeToEdit(defaultChargeValues)
-			handleModalStateToggle()
-		}
-	}
-
-	const handleEditClick = (rowId) => {
-		setChargeToEdit(propertyValues.unit_charges.find(({ id }) => id === rowId) || defaultChargeValues)
-		handleModalStateToggle()
-	}
 
 	return (
 		<Formik
@@ -264,37 +216,6 @@ let PropertyUnitInputForm = (props) => {
 											helperText={touched.sqft && errors.sqft}
 										/>
 									</Grid>
-								</Grid>
-							</Grid>
-							<Grid item container direction="column" spacing={2}>
-								<Grid item>
-									<Typography variant="subtitle1">Unit Charges</Typography>
-								</Grid>
-								<Grid item>
-									<ChargesTable
-										rows={values.unit_charges}
-										headCells={recurringChargesTableHeadCells}
-										handleEditClick={handleEditClick}
-										handleItemSubmit={handleItemSubmit}
-										handleDelete={handleItemDelete}
-										deleteUrl={"unit-charges"} />
-									{
-										modalOpenState ? <ChargeInputModal open={modalOpenState}
-											handleClose={handleModalStateToggle} history={history}
-											handleItemSubmit={handleItemSubmit}
-											chargeValues={chargeToEdit} /> : null
-									}
-								</Grid>
-								<Grid item>
-									<Button
-										className={classes.oneMarginTopBottom}
-										variant="outlined"
-										size="medium"
-										startIcon={<AddIcon />}
-										onClick={() => handleAddChargeClick()}
-										disableElevation>
-										Add Charge
-									</Button>
 								</Grid>
 							</Grid>
 							<Grid

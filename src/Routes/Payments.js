@@ -20,7 +20,7 @@ import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import { getTransactionsFilterOptions } from "../assets/commonAssets";
-import moment from "moment";
+import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
@@ -71,25 +71,25 @@ let PaymentsPage = ({
         if (periodFilter) {
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = moment().subtract(1, 'months').startOf('month')
-                    endOfPeriod = moment().subtract(1, 'months').endOf('month')
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
+                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
                     break;
                 case 'year-to-date':
-                    startOfPeriod = moment().startOf('year')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfYear(startOfToday())
+                    endOfPeriod = startOfToday()
                     break;
                 case 'last-year':
-                    startOfPeriod = moment().subtract(1, 'years').startOf('year')
-                    endOfPeriod = moment().subtract(1, 'years').endOf('year')
+                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
+                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
                     break;
                 default:
-                    startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
+                    endOfPeriod = startOfToday()
                     break;
             }
             filteredPayments = filteredPayments.filter((paymentItem) => {
-                const paymentDate = moment(paymentItem.payment_date)
-                return paymentDate.isSameOrAfter(startOfPeriod) && paymentDate.isSameOrBefore(endOfPeriod)
+                const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
             })
         };
         filteredPayments = filteredPayments

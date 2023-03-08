@@ -12,10 +12,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 import "@fullcalendar/core/main.css";
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
-import moment from "moment";
 import { handleItemFormSubmit, handleDelete } from "../actions/actions";
+import { format, startOfToday } from "date-fns";
 
-const defaultDate = moment().format('YYYY-MM-DD')
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit }) => {
 	const [open, toggleOpen] = React.useState(false);
@@ -28,17 +28,15 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 		})
 	);
 
-	const handleEventDrop = (info) => {
+	const handleEventDrop = async (info) => {
 		let updatedEvent = {
-			start: moment(info.event.start).format("YYYY-MM-DD"),
-			end: moment(info.event.start).format("YYYY-MM-DD"),
+			start: format(info.event.start, 'yyyy-MM-dd'),
+			end: format(info.event.start, 'yyyy-MM-dd'),
 			id: info.event.id,
 			title: info.event.title,
 			extendedProps: {...info.event.extendedProps}
 		};
-		handleItemSubmit( updatedEvent, "to-dos").then((response) => {
-			console.log("Updated event successfully!", updatedEvent);
-		});
+		await handleItemSubmit( updatedEvent, "to-dos");
 	};
 
 	const handleClose = () => {
@@ -52,8 +50,8 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
 			complete_status: event.extendedProps.complete_status,
-			start: event.start ? moment(event.start).format("YYYY-MM-DD") : defaultDate,
-			end: event.end ? moment(event.end).format("YYYY-MM-DD") : defaultDate,
+			start: event.start ? format(event.start, 'yyyy-MM-dd') : defaultDate,
+			end: event.end ? format(event.end, 'yyyy-MM-dd') : defaultDate,
 			allDay: event.allDay,
 		};
 		setEventToShow(clickedEvent);
@@ -68,8 +66,8 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
 			complete_status: event.extendedProps.complete_status,
-			start: event.start ? moment(event.start).format("YYYY-MM-DD") : defaultDate,
-			end: event.end ? moment(event.end).format("YYYY-MM-DD") : defaultDate,
+			start: event.start ? format(event.start, 'yyyy-MM-dd') : defaultDate,
+			end: event.end ? format(event.end, 'yyyy-MM-dd') : defaultDate,
 			allDay: event.allDay,
 		};
 		setEventToShow(clickedEvent);

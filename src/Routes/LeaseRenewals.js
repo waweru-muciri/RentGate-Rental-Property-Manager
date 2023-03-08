@@ -11,7 +11,7 @@ import { connect } from "react-redux";
 import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
-import moment from "moment";
+import { startOfToday, parse, differenceInDays } from "date-fns";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
@@ -74,7 +74,8 @@ let RentRollPage = ({
                 transactionDetails.lease = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
                 transactionDetails.current_terms = `${transaction.lease_type} | ${transaction.transaction_price} \n ${transaction.lease_start} - ${transaction.lease_end}`;
             }
-            const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
+           
+            const daysLeft =  differenceInDays(parse(transaction.lease_end, 'yyyy-MM-dd', new Date()), startOfToday()) 
             transactionDetails.days_left = daysLeft < 0 ? 0 : daysLeft
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name

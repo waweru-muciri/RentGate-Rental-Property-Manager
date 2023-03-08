@@ -36,6 +36,7 @@ const headCells = [
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
     { id: "address", numeric: false, disablePadding: true, label: "Unit Adddress" },
     { id: "sqft", numeric: false, disablePadding: true, label: "Square Footage" },
+    { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent Amount" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
@@ -44,6 +45,7 @@ const headCells = [
 
 let PropertyDetailsPage = ({
     propertyUnits,
+    propertyActiveLeases,
     transactions,
     expenses,
     meterReadings,
@@ -105,7 +107,7 @@ let PropertyDetailsPage = ({
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
                 <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} transactions={transactions}
-                    propertyUnits={propertyUnitsItems} users={users} classes={classes} />
+                    propertyUnits={propertyUnitsItems} users={users} propertyActiveLeases={propertyActiveLeases} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
                 <IndividualPropertyIncomeStatement propertyUnits={propertyUnits}
@@ -285,7 +287,7 @@ let PropertyDetailsPage = ({
                             handleDelete={handleItemDelete}
                         />
                     </Grid>
-                    
+
                 </Grid>
             </TabPanel>
         </Layout>
@@ -294,31 +296,40 @@ let PropertyDetailsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     const unitsInProperty = state.propertyUnits
-    .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
-    .map(({id}) => id)
+        .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
+        .map(({ id }) => id)
     return {
-        transactions: state.transactions.filter(({unit_id}) => unitsInProperty.includes(unit_id)),
+        transactions: state.transactions.filter(({ unit_id }) => unitsInProperty.includes(unit_id)),
         meterReadings: state.meterReadings,
         expenses: state.expenses,
-        propertyToShowDetails : state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
-        propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id)).map(
-            (property_unit) => {
+        propertyToShowDetails: state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
+        propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id))
+            .map((property_unit) => {
+                const latestUnitLease = state.leases.filter(({ terminated }) => terminated !== true)
+                    .sort((lease1, lease2) => lease1.start_date > lease2.start_date)
+                    .find(({ unit_id }) => unit_id === property_unit.id) || {}
                 const tenant = state.contacts.find(
-                    ({ id }) => property_unit.tenants ? property_unit.tenants.includes(id) : false) || {}
+                    ({ id }) => latestUnitLease.tenants ? latestUnitLease.tenants.includes(id) : false)
                 return Object.assign(
-                    {}, property_unit, 
-                    { tenant_name: tenant.first_name + ' ' + tenant.last_name,
-                     tenant_id_number: tenant.id_number 
+                    {},
+                    property_unit,
+                    {
+                        tenant_name: tenant ? `${tenant.first_name} ${tenant.last_name}` : '-',
+                        tenant_id_number: tenant ? tenant.id_number : '-',
+                        rent_amount: latestUnitLease.rent_amount
                     });
             }
-        ),
+            ),
+        propertyActiveLeases: state.leases
+            .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
+            .filter(({ terminated }) => terminated !== true),
         users: state.users,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

@@ -16,7 +16,7 @@ import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import { getTransactionsFilterOptions } from "../assets/commonAssets";
-import moment from "moment";
+import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
 
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -82,25 +82,25 @@ let MeterReadingsPage = ({
             let endOfPeriod;
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = moment().subtract(1, 'months').startOf('month')
-                    endOfPeriod = moment().subtract(1, 'months').endOf('month')
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
+                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
                     break;
                 case 'year-to-date':
-                    startOfPeriod = moment().startOf('year')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfYear(startOfToday())
+                    endOfPeriod = startOfToday()
                     break;
                 case 'last-year':
-                    startOfPeriod = moment().subtract(1, 'years').startOf('year')
-                    endOfPeriod = moment().subtract(1, 'years').endOf('year')
+                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
+                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
                     break;
                 default:
-                    startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
+                    endOfPeriod = startOfToday()
                     break;
             }
             filteredMeterReadings = filteredMeterReadings.filter((meterReading) => {
-                const meterReadingDate = moment(meterReading.reading_date)
-                return meterReadingDate.isSameOrAfter(startOfPeriod) && meterReadingDate.isSameOrBefore(endOfPeriod)
+                const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(meterReadingDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
         filteredMeterReadings = filteredMeterReadings.filter(({ property }) =>
@@ -383,7 +383,7 @@ let MeterReadingsPage = ({
                         setSelected={setSelected}
                         rows={filteredMeterReadingItems}
                         headCells={meterReadingsTableHeadCells}
-                        
+
                         handleDelete={handleItemDelete}
                         deleteUrl={"meter_readings"}
                     />
@@ -407,7 +407,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

@@ -9,13 +9,13 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import * as Yup from "yup";
-import moment from "moment";
 import { connect } from "react-redux";
 import { handleItemFormSubmit } from '../../actions/actions'
 import { withRouter } from "react-router-dom";
+import { format, startOfToday } from "date-fns";
 
 
-const defaultDate = moment().format("YYYY-MM-DD");
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
 	memo: Yup.string().trim().max(50, "Memo details should be less than 50").default(''),

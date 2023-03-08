@@ -7,38 +7,54 @@ import CustomSnackBar from "../components/CustomSnackbar";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
-import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import {commonStyles} from '../components/commonStyles'
+import { Bar } from 'react-chartjs-2';
+import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import moment from "moment";
+import { format, getYear, startOfToday, parse, eachMonthOfInterval, isSameMonth } from "date-fns";
+
+const options = {
+  responsive: true,
+  tooltips: {
+    mode: 'label'
+  },
+  elements: {
+    line: {
+      fill: false
+    }
+  },
+};
 
 const FilterYearSchema = Yup.object().shape({
   filter_year: Yup.number()
     .typeError("Year must be a number!")
     .required("Year is required")
     .positive()
-    .min(2000, "Must be greater than 2000")
+    .min(0, "Must be greater than 0")
     .max(2100, "We won't be here during those times dear")
     .integer(),
 });
 
+var monthsInYear = eachMonthOfInterval({
+  start: new Date(2020, 0, 1),
+  end: new Date(2020, 11, 1)
+})
+
 let DashBoardPage = (props) => {
   const classes = commonStyles()
+  const { propertyUnits, transactions, transactionsCharges, leases, properties } = props;
   const [transactionItems, setTransactionItems] = useState([]);
-  const { propertyUnits, contacts, transactions, notices, error } = props;
+  let [propertyFilter, setPropertyFilter] = useState("");
+  const [chargesItems, setChargesItems] = useState([]);
+  const propertyActiveLeases = leases.filter(({ terminated }) => terminated !== true)
+
+  useEffect(() => {
+    setChargesItems(transactionsCharges);
+  }, [transactionsCharges]);
 
   useEffect(() => {
     setTransactionItems(transactions);
@@ -46,10 +62,12 @@ let DashBoardPage = (props) => {
 
   const setFilteredTransactionItemsByYear = (filterYear) => {
     setTransactionItems(
-      transactions.filter(
-        ({ transaction_date }) =>
-          moment(transaction_date).year() === filterYear
-      )
+      transactions
+        .filter(({ payment_date }) => getYear(parse(payment_date, 'yyyy-MM-dd', new Date())) === filterYear)
+    );
+    setChargesItems(
+      transactionsCharges
+        .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
     );
   };
 
@@ -62,36 +80,147 @@ let DashBoardPage = (props) => {
   const doubleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Double Room').length;
   const shopUnits = propertyUnits.filter((property) => property.unit_type === 'Shop').length;
   //get the current number of occupied houses
-  const occupiedHouses = transactionItems.filter(({ transaction_date }) => moment(transaction_date).month() === moment().month())
-    .length;
+  const occupiedHouses = propertyActiveLeases.length;
   //get months in an year in short format
-  const monthsOfTheYear = moment.monthsShort();
-  //
-  const transactionsGraphData = Array.from(monthsOfTheYear, (monthOfYear) => ({
-    month: monthOfYear,
-    amount: 0,
-    numberOfTransactions: 0,
-  }));
+  const rentIncomeData = { datasets: [] }
+  rentIncomeData.labels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
+  const totalEachMonthPayments = monthsInYear.map((monthDate) => {
+    //get transactions recorded in the same month and year as monthDate
+    return transactionItems
+      .filter((payment) => {
+        const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
+        return isSameMonth(monthDate, paymentDate)
+      }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
+  })
+  rentIncomeData.datasets.push({
+    data: totalEachMonthPayments, label: 'Monthly Payments Collection', type: 'bar',
+    fill: false,
+    backgroundColor: '#71B37C',
+    borderColor: '#71B37C',
+    hoverBackgroundColor: '#71B37C',
+    hoverBorderColor: '#71B37C',
+  })
 
-  transactionItems.forEach(({ transaction_date, transaction_price }) => {
-    const currentMonth = moment(transaction_date).get("month");
-    transactionsGraphData[currentMonth].amount =
-      transactionsGraphData[currentMonth].amount +
-      parseFloat(transaction_price);
-    transactionsGraphData[currentMonth].numberOfTransactions =
-      transactionsGraphData[currentMonth].numberOfTransactions + 1;
-  });
-
-  const occupancyRateData = transactionsGraphData.map((transaction) => ({
-    month: transaction.month,
-    rate: (transaction.numberOfTransactions / totalProperties) * 100,
-  }));
+  const totalEachMonthCharges = monthsInYear.map((monthDate) => {
+    //get transactions recorded in the same month and year as monthDate
+    return chargesItems
+      .filter((charge) => {
+        const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
+        return isSameMonth(monthDate, chargeDate)
+      }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
+  })
+  rentIncomeData.datasets.push({
+    data: totalEachMonthCharges,
+    label: 'Monthly Charges', type: 'line', borderColor: '#EC932F', fill: false,
+    backgroundColor: '#EC932F',
+    pointBorderColor: '#EC932F',
+    pointBackgroundColor: '#EC932F',
+    pointHoverBackgroundColor: '#EC932F',
+    pointHoverBorderColor: '#EC932F',
+  })
 
   return (
     <Layout pageTitle="Dashboard">
       <Grid container justify="center" direction="column" spacing={4}>
         <Grid item key={0}>
           <PageHeading paddingLeft={2} text={"Dashboard"} />
+        </Grid>
+        <Grid item>
+          <Grid container item direction="column" spacing={4}>
+            <Grid item>
+              <Box
+                border={1}
+                borderRadius="borderRadius"
+                borderColor="grey.400"
+              >
+                <Formik
+                  initialValues={{ filter_year: getYear(startOfToday()) }}
+                  validationSchema={FilterYearSchema}
+                  onSubmit={(values) => {
+                    setFilteredTransactionItemsByYear(parseInt(values.filter_year));
+                  }}
+                >
+                  {({
+                    values,
+                    handleSubmit,
+                    touched,
+                    errors,
+                    handleChange,
+                    handleBlur,
+                  }) => (
+                      <form
+                        className={classes.form}
+                        id="yearFilterForm"
+                        onSubmit={handleSubmit}
+                      >
+                        <Grid
+                          container
+                          spacing={2}
+                          alignItems="center"
+                          justify="center"
+                          direction="row"
+                        >
+                          <Grid item sm={3}>
+                            <TextField
+                              fullWidth
+                              select
+                              variant="outlined"
+                              name="property_filter"
+                              label="Property"
+                              id="property_filter"
+                              onChange={(event) => {
+                                setPropertyFilter(
+                                  event.target.value
+                                );
+                              }}
+                              value={propertyFilter}
+                            >
+                              {properties.map(
+                                (property, index) => (
+                                  <MenuItem
+                                    key={index}
+                                    value={property.id}
+                                  >
+                                    {property.ref}
+                                  </MenuItem>
+                                )
+                              )}
+                            </TextField>
+                          </Grid>
+                          <Grid item>
+                            <TextField
+                              variant="outlined"
+                              id="filter_year"
+                              name="filter_year"
+                              label="Year"
+                              value={values.filter_year}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={errors.filter_year && touched.filter_year}
+                              helperText={
+                                touched.filter_year && errors.filter_year
+                              }
+                            />
+                          </Grid>
+                          <Grid item>
+                            <Button
+                              type="submit"
+                              form="yearFilterForm"
+                              color="primary"
+                              variant="contained"
+                              size="medium"
+                              startIcon={<SearchIcon />}
+                            >
+                              SEARCH
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </form>
+                    )}
+                </Formik>
+              </Box>
+            </Grid>
+          </Grid>
         </Grid>
         <Grid
           item
@@ -124,150 +253,26 @@ let DashBoardPage = (props) => {
           <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={((occupiedHouses / totalProperties) * 100) | 0} />
         </Grid>
         <Grid item>
-          <Box
-            border={1}
-            p={4}
-            borderRadius="borderRadius"
-            borderColor="grey.400"
-          >
-            <Grid container direction="column" spacing={4}>
-              <Grid item>
-                <Box
-                  border={1}
-                  borderRadius="borderRadius"
-                  borderColor="grey.400"
-                >
-                  <Formik
-                    initialValues={{ filter_year: moment().get("year") }}
-                    validationSchema={FilterYearSchema}
-                    onSubmit={(values) => {
-                      setFilteredTransactionItemsByYear(parseInt(values.filter_year));
-                    }}
-                  >
-                    {({
-                      values,
-                      handleSubmit,
-                      touched,
-                      errors,
-                      handleChange,
-                      handleBlur,
-                    }) => (
-                        <form
-                          className={classes.form}
-                          id="yearFilterForm"
-                          onSubmit={handleSubmit}
-                        >
-                          <Grid
-                            container
-                            spacing={2}
-                            alignItems="center"
-                            justify="center"
-                            direction="row"
-                          >
-                            <Grid item>
-                              <TextField
-                                variant="outlined"
-                                id="filter_year"
-                                name="filter_year"
-                                label="Year"
-                                value={values.filter_year}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={errors.filter_year && touched.filter_year}
-                                helperText={
-                                  touched.filter_year && errors.filter_year
-                                }
-                              />
-                            </Grid>
-                            <Grid item>
-                              <Button
-                                type="submit"
-                                form="yearFilterForm"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                startIcon={<SearchIcon />}
-                              >
-                                SEARCH
-                            </Button>
-                            </Grid>
-                          </Grid>
-                        </form>
-                      )}
-                  </Formik>
-                </Box>
-              </Grid>
-              <Grid item>
-                <Box
-                  p={2}
-                  border={1}
-                  borderRadius="borderRadius"
-                  borderColor="grey.400"
-                >
-                  <Typography variant="h6" align="center" gutterBottom>
-                    Monthly Rent Collection
-                  </Typography>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart
-                      data={transactionsGraphData}
-                      margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-                    >
-                      <Line type="monotone" dataKey="amount" stroke="#8884d8" />
-                      <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Legend />
-                      <Tooltip />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Box>
-              </Grid>
-              <Grid item>
-                <Box
-                  p={2}
-                  border={1}
-                  borderRadius="borderRadius"
-                  borderColor="grey.400"
-                >
-                  <Typography variant="h6" align="center" gutterBottom>
-                    Monthly House Occupany Rate
-                  </Typography>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart
-                      data={occupancyRateData}
-                      margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-                    >
-                      <Line type="monotone" dataKey="rate" stroke="#8884d8" />
-                      <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                      <Legend />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
+          <Typography variant="h6" align="center" gutterBottom>
+            Monthly Charges &amp; Payments
+          </Typography>
+          <Bar
+            data={rentIncomeData}
+            options={options}>
+          </Bar>
         </Grid>
       </Grid>
-      {
-        error ? <CustomSnackBar variant="error" message={error}/> : null
-      }
     </Layout>
   );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
-    notices: state.notices,
+    leases: state.leases,
+    properties: state.properties,
     propertyUnits: state.propertyUnits,
+    transactionsCharges: state.transactionsCharges,
     transactions: state.transactions,
-    users: state.users,
-    currentUser: state.currentUser,
-    contacts: state.contacts,
-    isLoading: state.isLoading,
-    error: state.error,
   };
 };
 

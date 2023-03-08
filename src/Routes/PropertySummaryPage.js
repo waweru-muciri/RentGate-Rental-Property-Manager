@@ -11,6 +11,7 @@ import RED from '@material-ui/core/colors/red';
 import GREEN from '@material-ui/core/colors/green';
 import { Doughnut } from 'react-chartjs-2';
 import GREY from "@material-ui/core/colors/grey";
+import { isWithinInterval, startOfMonth, startOfToday, endOfMonth, parse } from 'date-fns'
 
 const legendOpts = {
     display: true,
@@ -24,18 +25,24 @@ const legendOpts = {
 };
 
 let PropertySummaryPage = (props) => {
-    let { classes, propertyToShowDetails, propertyUnits, transactions, users } = props
-    const occupiedUnitsNumber = propertyUnits.filter((unit) => unit.tenants.length !== 0).length
+    let { classes, propertyActiveLeases, propertyToShowDetails, propertyUnits, transactions, users } = props
+    const occupiedUnitsNumber = propertyActiveLeases.length
     //get current month income data
     const curentMonthIncomeData = { datasets: [] }
     const totalPaymentsByType = []
-    const totalRentPayments = transactions
+    const transactionsForCurrentMonth = transactions
+        .filter(payment => {
+            return isWithinInterval(parse(payment.payment_date, 'yyyy-MM-dd', new Date()),
+                { start: startOfMonth(startOfToday()), end: endOfMonth(startOfToday()) })
+        })
+    const totalCurrentMonthRentPayments = transactionsForCurrentMonth
         .filter(payment => payment.payment_type === 'rent')
         .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
-    const totalOtherPayments = transactions.filter(payment => payment.payment_type !== 'rent')
+    const totalCurrentMonthOtherPayments = transactionsForCurrentMonth
+        .filter(payment => payment.payment_type !== 'rent')
         .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
-    totalPaymentsByType.push({ type: "rent", totalAmount: totalRentPayments, label: "Rent" })
-    totalPaymentsByType.push({ type: "other", totalAmount: totalOtherPayments, label: "Others" })
+    totalPaymentsByType.push({ type: "rent", totalAmount: totalCurrentMonthRentPayments, label: "Rent" })
+    totalPaymentsByType.push({ type: "other", totalAmount: totalCurrentMonthOtherPayments, label: "Others" })
     curentMonthIncomeData.labels = totalPaymentsByType.map(totalPayment => totalPayment.label)
     curentMonthIncomeData.datasets.push({
         data: totalPaymentsByType.map(totalPayment => totalPayment.totalAmount),

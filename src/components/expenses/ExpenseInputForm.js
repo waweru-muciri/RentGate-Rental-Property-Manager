@@ -6,10 +6,10 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { getExpensesCategories } from "../../assets/commonAssets";
-import moment from "moment";
+import { format, startOfToday } from "date-fns";
 
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const EXPENSE_CATEGORIES = getExpensesCategories();
-const defaultDate = moment().format("YYYY-MM-DD");
 
 const PropertyExpenseSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),

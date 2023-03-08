@@ -16,14 +16,14 @@ import { connect } from "react-redux";
 import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
-import moment from "moment";
 import { handleItemFormSubmit } from '../actions/actions'
 import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { format, startOfToday } from "date-fns";
 
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
-const defaultDate = moment().format('YYYY-MM-DD')
 
 const headCells = [
     { id: "unit_details", numeric: false, disablePadding: true, label: "Unit Details", },

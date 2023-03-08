@@ -16,11 +16,11 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
 import { handleDelete } from "../actions/actions";
 import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
-import moment from "moment";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
 
 
 const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -84,25 +84,25 @@ let TenantChargesStatementPage = ({
         if (periodFilter) {
             switch (periodFilter) {
                 case 'last-month':
-                    startOfPeriod = moment().subtract(1, 'months').startOf('month')
-                    endOfPeriod = moment().subtract(1, 'months').endOf('month')
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
+                    endOfPeriod = endOfMonth(subMonths(startOfToday(), 1))
                     break;
                 case 'year-to-date':
-                    startOfPeriod = moment().startOf('year')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfYear(startOfToday())
+                    endOfPeriod = startOfToday()
                     break;
                 case 'last-year':
-                    startOfPeriod = moment().subtract(1, 'years').startOf('year')
-                    endOfPeriod = moment().subtract(1, 'years').endOf('year')
+                    startOfPeriod = startOfYear(subYears(startOfToday(), 1))
+                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
                     break;
                 default:
-                    startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
-                    endOfPeriod = moment()
+                    startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
+                    endOfPeriod = startOfToday()
                     break;
             }
             filteredStatements = filteredStatements.filter((chargeItem) => {
-                const chargeItemDate = moment(chargeItem.charge_date)
-                return chargeItemDate.isSameOrAfter(startOfPeriod) && chargeItemDate.isSameOrBefore(endOfPeriod)
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
         filteredStatements = filteredStatements.filter(({ charge_type }) =>

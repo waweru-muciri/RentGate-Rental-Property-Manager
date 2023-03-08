@@ -26,11 +26,11 @@ import {
 	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import moment from "moment";
+import { addMonths, format, startOfToday } from "date-fns";
 
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
-const defaultDate = moment().format("YYYY-MM-DD");
 
 const recurringChargesTableHeadCells = [
 	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
@@ -70,7 +70,7 @@ let UnitLeaseInputForm = (props) => {
 		cosigner: leaseToEdit.cosigner || "",
 		start_date: leaseToEdit.start_date || defaultDate,
 		end_date: leaseToEdit.end_date || '',
-		rent_due_date: leaseToEdit.rent_due_date || moment().add(1, 'M').format('YYYY-MM-DD'),
+		rent_due_date: leaseToEdit.rent_due_date || format(addMonths(startOfToday(), 1), 'yyyy-MM-dd'),
 		security_deposit_due_date: leaseToEdit.security_deposit_due_date || defaultDate,
 		rent_amount: leaseToEdit.rent_amount || '',
 		security_deposit: leaseToEdit.security_deposit || 0,

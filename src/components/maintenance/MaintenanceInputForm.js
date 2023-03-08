@@ -12,7 +12,7 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
-import moment from "moment";
+import { format, startOfToday } from "date-fns";
 import * as Yup from "yup";
 
 const MaintenanceRequestSchema = Yup.object().shape({
@@ -22,8 +22,8 @@ const MaintenanceRequestSchema = Yup.object().shape({
 	expected_completion_date: Yup.date().required("Expected Completion Date Required"),
 });
 
-const defaultDate = moment().format("YYYY-MM-DD");
 
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 let MaintenanceRequestInputForm = (props) => {
 	let classes = commonStyles();
 	const { handleItemSubmit, history, maintenanceRequestToEdit, contacts } = props

@@ -7,9 +7,9 @@ import CancelIcon from "@material-ui/icons/Cancel"; import {
   getMeterTypes,
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import moment from "moment";
+import { format, startOfToday } from "date-fns";
 
-const defaultDate = moment().format("YYYY-MM-DD");
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 
 const MeterReadingSchema = Yup.object().shape({
