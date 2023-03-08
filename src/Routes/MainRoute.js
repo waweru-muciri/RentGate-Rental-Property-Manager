@@ -33,33 +33,33 @@ let MainPage = ({
     fetchData,
 }) => {
 
-    // useEffect(() => {
-    //     if (!properties.length) {
-    //         fetchData([
-    //             "properties",
-    //             "transactions",
-    //             "maintenance-requests",
-    //             "property_media",
-    //             "to-dos",
-    //             "contacts",
-    //             "contact_phone_numbers",
-    //             "contact_emails",
-    //             "contact_faxes",
-    //             "contact_addresses",
-    //         ]);
-    //     }
-    // }, [
-    //     contacts,
-    //     transactions,
-    //     maintenanceRequests,
-    //     contact_emails,
-    //     properties,
-    //     contact_phone_numbers,
-    //     contact_faxes,
-    //     contact_emails,
-    //     contact_addresses,
-    //     fetchData,
-    // ]);
+    useEffect(() => {
+        if (!properties.length) {
+            fetchData([
+                "properties",
+                "transactions",
+                "maintenance-requests",
+                "property_media",
+                "to-dos",
+                "contacts",
+                "contact_phone_numbers",
+                "contact_emails",
+                "contact_faxes",
+                "contact_addresses",
+            ]);
+        }
+    }, [
+        contacts,
+        transactions,
+        maintenanceRequests,
+        contact_emails,
+        properties,
+        contact_phone_numbers,
+        contact_faxes,
+        contact_emails,
+        contact_addresses,
+        fetchData,
+    ]);
 
     return (
         <React.Fragment>
