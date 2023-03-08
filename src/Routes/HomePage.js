@@ -10,9 +10,17 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardHeader from '@material-ui/core/CardHeader';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
 import GroupIcon from '@material-ui/icons/Group';
 import PhoneIcon from '@material-ui/icons/Phone';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import ApartmentIcon from '@material-ui/icons/Apartment';
+import ContactsIcon from "@material-ui/icons/Contacts";
+import EmailIcon from "@material-ui/icons/Email";
+import AssessmentIcon from '@material-ui/icons/Assessment';
+import MoneyOffIcon from '@material-ui/icons/MoneyOff';
+import ScheduleIcon from '@material-ui/icons/Schedule';
 import StarIcon from '@material-ui/icons/StarBorder';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -36,7 +44,7 @@ function Copyright() {
 }
 
 const theme = createMuiTheme({
-    typography:{
+    typography: {
         fontFamily: "Lato"
     },
     palette: {
@@ -46,8 +54,8 @@ const theme = createMuiTheme({
         secondary: {
             main: "#546e7a"
         },
-        text:{
-            primary: "#121037", 
+        text: {
+            primary: "#121037",
             secondary: "#546e7a",
         }
     },
@@ -91,7 +99,11 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(4),
     },
     heroContent: {
-        padding: theme.spacing(12, 8, 16, 8)
+        padding: theme.spacing(6, 2, 6, 2),
+        [theme.breakpoints.up('md')]: {
+            paddingTop: theme.spacing(12),
+            paddingBottom: theme.spacing(12)
+        },
     },
     cardHeader: {
         backgroundColor:
@@ -125,18 +137,23 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const appHeaderImages = [
+    {image: "/propertyDetails.png", title: "Rental Properties"},
+    {image: "/propertyDetails.png", title: "Rental Properties"},
+]
+
 const appFeatures = [
     {
-        icon: <GroupIcon color="primary" fontSize="large" />, title: "Coworking communities", description: `Connect in spaces designed
+        icon: <GroupIcon style={{ color: "#3f51b5" }} fontSize="large" />, title: "Coworking communities", description: `Connect in spaces designed
      to bring incredible people together. Learn with them and take your project to new heights.`},
     {
-        icon: <GroupIcon color="primary" fontSize="large" />, title: "Flexible contracts", description: `Stay as little as 3 months with rolling contracts. 
+        icon: <GroupIcon style={{ color: "#3f51b5" }} fontSize="large" />, title: "Flexible contracts", description: `Stay as little as 3 months with rolling contracts. 
     Like it here? This is your space, so stay as long as you want.`},
     {
-        icon: <AccountBalanceIcon color="primary" fontSize="large" />, title: "All Inclusive", description: `Monthly fee covers everything you need hassle free. 
+        icon: <AccountBalanceIcon style={{ color: "#3f51b5" }} fontSize="large" />, title: "All Inclusive", description: `Monthly fee covers everything you need hassle free. 
     Keep cool and focus on what matters to you.    `},
     {
-        icon: <PhoneIcon color="primary" fontSize="large" />, title: "Hospitality service", description: `24/7 support. No more hidden prices. 
+        icon: <PhoneIcon style={{ color: "#3f51b5" }} fontSize="large" />, title: "Hospitality service", description: `24/7 support. No more hidden prices. 
     It is your workingplace, playground, relax room.`},
 ]
 
@@ -157,11 +174,21 @@ const appModules = [
 
 const appCustomers = [
     {
-        image: "/propertyDetails.png", name: "Veronica Adams", title: "Growth Marketer, Crealytics", review: `Connect in spaces designed
+        image: "/propertyDetails.png", name: "Veronica Adams", title: "Growth Marketer, Dunhill", review: `Connect in spaces designed
      to bring incredible people together. Learn with them and take your project to new heights.`},
     {
-        image: "/rentalUnits.png", name: "Akachi Luccini", title: "Lead Generation, Alternative Capital", review: `Stay as little as 3 months with rolling contracts. 
+        image: "/rentalUnits.png", name: "Akachi Luccini", title: "Lead Generation, Gallant PM", review: `Stay as little as 3 months with rolling contracts. 
     Like it here? This is your space, so stay as long as you want.`},
+]
+
+const appServices = [
+    { icon: <ApartmentIcon />, title: "Unit Management" },
+    { icon: <ContactsIcon />, title: "Tenant Management" },
+    { icon: <ScheduleIcon />, title: "Rental Agreements Management" },
+    { icon: <AccountBalanceIcon />, title: "Charges & Payments Performance" },
+    { icon: <AssessmentIcon />, title: "Property Performance" },
+    { icon: <MoneyOffIcon />, title: "Expenses Tracking" },
+    { icon: <EmailIcon />, title: "In-App Email" },
 ]
 
 const tiers = [
@@ -170,7 +197,7 @@ const tiers = [
         price: '3500',
         description: ['10 users included', '2 GB of storage', 'Help center access', 'Email support'],
         buttonText: 'Sign up',
-        buttonVariant: 'contained',
+        buttonVariant: 'outlined',
     },
     {
         title: 'Growing',
@@ -183,7 +210,7 @@ const tiers = [
             'Priority email support',
         ],
         buttonText: 'Sign up',
-        buttonVariant: 'contained',
+        buttonVariant: 'outlined',
     },
     {
         title: 'Enterprise',
@@ -195,7 +222,7 @@ const tiers = [
             'Phone & email support',
         ],
         buttonText: 'Contact Us',
-        buttonVariant: 'contained',
+        buttonVariant: 'outlined',
     },
 ];
 const footers = [
@@ -246,32 +273,53 @@ export default function HomePage() {
             </AppBar>
             {/* Hero unit */}
             <div className={classes.heroContent}>
-                <Grid container alignItems="center" justify="center" direction="row">
-                    <Grid item xs={12} md={5} container spacing={2} alignItems="center" justify="center" direction="column">
-                        <Grid item>
-                            <Typography component="h3" variant="h4" className={classes.boldFont} gutterBottom>
-                                Management made easy
-                         </Typography>
-                            <Typography variant="h6" color="textSecondary">
-                                For property managers, owners, and management startups.
-                                Discover software products designed to inspire and to connect
-                                you to a community of motivated people.
-                        </Typography>
+                <Grid container alignItems="center" justify="center">
+                    <Grid item container lg={10} alignItems="center" justify="center" direction="row">
+                        <Grid item xs={12} md={5} container spacing={2} alignItems="center" justify="center" direction="column">
+                            <Grid item container>
+                                <Grid item>
+                                    <Typography component="h3" variant="h3" className={classes.boldFont} gutterBottom>
+                                        Management made easy
+                                </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="h6" color="textSecondary">
+                                        For property managers, owners, and management startups.
+                                        Discover software products designed to inspire and to connect
+                                        you to a community of motivated people.
+                                </Typography>
+                                </Grid>
+                            </Grid>
+                            <Grid item container direction='row' spacing={2}>
+                                <Grid item>
+                                    <Button variant="contained" color="primary">Sign Up</Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button variant="outlined" color="primary">Features</Button>
+                                </Grid>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                    <Grid item xs={12} md={7} container spacing={2} alignItems="center" justify="center" direction="column">
-                        <Grid item>
-                            Here is some other content
+                        <Grid item xs={12} md={7} container spacing={2} alignItems="center" justify="center" direction="column">
+                            <Grid item>
+                                <GridList cellHeight={500} className={classes.gridList} cols={1}>
+                                    {appHeaderImages.map((tile, tileIndex) => (
+                                        <GridListTile key={tileIndex} cols={tile.cols || 1}>
+                                            <img src={tile.image} alt={tile.title} />
+                                        </GridListTile>
+                                    ))}
+                                </GridList>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
             </div>
+            <Divider />
             {/* Hero unit */}
-            <Container maxWidth="lg" component="section" className={classes.heroContent}>
+            <Container maxWidth="lg" component="section" className={classes.heroContent} style={{ backgroundColor: "rgb(247, 249, 250)" }}>
                 <Grid container spacing={10} alignItems="center" justify="center" direction="column">
                     <Grid item container spacing={2} alignItems="center" justify="center" direction="column">
                         <Grid item>
-                            <Typography component="h3" variant="h4" align="center" className={classes.boldFont}>
+                            <Typography component="h4" variant="h4" align="center" className={classes.boldFont}>
                                 We are reimagining renting to help you achieve your dreams
                         </Typography>
                         </Grid>
@@ -291,12 +339,12 @@ export default function HomePage() {
                                         {feature.icon}
                                     </Grid>
                                     <Grid item>
-                                        <Typography variant="h6">
+                                        <Typography variant="h6" className={classes.boldFont}>
                                             {feature.title}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        <Typography component="p">
+                                        <Typography component="p" align="center" color="textSecondary">
                                             {feature.description}
                                         </Typography>
                                     </Grid>
@@ -306,19 +354,19 @@ export default function HomePage() {
                     </Grid>
                 </Grid>
             </Container>
+            <Divider />
             <Container maxWidth="lg" component="main" className={classes.heroContent}>
                 <Grid container spacing={10} direction="row">
                     <Grid item xs={12} md={6} container spacing={2} direction="column">
                         <Grid item xs={12}>
                             <Typography component="h3" variant="h4" >
-                                Flexible office space means growing your team is easy.
+                                Everything you could need.
                             </Typography>
                         </Grid>
                         <Grid item xs={12}>
                             <Typography variant="h6" color="textSecondary">
-                                Rather than worrying about switching offices every couple years,
-                                you can instead stay in the same location and grow-up from your
-                                shared coworking space to an office that takes up an entire floor.
+                                We make sure to include all the modules and functionality that
+                                a property owner/manager could possibly need.
                             </Typography>
                         </Grid>
                     </Grid>
@@ -327,13 +375,14 @@ export default function HomePage() {
                     </Grid>
                 </Grid>
             </Container>
+            <Divider />
             {/* Hero unit */}
             <Container maxWidth="lg" component="main" className={classes.heroContent}>
                 <Grid container spacing={10} alignItems="center" justify="center" direction="column">
                     <Grid item container spacing={2} alignItems="center" justify="center" direction="column">
                         <Grid item>
                             <Typography component="h3" variant="h4" className={classes.boldFont} align="center">
-                                Modules in App
+                                Featured Modules
                         </Typography>
                         </Grid>
                         <Grid item xs={10}>
@@ -345,7 +394,7 @@ export default function HomePage() {
                         </Typography>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={4} alignItems="stretch" justify="center" direction="row">
+                    <Grid item container spacing={4} alignItems="stretch" justify="center" direction="row">
                         {
                             appModules.map((module, moduleIndex) => (
                                 <Grid key={moduleIndex} item xs={12} md={6}>
@@ -375,22 +424,55 @@ export default function HomePage() {
                     </Grid>
                 </Grid>
             </Container>
+            <Divider />
+            {/* Hero unit */}
+            <Container maxWidth="lg" component="section" className={classes.heroContent} style={{ backgroundColor: "rgb(247, 249, 250)" }}>
+                <Grid container spacing={4} alignItems="center" justify="center" direction="row">
+                    <Grid item container xs={12} md={4} spacing={2} alignItems="center" justify="center" direction="column">
+                        <Grid item>
+                            <Typography component="h4" variant="h4" className={classes.boldFont}>
+                                What's included
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <Button variant="contained">EXPLORE OUR PACKAGES</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid container item xs={12} md={8} spacing={2} alignItems="center" direction="row">
+                        {
+                            appServices.map((service, serviceIndex) => (
+                                <Grid key={serviceIndex} item xs={6} sm={4} container spacing={1} direction="row" wrap="nowrap">
+                                    <Grid item>
+                                        {service.icon}
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography variant="subtitle1">
+                                            {service.title}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            ))
+                        }
+                    </Grid>
+                </Grid>
+            </Container>
+            <Divider />
             {/* End hero unit */}
             <Container maxWidth="md" component="section" className={classes.heroContent}>
                 <Grid container spacing={10} alignItems="center" justify="center" direction="column">
-                    <Grid item lg={8} container spacing={2} alignItems="center" justify="center" direction="column">
+                    <Grid item container spacing={2} alignItems="center" justify="center" direction="column">
                         <Grid item>
-                            <Typography variant="h5" align="center" className={classes.boldFont} gutterBottom>
-                                Choose the plan that's right for your team
+                            <Typography variant="h4" align="center" className={classes.boldFont} gutterBottom>
+                                Choose the right plan for your team
                         </Typography>
                         </Grid>
                         <Grid item>
                             <Typography align="center" color="textSecondary" component="p">
-                                Pay month or year and cancel at any time
+                                Pay monthly or yearly and cancel at any time
                             </Typography>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={5} alignItems="flex-end">
+                    <Grid container item spacing={5} alignItems="center" justify="center">
                         {tiers.map((tier) => (
                             // Enterprise card is full width at sm breakpoint
                             <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 6} md={4}>
@@ -441,10 +523,10 @@ export default function HomePage() {
                     <Grid item xs={12} lg={8} container spacing={2} alignItems="center" justify="center" direction="column">
                         <Grid item>
                             <Typography component="h3" variant="h4" className={classes.textWhite} align="center">
-                                Trusted by the Africa's most innovative businesses – big and small
+                                Trusted by Africa's most innovative businesses – big and small
                             </Typography>
                         </Grid>
-                        <Grid item xs={10}>
+                        <Grid item>
                             <Typography component="p" variant="h6" className={classes.textWhite} align="center">
                                 After 3 days all of your offers will arrive and you will have another 7 days to select your new company.
                         </Typography>
@@ -459,7 +541,7 @@ export default function HomePage() {
                                             <Grid className={classes.reviewBox} container spacing={1} direction="column">
                                                 <Grid item container direction="row" spacing={2} alignItems="center">
                                                     <Grid item>
-                                                        <Avatar variant="rounded" src={customer.image} className={classes.largeAvatar}>
+                                                        <Avatar variant="rounded" className={classes.largeAvatar}>
                                                         </Avatar>
                                                     </Grid>
                                                     <Grid item xs>
