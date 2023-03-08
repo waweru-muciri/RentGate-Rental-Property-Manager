@@ -2,7 +2,15 @@ import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import {
+    AppBar,
+    Box,
+    Tabs,
+    Tab,
+    TextField,
+    Button,
+    MenuItem,
+} from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -11,12 +19,12 @@ import CustomizedSnackbar from "../components/customizedSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
-import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
+import TenantStatementsPage from "../components/contacts/ContactStatements";
 
 const headCells = [
     {
@@ -44,7 +52,7 @@ const headCells = [
         label: "Landlord Name",
     },
     {
-        id: "property",
+        id: "property_ref",
         numeric: false,
         disablePadding: true,
         label: "Property Ref",
@@ -68,53 +76,6 @@ const headCells = [
         label: "Assigned To",
     },
 ];
-//sample working data here
-const transactionRows = [
-    {
-        id: 1,
-        transaction_type: "Studio",
-        buyer_tenant: 2,
-        seller_landlord: 1,
-        agent_commission: 1333,
-        property_details: "23675 Dwedney Trunk Road",
-        transaction_price: 4000,
-        assigned_to: "Brian Muciri",
-        transaction_date: "12-12-19",
-    },
-    {
-        id: 2,
-        transaction_type: "Single Family",
-        buyer_tenant: 2,
-        seller_landlord: 1,
-        agent_commission: 1500,
-        property_details: "23675 Dwedney Trunk Road",
-        transaction_price: 8000,
-        assigned_to: "Brian Muciri",
-        transaction_date: "12-12-19",
-    },
-    {
-        id: 3,
-        transaction_type: "Duplex",
-        buyer_tenant: 1,
-        seller_landlord: 1,
-        agent_commission: 1600,
-        property_details: "23675 Dwedney Trunk Road",
-        transaction_price: 6000,
-        assigned_to: "Brian Muciri",
-        transaction_date: "12-12-19",
-    },
-    {
-        id: 4,
-        transaction_type: "Apartment/Condo",
-        buyer_tenant: 0,
-        seller_landlord: 1,
-        agent_commission: 1200,
-        property_details: "23675 Dwedney Trunk Road",
-        transaction_price: 5000,
-        assigned_to: "Brian Muciri",
-        transaction_date: "12-12-19",
-    },
-];
 
 let TransactionPage = ({
     isLoading,
@@ -125,40 +86,68 @@ let TransactionPage = ({
     error,
     handleDelete,
 }) => {
+    const classes = commonStyles();
+    const USERS = [];
     let [transactionItems, setTransactionItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-
-    const USERS = []
+    const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
         setTransactionItems(getMappedTransactions());
     }, [transactions, contacts]);
 
-    const classes = commonStyles();
+    function TabPanel(props) {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}
+            >
+                {value === index && <Box m={2}>{children}</Box>}
+            </div>
+        );
+    }
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
 
     const getMappedTransactions = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
-                    (contact) => contact.id === transaction.tenant
-                );
+                (contact) => contact.id === transaction.tenant
+            );
             const landlord = contacts.find(
-                    (contact) => contact.id === transaction.landlord
-                );
+                (contact) => contact.id === transaction.landlord
+            );
             const property = properties.find(
-                    (property) => property.id === transaction.property
-                );
-            const transactionDetails = {}
-            transactionDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
-            transactionDetails.landlord = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            transactionDetails.property = typeof property !== 'undefined' ?  property.ref : null
+                (property) => property.id === transaction.property
+            );
+            const transactionDetails = {};
+            transactionDetails.tenant =
+                typeof tenant !== "undefined"
+                    ? tenant.first_name + " " + tenant.last_name
+                    : "";
+            transactionDetails.landlord =
+                typeof landlord !== "undefined"
+                    ? landlord.first_name + " " + landlord.last_name
+                    : "";
+            transactionDetails.property_ref =
+                typeof property !== "undefined" ? property.ref : null;
+            transactionDetails.property =
+                typeof property !== "undefined" ? property.id : null;
             return Object.assign({}, transaction, transactionDetails);
         });
         return mappedTransactions;
-    }
+    };
 
     const exportTransactionsRecordsToExcel = () => {
         let items = transactionItems.filter(({ id }) => selected.includes(id));
@@ -200,15 +189,32 @@ let TransactionPage = ({
 
     return (
         <Layout pageTitle="Transactions">
+            <AppBar
+                style={{
+                    position: "-webkit-sticky" /* Safari */,
+                    position: "sticky",
+                    top: 70,
+                }}
+                color="default"
+            >
+                <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    centered
+                >
+                    <Tab label="Transactions" />
+                    <Tab label="Tenant Statements" />
+                </Tabs>
+            </AppBar>
+            <TabPanel value={tabValue} index={0}>
             <Grid
                 container
                 spacing={3}
                 justify="space-evenly"
                 alignItems="center"
             >
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <PageHeading text="Transactions" />
-                </Grid>
                 <Grid
                     container
                     spacing={2}
@@ -287,11 +293,15 @@ let TransactionPage = ({
                                             );
                                         }}
                                     >
-                                    {USERS.map((user, index) => (
-                                <MenuItem key={index} value={user.id}>
-                                    {user.first_name + user.last_name}
-                                </MenuItem>
-                            ))}
+                                        {USERS.map((user, index) => (
+                                            <MenuItem
+                                                key={index}
+                                                value={user.id}
+                                            >
+                                                {user.first_name +
+                                                    user.last_name}
+                                            </MenuItem>
+                                        ))}
                                     </TextField>
                                 </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
@@ -309,16 +319,14 @@ let TransactionPage = ({
                                         }}
                                         value={propertyFilter}
                                     >
-                                        {properties.map(
-                                            (property, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={property.id}
-                                                >
-                                                    {property.ref}
-                                                </MenuItem>
-                                            )
-                                        )}
+                                        {properties.map((property, index) => (
+                                            <MenuItem
+                                                key={index}
+                                                value={property.id}
+                                            >
+                                                {property.ref}
+                                            </MenuItem>
+                                        ))}
                                     </TextField>
                                 </Grid>
                             </Grid>
@@ -372,6 +380,7 @@ let TransactionPage = ({
                             >
                                 <Grid item>
                                     <Button
+                                        onClick={(event) => handleSearchFormSubmit(event)}
                                         type="submit"
                                         form="contactSearchForm"
                                         color="primary"
@@ -379,12 +388,12 @@ let TransactionPage = ({
                                         size="medium"
                                         startIcon={<SearchIcon />}
                                     >
-                                        SEARCH{" "}
+                                        SEARCH
                                     </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button
-                                        onClick={(event) => resetSearchForm}
+                                        onClick={(event) => resetSearchForm(event)}
                                         type="reset"
                                         form="contactSearchForm"
                                         color="primary"
@@ -392,7 +401,7 @@ let TransactionPage = ({
                                         size="medium"
                                         startIcon={<UndoIcon />}
                                     >
-                                        RESET{" "}
+                                        RESET
                                     </Button>
                                 </Grid>
                             </Grid>
@@ -414,11 +423,20 @@ let TransactionPage = ({
                         rows={transactionItems}
                         headCells={headCells}
                         handleDelete={handleDelete}
-                        deleteUrl={'transactions'}
+                        deleteUrl={"transactions"}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+                <TenantStatementsPage
+                    contacts={contacts}
+                    transactions={transactions}
+                    isLoading={isLoading}
+                    properties={properties}
+                />
+            </TabPanel>
         </Layout>
     );
 };

@@ -21,7 +21,17 @@ import useStyles from "./tableStyles";
 import { stableSort, getSorting } from "./tablesSortingFunctions";
 
 function CommonTable(props) {
-    const { rows, headCells, selected, setSelected, deleteUrl, handleDelete } = props;
+    const {
+        rows,
+        headCells,
+        selected,
+        setSelected,
+        deleteUrl,
+        handleDelete,
+        noDetailsCol,
+        noEditCol,
+        noDeleteCol,
+    } = props;
     const { match } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState("asc");
@@ -135,68 +145,83 @@ function CommonTable(props) {
                                                         scope="row"
                                                         padding="none"
                                                     >
-                                                        {typeof tableCellData === "boolean" ? (tableCellData ? "Yes" : "No") : tableCellData}
+                                                        {typeof tableCellData ===
+                                                        "boolean"
+                                                            ? tableCellData
+                                                                ? "Yes"
+                                                                : "No"
+                                                            : tableCellData}
                                                     </TableCell>
                                                 );
                                             }
                                         )}
-                                        <TableCell
-                                            component="th"
-                                            scope="row"
-                                            sortDirection={false}
-                                        >
-                                            <Tooltip
-                                                title="Details"
-                                                placement="bottom"
+                                        {noDetailsCol ? null : (
+                                            <TableCell
+                                                component="th"
+                                                scope="row"
+                                                sortDirection={false}
                                             >
-                                                <IconButton
-                                                    color="primary"
-                                                    size="small"
-                                                    component={Link}
-                                                    to={`${match.url}${row.id}`}
+                                                <Tooltip
+                                                    title="Details"
+                                                    placement="bottom"
                                                 >
-                                                    <DetailsIcon fontSize="default" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            scope="row"
-                                            sortDirection={false}
-                                        >
-                                        <Tooltip
-                                                title="Edit"
-                                                placement="bottom"
+                                                    <IconButton
+                                                        color="primary"
+                                                        size="small"
+                                                        component={Link}
+                                                        to={`${match.url}${row.id}`}
+                                                    >
+                                                        <DetailsIcon fontSize="default" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        )}
+                                        {noEditCol ? null : (
+                                            <TableCell
+                                                component="th"
+                                                scope="row"
+                                                sortDirection={false}
                                             >
-                                            <IconButton
-                                                color="primary"
-                                                size="small"
-                                                component={Link}
-                                                to={`${match.url}/${row.id}/edit`}
+                                                <Tooltip
+                                                    title="Edit"
+                                                    placement="bottom"
+                                                >
+                                                    <IconButton
+                                                        color="primary"
+                                                        size="small"
+                                                        component={Link}
+                                                        to={`${match.url}/${row.id}/edit`}
+                                                    >
+                                                        <EditIcon fontSize="default" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        )}
+                                        {noDeleteCol ? null : (
+                                            <TableCell
+                                                component="th"
+                                                scope="row"
+                                                sortDirection={false}
                                             >
-                                                <EditIcon fontSize="default" />
-                                            </IconButton>
-                                             </Tooltip>
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            scope="row"
-                                            sortDirection={false}
-                                        ><Tooltip
-                                                title="Delete"
-                                                placement="bottom"
-                                            >
-                                            <IconButton
-                                                onClick={(event) => {
-                                                    handleDelete(row.id,deleteUrl);
-                                                }}
-                                                color="primary"
-                                                size="small"
-                                            >
-                                                <DeleteIcon fontSize="default" />
-                                            </IconButton>
-                                             </Tooltip>
-                                        </TableCell>
+                                                <Tooltip
+                                                    title="Delete"
+                                                    placement="bottom"
+                                                >
+                                                    <IconButton
+                                                        onClick={(event) => {
+                                                            handleDelete(
+                                                                row.id,
+                                                                deleteUrl
+                                                            );
+                                                        }}
+                                                        color="primary"
+                                                        size="small"
+                                                    >
+                                                        <DeleteIcon fontSize="default" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 );
                             })}

@@ -11,13 +11,14 @@ import {
     TextField,
     Button,
     MenuItem,
-    Tab, AppBar, Box,
+    Tab,
+    AppBar,
+    Box,
     Tabs,
 } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
-import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import LoadingBackdrop from "../components/loadingBackdrop";
@@ -73,23 +74,21 @@ let ContactsPage = ({
     const [selected, setSelected] = useState([]);
     const [tabValue, setTabValue] = React.useState(0);
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+    function TabPanel(props) {
+        const { children, value, index, ...other } = props;
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box p={2}>{children}</Box>
-      )}
-    </div>
-  );
-}
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}
+            >
+                {value === index && <Box m={2}>{children}</Box>}
+            </div>
+        );
+    }
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -142,21 +141,24 @@ function TabPanel(props) {
 
     return (
         <Layout pageTitle="Contacts">
-              <AppBar style={{
-  position: '-webkit-sticky', /* Safari */
-  position: 'sticky',
-  top: 70,
-}} color="default">
-            <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                centered
+            <AppBar
+                style={{
+                    position: "-webkit-sticky" /* Safari */,
+                    position: "sticky",
+                    top: 70,
+                }}
+                color="default"
             >
-                <Tab label="Contacts" />
-                <Tab label="Contact Statements" />
-            </Tabs>
+                <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    centered
+                >
+                    <Tab label="Contacts" />
+                    <Tab label="Contact Statements" />
+                </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
                 <Grid
