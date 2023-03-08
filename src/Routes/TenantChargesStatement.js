@@ -36,7 +36,7 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState(1);
+    let [periodFilter, setPeriodFilter] = useState(0);
     const [selected, setSelected] = useState([]);
     const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges.map((chargeItem) => chargeItem.charge_type)))
 
@@ -71,7 +71,7 @@ let TenantChargesStatementPage = ({
         let filteredStatements = tenantChargesItems
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
+       if(periodFilter !== '') {
             switch (periodFilter) {
                 case 'last-month':
                     startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
@@ -83,7 +83,8 @@ let TenantChargesStatementPage = ({
                     break;
                 case 'last-year':
                     startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
+                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
+
                     break;
                 default:
                     startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
@@ -109,22 +110,11 @@ let TenantChargesStatementPage = ({
     };
 
     return (
-        <Grid
-            container
-            spacing={3}
-            justify="center" direction="column"
-        >
-            <Grid item key={2}>
+        <Grid container spacing={2} justify="center" direction="column">
+            <Grid item sm={12}>
                 <Typography variant="h6">Tenant Charges Statement</Typography>
             </Grid>
-            <Grid
-                container
-                spacing={2}
-                item
-                alignItems="center"
-                direction="row"
-                key={1}
-            >
+            <Grid item container spacing={2} alignItems="center" direction="row">
                 <Grid item>
                     <ExportToExcelBtn
                         disabled={selected.length <= 0}
@@ -144,169 +134,172 @@ let TenantChargesStatementPage = ({
                     />
                 </Grid>
             </Grid>
-            <Grid item>
-                <Box
-                    border={1}
-                    borderRadius="borderRadius"
-                    borderColor="grey.400"
-                >
-                    <form
-                        className={classes.form}
-                        id="contactSearchForm"
-                        onSubmit={handleSearchFormSubmit}
-                    >
-                        <Grid
-                            container
-                            spacing={2}
-                            justify="center"
-                            direction="row"
+            <Grid item container>
+                <Grid item sm={12}>
+                    <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
+                        <form
+                            className={classes.form}
+                            id="contactSearchForm"
+                            onSubmit={handleSearchFormSubmit}
                         >
-                            <Grid item md={6} xs={12}>
-                                <TextField
-                                    fullWidth
-                                    variant="outlined"
-                                    select
-                                    id="period_filter"
-                                    name="period_filter"
-                                    label="Period"
-                                    value={periodFilter}
-                                    onChange={(event) => {
-                                        setPeriodFilter(
-                                            event.target.value
-                                        );
-                                    }}
-                                    InputLabelProps={{ shrink: true }}
-                                >
-                                    {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
-                                        <MenuItem
-                                            key={index}
-                                            value={filterOption.id}
+                            <Grid
+                                container
+                                justify="center"
+                                direction="column"
+                            >
+                                <Grid item container spacing={2} justify="center" direction="row">
+                                    <Grid item md={6} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            select
+                                            id="period_filter"
+                                            name="period_filter"
+                                            label="Period"
+                                            value={periodFilter}
+                                            onChange={(event) => {
+                                                setPeriodFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            InputLabelProps={{ shrink: true }}
                                         >
-                                            {filterOption.text}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                            <Grid item md={6} xs={12}>
-                                <TextField
-                                    fullWidth
-                                    select
-                                    variant="outlined"
-                                    name="chargeType"
-                                    label="Charge Type"
-                                    id="chargeType"
-                                    onChange={(event) => {
-                                        setChargeTypeFilter(
-                                            event.target.value
-                                        );
-                                    }}
-                                    value={chargeType}
+                                            {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
+                                                <MenuItem
+                                                    key={index}
+                                                    value={filterOption.id}
+                                                >
+                                                    {filterOption.text}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
+                                    <Grid item md={6} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            variant="outlined"
+                                            name="chargeType"
+                                            label="Charge Type"
+                                            id="chargeType"
+                                            onChange={(event) => {
+                                                setChargeTypeFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            value={chargeType}
+                                        >
+                                            {CHARGE_TYPES.map(
+                                                (charge_type, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={charge_type}
+                                                    >
+                                                        {charge_type}
+                                                    </MenuItem>
+                                                )
+                                            )}
+                                        </TextField>
+                                    </Grid>
+                                </Grid>
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    item
+                                    justify="flex-end"
+                                    alignItems="center"
+                                    direction="row"
+                                    key={1}
                                 >
-                                    {CHARGE_TYPES.map(
-                                        (charge_type, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={charge_type}
-                                            >
-                                                {charge_type}
-                                            </MenuItem>
-                                        )
-                                    )}
-                                </TextField>
-                            </Grid>
-                        </Grid>
-                        <Grid
-                            container
-                            spacing={2}
-                            item
-                            justify="flex-end"
-                            alignItems="center"
-                            direction="row"
-                            key={1}
-                        >
-                            <Grid item>
-                                <Button
-                                    onClick={(event) => handleSearchFormSubmit(event)}
-                                    type="submit"
-                                    form="contactSearchForm"
-                                    color="primary"
-                                    variant="contained"
-                                    size="medium"
-                                    startIcon={<SearchIcon />}
-                                >
-                                    SEARCH
+                                    <Grid item>
+                                        <Button
+                                            onClick={(event) => handleSearchFormSubmit(event)}
+                                            type="submit"
+                                            form="contactSearchForm"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<SearchIcon />}
+                                        >
+                                            SEARCH
                                     </Button>
-                            </Grid>
-                            <Grid item>
-                                <Button
-                                    onClick={(event) => resetSearchForm(event)}
-                                    type="reset"
-                                    form="contactSearchForm"
-                                    color="primary"
-                                    variant="contained"
-                                    size="medium"
-                                    startIcon={<UndoIcon />}
-                                >
-                                    RESET
+                                    </Grid>
+                                    <Grid item>
+                                        <Button
+                                            onClick={(event) => resetSearchForm(event)}
+                                            type="reset"
+                                            form="contactSearchForm"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<UndoIcon />}
+                                        >
+                                            RESET
                                     </Button>
+                                    </Grid>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </form>
-                </Box>
+                        </form>
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Box border={1} borderRadius="borderRadius" borderColor="grey.400" className={classes.form}>
-                    <Grid container direction="row" spacing={1}>
-                        <Grid item container md={4}>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Total Rent Charges: {currencyFormatter.format(totalRentCharges)}
-                                </Typography>
+            <Grid item container>
+                <Grid item sm={12}>
+                    <Box border={1} borderRadius="borderRadius" borderColor="grey.400" className={classes.form}>
+                        <Grid container direction="row" spacing={1}>
+                            <Grid item container md={4} sm={12}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Rent Charges: {currencyFormatter.format(totalRentCharges)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Other Charges: {currencyFormatter.format(totalOtherCharges)}
+                                    </Typography>
+                                </Grid>
                             </Grid>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Total Other Charges: {currencyFormatter.format(totalOtherCharges)}
-                                </Typography>
+                            <Grid item container md={4} sm={12}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Rent Payments: {currencyFormatter.format(totalRentPayments)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Other Payments: {currencyFormatter.format(totalOtherPayments)}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                            <Grid item container md={4} sm={12}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Outstanding Rent Balances: {currencyFormatter.format((totalRentCharges - totalRentPayments))}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Other Charges Outstanding Balances: {currencyFormatter.format((totalOtherPayments - totalOtherPayments))}
+                                    </Typography>
+                                </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item container md={4}>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Total Rent Payments: {currencyFormatter.format(totalRentPayments)}
-                                </Typography>
-                            </Grid>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Total Other Payments: {currencyFormatter.format(totalOtherPayments)}
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                        <Grid item container md={4}>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Outstanding Rent Balances: {currencyFormatter.format((totalRentCharges - totalRentPayments))}
-                                </Typography>
-                            </Grid>
-                            <Grid item sm={12}>
-                                <Typography variant="subtitle1" align="center">
-                                    Other Charges Outstanding Balances: {currencyFormatter.format((totalOtherPayments - totalOtherPayments))}
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Box>
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item>
-                <CommonTable
-                    selected={selected}
-                    setSelected={setSelected}
-                    rows={filteredChargeItems}
-                    headCells={headCells}
-                    noEditCol
-                    noDeleteCol
-                    deleteUrl={'unit-charges'}
-                    handleDelete={handleItemDelete}
-                />
+            <Grid item container>
+                <Grid item sm={12}>
+                    <CommonTable
+                        selected={selected}
+                        setSelected={setSelected}
+                        rows={filteredChargeItems}
+                        headCells={headCells}
+                        noEditCol
+                        noDeleteCol
+                        deleteUrl={'unit-charges'}
+                        handleDelete={handleItemDelete}
+                    />
+                </Grid>
             </Grid>
         </Grid>
     );

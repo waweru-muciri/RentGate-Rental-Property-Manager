@@ -5,6 +5,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { connect } from "react-redux";
 import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/PrivateLayout";
@@ -23,31 +24,13 @@ const headCells = [
         disablePadding: true,
         label: "Transaction Date",
     },
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Landlord",
-    },
-    {
-        id: "property_ref",
+   {
+        id: "unit_ref",
         numeric: false,
         disablePadding: true,
         label: "Property Ref",
     },
-    {
-        id: "lease_start",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Start Date",
-    },
-    {
-        id: "lease_end",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease End Date",
-    },
-    {
+        {
         id: "property_price",
         numeric: false,
         disablePadding: true,
@@ -81,36 +64,15 @@ let TenantStatementsPage = ({
     let [statementItems, setStatementItems] = useState([]);
     let [filteredStatementItems, setFilteredStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [contactFilter, setContactFilter] = useState("");
+    let [contactFilter, setContactFilter] = useState(null);
     let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {}
-            transactionDetails.tenant_name = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
-            transactionDetails.tenantId = typeof tenant !== 'undefined' ? tenant.id : ''
-            transactionDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            transactionDetails.property_ref = typeof property !== 'undefined' ? property.ref : null
-            transactionDetails.property = typeof property !== 'undefined' ? property.id : null
-            transactionDetails.property_price = typeof property !== 'undefined' ? property.price : null
-            transactionDetails.security_deposit = typeof transaction !== 'undefined' ? transaction.security_deposit : null
-            transactionDetails.water_deposit = typeof transaction !== 'undefined' ? transaction.water_deposit : null
-            transactionDetails.transaction_balance = typeof property !== 'undefined' ? property.price - transaction.transaction_price : null
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setStatementItems(mappedTransactions);
+        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date)
+	setStatementItems(mappedTransactions);
         setFilteredStatementItems(mappedTransactions);
     }, [transactions, contacts, users, properties]);
 
@@ -129,12 +91,9 @@ let TenantStatementsPage = ({
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
-            .filter(({ tenantId }) =>
-                !contactFilter ? true : tenantId === contactFilter
+            .filter(({ tenant_id }) =>
+                !contactFilter ? true : tenant_id === contactFilter.id
             )
-            .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord === assignedToFilter
-            );
         setFilteredStatementItems(filteredStatements);
     };
 
@@ -167,7 +126,7 @@ let TenantStatementsPage = ({
                     key={1}
                 >
                     <Grid item>
-                    <ExportToExcelBtn
+                        <ExportToExcelBtn
                             disabled={selected.length <= 0}
                             reportName={'Tenant Statements Records'}
                             reportTitle={'Tenant Statements Records'}
@@ -196,12 +155,12 @@ let TenantStatementsPage = ({
                                 <Grid
                                     container
                                     item
-                                    lg={6} md={12} xs={12}
+                                    xs={12} lg={6}
                                     spacing={1}
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item xs={12} lg={6}>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -218,7 +177,7 @@ let TenantStatementsPage = ({
                                             InputLabelProps={{ shrink: true }}
                                         />
                                     </Grid>
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item xs={12} lg={6}>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -234,7 +193,7 @@ let TenantStatementsPage = ({
                                         />
                                     </Grid>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} lg={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -268,7 +227,7 @@ let TenantStatementsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} lg={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -290,27 +249,20 @@ let TenantStatementsPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        select
-                                        fullWidth
-                                        variant="outlined"
-                                        type="text"
-                                        name="contact_filter"
-                                        label="Contact"
+                                <Grid item xs={12} lg={6}>
+                                    <Autocomplete
                                         id="contact_filter"
-                                        onChange={(event) => {
-                                            setContactFilter(event.target.value);
+                                        options={contacts}
+                                        getOptionSelected={(option, value) => option.id === value.id}
+                                        name="contact_filter"
+                                        onChange={(event, newValue) => {
+                                            setContactFilter(newValue);
                                         }}
                                         value={contactFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    >
-                                        {contacts.map((contact, contactIndex) => (
-                                            <MenuItem key={contactIndex} value={contact.id}>
-                                                {contact.first_name + ' ' + contact.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                        getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
+                                        style={{ width: "100%" }}
+                                        renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+                                    />
                                 </Grid>
                             </Grid>
                             <Grid

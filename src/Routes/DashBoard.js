@@ -3,7 +3,6 @@ import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import PageHeading from "../components/PageHeading";
 import InfoDisplayPaper from "../components/InfoDisplayPaper";
-import CustomSnackBar from "../components/CustomSnackbar";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";

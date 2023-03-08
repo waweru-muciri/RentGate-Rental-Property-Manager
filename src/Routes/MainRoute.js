@@ -21,7 +21,6 @@ import PropertyPage from "./PropertyPage";
 import PropertyUnitPage from "./PropertyUnitPage";
 import TenantDetailsPage from "./TenantDetailsPage";
 import PaymentEditForm from "../components/transactions/PaymentEditForm";
-const ReportsPage = lazy(() => import('./Reports'));
 const ExpensesPage = lazy(() => import('./Expenses'));
 const ExpensePage = lazy(() => import('./ExpensePage'));
 const UsersPage = lazy(() => import('./Users'));
@@ -108,7 +107,6 @@ let MainPage = ({
               <Switch>
                 <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
                 <Route exact path={`${match.path}`} component={DashBoard} />
-                <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
                 <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
                 <Route exact path={`${match.path}emails`} component={EmailsPage} />
                 <Route

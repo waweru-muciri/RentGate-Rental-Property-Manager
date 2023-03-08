@@ -6,19 +6,16 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import {
-    Grid,
-    TextField,
-    Button,
-    MenuItem,
-    Box,
-} from "@material-ui/core";
+import TextField from "@material-ui/core/TextField";
+import  Button from "@material-ui/core/Button";
+import Grid  from "@material-ui/core/Grid";
+import MenuItem from "@material-ui/core/MenuItem";
+import  Box from "@material-ui/core/Box";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { getGendersList } from "../assets/commonAssets.js";
@@ -78,7 +75,7 @@ let ContactsPage = ({
                 !genderFilter ? true : gender === genderFilter
             )
             .filter(({ id_number }) =>
-                !idFilter ? true : new String(id_number).includes(idFilter)
+                !idFilter ? true : String(id_number).includes(idFilter)
             );
 
         setFilteredContactItems(filteredContacts);
@@ -137,19 +134,6 @@ let ContactsPage = ({
                         >
                             Edit
                             </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            disabled={selected.length <= 0}
-                            component={Link}
-                            to={`/notices/new`}
-                        >
-                        Move Tenant Out With Notice
-                        </Button>
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf

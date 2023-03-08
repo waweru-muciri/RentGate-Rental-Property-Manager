@@ -1,7 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
-import ReactQuill from 'react-quill'; // ES6
-import 'react-quill/dist/quill.snow.css'; // ES6
 import { Typography, Grid, Button, TextField, MenuItem } from "@material-ui/core";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
@@ -15,51 +12,20 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const VacatingNoticeSchema = Yup.object().shape({
   lease_id: Yup.string().required("Tenant is required"),
   notification_date: Yup.date().required("Vacating Date Required"),
-  vacating_date: Yup.date().required("Vacating Date Required"),
-  actual_vacated_date: Yup.date(),
-  notice_details: Yup.string().trim().required('Notice Details are required')
+  vacating_date: Yup.date().required("Move Out Date is Required"),
 });
 
-const quillEditorModules = {
-  toolbar: [
-    [{ 'header': [1,2, 3, 4, 5, 6, false] }, { 'font': [] }],
-    [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' },
-    { 'indent': '-1' }, { 'indent': '+1' }],
-    ['link', 'image', 'video'],
-    ['clean']
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false,
-  }
-}
-/* 
- * Quill editor formats
- * See https://quilljs.com/docs/formats/
- */
-const quillEditorFormats = [
-  'header', 'font', 'size',
-  'bold', 'italic', 'underline', 'strike', 'blockquote',
-  'list', 'bullet', 'indent',
-  'link', 'image', 'video'
-]
-
-
 const NoticeInputForm = (props) => {
-  const history = useHistory();
-  const { activeLeases, submitForm } = props;
+  const { activeLeases, submitForm, history } = props;
   const classes = commonStyles();
   const noticeToEdit = props.noticeToEdit || {}
 
   let noticeValues = {
     id: noticeToEdit.id,
-    notice_details: noticeToEdit.notice_details || '',
     notification_date: noticeToEdit.notification_date || defaultDate,
     vacating_date: noticeToEdit.vacating_date || defaultDate,
-    actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate,
-    lease_id: noticeToEdit.lease_id || ''
+    lease_id: noticeToEdit.lease_id || '',
+    lease_details: activeLeases.find(({id}) => id === noticeToEdit.lease_id) || { start_date: '', unit_ref: "", lease_type: ""},
   };
 
   return (
@@ -70,9 +36,7 @@ const NoticeInputForm = (props) => {
         const vacatingNotice = {
           id: values.id,
           lease_id: values.lease_id,
-          notice_details: values.notice_details,
           vacating_date: values.vacating_date,
-          actual_vacated_date: values.actual_vacated_date,
           notification_date: values.notification_date,
         };
         submitForm(vacatingNotice, "notices").then(
@@ -90,6 +54,7 @@ const NoticeInputForm = (props) => {
         handleSubmit,
         errors,
         handleChange,
+        setFieldValue,
         handleBlur,
         isSubmitting,
       }) => (
@@ -101,124 +66,148 @@ const NoticeInputForm = (props) => {
           >
             <Grid
               container
-              spacing={4}
+              spacing={2}
               justify="center"
               alignItems="stretch"
               direction="column"
             >
               <Grid item>
-                <TextField
-                  fullWidth
-                  select
-                  variant="outlined"
-                  id="lease_id"
-                  name="lease_id"
-                  label="Tenant"
-                  value={values.lease_id}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"lease_id" in errors}
-                  helperText={errors.lease_id}
-                >
-                  {activeLeases.map((contact, index) => (
-                    <MenuItem key={index} value={contact.id}>
-                      {contact.tenant_name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  id="notification_date"
-                  name="notification_date"
-                  label="Notification Date"
-                  value={values.notification_date}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"notification_date" in errors}
-                  helperText={errors.notification_date
-                  }
-                />
-                <TextField
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  id="vacating_date"
-                  name="vacating_date"
-                  label="Vacating Date"
-                  value={values.vacating_date}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"vacating_date" in errors}
-                  helperText={errors.vacating_date}
-                />
-                <TextField
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  id="actual_vacated_date"
-                  name="actual_vacated_date"
-                  label="Actual Date Vacated"
-                  value={values.actual_vacated_date}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"actual_vacated_date" in errors}
-                  helperText={errors.actual_vacated_date}
-                />
-			    <Typography color='textSecondary' variant='body1' paragraph> Notice Details </Typography>
-                <ReactQuill
-                  label="Notice Details"
-                  value={values.notice_details}
-                  onChange={handleChange}
-                  theme="snow"
-                  modules={quillEditorModules}
-                  formats={quillEditorFormats} 
-                  placeholder={"Notice Details Here"} >
-				 <TextField
-                                fullWidth
-                                variant="outlined"
-								id="notice_details"
-								name="notice_details"
-                                onBlur={handleBlur}
-                                error={
-                                 'notice_details' in  errors                                  }
-                                helperText={
-                                  errors.notice_details
-                                }
-                />
-		</ReactQuill>
+                <Typography color="textSecondary" component="p">
+                  Recording every tenant's intention to move out will automatically end the agreement
+                  on the last move-out date.
+                </Typography>
               </Grid>
-              <Grid item className={classes.buttonBox}>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  size="medium"
-                  startIcon={<CancelIcon />}
-                  onClick={() => history.goBack()}
-                  disableElevation
-                >
-                  Cancel
-              </Button>
-                <Button
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  size="medium"
-                  startIcon={<SaveIcon />}
-                  form="noticeInputForm"
-                  disabled={isSubmitting}
-                >
-                  Save
-              </Button>
+              <Grid item container spacing={2} direction="row">
+                <Grid item sm>
+                  <TextField
+                    fullWidth
+                    select
+                    variant="outlined"
+                    id="lease_id"
+                    name="lease_id"
+                    label="Tenant"
+                    value={values.lease_id}
+                    onChange={(event) => {
+                      setFieldValue('lease_id', event.target.value)
+                      setFieldValue('lease_details', activeLeases.find(({id}) => id === event.target.value))
+                    }}
+                    onBlur={handleBlur}
+                    error={"lease_id" in errors}
+                    helperText={errors.lease_id}
+                  >
+                    {activeLeases.map((contact, index) => (
+                      <MenuItem key={index} value={contact.id}>
+                        {contact.tenant_name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item sm>
+                  <TextField
+                    fullWidth
+                    disabled
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    id="unit"
+                    name="unit"
+                    label="Unit"
+                    value={values.lease_details.unit_ref}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item container spacing={2} direction="row">
+                <Grid item sm>
+                  <TextField
+                    disabled
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    id="lease_type"
+                    name="type"
+                    label="Agreement Type"
+                    value={values.lease_details.lease_type}
+                  />
+                </Grid>
+                <Grid item sm>
+                  <TextField
+                    disabled
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    id="lease_start"
+                    name="lease_start"
+                    label="Start - End"
+                    value={`${values.lease_details.start_date} - ${values.vacating_date}`}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item container spacing={2} direction="row">
+                <Grid item sm>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    id="notification_date"
+                    name="notification_date"
+                    label="Notification Date"
+                    value={values.notification_date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={"notification_date" in errors}
+                    helperText={errors.notification_date
+                    }
+                  />
+                </Grid>
+                <Grid item sm>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    id="vacating_date"
+                    name="vacating_date"
+                    label="Move Out Date"
+                    value={values.vacating_date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={"vacating_date" in errors}
+                    helperText={errors.vacating_date}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item container direction="row" className={classes.buttonBox}>
+                <Grid item>
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    size="medium"
+                    startIcon={<CancelIcon />}
+                    onClick={() => history.goBack()}
+                    disableElevation
+                  >
+                    Cancel
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    variant="contained"
+                    size="medium"
+                    startIcon={<SaveIcon />}
+                    form="noticeInputForm"
+                    disabled={isSubmitting}
+                  >
+                    Move Out
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </form>
-        )}
-    </Formik>
+        )
+      }
+    </Formik >
   );
 };
 

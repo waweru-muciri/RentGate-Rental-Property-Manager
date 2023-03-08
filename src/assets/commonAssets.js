@@ -46,6 +46,7 @@ export function getUnitTypes() {
 		"Single Room",
 		"Double Room",
 		"Shop",
+		"Other",
 	];
 }
 
@@ -75,22 +76,12 @@ export const getLateFeeFrequencyOptions = () => {
 	return ['One-time fee', 'Daily']
 }
 
-export function getCheckOptions() {
-	let check_options = [];
-	for (let i = 1; i < 13; i++) {
-		i === 1
-			? check_options.push(i + " Check")
-			: check_options.push(i + " Checks");
-	}
-	return check_options;
-}
-
 export function getFrequencyOptions() {
 	return ["Per Day", "Week", "Month", "Quarter", "Half Year", "Year"];
 }
 
 export function getMeterTypes() {
-	return ["Electric", "Gas", "Oil", "Sewer", "Water"];
+	return ["Electric", "Sewer", "Water"];
 }
 
 export function getLeaseOptions() {
@@ -104,17 +95,10 @@ export function getLeaseOptions() {
 export function getPaymentOptions() {
 	return ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"];
 }
-export function getFurnishedOptions() {
-	return ["Yes", "No", "Partially"];
-}
-
-export function getTransactionTypes() {
-	return ["Rental", "Sale", "Not Specified"];
-}
 
 export function getTransactionsFilterOptions() {
 	return [
-		{ id: 1, text: 'Month To Date' }, { id: 'last-month', text: 'Last Month' },
+		{ id: 0, text: 'Month To Date' }, { id: 'last-month', text: 'Last Month' },
 		{ id: 3, text: '3 Months To Date' }, { id: 'year-to-date', text: 'Year To Date' },
 		{ id: 'last-year', text: 'Last Year' },];
 }

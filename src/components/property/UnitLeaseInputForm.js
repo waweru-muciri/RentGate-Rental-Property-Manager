@@ -14,14 +14,8 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import AddIcon from "@material-ui/icons/Add";
-import { connect } from "react-redux";
 import { Formik } from "formik";
-import {
-	handleItemFormSubmit,
-	handleDelete,
-} from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
-import { withRouter } from "react-router-dom";
 import {
 	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
@@ -61,6 +55,7 @@ let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
 	const { contacts, history, properties, propertyUnits, propertyUnitCharges, handleItemSubmit, handleItemDelete } = props
 	const [propertyUnitChargesItems, setpropertyUnitChargesItems] = useState([])
+
 	let leaseToEdit = props.leaseToEdit || {};
 	const unitLeaseValues = {
 		id: leaseToEdit.id,
@@ -239,7 +234,7 @@ let UnitLeaseInputForm = (props) => {
 										variant="outlined"
 										select
 										name="lease_type"
-										label="Lease Type"
+										label="Rental Agreement Type"
 										id="lease_type"
 										onBlur={handleBlur}
 										onChange={handleChange}
@@ -307,8 +302,7 @@ let UnitLeaseInputForm = (props) => {
 										onChange={handleChange}
 										value={values.rent_cycle}
 										error={errors.rent_cycle && touched.rent_cycle}
-										helperText={touched.rent_cycle && errors.rent_cycle || 'Frequency at which rent is charged on unit'
-										}
+										helperText={"Frequency at which rent is charged on unit"}
 									>
 										{RENT_CYCLES.map((rent_cycle, index) => (
 											<MenuItem key={index} value={rent_cycle}>
@@ -343,7 +337,7 @@ let UnitLeaseInputForm = (props) => {
 										label="Next Due Date"
 										value={values.rent_due_date}
 										error={errors.rent_due_date && touched.rent_due_date}
-										helperText={touched.rent_due_date && errors.rent_due_date || 'Next date when the rent is due'}
+										helperText={"Next date when the rent is due"}
 										onChange={handleChange}
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
@@ -466,7 +460,7 @@ let UnitLeaseInputForm = (props) => {
 									</TextField>
 								</Grid>
 							</Grid>
-							<Grid item container direction="column" spacing={2}>
+							<Grid item container direction="column" spacing={1}>
 								<Grid item>
 									<Typography variant="subtitle1">Unit Charges</Typography>
 								</Grid>
@@ -542,25 +536,4 @@ let UnitLeaseInputForm = (props) => {
 	);
 };
 
-const mapStateToProps = (state) => {
-	return {
-		contacts: state.contacts,
-		properties: state.properties,
-		error: state.error,
-		propertyUnits: state.propertyUnits,
-		propertyUnitCharges: state.propertyUnitCharges,
-		// contacts: state.contacts.filter(({ id }) => !state.properties.find((property) => property.tenants.includes(id))),
-		currentUser: state.currentUser,
-		users: state.users,
-	};
-};
-const mapDispatchToProps = (dispatch) => {
-	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
-	};
-};
-
-UnitLeaseInputForm = connect(mapStateToProps, mapDispatchToProps)(UnitLeaseInputForm);
-
-export default withRouter(UnitLeaseInputForm);
+export default UnitLeaseInputForm;

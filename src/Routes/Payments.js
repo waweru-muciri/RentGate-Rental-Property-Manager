@@ -6,11 +6,9 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
@@ -50,10 +48,10 @@ let PaymentsPage = ({
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState();
+    let [periodFilter, setPeriodFilter] = useState(0);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [contactFilter, setContactFilter] = useState("");
+    let [contactFilter, setContactFilter] = useState(null);
 
     const [selected, setSelected] = useState([]);
 
@@ -68,7 +66,7 @@ let PaymentsPage = ({
         let filteredPayments = paymentsItems
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
+       if(periodFilter !== '') {
             switch (periodFilter) {
                 case 'last-month':
                     startOfPeriod = startOfMonth(subMonths(startOfToday(), 1))
@@ -80,11 +78,11 @@ let PaymentsPage = ({
                     break;
                 case 'last-year':
                     startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
+                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
                     break;
                 default:
                     startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))
-                    endOfPeriod = startOfToday()
+                    endOfPeriod = endOfMonth(subMonths(startOfToday(), periodFilter))
                     break;
             }
             filteredPayments = filteredPayments.filter((paymentItem) => {

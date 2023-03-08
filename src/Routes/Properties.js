@@ -72,7 +72,7 @@ let PropertyPage = ({
                 justify="space-evenly"
                 alignItems="center"
             >
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12} >
                     <PageHeading text="Properties" />
                 </Grid>
                 <Grid
@@ -129,7 +129,7 @@ let PropertyPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -236,7 +236,6 @@ let PropertyPage = ({
                         handleDelete={handleItemDelete}
                     />
                 </Grid>
-
             </Grid>
         </Layout>
     );

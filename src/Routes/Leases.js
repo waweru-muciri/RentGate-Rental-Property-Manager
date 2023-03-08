@@ -23,12 +23,12 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 const headCells = [
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property", },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit", },
-    { id: "lease_type", numeric: false, disablePadding: true, label: "Lease Type", },
+    { id: "lease_type", numeric: false, disablePadding: true, label: "Agreement Type", },
     { id: "rent_cycle", numeric: false, disablePadding: true, label: "Rent Cycle", },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
-    { id: "start_date", numeric: false, disablePadding: true, label: "Lease Start", },
-    { id: "end_date", numeric: false, disablePadding: true, label: "Lease End", },
+    { id: "start_date", numeric: false, disablePadding: true, label: "Start Date", },
+    { id: "end_date", numeric: false, disablePadding: true, label: "End Date", },
     { id: "security_deposit", numeric: false, disablePadding: true, label: "Deposit Held", },
     { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent", },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
@@ -41,7 +41,6 @@ let TransactionPage = ({
     match,
     users,
     handleItemDelete,
-    error,
 }) => {
     const classes = commonStyles();
     let [leaseItems, setLeaseItems] = useState([]);
@@ -138,6 +137,8 @@ let TransactionPage = ({
                             size="medium"
                             startIcon={<BlockIcon />}
                             disabled={selected.length <= 0}
+                            component={Link}
+                            to={`/notices/new?lease=${selected[0]}`}
                         >
                             End Agreement
                         </Button>

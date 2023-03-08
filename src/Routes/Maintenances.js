@@ -6,7 +6,6 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/PrintToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
@@ -14,37 +13,17 @@ import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 
 const STATUS_LIST = ["Open", "Closed"];
 
 const maintenanceRequestsTableHeadCells = [
-	{
-		id: "date_created",
-		numeric: false,
-		disablePadding: true,
-		label: "Date Created",
-	},
-	{
-		id: "tenant_name",
-		numeric: false,
-		disablePadding: true,
-		label: "Tenant Name",
-	},
-	{
-		id: "property_ref",
-		numeric: false,
-		disablePadding: true,
-		label: "Property Ref",
-	},
-	{
-		id: "maintenance_details",
-		numeric: false,
-		disablePadding: true,
-		label: "Request Details",
-	},
+	{ id: "date_created", numeric: false, disablePadding: true, label: "Date Created" },
+	{ id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+	{ id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
+	{ id: "maintenance_details", numeric: false, disablePadding: true, label: "Request Details" },
 	{ id: "status", numeric: false, disablePadding: true, label: "Status" },
 	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -52,8 +31,6 @@ const maintenanceRequestsTableHeadCells = [
 ];
 
 let MaintenanceRequestsPage = ({
-	currentUser,
-	isLoading,
 	maintenanceRequests,
 	users,
 	contacts,
@@ -65,7 +42,7 @@ let MaintenanceRequestsPage = ({
 	let [filteredMaintenanceRequestItems, setFilteredMaintenanceRequestItems] = useState([]);
 	let [fromDateFilter, setFromDateFilter] = useState("");
 	let [toDateFilter, setToDateFilter] = useState("");
-	let [contactFilter, setContactFilter] = useState("");
+	let [contactFilter, setContactFilter] = useState(null);
 	let [statusFilter, setStatusFilter] = useState("");
 	const [selected, setSelected] = useState([]);
 
@@ -76,28 +53,10 @@ let MaintenanceRequestsPage = ({
 			(maintenanceRequest) => {
 				const contactWithRequest = contacts.find(
 					(contact) => contact.id === maintenanceRequest.contact
-				);
+				) || {};
 				const maintenanceRequestDetails = {}
-				if (typeof contactWithRequest !== 'undefined') {
 					maintenanceRequestDetails.tenant_id_number = contactWithRequest.id_number
 					maintenanceRequestDetails.tenant_name = contactWithRequest.first_name + " " + contactWithRequest.last_name
-					const property = propertyUnits.find(
-						({ tenants }) => tenants.length ? tenants[0] === contactWithRequest.id : false
-					);
-					if (typeof property !== "undefined") {
-						maintenanceRequestDetails.property_ref = property.ref;
-						maintenanceRequestDetails.property_address = property.address;
-						maintenanceRequestDetails.property = property.id;
-					}
-					const landlord = users.find(
-						(user) => user.id === contactWithRequest.assigned_to
-					);
-					if (typeof landlord !== "undefined") {
-						maintenanceRequestDetails.landlord_name = landlord.first_name + " " + landlord.last_name
-						maintenanceRequestDetails.landlord_email = landlord.email
-						maintenanceRequestDetails.landlord_phone_number = landlord.phone_number
-					}
-				}
 				return Object.assign(
 					{},
 					maintenanceRequest, maintenanceRequestDetails
@@ -118,9 +77,9 @@ let MaintenanceRequestsPage = ({
 			.filter(({ date_created }) =>
 				!toDateFilter ? true : date_created === toDateFilter
 			)
-			.filter(({ contact }) =>
-				!contactFilter ? true : contact === contactFilter
-			)
+			.filter(({ tenant_id }) =>
+                !contactFilter ? true : tenant_id === contactFilter.id
+            )
 			.filter(({ status }) =>
 				!statusFilter ? true : status === statusFilter
 			);
@@ -253,32 +212,20 @@ let MaintenanceRequestsPage = ({
 								justify="center"
 								direction="row"
 							>
-								<Grid item lg={6} md={12} xs={12}>
-									<TextField
-										fullWidth
-										select
-										variant="outlined"
-										id="contact"
-										name="contact"
-										label="Contact"
-										value={contactFilter}
-										onChange={(event) => {
-											setContactFilter(
-												event.target.value
-											);
+								<Grid item xs={12} md={6}>
+									<Autocomplete
+										id="contact_filter"
+										options={contacts}
+										getOptionSelected={(option, value) => option.id === value.id}
+										name="contact_filter"
+										onChange={(event, newValue) => {
+											setContactFilter(newValue);
 										}}
-									>
-										{contacts.map((contact, index) => (
-											<MenuItem
-												key={index}
-												value={contact.id}
-											>
-												{contact.first_name +
-													" " +
-													contact.last_name}
-											</MenuItem>
-										))}
-									</TextField>
+										value={contactFilter}
+										getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
+										style={{ width: "100%" }}
+										renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+									/>
 								</Grid>
 								<Grid item lg={6} md={12} xs={12}>
 									<TextField
@@ -358,12 +305,12 @@ let MaintenanceRequestsPage = ({
 						setSelected={setSelected}
 						rows={filteredMaintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
-						
+
 						handleDelete={handleItemDelete}
 						deleteUrl={"maintenance-requests"}
 					/>
 				</Grid>
-				
+
 			</Grid>
 		</Layout>
 	);
@@ -384,7 +331,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 	};
 };
 

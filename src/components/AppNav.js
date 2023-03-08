@@ -82,12 +82,11 @@ const reportLinkNestedLinks = [
     //show income here from all charges and provide a way to filter the charges according to type, 
     //show payments received from these charges and any outstanding balances
     {
-        text: "Property Income Statement",
+        text: "Property Performance",
         to: "/reports/property-income",
-        icon: <ShowChartIcon />,
+        icon: <AssessmentIcon />,
     }, 
     //show income and expenses received from each property and show net income for each of the expenses
-    { text: "Property Performance", to: "/reports/property-performance", icon: <AssessmentIcon /> },
     //show property occupancy rate over periods of time and provide for filtering criteria by property, unit, 
     //generate tenant statements and filtering criteria by each property and others
     //show total of values and other relevant data points

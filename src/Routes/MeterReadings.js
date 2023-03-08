@@ -77,7 +77,7 @@ let MeterReadingsPage = ({
         event.preventDefault();
         //filter the meterReadings here according to search criteria
         let filteredMeterReadings = meterReadingItems
-        if (periodFilter) {
+       if(periodFilter !== '') {
             let startOfPeriod;
             let endOfPeriod;
             switch (periodFilter) {
@@ -91,7 +91,8 @@ let MeterReadingsPage = ({
                     break;
                 case 'last-year':
                     startOfPeriod = startOfYear(subYears(startOfToday(), 1))
-                    startOfPeriod = endOfYear(subYears(startOfToday(), 1))
+                    endOfPeriod = endOfYear(subYears(startOfToday(), 1))
+
                     break;
                 default:
                     startOfPeriod = startOfMonth(subMonths(startOfToday(), periodFilter))

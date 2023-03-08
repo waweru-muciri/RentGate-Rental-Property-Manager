@@ -21,19 +21,17 @@ const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 let PropertyIncomeStatement = ({
     transactions,
     expenses,
-    meterReadings,
     properties,
 }) => {
     const classes = commonStyles();
     let [expensesItems, setExpensesItems] = useState([]);
     let [paymentItems, setPaymentItems] = useState([]);
-    let [meterReadingItems, setMeterReadingItems] = useState([]);
-    let [propertiesItems, setPropertiesItems] = useState([]);
+    let [netIncomeObject, setNetIncomeObject] = useState({});
     let [incomeStatements, setIncomeStatements] = useState([]);
     let [headCells, setHeadCells] = useState([]);
     let [expensesStatements, setExpensesStatements] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [fromFilter, setFromFilter] = useState(1);
+    let [fromFilter, setFromFilter] = useState(0);
 
     useEffect(() => {
         //go back [numMonths] months from current date
@@ -52,48 +50,51 @@ let PropertyIncomeStatement = ({
                 eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => subMonths(startOfToday(), value))
                 break;
         }
-        setHeadCells(eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')))
+        const headCellsForMonths = [...eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')), `Total as of ${format(eachPastMonthDate[eachPastMonthDate.length - 1], 'MMMM yyyy')}`]
+        // calculate income from rent
         const incomeMappedByMonth = []
-        const expensesMappedByMonth = []
-        const totalIncomeObject = { income_type: 'Total Income' }
-        const totalExpensesObject = { expense_type: 'Total Expenses' }
         const rentalIncomeObject = { income_type: 'Rental Income' }
+        const totalIncomeObject = { income_type: 'Total Income' }
+        const totalNetIncomeObject = { income_type: 'Net Income' }
         let totalRentalIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
             //get transactions recorded in the same month and year as monthDate
-            const totalRentalIncome = paymentItems.filter((transaction) => {
-                const transactionDate = parse(transaction.transaction_date, 'yyyy-MM-dd', new Date())
-                return isSameMonth(monthDate, transactionDate)
-            }).reduce((total, currentTransaction) => total + parseFloat(currentTransaction.payment_amount), 0)
+            const totalRentalIncome = paymentItems.filter(({ payment_type }) => payment_type === 'rent')
+                .filter((payment) => {
+                    const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
+                    return isSameMonth(monthDate, paymentDate)
+                }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
             totalRentalIncomeForPeriod += totalRentalIncome
             rentalIncomeObject[format(monthDate, 'MMMM yyyy')] = totalRentalIncome
         })
-        rentalIncomeObject[headCells[headCells.length - 1]] = totalRentalIncomeForPeriod
+        rentalIncomeObject[headCellsForMonths[headCellsForMonths.length - 1]] = totalRentalIncomeForPeriod
         incomeMappedByMonth.push(rentalIncomeObject)
-        const utilityIncomeObject = { income_type: 'Utility Income' }
-        let totalUtilityIncomeForPeriod = 0
+        // calculate income from other sources
+        const otherIncomeObject = { income_type: 'Other Income' }
+        let totalOtherIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
-            //get utility bills recorded in the same month and year
-            //as monthDate
-            const totalUtilityIncome = meterReadingItems.filter((meterReading) => {
-                const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
-                return isSameMonth(monthDate, meterReadingDate)
-            }).reduce((total, currentMeterReading) => {
-                const usage = parseFloat(currentMeterReading.current_value) - parseFloat(currentMeterReading.prior_value)
-                return total + ((usage * parseFloat(currentMeterReading.unit_charge)) + parseFloat(currentMeterReading.base_charge))
-            }, 0)
-            totalUtilityIncomeForPeriod += totalUtilityIncome
-            utilityIncomeObject[format(monthDate, 'MMMM yyyy')] = totalUtilityIncome
+            //get transactions recorded in the same month and year as monthDate
+            const totalOtherIncome = paymentItems.filter(({ payment_type }) => payment_type !== 'rent')
+                .filter((payment) => {
+                    const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
+                    return isSameMonth(monthDate, paymentDate)
+                }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
+            totalOtherIncomeForPeriod += totalOtherIncome
+            otherIncomeObject[format(monthDate, 'MMMM yyyy')] = totalOtherIncome
         })
-        utilityIncomeObject[headCells[headCells.length - 1]] = totalUtilityIncomeForPeriod
-        incomeMappedByMonth.push(utilityIncomeObject)
+        otherIncomeObject[headCellsForMonths[headCellsForMonths.length - 1]] = totalOtherIncomeForPeriod
+        incomeMappedByMonth.push(otherIncomeObject)
+        // get total of all incomes
         incomeMappedByMonth.forEach((incomeObject) => {
-            headCells.forEach((headCell) => {
+            headCellsForMonths.forEach((headCell) => {
                 const incomeAmount = parseFloat(incomeObject[headCell]) || 0
                 totalIncomeObject[headCell] = (parseFloat(totalIncomeObject[headCell]) || 0) + incomeAmount
             })
         })
         incomeMappedByMonth.push(totalIncomeObject)
+        //calucate expenses
+        const expensesMappedByMonth = []
+        const totalExpensesObject = { expense_type: 'Total Expenses' }
         const expenseObjectsInMonth = []
         eachPastMonthDate.forEach((monthDate) => {
             //get expenses recorded in the same month and year
@@ -117,38 +118,36 @@ let PropertyIncomeStatement = ({
                 const expenseObjectByType = expensesMappedByMonth.find((expense) => expense.expense_type === expenseType)
                 if (typeof expenseObjectByType !== 'undefined') {
                     expenseObjectByType[expenseObject.month] = (parseFloat(expenseObjectByType[expenseObject.month]) || 0) + parseFloat(expenseObject.amount)
-                    expenseObjectByType[headCells[headCells.length - 1]] = (parseFloat(expenseObjectByType[headCells[headCells.length - 1]]) || 0) + parseFloat(expenseObject.amount)
+                    expenseObjectByType[headCellsForMonths[headCellsForMonths.length - 1]] = (parseFloat(expenseObjectByType[headCellsForMonths[headCellsForMonths.length - 1]]) || 0) + parseFloat(expenseObject.amount)
                 } else {
                     const totalExpensesByTypeObject = {}
                     totalExpensesByTypeObject['expense_type'] = expenseType
                     totalExpensesByTypeObject[expenseObject.month] = parseFloat(expenseObject.amount) || 0
-                    totalExpensesByTypeObject[headCells[headCells.length - 1]] = parseFloat(expenseObject.amount) || 0
+                    totalExpensesByTypeObject[headCellsForMonths[headCellsForMonths.length - 1]] = parseFloat(expenseObject.amount) || 0
                     expensesMappedByMonth.push(totalExpensesByTypeObject)
                 }
             })
         })
         expensesMappedByMonth.forEach((expenseObject) => {
-            headCells.forEach((headCell) => {
+            headCellsForMonths.forEach((headCell) => {
                 const expenseAmount = parseFloat(expenseObject[headCell]) || 0
                 totalExpensesObject[headCell] = (parseFloat(totalExpensesObject[headCell]) || 0) + expenseAmount
             })
         })
         expensesMappedByMonth.push(totalExpensesObject)
+        // get net income
+        headCellsForMonths.forEach((headCell) => {
+            totalNetIncomeObject[headCell] = (parseFloat(totalIncomeObject[headCell]) || 0) - (parseFloat(totalExpensesObject[headCell]) || 0)
+        })
+        setHeadCells(headCellsForMonths)
+        setNetIncomeObject(totalNetIncomeObject);
         setIncomeStatements(incomeMappedByMonth);
         setExpensesStatements(expensesMappedByMonth);
-    }, [expensesItems, paymentItems, meterReadingItems])
+    }, [expensesItems, paymentItems])
 
     useEffect(() => {
         setExpensesItems(expenses)
     }, [expenses])
-
-    useEffect(() => {
-        setPropertiesItems(properties)
-    }, [properties])
-
-    useEffect(() => {
-        setMeterReadingItems(meterReadings)
-    }, [meterReadings])
 
     useEffect(() => {
         setPaymentItems(transactions)
@@ -157,16 +156,20 @@ let PropertyIncomeStatement = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = paymentItems
-            .filter((transaction_item) =>
-                !propertyFilter ? true : transaction_item.property === propertyFilter)
+        let filteredTransactions = transactions
+            .filter(({ property_id }) => !propertyFilter ? true : property_id === propertyFilter)
         setPaymentItems(filteredTransactions)
+        const filteredExpenses = expenses
+            .filter(({ property_id }) => !propertyFilter ? true : property_id === propertyFilter)
+        setExpensesItems(filteredExpenses)
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
         setPropertyFilter("");
         setFromFilter(1);
+        setExpensesItems(expenses)
+        setPaymentItems(transactions)
     };
 
     return (
@@ -228,7 +231,7 @@ let PropertyIncomeStatement = ({
                                             );
                                         }}
                                     >
-                                        {propertiesItems.map((property, index) => (
+                                        {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}
                                                 value={property.id}
@@ -366,6 +369,34 @@ let PropertyIncomeStatement = ({
                             })
                         }
                     </div>
+                    <div style={{ width: '100%' }}>
+                        <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                            <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                Net Income
+                            </Box>
+                            {
+                                headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        {headCell}
+                                    </Box>
+                                )
+                            }
+                        </Box>
+                        {
+                            <Box display="flex" key={'kjb'} flexDirection="row" p={1} bgcolor="background.paper">
+                                <Box textAlign="left" width={1} key={"iiajl"} flexGrow={1} p={1} >
+                                    Net Income
+                            </Box>
+                                {headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        {currencyFormatter.format(netIncomeObject[headCell] || 0)}
+                                    </Box>
+                                )
+                                }
+                            </Box>
+
+                        }
+                    </div>
                 </Grid>
             </Grid>
         </Layout>
@@ -375,9 +406,7 @@ let PropertyIncomeStatement = ({
 const mapStateToProps = (state, ownProps) => {
     return {
         transactions: state.transactions,
-        meterReadings: state.meterReadings,
         expenses: state.expenses,
-        currentUser: state.currentUser,
         properties: state.properties,
         error: state.error,
         match: ownProps.match,

@@ -217,6 +217,7 @@ let PropertyInputForm = (props) => {
 				};
 				const propertyId = await handleItemSubmit(property, "properties")
 				values.property_units.forEach(async (property_unit) => {
+					console.log("Property Unit => ", property_unit)
 					//assign a default address to each property unit
 					property_unit.address = values.address + ' - ' + property_unit.ref
 					//check if the unit has an image to upload
