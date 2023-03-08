@@ -168,6 +168,7 @@ let RentRollPage = ({
                 payment_type: charge.charge_type,
             };
             await handleItemSubmit(chargePayment, 'charge-payments')
+            await handleItemSubmit({ id: charge.id, payed: true }, 'transactions-charges')
         })
     }
 

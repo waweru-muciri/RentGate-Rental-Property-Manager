@@ -4,7 +4,7 @@ import PageHeading from "../components/PageHeading";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import { handleItemFormSubmit } from '../actions/actions'
-import PaymentInputForm from "../components/transactions/PaymentInputForm";
+import PaymentInputForm from "../components/payments/PaymentInputForm";
 import { withRouter } from "react-router-dom";
 import queryString from 'query-string';
 

@@ -16,7 +16,7 @@ import DashBoard from "./DashBoard";
 import LoadingBackdrop from '../components/LoadingBackdrop'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { auth } from '../firebase'
-const PaymentEditForm = lazy(() => import('../components/transactions/PaymentEditForm'));
+const PaymentEditForm = lazy(() => import('../components/payments/PaymentEditForm'));
 const PropertyUnitPage = lazy(() => import('./PropertyUnitPage'));
 const TenantDetailsPage = lazy(() => import('./TenantDetailsPage'));
 const PropertyPage = lazy(() => import('./PropertyPage'));

@@ -12,7 +12,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleItemFormSubmit, handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -44,6 +44,7 @@ let PaymentsPage = ({
     contacts,
     properties,
     match,
+    handleItemSubmit,
     handleItemDelete,
 }) => {
     const classes = commonStyles();
@@ -117,6 +118,16 @@ let PaymentsPage = ({
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
         setFilteredPaymentsItems(filteredPayments);
+    }
+
+    const handlePaymentDelete = async (paymentId, url) => {
+        const paymentToDelete = paymentsItems.find(({ id }) => id === paymentId) || {}
+        const paymentForSameCharge = paymentsItems
+            .find(({ id, charge_id }) => charge_id === paymentToDelete.charge_id && id !== paymentToDelete.id)
+        if (!paymentForSameCharge) {
+            await handleItemSubmit({ id: paymentToDelete.charge_id, payed: false }, 'transactions-charges')
+        }
+        await handleItemDelete(paymentId, url)
     }
 
     const resetSearchForm = (event) => {
@@ -368,7 +379,7 @@ let PaymentsPage = ({
                         setSelected={setSelected}
                         rows={filteredPaymentsItems}
                         headCells={headCells}
-                        handleDelete={handleItemDelete}
+                        handleDelete={handlePaymentDelete}
                         deleteUrl={"charge-payments"}
                     />
                 </Grid>
@@ -400,7 +411,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),        
     };
 };
 

@@ -48,10 +48,10 @@ let PropertySettingsInputForm = (props) => {
 		grace_period: propertySettings.grace_period || 0,
 		late_fee_frequency: propertySettings.late_fee_frequency || "one_time_fee",
 		late_fee_amount: propertySettings.late_fee_amount || "",
-		email_residents_on_charges_posted: propertySettings.email_residents_on_charges_posted || true,
-		late_fee_policy_status: propertySettings.late_fee_policy_status || false,
-		automatically_end_agreement_on_move_out_date: propertySettings.automatically_end_agreement_on_move_out_date || true,
-		email_residents_on_late_fees: propertySettings.email_residents_on_late_fees || true,
+		email_residents_on_charges_posted: propertySettings.email_residents_on_charges_posted || false,
+		late_fees_charges_activated: propertySettings.late_fees_charges_activated || false,
+		automatically_end_agreement_on_move_out_date: propertySettings.automatically_end_agreement_on_move_out_date || false,
+		email_residents_on_late_fees: propertySettings.email_residents_on_late_fees || false,
 		management_fee_type: propertySettings.management_fee_type || 'flat_fee',
 		management_fee_income_percentage: propertySettings.management_fee_income_percentage || '',
 		management_fee_flat_fee: propertySettings.management_fee_flat_fee || '',
@@ -70,7 +70,7 @@ let PropertySettingsInputForm = (props) => {
 						late_fee_max_amount: values.late_fee_max_amount,
 						grace_period: values.grace_period,
 						late_fee_frequency: values.late_fee_frequency,
-						late_fee_policy_status: values.late_fee_policy_status,
+						late_fees_charges_activated: values.late_fees_charges_activated,
 						email_residents_on_late_fees: values.email_residents_on_late_fees,
 						late_fee_amount: values.late_fee_amount,
 						management_fee_type: values.management_fee_type,
@@ -119,13 +119,13 @@ let PropertySettingsInputForm = (props) => {
 									<Typography variant="subtitle1">Late Rent Payments Fee Policy</Typography>
 								</Grid>
 								<Grid item>
-									<FormControl error={errors.late_fee_policy_status && touched.late_fee_policy_status}>
+									<FormControl error={errors.late_fees_charges_activated && touched.late_fees_charges_activated}>
 										<FormControlLabel
 											control={<Switch
-												checked={values.late_fee_policy_status}
+												checked={values.late_fees_charges_activated}
 												onChange={handleChange}
 												color="primary"
-												name="late_fee_policy_status"
+												name="late_fees_charges_activated"
 												inputProps={{ 'aria-label': 'Late fees checkbox' }}
 											/>}
 											label="Automatic Late Fees"

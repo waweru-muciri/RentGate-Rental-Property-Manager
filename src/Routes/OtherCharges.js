@@ -161,7 +161,7 @@ let TenantChargesStatementPage = ({
         await handleItemDelete(chargeId, url)
     }
 
-    const setChargesPaidInFull = () => {
+    const setChargesPaidInFull = async () => {
         const chargesToAddPayments = transactionsCharges.filter(({ id }) => selected.includes(id))
             .filter(({ payed_status }) => payed_status === false)
         //post the charges here to show that they are payed
@@ -178,6 +178,7 @@ let TenantChargesStatementPage = ({
                 payment_type: charge.charge_type,
             };
             await handleItemSubmit(chargePayment, 'charge-payments')
+            await handleItemSubmit({ id: charge.id, payed: true }, 'transactions-charges')
         })
     }
 

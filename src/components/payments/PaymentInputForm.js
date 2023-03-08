@@ -7,7 +7,7 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
-import { commonStyles } from "../../components/commonStyles";
+import { commonStyles } from "../commonStyles";
 import * as Yup from "yup";
 import { withRouter } from "react-router-dom";
 import { format, startOfToday } from "date-fns";
@@ -71,6 +71,7 @@ let PaymentInputForm = (props) => {
 						chargePayment.security_deposit_charge_id = values.tenantLease.id
 					}
 					await handleItemSubmit(chargePayment, 'charge-payments')
+					await handleItemSubmit({ id: values.charge_id, payed: true }, 'transactions-charges')
 					resetForm({});
 					history.goBack()
 					setStatus({ sent: true, msg: "Details saved successfully!" })
