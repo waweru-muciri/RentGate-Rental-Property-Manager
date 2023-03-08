@@ -26,8 +26,7 @@ import {
 } from "../../assets/commonAssets.js";
 import ImageCropper from '../ImageCropper';
 import * as Yup from "yup";
-import LoadingBackdrop from "../LoadingBackdrop";
-
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -155,7 +154,7 @@ let ContactInputForm = (props) => {
 								)
 							}
 							{
-								isSubmitting && (<LoadingBackdrop open={true}/>)
+								isSubmitting && (<CustomCircularProgress open={true}/>)
 							}
 							<Grid container spacing={4} direction="row">
 								<Grid
@@ -514,7 +513,7 @@ let ContactInputForm = (props) => {
 										disabled={isSubmitting}
 									>
 										Save
-										</Button>
+									</Button>
 								</Grid>
 							</Grid >
 						</Grid >

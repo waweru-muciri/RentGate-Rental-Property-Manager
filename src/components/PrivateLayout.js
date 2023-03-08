@@ -13,7 +13,7 @@ const Layout = (props) => {
 			<CssBaseline />
 			<Head title={props.pageTitle} />
 			<Container>
-				<AppNav classes={classes} pageTitle={"Yarra Property Management"}/>
+				<AppNav classes={classes} pageTitle={"RentGate Property Management"}/>
 				<Paper className={classes.rootPaper}>{props.children}</Paper>
 			</Container>
 		</React.Fragment>

@@ -27,6 +27,7 @@ const firebaseStorageRef = firebaseStorage.ref();
 const setAdminCustomClaim = firebaseFunctions.httpsCallable('setAdminCustomClaim');
 export const setDatabaseRefCustomClaim = firebaseFunctions.httpsCallable('setDatabaseRefCustomClaim');
 export const createFirebaseUser = firebaseFunctions.httpsCallable('createFirebaseUser');
+export const adminCreateFirebaseUser = firebaseFunctions.httpsCallable('adminCreateFirebaseUser');
 export const updateFirebaseUser = firebaseFunctions.httpsCallable('updateFirebaseUser');
 export const deleteFirebaseUsers = firebaseFunctions.httpsCallable('deleteFirebaseUsers');
 export const sendInvoice = firebaseFunctions.httpsCallable('sendInvoice');
@@ -39,7 +40,7 @@ export function setCurrentUser(user) {
 }
 
 const firebaseGetOptions = {
-    source: 'cache'
+    source: 'default'
 };
 
 export const firebaseSignOutUser = () => {
@@ -79,7 +80,7 @@ export const getFirebaseUserDetails = async (userToken) => {
 }
 
 export const resetUserPasswordByEmail = async (email) => {
-    return await auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/account-actions/' })
+    return await auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://rentgatepm.com/account-actions/' })
 }
 
 export const signUpWithEmailAndPassword = async (userDetails) => {
@@ -118,10 +119,10 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
 
 }
 
-export async function sendEmails(subject, email, recipients) {
+export async function sendEmails(from_user, subject, email, recipients) {
     var sendEmail = firebaseFunctions.httpsCallable('sendEmail');
     try {
-        await sendEmail({ subject: subject, email: email, recipients: recipients })
+        await sendEmail({ replyTo: from_user, subject: subject, email: email, recipients: recipients })
         // Read result of the Cloud Function.
     } catch (error) {
         //getting the error details

@@ -13,6 +13,7 @@ import { Formik } from "formik";
 import { getPaymentOptions } from "../../assets/commonAssets.js";
 import { commonStyles } from "../commonStyles.js";
 import { DialogTitle } from "@material-ui/core";
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const RENT_CYCLES = getPaymentOptions();
 const CHARGE_TYPES = [
@@ -32,10 +33,6 @@ export default function FormDialog(props) {
     const classes = commonStyles();
     const { open, handleClose, handleItemSubmit, chargeValues } = props
 
-    if (!chargeValues.frequency) {
-        chargeValues.frequency = ''
-    }
-
     return (
         <Dialog
             fullWidth
@@ -49,10 +46,11 @@ export default function FormDialog(props) {
                 <Formik
                     initialValues={chargeValues}
                     validationSchema={UnitChargeSchema}
-                    onSubmit={(values, { resetForm, setStatus }) => {
+                    onSubmit={async (values, { resetForm, setStatus }) => {
                         try {
                             let unitChargeToSave = {
                                 id: values.id,
+                                property_id: values.property_id,
                                 unit_id: values.unit_id,
                                 charge_label: values.charge_label,
                                 type: values.type,
@@ -60,9 +58,10 @@ export default function FormDialog(props) {
                                 due_date: values.due_date,
                                 frequency: values.frequency,
                             };
-                            handleItemSubmit(unitChargeToSave)
-                            resetForm({});
-                            setStatus({ sent: true, msg: "Charge added to agreement!" })
+                            //save the unit charge with unit and property details
+                            await handleItemSubmit(unitChargeToSave, 'unit-charges')
+                            resetForm({ type: values.type });
+                            setStatus({ sent: true, msg: "Unit charge saved successfully" })
                             if (values.id) {
                                 handleClose()
                             }
@@ -98,6 +97,9 @@ export default function FormDialog(props) {
                                             message={status.msg}
                                         />
                                     )
+                                }
+                                {
+                                    isSubmitting && (<CustomCircularProgress open={true} />)
                                 }
                                 <Grid container item direction="column" spacing={2}>
                                     <Grid item xs={12} md>

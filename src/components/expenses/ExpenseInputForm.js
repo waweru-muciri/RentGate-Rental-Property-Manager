@@ -11,8 +11,10 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { getExpensesCategories } from "../../assets/commonAssets";
 import { format, startOfToday } from "date-fns";
-const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
+import CustomCircularProgress from "../CustomCircularProgress";
+
 const EXPENSE_CATEGORIES = getExpensesCategories();
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const PropertyExpenseSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
@@ -95,6 +97,9 @@ const ExpenseInputForm = (props) => {
                   message={status.msg}
                 />
               )
+            }
+            {
+              isSubmitting && (<CustomCircularProgress open={true} />)
             }
             <Grid item container direction="row" spacing={2}>
               <Grid item sm={6}>

@@ -19,6 +19,7 @@ import {
 	handleItemFormSubmit,
 } from "../../actions/actions";
 import { withRouter } from "react-router-dom";
+import CustomCircularProgress from "../CustomCircularProgress";
 import * as Yup from "yup";
 
 
@@ -112,6 +113,9 @@ let PropertySettingsInputForm = (props) => {
 									message={status.msg}
 								/>
 							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
 						}
 						<Grid item container spacing={4} direction="row">
 							<Grid container item xs spacing={2} direction="column">

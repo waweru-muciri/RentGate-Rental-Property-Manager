@@ -70,10 +70,10 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 	};
 
 	return (
-		<Layout pageTitle={"Account Details"}>
+		<Layout pageTitle={"Admin Account Details"}>
 			<AppBar position="static">
 				<Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
-					<Tab label="Account Details" />
+					<Tab label="Account Profile" />
 					<Tab label="Company Details" />
 					<Tab label="Billing &amp; Payments" />
 				</Tabs>

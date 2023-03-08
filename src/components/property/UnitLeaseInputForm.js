@@ -18,16 +18,18 @@ import {
 import * as Yup from "yup";
 import { addMonths, format, startOfMonth, startOfToday } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
 
 const recurringChargesTableHeadCells = [
-	{ id: "account", numeric: false, disablePadding: true, label: "Charge Name" },
+	{ id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name" },
 	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
 	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
 	{ id: "frequency", numeric: false, disablePadding: true, label: "Frequency" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ]
 
@@ -38,6 +40,7 @@ const UnitLeaseSchema = Yup.object().shape({
 	start_date: Yup.date().required('Start Date is Required'),
 	rent_amount: Yup.number().typeError('Rent Amount must be number').positive("Amount must be a positive number").required('Rent Amount is Required'),
 	security_deposit: Yup.number().typeError('Security Deposit must be number').positive("Amount must be a positive number"),
+	water_deposit: Yup.number().typeError('Water Deposit must be number').positive("Amount must be a positive number"),
 	property_id: Yup.string().trim().required('Property is Required'),
 	unit_id: Yup.string().trim().required('Unit is Required'),
 	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
@@ -63,6 +66,7 @@ let UnitLeaseInputForm = (props) => {
 		rent_amount: leaseToEdit.rent_amount || '',
 		terminated: leaseToEdit.terminated || false,
 		security_deposit: leaseToEdit.security_deposit || '',
+		water_deposit: leaseToEdit.water_deposit || '',
 		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
 		unit_charges: leaseUnitCharges
@@ -70,10 +74,11 @@ let UnitLeaseInputForm = (props) => {
 
 	const defaultChargeValues = {
 		unit_id: leaseToEdit.unit_id,
+		property_id: leaseToEdit.property_id,
 		frequency: '',
 		amount: '',
 		due_date: defaultDate,
-		account: '',
+		charge_label: '',
 		type: 'one_time_charge',
 	}
 
@@ -103,37 +108,30 @@ let UnitLeaseInputForm = (props) => {
 						end_date: values.end_date,
 						rent_due_date: values.rent_due_date,
 						security_deposit: values.security_deposit,
+						water_deposit: values.water_deposit,
 						security_deposit_due_date: values.security_deposit_due_date,
 						rent_amount: values.rent_amount,
 						terminated: values.terminated
 					};
-					const savedLeaseId = await handleItemSubmit(propertyUnitLease, "leases")
-					//save all unit charges relating to this lease
-					const unitChargesToSave = [...values.unit_charges]
-					unitChargesToSave.forEach(async unitCharge => {
-						const chargeWithLeaseId = Object.assign({}, unitCharge,
-							{
-								lease_id: savedLeaseId, tenant_id: values.tenants.map(tenant => tenant.id),
-								property_id: values.property_id, unit_id: values.unit_id,
-							})
-						await handleItemSubmit(chargeWithLeaseId, 'unit-charges')
-					})
+					await handleItemSubmit(propertyUnitLease, "leases")
 					if (!values.id) {
 						//post charges for rent and  security deposit 
 						const tenant = values.tenants[0]
 						const newRentCharge = {
+							payed: false,
 							charge_amount: values.rent_amount,
-							charge_date: defaultDate,
+							charge_date: values.start_date,
 							charge_label: "Rent",
 							charge_type: "rent",
-							due_date: defaultDate,
+							due_date: values.start_date,
 							tenant_id: tenant.id,
 							unit_id: values.unit_id,
 							property_id: values.property_id,
 						}
 						const newSecurityDepositCharge = {
+							payed: false,
 							charge_amount: values.security_deposit,
-							charge_date: defaultDate,
+							charge_date: values.start_date,
 							charge_label: "Security Deposit",
 							charge_type: "security_deposit",
 							due_date: values.security_deposit_due_date,
@@ -141,7 +139,19 @@ let UnitLeaseInputForm = (props) => {
 							unit_id: values.unit_id,
 							property_id: values.property_id,
 						}
+						const newWaterDepositCharge = {
+							payed: false,
+							charge_amount: values.water_deposit,
+							charge_date: values.start_date,
+							charge_label: "Water Deposit",
+							charge_type: "water_deposit",
+							due_date: values.security_deposit_due_date,
+							tenant_id: tenant.id,
+							unit_id: values.unit_id,
+							property_id: values.property_id,
+						}
 						await handleItemSubmit(newRentCharge, 'transactions-charges')
+						await handleItemSubmit(newWaterDepositCharge, 'transactions-charges')
 						await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 					}
 					resetForm({});
@@ -179,6 +189,9 @@ let UnitLeaseInputForm = (props) => {
 									message={status.msg}
 								/>
 							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
 						}
 						<Grid container spacing={4} direction="row" alignItems="flex-start">
 							<Grid item container md={6} direction="column" spacing={2}>
@@ -268,66 +281,84 @@ let UnitLeaseInputForm = (props) => {
 										Agreement Start &amp; End Dates
 									</Typography>
 								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										fullWidth
-										variant="outlined"
-										label="Start Date"
-										error={'start_date' in errors}
-										helperText={errors.start_date}
-										id="start_date"
-										type="date"
-										name="start_date"
-										value={values.start_date}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										fullWidth
-										variant="outlined"
-										id="end_date"
-										type="date"
-										name="end_date"
-										label="End Date"
-										value={values.end_date}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
-										error={errors.end_date && touched.end_date}
-										helperText={touched.end_date && errors.end_date}
-									/>
+								<Grid item container direction="row" justify="center" spacing={2}>
+									<Grid item xs={12} md={6}>
+										<TextField
+											fullWidth
+											variant="outlined"
+											label="Start Date"
+											error={'start_date' in errors}
+											helperText={errors.start_date}
+											id="start_date"
+											type="date"
+											name="start_date"
+											value={values.start_date}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											InputLabelProps={{ shrink: true }}
+										/>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="end_date"
+											type="date"
+											name="end_date"
+											label="End Date"
+											value={values.end_date}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											InputLabelProps={{ shrink: true }}
+											error={errors.end_date && touched.end_date}
+											helperText={touched.end_date && errors.end_date}
+										/>
+									</Grid>
 								</Grid>
 								<Grid item>
 									<Typography variant="subtitle1" >
 										Rent
 								</Typography>
 								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										fullWidth
-										variant="outlined"
-										select
-										name="rent_cycle"
-										label="Rent Cycle"
-										id="rent_cycle"
-										onBlur={handleBlur}
-										onChange={handleChange}
-										value={values.rent_cycle}
-										error={errors.rent_cycle && touched.rent_cycle}
-										helperText={"Frequency at which rent is charged on unit"}
-									>
-										{RENT_CYCLES.map((rent_cycle, index) => (
-											<MenuItem key={index} value={rent_cycle}>
-												{rent_cycle}
-											</MenuItem>
-										))}
-									</TextField>
+								<Grid item container direction="row" justify="center" spacing={2}>
+									<Grid item xs={12} md={6}>
+										<TextField
+											fullWidth
+											variant="outlined"
+											select
+											name="rent_cycle"
+											label="Rent Cycle"
+											id="rent_cycle"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.rent_cycle}
+											error={errors.rent_cycle && touched.rent_cycle}
+											helperText={"Frequency at which rent is charged on unit"}
+										>
+											{RENT_CYCLES.map((rent_cycle, index) => (
+												<MenuItem key={index} value={rent_cycle}>
+													{rent_cycle}
+												</MenuItem>
+											))}
+										</TextField>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="rent_due_date"
+											type="date"
+											name="rent_due_date"
+											label="Rent Next Due Date"
+											value={values.rent_due_date}
+											error={errors.rent_due_date && touched.rent_due_date}
+											helperText={"Next date when the rent is due"}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											InputLabelProps={{ shrink: true }}
+										/>
+									</Grid>
 								</Grid>
-							</Grid>
-							<Grid item container md={6} direction="column" justify="center" spacing={2}>
 								<Grid item xs={12}>
 									<TextField
 										fullWidth
@@ -343,22 +374,8 @@ let UnitLeaseInputForm = (props) => {
 										helperText={touched.rent_amount && errors.rent_amount}
 									/>
 								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										fullWidth
-										variant="outlined"
-										id="rent_due_date"
-										type="date"
-										name="rent_due_date"
-										label="Rent Next Due Date"
-										value={values.rent_due_date}
-										error={errors.rent_due_date && touched.rent_due_date}
-										helperText={"Next date when the rent is due"}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
-									/>
-								</Grid>
+							</Grid>
+							<Grid item container md={6} direction="column" justify="center" spacing={2}>
 								<Grid item>
 									<Typography variant="subtitle1" paragraph>
 										Security Deposit
@@ -372,6 +389,7 @@ let UnitLeaseInputForm = (props) => {
 										type="date"
 										name="security_deposit_due_date"
 										label="Due Date"
+										helperText="Date when the security deposit is due."
 										value={values.security_deposit_due_date}
 										onChange={handleChange}
 										onBlur={handleBlur}
@@ -383,7 +401,7 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										id="security_deposit"
-										label="Security Deposit"
+										label="Security Deposit Amount"
 										name="security_deposit"
 										value={values.security_deposit}
 										onChange={handleChange}
@@ -393,7 +411,28 @@ let UnitLeaseInputForm = (props) => {
 									/>
 								</Grid>
 								<Grid item>
-									<Typography variant='body1' color="textSecondary">Don't forget to record the payment once you have collected the deposit.</Typography>
+									<Typography variant="subtitle1" paragraph>
+										Water Deposit
+									</Typography>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										fullWidth
+										variant="outlined"
+										id="water_deposit"
+										label="Water Deposit Amount"
+										name="water_deposit"
+										value={values.water_deposit}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.water_deposit && touched.water_deposit}
+										helperText={touched.water_deposit && errors.water_deposit}
+									/>
+								</Grid>
+								<Grid item>
+									<Typography variant='body1' color="textSecondary">
+										Don't forget to record the payments once you have collected the deposits.
+									</Typography>
 								</Grid>
 								<Grid item>
 									<Typography variant="subtitle1" >
@@ -487,9 +526,7 @@ let UnitLeaseInputForm = (props) => {
 								{
 									modalOpenState ? <ChargeInputModal open={modalOpenState}
 										handleClose={handleModalStateToggle} history={history}
-										handleItemSubmit={(submittedUnitCharge) => {
-											setFieldValue("unit_charges", [...values.unit_charges, submittedUnitCharge])
-										}}
+										handleItemSubmit={handleItemSubmit}
 										chargeValues={chargeToEdit} /> : null
 								}
 							</Grid>

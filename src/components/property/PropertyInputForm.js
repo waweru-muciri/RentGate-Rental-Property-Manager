@@ -10,6 +10,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
 import Box from "@material-ui/core/Box";
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import CustomCircularProgress from "../CustomCircularProgress";
 import CustomSnackbar from '../CustomSnackbar'
 import { connect } from "react-redux";
 import { Formik, FieldArray } from "formik";
@@ -233,8 +234,15 @@ let PropertyInputForm = (props) => {
 						property.property_image_url = fileDownloadUrl;
 					}
 					const propertyId = await handleItemSubmit(property, "properties")
+					//create some property settings if first time property being created
 					if (!values.id) {
-						await handleItemSubmit({ property_id: propertyId }, "property-settings")
+						await handleItemSubmit(
+							{
+								property_id: propertyId, grace_period: 0, late_fees_charges_activated: false,
+								automatically_end_agreement_on_move_out_date: true, management_fee_type: "flat_fee",
+								management_fee_flat_fee: 0
+							},
+							"property-settings")
 					}
 					values.property_units.forEach(async (property_unit) => {
 						//check if the unit has an image to upload
@@ -288,6 +296,9 @@ let PropertyInputForm = (props) => {
 									message={status.msg}
 								/>
 							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
 						}
 						<Grid item>
 							<TextField

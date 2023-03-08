@@ -15,6 +15,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import CustomCircularProgress from "../CustomCircularProgress";
 import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
@@ -85,182 +86,185 @@ let ToDoInputForm = (props) => {
 				handleSubmit,
 				isSubmitting,
 			}) => (
-					<Dialog
-						open={open}
-						onClose={handleClose}
-						aria-labelledby="form-dialog-title"
+				<Dialog
+					open={open}
+					onClose={handleClose}
+					aria-labelledby="form-dialog-title"
+				>
+					{
+						status && status.msg && (
+							<CustomSnackbar
+								variant={status.sent ? "success" : "error"}
+								message={status.msg}
+							/>
+						)
+					}
+					{
+						isSubmitting && (<CustomCircularProgress open={true} />)
+					}
+					<DialogTitle id="form-dialog-title">
+						{pageTitle}
+					</DialogTitle>
+					<form
+						className={styles.form}
+						method="post"
+						id="todoInputForm"
+						onSubmit={handleSubmit}
 					>
-						{
-							status && status.msg && (
-								<CustomSnackbar
-									variant={status.sent ? "success" : "error"}
-									message={status.msg}
-								/>
-							)
-						}
-						<DialogTitle id="form-dialog-title">
-							{pageTitle}
-						</DialogTitle>
-						<form
-							className={styles.form}
-							method="post"
-							id="todoInputForm"
-							onSubmit={handleSubmit}
+						<TextField
+							fullWidth
+							variant="outlined"
+							name="title"
+							label="Title"
+							id="title"
+							onBlur={handleBlur}
+							onChange={handleChange}
+							value={values.title || ""}
+							error={errors.title && touched.title}
+							helperText={touched.title && errors.title}
+						/>
+						<TextField
+							fullWidth
+							variant="outlined"
+							id="start"
+							name="start"
+							label="Start Date"
+							type="date"
+							value={values.start || ""}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={errors.start && touched.start}
+							helperText={touched.start && errors.start}
+							InputLabelProps={{ shrink: true }}
+						/>
+						<TextField
+							fullWidth
+							variant="outlined"
+							id="end"
+							name="end"
+							label="End Date"
+							type="date"
+							value={values.end || ""}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={errors.end && touched.end}
+							helperText={touched.end && errors.end}
+							InputLabelProps={{ shrink: true }}
+						/>
+						<TextField
+							fullWidth
+							select
+							error={errors.assigned_to && touched.assigned_to}
+							helperText={
+								touched.assigned_to && errors.assigned_to
+							}
+							variant="outlined"
+							type="text"
+							name="assigned_to"
+							id="assigned_to"
+							label="Assigned To"
+							value={values.assigned_to || ""}
+							onChange={handleChange}
+							onBlur={handleBlur}
 						>
-							<TextField
-								fullWidth
-								variant="outlined"
-								name="title"
-								label="Title"
-								id="title"
-								onBlur={handleBlur}
-								onChange={handleChange}
-								value={values.title || ""}
-								error={errors.title && touched.title}
-								helperText={touched.title && errors.title}
-							/>
-							<TextField
-								fullWidth
-								variant="outlined"
-								id="start"
-								name="start"
-								label="Start Date"
-								type="date"
-								value={values.start || ""}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								error={errors.start && touched.start}
-								helperText={touched.start && errors.start}
-								InputLabelProps={{ shrink: true }}
-							/>
-							<TextField
-								fullWidth
-								variant="outlined"
-								id="end"
-								name="end"
-								label="End Date"
-								type="date"
-								value={values.end || ""}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								error={errors.end && touched.end}
-								helperText={touched.end && errors.end}
-								InputLabelProps={{ shrink: true }}
-							/>
-							<TextField
-								fullWidth
-								select
-								error={errors.assigned_to && touched.assigned_to}
-								helperText={
-									touched.assigned_to && errors.assigned_to
-								}
-								variant="outlined"
-								type="text"
-								name="assigned_to"
-								id="assigned_to"
-								label="Assigned To"
-								value={values.assigned_to || ""}
-								onChange={handleChange}
-								onBlur={handleBlur}
-							>
-								{users.map((user, index) => (
-									<MenuItem key={index} value={user.id}>
-										{user.first_name + " " + user.last_name}
-									</MenuItem>
-								))}
-							</TextField>
-							<TextField
-								fullWidth
-								type="date"
-								variant="outlined"
-								id="reminder_date"
-								name="reminder_date"
-								label="Reminder Date"
-								value={values.reminder_date || ""}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								error={
-									errors.reminder_date && touched.reminder_date
-								}
-								helperText={
-									touched.reminder_date && errors.reminder_date
-								}
-								InputLabelProps={{ shrink: true }}
-							/>
-							<TextField
-								fullWidth
-								variant="outlined"
-								id="description"
-								name="description"
-								label="Description"
-								value={values.description || ""}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								error={errors.description && touched.description}
-								helperText={
-									touched.description && errors.description
-								}
-							/>
-							<FormControl fullWidth component="fieldset">
-								<FormLabel component="legend">
-									Complete Status
+							{users.map((user, index) => (
+								<MenuItem key={index} value={user.id}>
+									{user.first_name + " " + user.last_name}
+								</MenuItem>
+							))}
+						</TextField>
+						<TextField
+							fullWidth
+							type="date"
+							variant="outlined"
+							id="reminder_date"
+							name="reminder_date"
+							label="Reminder Date"
+							value={values.reminder_date || ""}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={
+								errors.reminder_date && touched.reminder_date
+							}
+							helperText={
+								touched.reminder_date && errors.reminder_date
+							}
+							InputLabelProps={{ shrink: true }}
+						/>
+						<TextField
+							fullWidth
+							variant="outlined"
+							id="description"
+							name="description"
+							label="Description"
+							value={values.description || ""}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={errors.description && touched.description}
+							helperText={
+								touched.description && errors.description
+							}
+						/>
+						<FormControl fullWidth component="fieldset">
+							<FormLabel component="legend">
+								Complete Status
 							</FormLabel>
-								<RadioGroup
-									row
-									aria-label="Completed Status"
-									name="complete_status"
-									value={values.complete_status || "false"}
-									onChange={handleChange}
-								>
-									<FormControlLabel
-										value={"true"}
-										control={<Radio />}
-										label="Complete"
-									/>
-									<FormControlLabel
-										value={"false"}
-										control={<Radio />}
-										label="Incomplete"
-									/>
-								</RadioGroup>
-							</FormControl>
-							<DialogActions>
-								<Button
-									color="primary"
-									size="medium"
-									startIcon={<CancelIcon />}
-									onClick={() => handleClose()}
-									disableElevation
-								>
-									Cancel
+							<RadioGroup
+								row
+								aria-label="Completed Status"
+								name="complete_status"
+								value={values.complete_status || "false"}
+								onChange={handleChange}
+							>
+								<FormControlLabel
+									value={"true"}
+									control={<Radio />}
+									label="Complete"
+								/>
+								<FormControlLabel
+									value={"false"}
+									control={<Radio />}
+									label="Incomplete"
+								/>
+							</RadioGroup>
+						</FormControl>
+						<DialogActions>
+							<Button
+								color="primary"
+								size="medium"
+								startIcon={<CancelIcon />}
+								onClick={() => handleClose()}
+								disableElevation
+							>
+								Cancel
 							</Button>
-								<Button
-									type="submit"
-									color="primary"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="todoInputForm"
-									disabled={isSubmitting}
-								>
-									Save
+							<Button
+								type="submit"
+								color="primary"
+								size="medium"
+								startIcon={<SaveIcon />}
+								form="todoInputForm"
+								disabled={isSubmitting}
+							>
+								Save
 							</Button>
-								<Button
-									color="primary"
-									size="medium"
-									startIcon={<DeleteIcon />}
-									disabled={!values.id}
-									onClick={() => {
-										handleItemDelete(currentUser.tenant, values.id, "to-dos");
-										handleClose();
-									}}
-									disableElevation
-								>
-									Delete
+							<Button
+								color="primary"
+								size="medium"
+								startIcon={<DeleteIcon />}
+								disabled={!values.id}
+								onClick={() => {
+									handleItemDelete(currentUser.tenant, values.id, "to-dos");
+									handleClose();
+								}}
+								disableElevation
+							>
+								Delete
 							</Button>
-							</DialogActions>
-						</form>
-					</Dialog>
-				)}
+						</DialogActions>
+					</form>
+				</Dialog>
+			)}
 		</Formik>
 	);
 };

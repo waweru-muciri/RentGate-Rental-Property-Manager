@@ -21,6 +21,7 @@ import {
 	getPropertyBaths,
 } from "../../assets/commonAssets.js";
 import ImageCropper from '../ImageCropper';
+import CustomCircularProgress from "../CustomCircularProgress";
 import * as Yup from "yup";
 
 const UNIT_TYPES = getUnitTypes();
@@ -119,6 +120,9 @@ let PropertyUnitInputForm = (props) => {
 									message={status.msg}
 								/>
 							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
 						}
 						<Grid container item spacing={2} direction="column">
 							<Grid item>

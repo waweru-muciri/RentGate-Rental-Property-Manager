@@ -87,7 +87,7 @@ let DashBoardPage = (props) => {
 
   const totalProperties = propertyUnits.length;
   //get the number of the different units by category
-  const bedSitterUnits = propertyUnits.filter((property) => property.unit_type === 'Bedsitter').length;
+  const bedSitterUnits = propertyUnits.filter((property) => property.unit_type === 'Bed Sitter').length;
   const oneBedUnits = propertyUnits.filter((property) => property.unit_type === 'One Bedroom').length;
   const twoBedUnits = propertyUnits.filter((property) => property.unit_type === 'Two Bedroom').length;
   const singleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Single Room').length;

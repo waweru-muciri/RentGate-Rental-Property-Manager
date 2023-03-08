@@ -15,6 +15,8 @@ import { sendEmails } from "../../actions/actions";
 import ReactQuill from 'react-quill'; // ES6
 import 'react-quill/dist/quill.snow.css'; // ES6
 import * as Yup from "yup";
+import CustomCircularProgress from "../CustomCircularProgress";
+
 
 const EmailSchema = Yup.object().shape({
   from_user: Yup.string().required("From User is required"),
@@ -29,7 +31,7 @@ const quillEditorModules = {
     ['bold', 'italic', 'underline', 'strike', 'blockquote'],
     [{ 'list': 'ordered' }, { 'list': 'bullet' },
     { 'indent': '-1' }, { 'indent': '+1' }],
-    ['link', 'image', 'video'],
+    ['link'],
     ['clean']
   ],
   clipboard: {
@@ -67,6 +69,7 @@ export default function HorizontalLinearStepper(props) {
   }
   //for the transfer list below
   const [emailValues, setEmailValues] = React.useState(defaultEmailValues);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   const steps = getSteps();
 
@@ -94,18 +97,23 @@ export default function HorizontalLinearStepper(props) {
 
   const handleSendEmailSubmit = async (emailsArray) => {
     //send the emails here
-    await sendEmails(emailValues.email_subject, emailValues.email_message, emailsArray)
+    setIsSaving(true)
+    await sendEmails(emailValues.from_user, emailValues.email_subject, emailValues.email_message, emailsArray)
     const emailObjectToSave = {
       email_subject: emailValues.email_subject,
       from_user: emailValues.from_user,
       date_sent: new Date().toDateString(),
     }
     await handleItemSubmit(emailObjectToSave, "communication_emails")
+    setIsSaving(false)
     handleNext()
   }
 
   return (
     <div className={classes.fullHeightWidthContainer}>
+      {
+        isSaving && (<CustomCircularProgress dialogTitle="Sending email..." open={true} />)
+      }
       <Stepper activeStep={activeStep}>
         {steps.map((label, index) => {
           return (

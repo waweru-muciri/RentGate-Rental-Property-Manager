@@ -13,12 +13,13 @@ import { commonStyles } from "../commonStyles";
 import IconButton from "@material-ui/core/IconButton";
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import CustomSnackbar from '../CustomSnackbar'
+import CustomCircularProgress from "../CustomCircularProgress";
 import {
 	getContactTitles,
 	getGendersList,
 } from "../../assets/commonAssets.js";
 import {
-	createFirebaseUser,
+	adminCreateFirebaseUser,
 	setDatabaseRefCustomClaim,
 	uploadFilesToFirebase,
 	deleteUploadedFileByUrl,
@@ -104,32 +105,31 @@ let UserInputForm = (props) => {
 						var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
 						user.user_avatar_url = fileDownloadUrl;
 					}
-					//create new user who can log in
-					try {
-						if (values.id) {
-							//this means we should update the user
-							await updateFirebaseUser({
-								uid: values.id,
-								userProfile: {
-									email: values.primary_email,
-									password: values.password, phoneNumber: values.phone_number
-								}
-							})
-						} else {
-							//create new user and store profile info
-							const returnData = await createFirebaseUser({
+					//edit user if already present else create new user who can actually log in
+					//if an error occurs just terminate without saving any user details in the database
+					if (values.id) {
+						//this means we should update the user
+						await updateFirebaseUser({
+							uid: values.id,
+							userProfile: {
 								email: values.primary_email,
-								password: values.password, phoneNumber: values.phone_number
-							})
-							const newUserData = returnData.data
-							//asign new user uid to user profile
-							Object.assign(user, { id: newUserData.uid })
-							if (newUserData) {
-								await setDatabaseRefCustomClaim({ userId: newUserData.uid })
+								password: values.password
 							}
+						})
+					} else {
+						//create new user and store profile info
+						const returnData = await adminCreateFirebaseUser({
+							email: values.primary_email,
+							password: values.password,
+						})
+						const newUserData = returnData.data
+						//asign new user uid to user profile
+						Object.assign(user, { id: newUserData.uid })
+						if (newUserData) {
+							//set the admin user's database ref to new user's custom claims
+							//this is not an admin user however so no setting of admin privileges
+							await setDatabaseRefCustomClaim({ userId: newUserData.uid })
 						}
-					} catch (error) {
-						console.log("Error while creating user => ", error)
 					}
 					//store the user's profile in the db
 					await handleItemSubmit(user, "users")
@@ -137,9 +137,11 @@ let UserInputForm = (props) => {
 					if (values.id) {
 						history.goBack();
 					}
+					// show that everything is successfully done
 					setStatus({ sent: true, msg: "Details saved successfully!" })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
+					console.log("Error while saving user => ", error)
 				}
 			}}
 		>
@@ -154,304 +156,307 @@ let UserInputForm = (props) => {
 				isSubmitting,
 				setFieldValue,
 			}) => (
-					<form
-						className={classes.form}
-						method="post"
-						noValidate
-						id="userInputForm"
-						onSubmit={handleSubmit}
+				<form
+					className={classes.form}
+					method="post"
+					noValidate
+					id="userInputForm"
+					onSubmit={handleSubmit}
+				>
+					<Grid
+						container
+						spacing={4}
+						justify="center"
+						alignItems="center"
+						direction="column"
 					>
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
+								/>
+							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
+						}
 						<Grid
-							container
-							spacing={4}
 							justify="center"
-							alignItems="center"
+							container
+							item
 							direction="column"
+							spacing={2}
 						>
-							{
-								status && status.msg && (
-									<CustomSnackbar
-										variant={status.sent ? "success" : "error"}
-										message={status.msg}
-									/>
-								)
-							}
 							<Grid
-								justify="center"
-								container
 								item
-								direction="column"
-								spacing={2}
+								container
+								justify="center"
+								spacing={4}
+								alignItems="center"
 							>
-								<Grid
-									item
-									container
-									justify="center"
-									spacing={4}
-									alignItems="center"
-								>
-									<Grid key={1} item>
-										<Avatar
-											alt="User Image"
-											src={
-												values.user_image ? values.user_image.data
-													: values.user_avatar_url
-											}
-											className={classes.largeAvatar}
-										/>
-									</Grid>
-									{
-										values.file_to_load_url &&
-										<ImageCropper open={true} selectedFile={values.file_to_load_url}
-											setCroppedImageData={(croppedImage) => {
-												setFieldValue('file_to_load_url', '');
-												setFieldValue('user_image', croppedImage);
-											}} cropHeight={160} cropWidth={160} />
-									}
-									<Grid key={2} item>
-										<Box>
-											<input onChange={(event) => {
-												const selectedFile = event.currentTarget.files[0]
-												//remove the object then push a copy of it with added image object
-												setFieldValue("file_to_load_url", selectedFile);
-											}} accept="image/*" className={classes.fileInputDisplayNone} id={"user-image-input"} type="file" />
-											<label htmlFor={"user-image-input"}>
-												<IconButton color="primary" aria-label="upload picture" component="span">
-													<PhotoCamera />
-												</IconButton>
-											</label>
-											<Box>{values.user_avatar_url || values.user_image ? "Change Photo" : "Add Photo"}</Box>
-										</Box>
-									</Grid>
+								<Grid key={1} item>
+									<Avatar
+										alt="User Image"
+										src={
+											values.user_image ? values.user_image.data
+												: values.user_avatar_url
+										}
+										className={classes.largeAvatar}
+									/>
 								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											select
-											name="title"
-											label="Title"
-											id="title"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.title}
-											error={errors.title && touched.title}
-											helperText={touched.title && errors.title}
-										>
-											{CONTACT_TITLES.map((contact_title, index) => (
-												<MenuItem key={index} value={contact_title}>
-													{contact_title}
-												</MenuItem>
-											))}
-										</TextField>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											select
-											name="gender"
-											label="Gender"
-											id="gender"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.gender}
-											error={errors.gender && touched.gender}
-											helperText={touched.gender && errors.gender}
-										>
-											{GENDERS_LIST.map((gender_type, index) => (
-												<MenuItem key={index} value={gender_type}>
-													{gender_type}
-												</MenuItem>
-											))}
-										</TextField>
-									</Grid>
+								{
+									values.file_to_load_url &&
+									<ImageCropper open={true} selectedFile={values.file_to_load_url}
+										setCroppedImageData={(croppedImage) => {
+											setFieldValue('file_to_load_url', '');
+											setFieldValue('user_image', croppedImage);
+										}} cropHeight={160} cropWidth={160} />
+								}
+								<Grid key={2} item>
+									<Box>
+										<input onChange={(event) => {
+											const selectedFile = event.currentTarget.files[0]
+											//remove the object then push a copy of it with added image object
+											setFieldValue("file_to_load_url", selectedFile);
+										}} accept="image/*" className={classes.fileInputDisplayNone} id={"user-image-input"} type="file" />
+										<label htmlFor={"user-image-input"}>
+											<IconButton color="primary" aria-label="upload picture" component="span">
+												<PhotoCamera />
+											</IconButton>
+										</label>
+										<Box>{values.user_avatar_url || values.user_image ? "Change Photo" : "Add Photo"}</Box>
+									</Box>
 								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											id="first_name"
-											name="first_name"
-											label="First Name"
-											value={values.first_name}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={errors.first_name && touched.first_name}
-											helperText={touched.first_name && errors.first_name}
-										/>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											id="last_name"
-											name="last_name"
-											label="Last Name"
-											value={values.last_name}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={errors.last_name && touched.last_name}
-											helperText={touched.last_name && errors.last_name}
-										/>
-									</Grid>
-								</Grid>
-								<Grid item sm>
+							</Grid>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										required
 										variant="outlined"
-										id="id_number"
-										name="id_number"
-										label="ID Number"
-										value={values.id_number}
-										onChange={handleChange}
+										select
+										name="title"
+										label="Title"
+										id="title"
 										onBlur={handleBlur}
-										error={errors.id_number && touched.id_number}
-										helperText={touched.id_number && errors.id_number}
-									/>
+										onChange={handleChange}
+										value={values.title}
+										error={errors.title && touched.title}
+										helperText={touched.title && errors.title}
+									>
+										{CONTACT_TITLES.map((contact_title, index) => (
+											<MenuItem key={index} value={contact_title}>
+												{contact_title}
+											</MenuItem>
+										))}
+									</TextField>
 								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											id="phone_number"
-											name="phone_number"
-											label="Personal Phone Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={errors.phone_number && touched.phone_number}
-											helperText={touched.phone_number && errors.phone_number}
-											value={values.phone_number}
-										/>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id="work_mobile_number"
-											name="work_mobile_number"
-											label="Work Phone Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Work Phone Number"
-											value={values.work_mobile_number}
-										/>
-									</Grid>
-								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											variant="outlined"
-											name="primary_email"
-											label="Primary Email"
-											id="primary_email"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.primary_email}
-											error={errors.primary_email && touched.primary_email}
-											helperText={touched.primary_email && errors.primary_email}
-										/>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											name="other_email"
-											label="Other Email"
-											id="other_email"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.other_email}
-											error={errors.other_email && touched.other_email}
-											helperText={touched.other_email && errors.other_email}
-										/>
-									</Grid>
-								</Grid>
-								<Grid item>
-									<Typography>Password</Typography>
-								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											required
-											type="password"
-											variant="outlined"
-											name="password"
-											label="User Password"
-											id="password"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.password}
-											error={errors.password && touched.password}
-											helperText={touched.password && errors.password}
-										/>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											type="password"
-											required
-											variant="outlined"
-											name="confirm_password"
-											label="Confirm Password"
-											id="confirm_password"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.confirm_password}
-											error={errors.confirm_password && touched.confirm_password}
-											helperText={touched.confirm_password && errors.confirm_password}
-										/>
-									</Grid>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										variant="outlined"
+										select
+										name="gender"
+										label="Gender"
+										id="gender"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.gender}
+										error={errors.gender && touched.gender}
+										helperText={touched.gender && errors.gender}
+									>
+										{GENDERS_LIST.map((gender_type, index) => (
+											<MenuItem key={index} value={gender_type}>
+												{gender_type}
+											</MenuItem>
+										))}
+									</TextField>
 								</Grid>
 							</Grid>
-							{/** end of user details grid **/}
-							<Grid
-								item
-								container
-								direction="row"
-								className={classes.buttonBox}
-							>
-								<Grid item>
-									<Button
-										color="secondary"
-										variant="contained"
-										size="medium"
-										startIcon={<CancelIcon />}
-										onClick={() => history.goBack()}
-										disableElevation
-									>
-										Cancel
-									</Button>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										variant="outlined"
+										id="first_name"
+										name="first_name"
+										label="First Name"
+										value={values.first_name}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.first_name && touched.first_name}
+										helperText={touched.first_name && errors.first_name}
+									/>
 								</Grid>
-								<Grid item>
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										size="medium"
-										startIcon={<SaveIcon />}
-										form="userInputForm"
-										disabled={isSubmitting}
-									>
-										{values.id ? "Save Details" : "Create User"}
-									</Button>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										variant="outlined"
+										id="last_name"
+										name="last_name"
+										label="Last Name"
+										value={values.last_name}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.last_name && touched.last_name}
+										helperText={touched.last_name && errors.last_name}
+									/>
+								</Grid>
+							</Grid>
+							<Grid item sm>
+								<TextField
+									fullWidth
+									required
+									variant="outlined"
+									id="id_number"
+									name="id_number"
+									label="ID Number"
+									value={values.id_number}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.id_number && touched.id_number}
+									helperText={touched.id_number && errors.id_number}
+								/>
+							</Grid>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										variant="outlined"
+										id="phone_number"
+										name="phone_number"
+										label="Personal Phone Number"
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.phone_number && touched.phone_number}
+										helperText={touched.phone_number && errors.phone_number}
+										value={values.phone_number}
+									/>
+								</Grid>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										variant="outlined"
+										id="work_mobile_number"
+										name="work_mobile_number"
+										label="Work Phone Number"
+										onChange={handleChange}
+										onBlur={handleBlur}
+										helperText="Work Phone Number"
+										value={values.work_mobile_number}
+									/>
+								</Grid>
+							</Grid>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										variant="outlined"
+										name="primary_email"
+										label="Primary Email"
+										id="primary_email"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.primary_email}
+										error={errors.primary_email && touched.primary_email}
+										helperText={touched.primary_email && errors.primary_email}
+									/>
+								</Grid>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										variant="outlined"
+										name="other_email"
+										label="Other Email"
+										id="other_email"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.other_email}
+										error={errors.other_email && touched.other_email}
+										helperText={touched.other_email && errors.other_email}
+									/>
+								</Grid>
+							</Grid>
+							<Grid item>
+								<Typography>Password</Typography>
+							</Grid>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										required
+										type="password"
+										variant="outlined"
+										name="password"
+										label="User Password"
+										id="password"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.password}
+										error={errors.password && touched.password}
+										helperText={touched.password && errors.password}
+									/>
+								</Grid>
+								<Grid item xs={12} sm>
+									<TextField
+										fullWidth
+										type="password"
+										required
+										variant="outlined"
+										name="confirm_password"
+										label="Confirm Password"
+										id="confirm_password"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.confirm_password}
+										error={errors.confirm_password && touched.confirm_password}
+										helperText={touched.confirm_password && errors.confirm_password}
+									/>
 								</Grid>
 							</Grid>
 						</Grid>
-					</form>
-				)}
+						{/** end of user details grid **/}
+						<Grid
+							item
+							container
+							direction="row"
+							className={classes.buttonBox}
+						>
+							<Grid item>
+								<Button
+									color="secondary"
+									variant="contained"
+									size="medium"
+									startIcon={<CancelIcon />}
+									onClick={() => history.goBack()}
+									disableElevation
+								>
+									Cancel
+									</Button>
+							</Grid>
+							<Grid item>
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									size="medium"
+									startIcon={<SaveIcon />}
+									form="userInputForm"
+									disabled={isSubmitting}
+								>
+									{values.id ? "Save Details" : "Create User"}
+								</Button>
+							</Grid>
+						</Grid>
+					</Grid>
+				</form>
+			)}
 		</Formik>
 	);
 };

@@ -6,12 +6,11 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import BlockIcon from "@material-ui/icons/Block";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import { connect } from "react-redux";
-import { handleDelete, updateFirebaseUser } from "../actions/actions";
+import { handleDelete, deleteFirebaseUsers } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -66,6 +65,11 @@ let UsersPage = ({
 		setLastNameFilter("");
 	};
 
+	const deleteUserAuthentication = async (userId, url) => {
+		await deleteFirebaseUsers({ userIds: [userId] });
+		handleItemDelete(userId, "users")
+	}
+
 	return (
 		<Layout pageTitle="Users">
 			<Grid
@@ -110,30 +114,6 @@ let UsersPage = ({
 							to={`${match.url}/${selected[0]}/edit`}
 						>
 							Edit
-						</Button>
-					</Grid>
-					<Grid item>
-						<Button
-							type="button"
-							color="primary"
-							variant="contained"
-							size="medium"
-							startIcon={<BlockIcon />}
-							disabled={!selected.length}
-							onClick={async () => {
-								try {
-									await updateFirebaseUser({
-										uid: selected[0],
-										userProfile: {
-											disabled: true
-										}
-									})
-								} catch (error) {
-									console.log("Error during disabling user => ", error)
-								}
-							}}
-						>
-							Disable
 						</Button>
 					</Grid>
 					<Grid item>
@@ -255,7 +235,7 @@ let UsersPage = ({
 						rows={userItems}
 						noDetailsCol={true}
 						headCells={usersTableHeadCells}
-						handleDelete={handleItemDelete}
+						handleDelete={deleteUserAuthentication}
 					/>
 				</Grid>
 

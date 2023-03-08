@@ -40,13 +40,13 @@ const createDocumentDefinition = (reportTitle, ...contentParts) => {
         pageSize: 'A4',
         info: {
             title: `${companyProfile.company_name} - ${reportTitle}`,
-            author: 'Yarra Property Management Services',
+            author: 'RentGate Property Management Services',
             subject: `${reportTitle}`,
             keywords: `${reportTitle}`,
         },
         footer: (currentPage, pageCount) => {
             return {
-                text: `Yarra Property Management : Page ${currentPage.toString()} of ${pageCount.toString()}`,
+                text: `RentGate Property Management : Page ${currentPage.toString()} of ${pageCount.toString()}`,
                 alignment: 'center',
                 fontSize: 7
             }
@@ -132,7 +132,7 @@ const printDataToExcel = (title, subject, dataToExport, fileName) => {
     workBook.Props = {
         Title: title,
         Subject: subject,
-        Author: "Yarra Property Manager",
+        Author: "RentGate Property Management",
         CreatedDate: new Date(),
     };
     var workBookSheetData = dataToExport;

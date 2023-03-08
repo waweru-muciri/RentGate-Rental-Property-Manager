@@ -24,11 +24,10 @@ import RentBalancesPage from "./RentBalancesPage";
 import { handleItemFormSubmit, handleDelete } from '../actions/actions'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getTransactionsFilterOptions, currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getYearToDateFromToDates } from "../assets/commonAssets";
-import { parse, isWithinInterval, format, startOfToday } from "date-fns";
+import { parse, isWithinInterval } from "date-fns";
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 
-const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const headCells = [
     { id: "unit_details", numeric: false, disablePadding: true, label: "Unit Details", },

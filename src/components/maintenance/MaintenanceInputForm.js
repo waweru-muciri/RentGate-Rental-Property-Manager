@@ -15,6 +15,7 @@ import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import { format, startOfToday } from "date-fns";
 import * as Yup from "yup";
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
@@ -90,263 +91,266 @@ let MaintenanceRequestInputForm = (props) => {
 				handleSubmit,
 				isSubmitting,
 			}) => (
-					<form
-						className={classes.form}
-						method="post"
-						id="maintenanceRequestInputForm"
-						onSubmit={handleSubmit}
+				<form
+					className={classes.form}
+					method="post"
+					id="maintenanceRequestInputForm"
+					onSubmit={handleSubmit}
+				>
+					<Grid
+						container
+						spacing={2}
+						justify="center"
+						alignItems="center"
+						direction="column"
 					>
-						<Grid
-							container
-							spacing={2}
-							justify="center"
-							alignItems="center"
-							direction="column"
-						>
-							{
-								status && status.msg && (
-									<CustomSnackbar
-										variant={status.sent ? "success" : "error"}
-										message={status.msg}
-									/>
-								)
-							}
-							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} md={6}>
-									<TextField
-										fullWidth
-										select
-										variant="outlined"
-										name="property"
-										label="Property"
-										id="property"
-										onChange={(event) => {
-											setFieldValue('property', event.target.value)
-											setFieldValue('property_unit', '')
-										}
-										}
-										value={values.property}
-										error={errors.property && touched.property}
-										helperText={touched.property && errors.property}
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
+								/>
+							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
+						}
+						<Grid item container direction="row" spacing={2}>
+							<Grid item xs={12} md={6}>
+								<TextField
+									fullWidth
+									select
+									variant="outlined"
+									name="property"
+									label="Property"
+									id="property"
+									onChange={(event) => {
+										setFieldValue('property', event.target.value)
+										setFieldValue('property_unit', '')
+									}
+									}
+									value={values.property}
+									error={errors.property && touched.property}
+									helperText={touched.property && errors.property}
 
-									>
-										{properties.map((property, index) => (
-											<MenuItem key={index} value={property.id}>
-												{property.ref}
-											</MenuItem>
-										))}
-									</TextField>
-								</Grid>
-								<Grid item xs={12} md={6}>
-									<TextField
-										fullWidth
-										select
-										variant="outlined"
-										name="property_unit"
-										label="Unit"
-										id="property_unit"
-										onChange={handleChange}
-										value={values.property_unit}
-										error={errors.property_unit && touched.property_unit}
-										helperText={touched.property_unit && errors.property_unit}
+								>
+									{properties.map((property, index) => (
+										<MenuItem key={index} value={property.id}>
+											{property.ref}
+										</MenuItem>
+									))}
+								</TextField>
+							</Grid>
+							<Grid item xs={12} md={6}>
+								<TextField
+									fullWidth
+									select
+									variant="outlined"
+									name="property_unit"
+									label="Unit"
+									id="property_unit"
+									onChange={handleChange}
+									value={values.property_unit}
+									error={errors.property_unit && touched.property_unit}
+									helperText={touched.property_unit && errors.property_unit}
 
-									>
-										{propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
-											<MenuItem key={index} value={property_unit.id}>
-												{property_unit.ref}
-											</MenuItem>
-										))}
-									</TextField>
-								</Grid>
-							</Grid>
-							<Grid item container direction="column" spacing={2}>
-								<Grid item>
-									<TextField
-										fullWidth
-										type="date"
-										InputLabelProps={{ shrink: true }}
-										variant="outlined"
-										id="date_created"
-										name="date_created"
-										label="Date Created"
-										value={values.date_created}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.date_created && touched.date_created}
-										helperText={touched.date_created && errors.date_created}
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										type="date"
-										InputLabelProps={{ shrink: true }}
-										variant="outlined"
-										id="expected_completion_date"
-										name="expected_completion_date"
-										label="Expected Completion Date"
-										value={values.expected_completion_date}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.expected_completion_date && touched.expected_completion_date}
-										helperText={touched.expected_completion_date && errors.expected_completion_date}
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										type="date"
-										InputLabelProps={{ shrink: true }}
-										variant="outlined"
-										id="actual_completion_date"
-										name="actual_completion_date"
-										label="Actual Completion Date"
-										value={values.actual_completion_date}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.actual_completion_date && touched.actual_completion_date}
-										helperText={touched.actual_completion_date && errors.actual_completion_date}
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										rows={4}
-										multiline
-										variant="outlined"
-										id="maintenance_details"
-										name="maintenance_details"
-										label="What Needs Attention?"
-										value={values.maintenance_details}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.maintenance_details && touched.maintenance_details}
-										helperText={touched.maintenance_details && errors.maintenance_details}
-									/>
-								</Grid>
-								<Grid item>
-									<TextField
-										fullWidth
-										multiline
-										rows={4}
-										variant="outlined"
-										id="other_details"
-										name="other_details"
-										label="Anything maintenance should know when entering the residence?"
-										value={values.other_details}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.other_details && touched.other_details}
-										helperText={touched.other_details && errors.other_details}
-									/>
-								</Grid>
-								<Grid item>
-									<FormControl fullWidth component="fieldset">
-										<FormLabel component="legend">
-											Is the issue urgent?
-									</FormLabel>
-										<RadioGroup
-											row
-											aria-label="Issue urgency"
-											name="issue_urgency"
-											value={values.issue_urgency}
-											onChange={handleChange}
-										>
-											<FormControlLabel
-												value="Yes"
-												control={<Radio />}
-												label="Yes"
-											/>
-											<FormControlLabel
-												value="No"
-												control={<Radio />}
-												label="No"
-											/>
-										</RadioGroup>
-									</FormControl>
-								</Grid>
-								<Grid item>
-									<FormControl fullWidth component="fieldset">
-										<FormLabel component="legend">
-											Permission given to enter the residence?
-										</FormLabel>
-										<RadioGroup
-											row
-											aria-label="Permission to enter residence"
-											name="enter_permission"
-											value={values.enter_permission}
-											onChange={handleChange}
-										>
-											<FormControlLabel
-												value="Yes"
-												control={<Radio />}
-												label="Yes"
-											/>
-											<FormControlLabel
-												value="No"
-												control={<Radio />}
-												label="No"
-											/>
-										</RadioGroup>
-									</FormControl>
-								</Grid>
-								<Grid item>
-									<FormControl fullWidth component="fieldset">
-										<FormLabel component="legend">
-											Maintenance Request Status
-									</FormLabel>
-										<RadioGroup
-											row
-											aria-label="Maintenance Request Status"
-											name="status"
-											value={values.status}
-											onChange={handleChange}
-										>
-											<FormControlLabel
-												value="Open"
-												control={<Radio />}
-												label="Open"
-											/>
-											<FormControlLabel
-												value="Closed"
-												control={<Radio />}
-												label="Closed"
-											/>
-										</RadioGroup>
-									</FormControl>
-								</Grid>
-							</Grid>
-							{/** end of maintenance request details grid **/}
-							<Grid item container direction="row" className={classes.buttonBox}>
-								<Grid item>
-									<Button
-										color="secondary"
-										variant="contained"
-										size="medium"
-										startIcon={<CancelIcon />}
-										onClick={() => history.goBack()}
-										disableElevation
-									>
-										Cancel
-									</Button>
-								</Grid>
-								<Grid item>
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										size="medium"
-										startIcon={<SaveIcon />}
-										form="maintenanceRequestInputForm"
-										disabled={isSubmitting}
-									>
-										Save
-									</Button>
-								</Grid>
+								>
+									{propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
+										<MenuItem key={index} value={property_unit.id}>
+											{property_unit.ref}
+										</MenuItem>
+									))}
+								</TextField>
 							</Grid>
 						</Grid>
-					</form>
-				)
+						<Grid item container direction="column" spacing={2}>
+							<Grid item>
+								<TextField
+									fullWidth
+									type="date"
+									InputLabelProps={{ shrink: true }}
+									variant="outlined"
+									id="date_created"
+									name="date_created"
+									label="Date Created"
+									value={values.date_created}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.date_created && touched.date_created}
+									helperText={touched.date_created && errors.date_created}
+								/>
+							</Grid>
+							<Grid item>
+								<TextField
+									fullWidth
+									type="date"
+									InputLabelProps={{ shrink: true }}
+									variant="outlined"
+									id="expected_completion_date"
+									name="expected_completion_date"
+									label="Expected Completion Date"
+									value={values.expected_completion_date}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.expected_completion_date && touched.expected_completion_date}
+									helperText={touched.expected_completion_date && errors.expected_completion_date}
+								/>
+							</Grid>
+							<Grid item>
+								<TextField
+									fullWidth
+									type="date"
+									InputLabelProps={{ shrink: true }}
+									variant="outlined"
+									id="actual_completion_date"
+									name="actual_completion_date"
+									label="Actual Completion Date"
+									value={values.actual_completion_date}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.actual_completion_date && touched.actual_completion_date}
+									helperText={touched.actual_completion_date && errors.actual_completion_date}
+								/>
+							</Grid>
+							<Grid item>
+								<TextField
+									fullWidth
+									rows={4}
+									multiline
+									variant="outlined"
+									id="maintenance_details"
+									name="maintenance_details"
+									label="What Needs Attention?"
+									value={values.maintenance_details}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.maintenance_details && touched.maintenance_details}
+									helperText={touched.maintenance_details && errors.maintenance_details}
+								/>
+							</Grid>
+							<Grid item>
+								<TextField
+									fullWidth
+									multiline
+									rows={4}
+									variant="outlined"
+									id="other_details"
+									name="other_details"
+									label="Anything maintenance should know when entering the residence?"
+									value={values.other_details}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.other_details && touched.other_details}
+									helperText={touched.other_details && errors.other_details}
+								/>
+							</Grid>
+							<Grid item>
+								<FormControl fullWidth component="fieldset">
+									<FormLabel component="legend">
+										Is the issue urgent?
+									</FormLabel>
+									<RadioGroup
+										row
+										aria-label="Issue urgency"
+										name="issue_urgency"
+										value={values.issue_urgency}
+										onChange={handleChange}
+									>
+										<FormControlLabel
+											value="Yes"
+											control={<Radio />}
+											label="Yes"
+										/>
+										<FormControlLabel
+											value="No"
+											control={<Radio />}
+											label="No"
+										/>
+									</RadioGroup>
+								</FormControl>
+							</Grid>
+							<Grid item>
+								<FormControl fullWidth component="fieldset">
+									<FormLabel component="legend">
+										Permission given to enter the residence?
+										</FormLabel>
+									<RadioGroup
+										row
+										aria-label="Permission to enter residence"
+										name="enter_permission"
+										value={values.enter_permission}
+										onChange={handleChange}
+									>
+										<FormControlLabel
+											value="Yes"
+											control={<Radio />}
+											label="Yes"
+										/>
+										<FormControlLabel
+											value="No"
+											control={<Radio />}
+											label="No"
+										/>
+									</RadioGroup>
+								</FormControl>
+							</Grid>
+							<Grid item>
+								<FormControl fullWidth component="fieldset">
+									<FormLabel component="legend">
+										Maintenance Request Status
+									</FormLabel>
+									<RadioGroup
+										row
+										aria-label="Maintenance Request Status"
+										name="status"
+										value={values.status}
+										onChange={handleChange}
+									>
+										<FormControlLabel
+											value="Open"
+											control={<Radio />}
+											label="Open"
+										/>
+										<FormControlLabel
+											value="Closed"
+											control={<Radio />}
+											label="Closed"
+										/>
+									</RadioGroup>
+								</FormControl>
+							</Grid>
+						</Grid>
+						{/** end of maintenance request details grid **/}
+						<Grid item container direction="row" className={classes.buttonBox}>
+							<Grid item>
+								<Button
+									color="secondary"
+									variant="contained"
+									size="medium"
+									startIcon={<CancelIcon />}
+									onClick={() => history.goBack()}
+									disableElevation
+								>
+									Cancel
+									</Button>
+							</Grid>
+							<Grid item>
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									size="medium"
+									startIcon={<SaveIcon />}
+									form="maintenanceRequestInputForm"
+									disabled={isSubmitting}
+								>
+									Save
+									</Button>
+							</Grid>
+						</Grid>
+					</Grid>
+				</form>
+			)
 			}
 		</Formik >
 	);

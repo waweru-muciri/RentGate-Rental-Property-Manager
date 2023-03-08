@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import { handleItemFormSubmit } from '../../actions/actions'
 import { withRouter } from "react-router-dom";
 import { format, startOfToday } from "date-fns";
+import CustomCircularProgress from "../CustomCircularProgress";
 
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
@@ -21,7 +22,7 @@ const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
 	memo: Yup.string().trim().max(50, "Memo details should be less than 50").default(''),
 	payment_amount: Yup.number().typeError('Amount must be a number').positive("Amount must be a positive number")
-	.required("Payment amount is required"),
+		.required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
 });
 
@@ -97,6 +98,7 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 							<form
 								className={classes.form}
 								method="post"
+								noValidate
 								id="paymentInputForm"
 								onSubmit={handleSubmit}
 							>
@@ -108,6 +110,9 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 												message={status.msg}
 											/>
 										)
+									}
+									{
+										isSubmitting && (<CustomCircularProgress open={true} />)
 									}
 									<Grid item container spacing={2} direction="column">
 										<Grid item>

@@ -1,5 +1,6 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
+import Grid  from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
@@ -16,6 +17,9 @@ let UserPage = ({ match, userToEdit, handleItemSubmit }) => {
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading text={pageTitle} />
+					<Typography variant='body1' color="textSecondary">
+						Only admin user can create/edit users
+					</Typography>
 				</Grid>
 				<Grid
 					container
@@ -33,7 +37,7 @@ let UserPage = ({ match, userToEdit, handleItemSubmit }) => {
 
 const mapStateToProps = (state, ownProps) => {
 	return {
-		userToEdit : state.users.find(({ id }) => id === ownProps.match.params.userId) || {},
+		userToEdit: state.users.find(({ id }) => id === ownProps.match.params.userId) || {},
 	};
 };
 const mapDispatchToProps = (dispatch) => {

@@ -10,6 +10,9 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { format, startOfToday } from "date-fns";
+import CustomCircularProgress from "../CustomCircularProgress";
+
+
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const ManagmentFeeSchema = Yup.object().shape({
@@ -88,6 +91,9 @@ const ManagmentFeeInputForm = (props) => {
                   message={status.msg}
                 />
               )
+            }
+            {
+              isSubmitting && (<CustomCircularProgress open={true} />)
             }
             <Grid item>
               <TextField

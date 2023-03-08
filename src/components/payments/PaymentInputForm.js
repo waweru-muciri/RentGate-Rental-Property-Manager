@@ -11,6 +11,7 @@ import { commonStyles } from "../commonStyles";
 import * as Yup from "yup";
 import { withRouter } from "react-router-dom";
 import { format, startOfToday } from "date-fns";
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const PaymentSchema = Yup.object().shape({
@@ -104,6 +105,9 @@ let PaymentInputForm = (props) => {
 									message={status.msg}
 								/>
 							)
+						}
+						{
+							isSubmitting && (<CustomCircularProgress open={true} />)
 						}
 						<Grid item>
 							<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>

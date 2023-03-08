@@ -191,7 +191,7 @@ let TransactionPage = ({
                     </Grid>
                     <Grid item>
                         <ImportItemsBtn
-                            disabled={!selected.length}
+                            disabled={selected.length != 1}
                             savingUrl="transactions-charges"
                             text="Upload Rent Charges"
                             baseObjectToAddProperties={getSelectedLeaseDetailsForRentChargesUpload()}

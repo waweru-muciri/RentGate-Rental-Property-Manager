@@ -11,6 +11,7 @@ import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
 import GREY from '@material-ui/core/colors/grey';
 
 
@@ -52,6 +53,7 @@ export default function EnhancedTable(props) {
     rows,
     headCells,
     handleDelete,
+    handleEditClick,
   } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -91,7 +93,29 @@ export default function EnhancedTable(props) {
                           const tableCellData =
                             row[headCell.id];
                           return (
-                            headCell.id === 'delete' ?
+                            headCell.id === 'edit' ?
+                              <TableCell
+                                component="th"
+                                scope="row"
+                                sortDirection={false}
+                                key={`edit${tableCellIndex}`}
+                              >
+                                <Tooltip
+                                  title="Edit"
+                                  placement="bottom"
+                                >
+                                  <IconButton
+                                    onClick={(event) => {
+                                      handleEditClick(rowIndex);
+                                    }}
+                                    color="primary"
+                                    size="small"
+                                  >
+                                    <EditIcon fontSize="default" />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                              : headCell.id === 'delete' ?
                               <TableCell
                                 component="th"
                                 scope="row"
@@ -114,7 +138,7 @@ export default function EnhancedTable(props) {
                                 </Tooltip>
                               </TableCell>
                               : <StyledTableCell component="th" scope="row" key={`other${tableCellIndex}`}>
-                                {tableCellData || "-"}
+                                {tableCellData || "One time"}
                               </StyledTableCell>
                           )
                         }

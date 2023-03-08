@@ -25,6 +25,7 @@ import {
 import { Formik } from "formik";
 import ImageCropper from '../ImageCropper';
 import CustomSnackbar from '../CustomSnackbar'
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -35,7 +36,7 @@ const UserSchema = Yup.object().shape({
     gender: Yup.string().trim().required("Gender is required"),
     first_name: Yup.string().trim().required("First Name is required"),
     last_name: Yup.string().trim().required("Last Name is Required"),
-    id_number: Yup.string().trim().min(8).required("Id Number is Required"),
+    id_number: Yup.string().trim().min(8, 'Too Short').required("Id Number is Required"),
     primary_email: Yup.string().trim().email("Invalid Email").required("Primary Email is Required"),
     other_email: Yup.string().trim().email("Invalid Email"),
     personal_phone_number: Yup.string().trim().min(10, 'Too Short').required("Personal Phone Number is Required"),
@@ -80,7 +81,7 @@ let UserInputForm = (props) => {
                 initialValues={userValues}
                 enableReinitialize
                 validationSchema={UserSchema}
-                onSubmit={async (values, { resetForm, setStatus }) => {
+                onSubmit={async (values, { setStatus }) => {
                     try {
                         const user = {
                             id: values.id,
@@ -107,10 +108,6 @@ let UserInputForm = (props) => {
                             user.user_avatar_url = fileDownloadUrl;
                         }
                         await handleItemSubmit(user, "users")
-                        resetForm({});
-                        if (values.id) {
-                            history.goBack();
-                        }
                         setStatus({ sent: true, msg: "Details saved successfully!" })
                     } catch (error) {
                         setStatus({ sent: false, msg: `Error! ${error}.` })
@@ -128,257 +125,261 @@ let UserInputForm = (props) => {
                     isSubmitting,
                     setFieldValue,
                 }) => (
-                        <form
-                            className={classes.form}
-                            method="post"
-                            noValidate
-                            id="userInputForm"
-                            onSubmit={handleSubmit}
+                    <form
+                        className={classes.form}
+                        noValidate
+                        method="post"
+                        id="userPersonalInfoInputForm"
+                        onSubmit={handleSubmit}
+                    >
+                        <Grid
+                            container
+                            justify="center"
+                            alignItems="center"
+                            direction="column"
+                            spacing={2}
                         >
+                            {
+                                status && status.msg && (
+                                    <CustomSnackbar
+                                        variant={status.sent ? "success" : "error"}
+                                        message={status.msg}
+                                    />
+                                )
+                            }
+                            {
+                                isSubmitting && (<CustomCircularProgress open={true} dialogTitle="Saving profile..." />)
+                            }
                             <Grid
-                                container
                                 justify="center"
-                                alignItems="center"
+                                container
+                                item
                                 direction="column"
                                 spacing={2}
                             >
-                                {
-                                    status && status.msg && (
-                                        <CustomSnackbar
-                                            variant={status.sent ? "success" : "error"}
-                                            message={status.msg}
-                                        />
-                                    )
-                                }
+                                <Grid item>
+                                    <Typography>Personal Info</Typography>
+                                </Grid>
                                 <Grid
-                                    justify="center"
-                                    container
                                     item
-                                    direction="column"
-                                    spacing={2}
+                                    container
+                                    justify="center"
+                                    spacing={4}
+                                    alignItems="center"
                                 >
-                                    <Grid item>
-                                        <Typography>Personal Info</Typography>
+                                    <Grid key={1} item>
+                                        <Avatar
+                                            alt="User Image"
+                                            src={
+                                                values.user_image ? values.user_image.data
+                                                    : values.user_avatar_url
+                                            }
+                                            className={classes.largeAvatar}
+                                        />
                                     </Grid>
-                                    <Grid
-                                        item
-                                        container
-                                        justify="center"
-                                        spacing={4}
-                                        alignItems="center"
-                                    >
-                                        <Grid key={1} item>
-                                            <Avatar
-                                                alt="User Image"
-                                                src={
-                                                    values.user_image ? values.user_image.data
-                                                        : values.user_avatar_url
-                                                }
-                                                className={classes.largeAvatar}
-                                            />
-                                        </Grid>
-                                        {
-                                            values.file_to_load_url &&
-                                            <ImageCropper open={true} selectedFile={values.file_to_load_url}
-                                                setCroppedImageData={(croppedImage) => {
-                                                    setFieldValue('file_to_load_url', '');
-                                                    setFieldValue('user_image', croppedImage);
-                                                }} cropHeight={160} cropWidth={160} />
-                                        }
-                                        <Grid key={2} item>
-                                            <Box>
-                                                <input onChange={(event) => {
-                                                    const selectedFile = event.currentTarget.files[0]
-                                                    //remove the object then push a copy of it with added image object
-                                                    setFieldValue("file_to_load_url", selectedFile);
-                                                }} accept="image/*" className={classes.fileInputDisplayNone} id={"user-image-input"} type="file" />
-                                                <label htmlFor={"user-image-input"}>
-                                                    <IconButton color="primary" aria-label="upload picture" component="span">
-                                                        <PhotoCamera />
-                                                    </IconButton>
-                                                </label>
-                                                <Box>{values.user_avatar_url || values.user_image ? "Change Photo" : "Add Photo"}</Box>
-                                            </Box>
-                                        </Grid>
+                                    {
+                                        values.file_to_load_url &&
+                                        <ImageCropper open={true} selectedFile={values.file_to_load_url}
+                                            setCroppedImageData={(croppedImage) => {
+                                                setFieldValue('file_to_load_url', '');
+                                                setFieldValue('user_image', croppedImage);
+                                            }} cropHeight={160} cropWidth={160} />
+                                    }
+                                    <Grid key={2} item>
+                                        <Box>
+                                            <input onChange={(event) => {
+                                                const selectedFile = event.currentTarget.files[0]
+                                                //remove the object then push a copy of it with added image object
+                                                setFieldValue("file_to_load_url", selectedFile);
+                                            }} accept="image/*" className={classes.fileInputDisplayNone} id={"user-image-input"} type="file" />
+                                            <label htmlFor={"user-image-input"}>
+                                                <IconButton color="primary" aria-label="upload picture" component="span">
+                                                    <PhotoCamera />
+                                                </IconButton>
+                                            </label>
+                                            <Box>{values.user_avatar_url || values.user_image ? "Change Photo" : "Add Photo"}</Box>
+                                        </Box>
                                     </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                required
-                                                select
-                                                name="title"
-                                                label="Title"
-                                                id="title"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.title}
-                                                error={errors.title && touched.title}
-                                                helperText={touched.title && errors.title}
-                                            >
-                                                {CONTACT_TITLES.map((contact_title, index) => (
-                                                    <MenuItem key={index} value={contact_title}>
-                                                        {contact_title}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                required
-                                                select
-                                                name="gender"
-                                                label="Gender"
-                                                id="gender"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.gender}
-                                                error={errors.gender && touched.gender}
-                                                helperText={touched.gender && errors.gender}
-                                            >
-                                                {GENDERS_LIST.map((gender_type, index) => (
-                                                    <MenuItem key={index} value={gender_type}>
-                                                        {gender_type}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                required
-                                                id="first_name"
-                                                name="first_name"
-                                                label="First Name"
-                                                value={values.first_name}
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                error={errors.first_name && touched.first_name}
-                                                helperText={touched.first_name && errors.first_name}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id="last_name"
-                                                name="last_name"
-                                                label="Last Name"
-                                                required
-                                                value={values.last_name}
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                error={errors.last_name && touched.last_name}
-                                                helperText={touched.last_name && errors.last_name}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item sm>
+                                </Grid>
+                                <Grid item container direction="row" spacing={2}>
+                                    <Grid item xs={12} sm>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
-                                            id="id_number"
-                                            name="id_number"
-                                            label="ID Number"
                                             required
-                                            value={values.id_number}
-                                            onChange={handleChange}
+                                            select
+                                            name="title"
+                                            label="Title"
+                                            id="title"
                                             onBlur={handleBlur}
-                                            error={errors.id_number && touched.id_number}
-                                            helperText={touched.id_number && errors.id_number}
-                                        />
+                                            onChange={handleChange}
+                                            value={values.title}
+                                            error={errors.title && touched.title}
+                                            helperText={touched.title && errors.title}
+                                        >
+                                            {CONTACT_TITLES.map((contact_title, index) => (
+                                                <MenuItem key={index} value={contact_title}>
+                                                    {contact_title}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id={"personal_phone_number"}
-                                                name={"personal_phone_number"}
-                                                label="Personal Phone Number"
-                                                required
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                error={errors.personal_phone_number && touched.personal_phone_number}
-                                                helperText={"Personal Phone Number"}
-                                                value={values.personal_phone_number}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id={"work_phone_number"}
-                                                name={"work_phone_number"}
-                                                label="Work Phone Number"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                helperText="Work Phone Number"
-                                                value={values.work_phone_number}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                name="primary_email"
-                                                label="Primary Email"
-                                                id="primary_email"
-                                                required
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.primary_email}
-                                                error={errors.primary_email && touched.primary_email}
-                                                helperText={touched.primary_email && errors.primary_email}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                name="other_email"
-                                                label="Other Email"
-                                                id="other_email"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.other_email}
-                                                error={errors.other_email && touched.other_email}
-                                                helperText={touched.other_email && errors.other_email}
-                                            />
-                                        </Grid>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            required
+                                            select
+                                            name="gender"
+                                            label="Gender"
+                                            id="gender"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.gender}
+                                            error={errors.gender && touched.gender}
+                                            helperText={touched.gender && errors.gender}
+                                        >
+                                            {GENDERS_LIST.map((gender_type, index) => (
+                                                <MenuItem key={index} value={gender_type}>
+                                                    {gender_type}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
                                 </Grid>
-                                {/** end of user details grid **/}
-                                <Grid
-                                    item
-                                    container
-                                    direction="row"
-                                    className={classes.buttonBox}
-                                >
-                                    <Grid item>
-                                        <Button
-                                            type="submit"
+                                <Grid item container direction="row" spacing={2}>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
                                             variant="outlined"
-                                            size="medium"
-                                            startIcon={<SaveIcon />}
-                                            form="userInputForm"
-                                            disabled={isSubmitting}
-                                        >
-                                            Save
-									</Button>
+                                            required
+                                            id="first_name"
+                                            name="first_name"
+                                            label="First Name"
+                                            value={values.first_name}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={errors.first_name && touched.first_name}
+                                            helperText={touched.first_name && errors.first_name}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            id="last_name"
+                                            name="last_name"
+                                            label="Last Name"
+                                            required
+                                            value={values.last_name}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={errors.last_name && touched.last_name}
+                                            helperText={touched.last_name && errors.last_name}
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid item sm>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        id="id_number"
+                                        name="id_number"
+                                        label="ID Number"
+                                        required
+                                        value={values.id_number}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        error={errors.id_number && touched.id_number}
+                                        helperText={touched.id_number && errors.id_number}
+                                    />
+                                </Grid>
+                                <Grid item container direction="row" spacing={2}>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            id="personal_phone_number"
+                                            name="personal_phone_number"
+                                            label="Personal Phone Number"
+                                            required
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            helperText={touched.personal_phone_number && errors.personal_phone_number}
+                                            error={errors.personal_phone_number && touched.personal_phone_number}
+                                            value={values.personal_phone_number}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            id="work_phone_number"
+                                            name="work_phone_number"
+                                            label="Work Phone Number"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            helperText={touched.work_phone_number && errors.work_phone_number}
+                                            error={errors.work_phone_number && touched.work_phone_number}
+                                            value={values.work_phone_number}
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" spacing={2}>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            name="primary_email"
+                                            label="Primary Email"
+                                            id="primary_email"
+                                            required
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.primary_email}
+                                            error={errors.primary_email && touched.primary_email}
+                                            helperText={touched.primary_email && errors.primary_email}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            name="other_email"
+                                            label="Other Email"
+                                            id="other_email"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.other_email}
+                                            error={errors.other_email && touched.other_email}
+                                            helperText={touched.other_email && errors.other_email}
+                                        />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                        </form>
-                    )}
+                            {/** end of user details grid **/}
+                            <Grid
+                                item
+                                container
+                                direction="row"
+                                className={classes.buttonBox}
+                            >
+                                <Grid item>
+                                    <Button
+                                        type="submit"
+                                        variant="outlined"
+                                        size="medium"
+                                        startIcon={<SaveIcon />}
+                                        form="userPersonalInfoInputForm"
+                                        disabled={isSubmitting}
+                                    >
+                                        Save
+									</Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </form>
+                )}
             </Formik>
             <Formik
                 initialValues={{ password: '', confirm_password: '' }}
@@ -404,107 +405,110 @@ let UserInputForm = (props) => {
                     handleSubmit,
                     isSubmitting,
                 }) => (
-                        <form
-                            className={classes.form}
-                            method="post"
-                            id="changePasswordForm"
-                            noValidate
-                            onSubmit={handleSubmit}
+                    <form
+                        className={classes.form}
+                        method="post"
+                        id="changePasswordForm"
+                        noValidate
+                        onSubmit={handleSubmit}
+                    >
+                        <Grid
+                            container
+                            justify="center"
+                            alignItems="center"
+                            direction="column"
                         >
+                            {
+                                status && status.msg && (
+                                    <CustomSnackbar
+                                        variant={status.sent ? "success" : "error"}
+                                        message={status.msg}
+                                    />
+                                )
+                            }
+                            {
+                                isSubmitting && (<CustomCircularProgress open={true} dialogTitle="Updating password..." />)
+                            }
                             <Grid
-                                container
                                 justify="center"
-                                alignItems="center"
+                                container
+                                item
                                 direction="column"
+                                spacing={2}
                             >
-                                {
-                                    status && status.msg && (
-                                        <CustomSnackbar
-                                            variant={status.sent ? "success" : "error"}
-                                            message={status.msg}
-                                        />
-                                    )
-                                }
-                                <Grid
-                                    justify="center"
-                                    container
-                                    item
-                                    direction="column"
-                                    spacing={2}
-                                >
-                                    <Grid item>
-                                        <Typography>Change Password</Typography>
-                                    </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                required
-                                                type="password"
-                                                variant="outlined"
-                                                name="password"
-                                                label="New Password"
-                                                id="password"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.password}
-                                                error={errors.password && touched.password}
-                                                helperText={touched.password && errors.password}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                type="password"
-                                                required
-                                                variant="outlined"
-                                                name="confirm_password"
-                                                label="Confirm New Password"
-                                                id="confirm_password"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.confirm_password}
-                                                error={errors.confirm_password && touched.confirm_password}
-                                                helperText={touched.confirm_password && errors.confirm_password}
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                <Grid item>
+                                    <Typography>Change Password</Typography>
                                 </Grid>
-                                {/** end of user details grid **/}
-                                <Grid
-                                    item
-                                    container
-                                    direction="row"
-                                    className={classes.buttonBox}
-                                >
-                                    <Grid item>
-                                        <Button
-                                            type="submit"
+                                <Grid item container direction="row" spacing={2}>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            type="password"
                                             variant="outlined"
-                                            size="medium"
-                                            startIcon={<SaveIcon />}
-                                            form="changePasswordForm"
-                                            disabled={isSubmitting}
-                                        >
-                                            Update
-									    </Button>
+                                            name="password"
+                                            label="New Password"
+                                            id="password"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.password}
+                                            error={errors.password && touched.password}
+                                            helperText={touched.password && errors.password}
+                                        />
                                     </Grid>
-                                    <Grid item>
-                                        <Button
-                                            color="secondary"
-                                            variant="contained"
-                                            size="medium"
-                                            startIcon={<CancelIcon />}
-                                            onClick={() => history.goBack()}
-                                            disableElevation
-                                        >
-                                            Cancel
-									    </Button>
+                                    <Grid item xs={12} sm>
+                                        <TextField
+                                            fullWidth
+                                            type="password"
+                                            required
+                                            variant="outlined"
+                                            name="confirm_password"
+                                            label="Confirm New Password"
+                                            id="confirm_password"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.confirm_password}
+                                            error={errors.confirm_password && touched.confirm_password}
+                                            helperText={touched.confirm_password && errors.confirm_password}
+                                        />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                        </form>
-                    )}
+                            {/** end of user details grid **/}
+                            <Grid
+                                item
+                                container
+                                direction="row"
+                                className={classes.buttonBox}
+                            >
+                                <Grid item>
+                                    <Button
+                                        type="submit"
+                                        variant="outlined"
+                                        size="medium"
+                                        startIcon={<SaveIcon />}
+                                        form="changePasswordForm"
+                                        disabled={isSubmitting}
+                                    >
+                                        Update
+									    </Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        color="secondary"
+                                        variant="contained"
+                                        size="medium"
+                                        startIcon={<CancelIcon />}
+                                        onClick={() => history.goBack()}
+                                        disableElevation
+                                    >
+                                        Cancel
+									    </Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </form>
+                )}
             </Formik>
         </div>
     );

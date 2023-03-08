@@ -62,7 +62,7 @@ const mapStateToProps = (state, ownProps) => {
 		properties: state.properties,
 		propertyUnitsToShow: propertyUnitsToShow,
 		tenantsToShow: tenantsToShow,
-		leaseUnitCharges: state.propertyUnitCharges.filter(({ lease_id }) => lease_id === leaseToEdit.id),
+		leaseUnitCharges: state.propertyUnitCharges.filter(({ unit_id }) => unit_id === leaseToEdit.unit_id),
 	};
 };
 const mapDispatchToProps = (dispatch) => {

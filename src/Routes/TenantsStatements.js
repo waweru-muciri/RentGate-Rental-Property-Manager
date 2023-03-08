@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy } from "react";
 import Layout from "../components/PrivateLayout";
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
@@ -8,8 +8,8 @@ import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import TenantsChargesStatement from "./TenantsChargesStatement";
-import TenantsPaymentsStatement from "./TenantsPaymentsStatement";
 import { parse } from "date-fns";
+const TenantsPaymentsStatement = lazy(() => import('./TenantsPaymentsStatement'));
 
 let TenantStatementsPage = ({
     transactions,

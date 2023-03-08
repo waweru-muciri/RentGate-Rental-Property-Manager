@@ -68,8 +68,13 @@ let MainPage = ({
         async function (user) {
           if (user) {
             //get details about user
-            const userDetails = await getFirebaseUserDetails(user)
-            setUser(userDetails)
+            try {
+              const userDetails = await getFirebaseUserDetails(user)
+              setUser(userDetails)
+            } catch (error) {
+              setUser(null);
+              history.push("/login");
+            }
           } else {
             // User is signed out.
             setUser(null);

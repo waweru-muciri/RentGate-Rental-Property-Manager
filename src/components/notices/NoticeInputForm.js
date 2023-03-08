@@ -1,7 +1,6 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-import MenuItem from "@material-ui/core/MenuItem";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import CustomSnackbar from '../CustomSnackbar'
@@ -12,6 +11,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { format, startOfToday } from "date-fns";
+import CustomCircularProgress from "../CustomCircularProgress";
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
@@ -93,6 +93,9 @@ const NoticeInputForm = (props) => {
                   message={status.msg}
                 />
               )
+            }
+            {
+              isSubmitting && (<CustomCircularProgress open={true} />)
             }
             <Grid item>
               <Typography color="textSecondary" component="p">

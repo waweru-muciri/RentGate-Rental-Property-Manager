@@ -5,59 +5,74 @@ const monthsInYear = eachMonthOfInterval({
 	end: endOfYear(startOfToday()),
 })
 //general contact titles
+const TITLES_LIST = ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"]
+const GENDERS_LIST = ["Male", "Female", "Unspecified"];
+const EXPENSES_CATEGORIES = [
+	'Security Deposit Refund',
+	'Water Deposit Refund',
+	'Management Fees',
+	'Utilities',
+	'Taxes',
+	'Mortgage',
+	'Office',
+	'Maintenance & Cleaning',
+	'Advertising',
+	'Insurance',
+	'Legal & Other Professional Fees',
+	'Auto & Travel',
+	'Supplies',
+	'Other Refund',
+	'Repairs',
+	'Other'
+]
+const PROPRERTY_TYPES = [
+	"Residential",
+	"Condo/Townhouse",
+	"Multi-family",
+	"Single-family",
+]
+const UNIT_TYPES = [
+	"Bed Sitter",
+	"One Bedroom",
+	"Two Bedroom",
+	"Single Room",
+	"Double Room",
+	"Shop",
+	"Other",
+];
+const LEASE_OPTIONS = [
+	"Fixed",
+	"Fixed w/rollover",
+];
+const METER_TYPES = ["Electric", "Sewer", "Water"];
+const FREQUENCY_OPTIONS = ["Per Day", "Week", "Month", "Quarter", "Half Year", "Year"];
+const PAYMENT_FREQUENCY_OPTIONS = ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"];
+
+//functions to get the above values
 export function getContactTitles() {
-	return ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"];
+	return TITLES_LIST;
 }
 
 export function getGendersList() {
-	let gendersList = ["Male", "Female", "Not Specified"];
-	return gendersList;
+	return GENDERS_LIST;
 }
 
 export function getExpensesCategories() {
-	return [
-		'Taxes',
-		'Utilities',
-		'Mortgage',
-		'Office',
-		'Entertainment',
-		'Maintenance & Cleaning',
-		'Advertising',
-		'Insurance',
-		'Legal & Other Professional Fees',
-		'Auto & Travel',
-		'Management Fees',
-		'Supplies',
-		'Repairs',
-		'Other'
-	]
+	return EXPENSES_CATEGORIES;
 }
 
 //general property types
 export function getPropertyTypes() {
-	return [
-		"Residential",
-		"Condo/Townhouse",
-		"Multi-family",
-		"Single-family",
-	];
+	return PROPRERTY_TYPES;
 }
 
 //general unit types
 export function getUnitTypes() {
-	return [
-		"Bedsitter",
-		"One Bedroom",
-		"Two Bedroom",
-		"Single Room",
-		"Double Room",
-		"Shop",
-		"Other",
-	];
+	return UNIT_TYPES;
 }
 
 export function getPropertyBaths() {
-	let baths = [];
+	const baths = [];
 	for (let i = 1; i <= 5; i++) {
 		baths.push(i);
 	}
@@ -65,7 +80,7 @@ export function getPropertyBaths() {
 }
 
 export function getPropertyBeds() {
-	let beds = ["Studio"];
+	const beds = [];
 	for (let i = 1; i <= 5; i++) {
 		beds.push(i);
 	}
@@ -73,23 +88,19 @@ export function getPropertyBeds() {
 }
 
 export function getFrequencyOptions() {
-	return ["Per Day", "Week", "Month", "Quarter", "Half Year", "Year"];
+	return FREQUENCY_OPTIONS;
 }
 
 export function getMeterTypes() {
-	return ["Electric", "Sewer", "Water"];
+	return METER_TYPES;
 }
 
 export function getLeaseOptions() {
-	let lease_options = [
-		"Fixed",
-		"Fixed w/rollover",
-	];
-	return lease_options;
+	return LEASE_OPTIONS;
 }
 
 export function getPaymentOptions() {
-	return ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"];
+	return PAYMENT_FREQUENCY_OPTIONS;
 }
 
 export function getTransactionsFilterOptions() {

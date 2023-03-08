@@ -187,7 +187,7 @@ let DocumentsTemplatesPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography>Email Templates</Typography>
+                    <Typography variant="h6">Email Templates</Typography>
                 </Grid>
                 <Grid item xs={12}>
                     <CommonTable

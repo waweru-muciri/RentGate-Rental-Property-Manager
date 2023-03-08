@@ -14,6 +14,7 @@ import { commonStyles } from "../components/commonStyles";
 import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
 import { startOfToday, parse, subMonths, addMonths, getMonth, format, isSameMonth } from 'date-fns'
 import { ExportStatementToExcelBtn } from "../components/ExportToExcelBtn";
+import InfoDisplayPaper from "../components/InfoDisplayPaper";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -21,10 +22,12 @@ const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 let PropertyIncomeStatement = ({
     transactions,
     expenses,
+    leases,
     properties,
 }) => {
     const classes = commonStyles();
     let [expensesItems, setExpensesItems] = useState([]);
+    let [leaseItems, setLeaseItems] = useState([]);
     let [paymentItems, setPaymentItems] = useState([]);
     let [netIncomeObject, setNetIncomeObject] = useState({});
     let [incomeStatements, setIncomeStatements] = useState([]);
@@ -158,14 +161,28 @@ let PropertyIncomeStatement = ({
         setPaymentItems(transactions)
     }, [transactions])
 
+    useEffect(() => {
+        setLeaseItems(leases)
+    }, [leases])
+
+    const TOTAL_SECURITY_DEPOSIT_LIABILITY = leaseItems.reduce((total, currentValue) => {
+        return total + parseFloat(currentValue.security_deposit) || 0
+    }, 0);
+    const TOTAL_WATER_DEPOSIT_LIABILITY = leaseItems.reduce((total, currentValue) => {
+        return total + parseFloat(currentValue.water_deposit) || 0
+    }, 0);
+
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
         let filteredTransactions = transactions
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-        setPaymentItems(filteredTransactions)
         const filteredExpenses = expenses
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        const filteredLeases = leases
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        setPaymentItems(filteredTransactions)
+        setLeaseItems(filteredLeases)
         setExpensesItems(filteredExpenses)
     };
 
@@ -175,6 +192,7 @@ let PropertyIncomeStatement = ({
         setFromFilter("month-to-date");
         setExpensesItems(expenses)
         setPaymentItems(transactions)
+        setLeaseItems(leases)
     };
 
     return (
@@ -322,110 +340,116 @@ let PropertyIncomeStatement = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item sm={12}>
-                    <div style={{ width: '100%' }}>
-                        <Box display="flex" key={'adadf'} flexDirection="row" p={1} bgcolor="grey.300">
-                            <Box key="first1" width={1} textAlign="left" flexGrow={1} p={1} >
-                                Income
+                <Grid item container sm={12} spacing={2}>
+                    <Grid item container direction="row" spacing={2}>
+                        <InfoDisplayPaper value={TOTAL_SECURITY_DEPOSIT_LIABILITY} title="Total Security Deposit Liability" />
+                        <InfoDisplayPaper value={TOTAL_WATER_DEPOSIT_LIABILITY} title="Total Water Deposit Liability" />
+                    </Grid>
+                    <Grid item sm={12}>
+                        <div style={{ width: '100%' }}>
+                            <Box display="flex" key={'adadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                                <Box key="first1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                    Income
                             </Box>
-                            {
-                                headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {headCell} (Ksh)
+                                {
+                                    headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {headCell} (Ksh)
                                     </Box>
-                                )
-                            }
-                        </Box>
-                        {
-                            incomeStatements.map((incomeStatement, incomeIndex) => {
-                                const otherColumns = headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {currencyFormatter.format(incomeStatement[headCell])}
-                                    </Box>
-                                )
-                                return (
-                                    <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
-                                        <Box textAlign="left" width={1} key={incomeIndex + "jl"} flexGrow={1} p={1} >
-                                            {incomeStatement['income_type']}
-                                        </Box>
-                                        {otherColumns}
-                                    </Box>
-                                )
-                            })
-                        }
-                    </div>
-                    <div style={{ width: '100%' }}>
-                        <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
-                            <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
-                                Expenses
-                            </Box>
-                            {
-                                headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {headCell}
-                                    </Box>
-                                )
-                            }
-                        </Box>
-                        {
-                            expensesStatements.map((expenseStatement, incomeIndex) => {
-                                const otherColumns = headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {currencyFormatter.format(expenseStatement[headCell] || 0)}
-                                    </Box>
-                                )
-                                return (
-                                    <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
-                                        <Box textAlign="left" width={1} key={incomeIndex + "iiajl"} flexGrow={1} p={1} >
-                                            {expenseStatement['expense_type']}
-                                        </Box>
-                                        {otherColumns}
-                                    </Box>
-                                )
-                            })
-                        }
-                    </div>
-                    <div style={{ width: '100%' }}>
-                        <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
-                            <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
-                                Net Income
-                            </Box>
-                            {
-                                headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {headCell}
-                                    </Box>
-                                )
-                            }
-                        </Box>
-                        {
-                            <Box display="flex" key={'kjb'} flexDirection="row" p={1} bgcolor="background.paper">
-                                <Box textAlign="left" width={1} key={"iiajl"} flexGrow={1} p={1} >
-                                    Net Income
-                            </Box>
-                                {headCells.map((headCell, index) =>
-                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        {currencyFormatter.format(netIncomeObject[headCell] || 0)}
-                                    </Box>
-                                )
+                                    )
                                 }
                             </Box>
+                            {
+                                incomeStatements.map((incomeStatement, incomeIndex) => {
+                                    const otherColumns = headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {currencyFormatter.format(incomeStatement[headCell])}
+                                        </Box>
+                                    )
+                                    return (
+                                        <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
+                                            <Box textAlign="left" width={1} key={incomeIndex + "jl"} flexGrow={1} p={1} >
+                                                {incomeStatement['income_type']}
+                                            </Box>
+                                            {otherColumns}
+                                        </Box>
+                                    )
+                                })
+                            }
+                        </div>
+                        <div style={{ width: '100%' }}>
+                            <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                                <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                    Expenses
+                            </Box>
+                                {
+                                    headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {headCell}
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+                            {
+                                expensesStatements.map((expenseStatement, incomeIndex) => {
+                                    const otherColumns = headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {currencyFormatter.format(expenseStatement[headCell] || 0)}
+                                        </Box>
+                                    )
+                                    return (
+                                        <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
+                                            <Box textAlign="left" width={1} key={incomeIndex + "iiajl"} flexGrow={1} p={1} >
+                                                {expenseStatement['expense_type']}
+                                            </Box>
+                                            {otherColumns}
+                                        </Box>
+                                    )
+                                })
+                            }
+                        </div>
+                        <div style={{ width: '100%' }}>
+                            <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                                <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                    Net Income
+                            </Box>
+                                {
+                                    headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {headCell}
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+                            {
+                                <Box display="flex" key={'kjb'} flexDirection="row" p={1} bgcolor="background.paper">
+                                    <Box textAlign="left" width={1} key={"iiajl"} flexGrow={1} p={1} >
+                                        Net Income
+                            </Box>
+                                    {headCells.map((headCell, index) =>
+                                        <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                            {currencyFormatter.format(netIncomeObject[headCell] || 0)}
+                                        </Box>
+                                    )
+                                    }
+                                </Box>
 
-                        }
-                    </div>
+                            }
+                        </div>
+                    </Grid>
                 </Grid>
             </Grid>
         </Layout>
     );
 };
 
+
 const mapStateToProps = (state, ownProps) => {
     return {
         transactions: state.transactions,
         expenses: state.expenses,
         properties: state.properties,
-        error: state.error,
-        match: ownProps.match,
+        leases: state.leases,
     };
 };
 
