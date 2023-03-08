@@ -480,7 +480,7 @@ export function handleItemFormSubmit(data, url) {
                                 );
                                 break;
 
-                            case "users":
+                            case "communication_emails":
                                 dispatch(communicationEmailsActions.editCommunicationEmail(modifiedObject));
                                 break;
 

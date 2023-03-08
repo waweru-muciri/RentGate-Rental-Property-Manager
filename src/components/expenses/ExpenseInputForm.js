@@ -7,23 +7,35 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { getExpensesCategories } from "../../assets/commonAssets";
+import moment from "moment";
 
+const defaultDate = moment().format("YYYY-MM-DD");
 
 const VacatingNoticeSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
-  amount: Yup.number().required("Expenditure Amount is required"),
+  amount: Yup.number().min(0).required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
   property: Yup.string().required("Property is Required"),
+  expense_notes: Yup.string().default(""),
 });
 
-const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
+const ExpenseInputForm = (props) => {
+  const { properties, handleItemSubmit } = props
   const history = useHistory();
   const classes = commonStyles();
   const expenseCategories = getExpensesCategories();
+  const expenseToEdit =  typeof props.expenseToEdit !== 'undefined' ? props.expenseToEdit : {}
+  const expenseValues =  {
+		expense_notes: expenseToEdit.expense_notes ||  '',
+		expense_date: expenseToEdit.expense_date || defaultDate,
+		amount: expenseToEdit.amount || 0,
+		property: expenseToEdit.property || '',
+		type: expenseToEdit.type || '',
+	}
 
   return (
     <Formik
-      initialValues={expenseToEdit}
+      initialValues={expenseValues}
       enableReinitialize
       validationSchema={VacatingNoticeSchema}
       onSubmit={(values, { resetForm }) => {

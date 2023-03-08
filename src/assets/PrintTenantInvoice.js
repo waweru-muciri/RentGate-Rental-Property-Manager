@@ -9,7 +9,7 @@ export default function (props) {
         details: notice.notice_details,
         tenant_name: notice.tenant_name,
         tenant_email: notice.contact_email,
-        tenant_phone_number: notice.personal_phone_number,
+        tenant_phone_number: notice.personal_mobile_number,
         landlord_name: notice.landlord_name || 'Landlord Name',
         landlord_phone_number: notice.landlord_phone_number || 'Landlord Phone Number',
         landlord_email: notice.landlord_email || 'landlordemail@email.com',

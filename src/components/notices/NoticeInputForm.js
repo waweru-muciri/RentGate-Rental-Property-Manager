@@ -6,6 +6,8 @@ import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
+import moment from "moment";
+const defaultDate = moment().format("YYYY-MM-DD");
 
 const VacatingNoticeSchema = Yup.object().shape({
   tenant: Yup.string().required("Tenant is required"),
@@ -18,11 +20,17 @@ const VacatingNoticeSchema = Yup.object().shape({
 
 const NoticeInputForm = (props) => {
   const history = useHistory();
+  const { contacts, users, submitForm } = props;
   const classes = commonStyles();
-
-  const { contacts, users, noticeToEdit, submitForm } = props;
-
-  let noticeValues = { ...noticeToEdit };
+  const noticeToEdit = typeof props.noticeToEdit !== 'undefined' ? props.noticeToEdit :  {}
+  let noticeValues ={
+		  id: noticeToEdit.id, 
+		  notice_details: noticeToEdit.notice_details, 
+		  notification_date: noticeToEdit.notification_date || defaultDate, 
+		  vacating_date: noticeToEdit.vacating_date || defaultDate, 
+		  actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate, 
+		  landlord: noticeToEdit.landlord || '', 
+		  tenant: noticeToEdit.tenant || '' };
 
   return (
     <Formik
@@ -30,13 +38,13 @@ const NoticeInputForm = (props) => {
       validationSchema={VacatingNoticeSchema}
       onSubmit={(values, { resetForm }) => {
         const vacatingNotice = {
+          id: values.id,
           tenant: values.tenant,
           landlord: values.landlord,
           notice_details: values.notice_details,
           vacating_date: values.vacating_date,
           actual_vacated_date: values.actual_vacated_date,
           notification_date: values.notification_date,
-          notice_details: values.notice_details,
         };
         submitForm(vacatingNotice, "notices").then(
           (response) => {

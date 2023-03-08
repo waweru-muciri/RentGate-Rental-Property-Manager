@@ -46,7 +46,6 @@ const headCells = [
 ];
 
 let RentRollPage = ({
-    currentUser,
     transactions,
     properties,
     contacts,
@@ -56,13 +55,13 @@ let RentRollPage = ({
     let [filteredStatementItems, setFilteredStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState(moment().format('YYYY-MM-DD'));
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
+        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date >  transaction1.transaction_date ).filter((transaction) => moment(transaction.transaction_date).month() === moment().month()).map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );
@@ -82,7 +81,7 @@ let RentRollPage = ({
                 transactionDetails.property_price = property.price
             }
             transactionDetails.status = moment(transaction.lease_start).month() === moment().month() ? 'Active' : 'Inactive'
-            transactionDetails.days_left = moment(transaction.lease_end).diff(moment(), 'days')
+			transactionDetails.days_left = moment(transaction.lease_end).diff(moment(), 'days')
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
@@ -130,7 +129,7 @@ let RentRollPage = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredStatementItems(statementItems);
+        setStatementItems(statementItems);
         setPropertyFilter("");
         setContactFilter("");
         setAssignedToFilter("");
@@ -364,7 +363,6 @@ const mapStateToProps = (state, ownProps) => {
         transactions: state.transactions,
         contacts: state.contacts,
         users: state.users,
-        currentUser: state.currentUser,
     };
 };
 

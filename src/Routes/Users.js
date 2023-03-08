@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
+import BlockIcon from '@material-ui/icons/Block';
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
@@ -18,11 +19,10 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 
-const STATUS_LIST = ["Active", "Inactive"];
+const STATUS_LIST = [{disabled : false, displayName: "Active" } , {disabled : true, displayName: "Inactive"}];
 const ROLES_LIST = [];
 
 const usersTableHeadCells = [
-	{ id: "email", numeric: false, disablePadding: true, label: "Email" },
 	{
 		id: "first_name",
 		numeric: false,
@@ -35,19 +35,20 @@ const usersTableHeadCells = [
 		disablePadding: true,
 		label: "Last Name",
 	},
-	{ id: "status", numeric: false, disablePadding: true, label: "Status" },
 	{
 		id: "phone_number",
 		numeric: false,
 		disablePadding: true,
 		label: "Phone Number",
 	},
+	{ id: "primary_email", numeric: false, disablePadding: true, label: "Primary Email" },
 	{
-		id: "date_created",
+		id: "id_number",
 		numeric: false,
 		disablePadding: true,
-		label: "Date Created",
+		label: "ID Number",
 	},
+	{ id: "disabled", numeric: false, disablePadding: true, label: "Status" },
 ];
 
 let UsersPage = ({
@@ -78,6 +79,18 @@ let UsersPage = ({
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the users here according to search criteria
+        let filteredUsers = userItems
+            .filter(({ first_name }) =>
+                !firstNameFilter ? true : first_name.toLowerCase().includes(firstNameFilter.toLowerCase())
+            )
+            .filter(({ last_name }) =>
+                !lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
+            )
+            .filter((user) =>
+                !statusFilter ? true : user.disabled === statusFilter
+            )
+
+        setUserItems(filteredUsers);
 	};
 
 	const resetSearchForm = (event) => {
@@ -118,7 +131,6 @@ let UsersPage = ({
 							component={Link}
 							to={`${match.url}/new`}
 						>
-							{" "}
 							NEW
 						</Button>
 					</Grid>
@@ -131,9 +143,21 @@ let UsersPage = ({
 							startIcon={<EditIcon />}
 							disabled={selected.length <= 0}
 							component={Link}
-							to={`${match.url}${selected[0]}/edit`}
+							to={`${match.url}/${selected[0]}/edit`}
 						>
 							Edit
+						</Button>
+					</Grid>
+					<Grid item>
+						<Button
+							type="button"
+							color="primary"
+							variant="contained"
+							size="medium"
+							startIcon={<BlockIcon />}
+							disabled={selected.length <= 0}
+						>
+						{selected.length <=0 ? "Disable" :  selected.length[0].disabled ? "Enable" : "Disable" }	
 						</Button>
 					</Grid>
 					<Grid item>
@@ -173,7 +197,7 @@ let UsersPage = ({
 										value={firstNameFilter || ""}
 										onChange={(event) => {
 											setFirstNameFilter(
-												event.target.value
+												event.target.value.trim()
 											);
 										}}
 									/>
@@ -187,7 +211,7 @@ let UsersPage = ({
 										id="last_name"
 										onChange={(event) => {
 											setLastNameFilter(
-												event.target.value
+												event.target.value.trim()
 											);
 										}}
 										value={lastNameFilter || ""}
@@ -233,12 +257,12 @@ let UsersPage = ({
 										}}
 										value={statusFilter || ""}
 									>
-										{STATUS_LIST.map((status, index) => (
+										{STATUS_LIST.map((statusObject, index) => (
 											<MenuItem
 												key={index}
-												value={status}
+												value={statusObject.disabled}
 											>
-												{status}
+												{statusObject.displayName}
 											</MenuItem>
 										))}
 									</TextField>
@@ -296,6 +320,7 @@ let UsersPage = ({
 					<CommonTable
 						selected={selected}
 						setSelected={setSelected}
+						deleteUrl={'users'}
 						rows={userItems}
 						headCells={usersTableHeadCells}
 						handleDelete={handleItemDelete}

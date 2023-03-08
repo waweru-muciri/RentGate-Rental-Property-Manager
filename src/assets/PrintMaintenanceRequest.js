@@ -8,7 +8,7 @@ export default function (props) {
     const maintenanceRequestDetails = {
         tenant_name: maintenanceRequest.tenant_name,
         tenant_email: maintenanceRequest.contact_email,
-        tenant_phone_number: maintenanceRequest.personal_phone_number,
+        tenant_phone_number: maintenanceRequest.personal_mobile_number,
         landlord_name: maintenanceRequest.landlord_name || 'Landlord Name',
         landlord_phone_number: maintenanceRequest.landlord_phone_number || 'Landlord Phone Number',
         landlord_email: maintenanceRequest.landlord_email || 'landlordemail@email.com',

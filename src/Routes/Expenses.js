@@ -42,6 +42,7 @@ let ExpensesPage = ({
 }) => {
     const classes = commonStyles();
     let [expenseItems, setExpenseItems] = useState([]);
+    let [filteredExpenseItems, setFilteredExpenseItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [propertyFilter, setPropertyFilter] = useState("");
@@ -49,8 +50,20 @@ let ExpensesPage = ({
 
 
     useEffect(() => {
-        setExpenseItems(getMappedExpenses());
-    }, [expenses.length]);
+        const mappedExpenses = expenses.sort((expense1, expense2) => expense2.expense_date > expense1.expense_date).map((expense) => {
+            const property = properties.find(
+                (property) => property.id === expense.property
+            );
+            const expenseDetails = {};
+            expenseDetails.property_ref =
+                typeof property !== "undefined" ? property.ref : null;
+            expenseDetails.property =
+                typeof property !== "undefined" ? property.id : null;
+            return Object.assign({}, expense, expenseDetails);
+        });
+        setExpenseItems(mappedExpenses);
+        setFilteredExpenseItems(mappedExpenses);
+    }, [expenses, properties]);
 
     const exportVacatingExpensesToExcel = () => {
         let items = expenseItems.filter(({ id }) => selected.includes(id));
@@ -62,25 +75,10 @@ let ExpensesPage = ({
         );
     };
 
-    const getMappedExpenses = () => {
-        const mappedExpenses = expenses.map((expense) => {
-            const property = properties.find(
-                (property) => property.id === expense.property
-            );
-            const expenseDetails = {};
-            expenseDetails.property_ref =
-                typeof property !== "undefined" ? property.ref : null;
-            expenseDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, expense, expenseDetails);
-        });
-        return mappedExpenses;
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the expenses here according to search criteria
-        let filteredExpenses = getMappedExpenses()
+        let filteredExpenses = expenseItems 
             .filter(({ expense_date }) =>
                 !fromDateFilter ? true : expense_date >= fromDateFilter
             )
@@ -91,12 +89,12 @@ let ExpensesPage = ({
                 !propertyFilter ? true : property === propertyFilter
             )
 
-        setExpenseItems(filteredExpenses);
+        setFilteredExpenseItems(filteredExpenses);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setExpenseItems(getMappedExpenses());
+        setFilteredExpenseItems(expenseItems);
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("");
@@ -298,7 +296,7 @@ let ExpensesPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={expenseItems}
+                        rows={filteredExpenseItems}
                         headCells={expensesTableHeadCells}
                         handleDelete={handleItemDelete}
                         deleteUrl={"expenses"}

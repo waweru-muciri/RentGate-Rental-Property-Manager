@@ -116,7 +116,6 @@ let ContactInputForm = (props) => {
 					skype_url: values.skype_url,
 					facebook_url: values.facebook_url,
 				};
-				console.log("Contact object => ", contact);
 				//first upload the image to firebase
 				if (values.contact_images.length) {
 					//if the user had previously uploaded an avatar
@@ -126,7 +125,7 @@ let ContactInputForm = (props) => {
 						deleteUploadedFileByUrl(values.contact_avatar_url);
 					}
 					//upload the first and only image in the contact images array
-					var fileDownloadUrl  = uploadFilesToFirebase([values.contact_images[0]])
+					var fileDownloadUrl = uploadFilesToFirebase([values.contact_images[0]])
 					contact.contact_avatar_url = fileDownloadUrl;
 				}
 
@@ -418,7 +417,7 @@ let ContactInputForm = (props) => {
 											helperText={
 												errors.personal_mobile_number
 											}
-										value={values.personal_mobile_number}
+											value={values.personal_mobile_number}
 										/>
 									</Grid>
 									<Grid item >
@@ -431,7 +430,7 @@ let ContactInputForm = (props) => {
 											onChange={handleChange}
 											onBlur={handleBlur}
 											helperText="Work Mobile Number"
-										value={values.work_mobile_number}
+											value={values.work_mobile_number}
 										/>
 									</Grid>
 									<Grid item >
@@ -444,7 +443,7 @@ let ContactInputForm = (props) => {
 											onChange={handleChange}
 											onBlur={handleBlur}
 											helperText="Custom Mobile Number"
-										value={values.custom_mobile_number}
+											value={values.custom_mobile_number}
 										/>
 									</Grid>
 									{/* start of contact emails column */}

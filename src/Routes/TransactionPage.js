@@ -13,11 +13,11 @@ let TransactionPage = (props) => {
 	);
 	transactionToEdit = typeof transactionToEdit !== 'undefined' ? transactionToEdit : {}
 	let pageTitle = transactionToEditId
-		? "Edit Transaction"
-		: "New Transaction";
+		? "Edit Lease"
+		: "New Lease";
 
 	return (
-		<Layout pageTitle="Transaction Details">
+		<Layout pageTitle="Lease Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading paddingLeft={2} text={pageTitle} />

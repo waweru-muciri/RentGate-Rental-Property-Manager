@@ -6,16 +6,11 @@ import { connect } from "react-redux";
 import NoticeInputForm from "../components/notices/NoticeInputForm";
 import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
-import moment from "moment";
-
-
-const defaultDate = moment().format("YYYY-MM-DD");
 
 let NoticePage = (props) => {
     const { notices, users, contacts, submitForm } = props;
     let noticeToEditId = props.match.params.noticeId;
     let noticeToEdit = notices.find(({ id }) => id === noticeToEditId);
-    noticeToEdit = typeof noticeToEditId !== 'undefined' ? Object.assign(noticeToEdit, { actual_vacated_date: noticeToEdit.actual_vacated_date ? noticeToEdit.actual_vacated_date : defaultDate }) : { notification_date: defaultDate, vacating_date: defaultDate, actual_vacated_date: defaultDate, landlord: '', tenant: '' };
 
     let pageTitle = noticeToEditId ? "Edit Notice" : "New Notice";
 

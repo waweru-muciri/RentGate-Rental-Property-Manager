@@ -37,7 +37,7 @@ const headCells = [
         label: "Tenant Name",
     },
     {
-        id: "landlord",
+        id: "landlord_name",
         numeric: false,
         disablePadding: true,
         label: "Landlord Name",
@@ -97,6 +97,7 @@ function TabPanel(props) {
 }
 
 let TransactionPage = ({
+    currentUser,
     isLoading,
     transactions,
     properties,
@@ -107,23 +108,16 @@ let TransactionPage = ({
 }) => {
     const classes = commonStyles();
     let [transactionItems, setTransactionItems] = useState([]);
+    let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
     const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
-        setTransactionItems(getMappedTransactions());
-    }, [transactions, contacts]);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
-
-    const getMappedTransactions = () => {
-        const mappedTransactions = transactions.map((transaction) => {
+        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );
@@ -138,7 +132,7 @@ let TransactionPage = ({
                 typeof tenant !== "undefined"
                     ? tenant.first_name + " " + tenant.last_name
                     : "";
-            transactionDetails.landlord =
+            transactionDetails.landlord_name =
                 typeof landlord !== "undefined"
                     ? landlord.first_name + " " + landlord.last_name
                     : "";
@@ -150,7 +144,12 @@ let TransactionPage = ({
                 typeof property !== "undefined" ? property.id : null;
             return Object.assign({}, transaction, transactionDetails);
         });
-        return mappedTransactions;
+        setTransactionItems(mappedTransactions);
+        setFilteredTransactionItems(mappedTransactions);
+    }, [transactions, contacts, properties, users]);
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
     };
 
     const exportTransactionsRecordsToExcel = () => {
@@ -166,7 +165,7 @@ let TransactionPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = getMappedTransactions()
+        let filteredTransactions = transactionItems
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -179,12 +178,12 @@ let TransactionPage = ({
             .filter(({ landlord }) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setTransactionItems(filteredTransactions);
+        setFilteredTransactionItems(filteredTransactions);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setTransactionItems(getMappedTransactions());
+        setFilteredTransactionItems(transactionItems);
         setPropertyFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -406,7 +405,7 @@ let TransactionPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={transactionItems}
+                        rows={filteredTransactionItems}
                         headCells={headCells}
                         handleDelete={handleDelete}
                         deleteUrl={"transactions"}
@@ -422,8 +421,8 @@ const mapStateToProps = (state, ownProps) => {
     return {
         transactions: state.transactions,
         users: state.users,
-        expenses: state.expenses,
         currentUser: state.currentUser,
+        expenses: state.expenses,
         properties: state.properties,
         contacts: state.contacts,
         isLoading: state.isLoading,

@@ -8,8 +8,8 @@ export default function (props) {
     const noticeDetails = {
         details: notice.notice_details,
         tenant_name: notice.tenant_name,
-        tenant_email: notice.contact_email,
-        tenant_phone_number: notice.personal_phone_number,
+        tenant_email: notice.tenant_email,
+        tenant_phone_number: notice.tenant_mobile_number,
         landlord_name: notice.landlord_name || 'Landlord Name',
         landlord_phone_number: notice.landlord_phone_number || 'Landlord Phone Number',
         landlord_email: notice.landlord_email || 'landlordemail@email.com',
@@ -39,7 +39,7 @@ export default function (props) {
 
     },
     { text: `OBJECT: NOTICE OF TERMINATION OF LEASE ON ${noticeDetails.vacating_date}`, bold: true, fontSize: 10, decoration: "underline", margin: [0, 6, 0, 6] },
-    { text: `Dear, ${noticeDetails.tenant_name}, Unit ${noticeDetails.property_ref}`, bold: true, fontSize: 10, },
+    { text: `Dear, ${noticeDetails.tenant_name}, Unit:  ${noticeDetails.property_ref}`, bold: true, fontSize: 10, },
     { text: noticeDetails.details, margin: [0, 10, 0, 10] },
     { text: 'Sincerely,', },
     { text: noticeDetails.landlord_name, },

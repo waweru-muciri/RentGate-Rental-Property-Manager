@@ -32,7 +32,6 @@ const defaultDate = moment().format("YYYY-MM-DD");
 let MaintenanceRequestInputForm = (props) => {
 	let classes = commonStyles();
 	const { handleItemSubmit, history, contacts } = props
-	console.log('Props => ', props)
 	let maintenanceRequest = typeof props.maintenanceRequestToEdit !== 'undefined' ? props.maintenanceRequestToEdit : {};
 	let maintenanceRequestValues = {
 		id: maintenanceRequest.id,
@@ -69,13 +68,12 @@ let MaintenanceRequestInputForm = (props) => {
 				};
 				handleItemSubmit(maintenanceRequest, "maintenance-requests").then(
 					(response) => {
-						console.log("Saved maintenance request successfully => ", response);
-					}
-				);
 				resetForm({});
 				if (values.id) {
 					history.goBack();
 				}
+					}
+				);
 			}}
 		>
 			{({ values,

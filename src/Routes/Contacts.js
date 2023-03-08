@@ -53,7 +53,7 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Date of Birth",
     },
-    { id: "personal_phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
+    { id: "personal_mobile_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
 
 ];
@@ -75,6 +75,7 @@ function TabPanel(props) {
 }
 
 let ContactsPage = ({
+    currentUser,
     isLoading,
     contacts,
     users,
@@ -82,9 +83,10 @@ let ContactsPage = ({
     error,
 }) => {
     let [contactItems, setContactItems] = useState([]);
+    let [filteredContactItems, setFilteredContactItems] = useState([]);
     let [firstNameFilter, setFirstNameFilter] = useState("");
     let [lastNameFilter, setLastNameFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [genderFilter, setGenderFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -98,10 +100,11 @@ let ContactsPage = ({
             return Object.assign({}, contact, landlordDetails);
         });
         setContactItems(mappedContacts);
+        setFilteredContactItems(mappedContacts);
     }, [contacts, users]);
 
     const exportContactRecordsToExcel = () => {
-        let items = contacts.filter(({ id }) => selected.includes(id));
+        let items = contactItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
             "Contacts  Records",
             "Contact Data",
@@ -113,7 +116,7 @@ let ContactsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the contacts here according to search criteria
-        let filteredContacts = contacts
+        let filteredContacts = contactItems
             .filter(({ first_name }) =>
                 !firstNameFilter ? true : first_name.toLowerCase().includes(firstNameFilter.toLowerCase())
             )
@@ -127,12 +130,12 @@ let ContactsPage = ({
                 !assignedToFilter ? true : assigned_to === assignedToFilter
             );
 
-        setContactItems(filteredContacts);
+        setFilteredContactItems(filteredContacts);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setContactItems(contacts);
+        setFilteredContactItems(contactItems);
         setFirstNameFilter("");
         setLastNameFilter("");
         setAssignedToFilter("");
@@ -352,7 +355,7 @@ let ContactsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={contactItems}
+                        rows={filteredContactItems}
                         headCells={contactsTableHeadCells}
                         handleDelete={handleDelete}
                         deleteUrl={"contacts"}
@@ -366,6 +369,7 @@ let ContactsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        currentUser: state.currentUser,
         users: state.users,
         contacts: state.contacts,
         isLoading: state.isLoading,

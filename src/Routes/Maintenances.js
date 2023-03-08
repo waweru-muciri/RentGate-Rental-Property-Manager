@@ -59,6 +59,7 @@ let MaintenanceRequestsPage = ({
 	error,
 }) => {
 	let [maintenanceRequestItems, setMaintenanceRequestItems] = useState([]);
+	let [filteredMaintenanceRequestItems, setFilteredMaintenanceRequestItems] = useState([]);
 	let [fromDateFilter, setFromDateFilter] = useState("");
 	let [toDateFilter, setToDateFilter] = useState("");
 	let [contactFilter, setContactFilter] = useState("");
@@ -67,7 +68,7 @@ let MaintenanceRequestsPage = ({
 
 	const classes = commonStyles();
 
-	const getMappedMaintenanceRequests = () => {
+	useEffect(() => {
 		const mappedMaintenanceRequests = maintenanceRequests.map(
 			(maintenanceRequest) => {
 				const contactWithRequest = contacts.find(
@@ -100,12 +101,9 @@ let MaintenanceRequestsPage = ({
 				);
 			}
 		);
-		return mappedMaintenanceRequests;
-	};
-
-	useEffect(() => {
-		setMaintenanceRequestItems(getMappedMaintenanceRequests());
-	}, [maintenanceRequests, contacts]);
+		setMaintenanceRequestItems(mappedMaintenanceRequests);
+		setFilteredMaintenanceRequestItems(mappedMaintenanceRequests);
+	}, [maintenanceRequests, contacts, users, properties]);
 
 	const exportMaintenanceRequestRecordsToExcel = () => {
 		let items = maintenanceRequests.filter(({ id }) =>
@@ -122,7 +120,7 @@ let MaintenanceRequestsPage = ({
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the maintenanceRequests here according to search criteria
-		let filteredMaintenanceRequests = getMappedMaintenanceRequests()
+		let filteredMaintenanceRequests = maintenanceRequestItems
 			.filter(({ date_created }) =>
 				!fromDateFilter ? true : date_created >= fromDateFilter
 			)
@@ -136,12 +134,12 @@ let MaintenanceRequestsPage = ({
 				!statusFilter ? true : status === statusFilter
 			);
 
-		setMaintenanceRequestItems(filteredMaintenanceRequests);
+		setFilteredMaintenanceRequestItems(filteredMaintenanceRequests);
 	};
 
 	const resetSearchForm = (event) => {
 		event.preventDefault();
-		setMaintenanceRequestItems(getMappedMaintenanceRequests());
+		setFilteredMaintenanceRequestItems(maintenanceRequestItems);
 		setContactFilter("");
 		setStatusFilter("");
 		setFromDateFilter("");
@@ -371,7 +369,7 @@ let MaintenanceRequestsPage = ({
 					<CommonTable
 						selected={selected}
 						setSelected={setSelected}
-						rows={maintenanceRequestItems}
+						rows={filteredMaintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
 						handleDelete={handleDelete}
 						deleteUrl={"maintenance-requests"}

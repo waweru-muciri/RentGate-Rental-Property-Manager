@@ -17,10 +17,10 @@ let PropertyPage = (props) => {
 		);
 	}
 
-	let pageTitle = propertyToEditId ? "Edit Property" : "New Property";
+	let pageTitle = propertyToEditId ? "Edit Rental" : "Add Rental";
 
 	return (
-		<Layout pageTitle="Property Details">
+		<Layout pageTitle={pageTitle}>
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading paddingLeft={2} text={pageTitle} />
@@ -42,7 +42,6 @@ let PropertyPage = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		properties: state.properties,
-		error: state.error,
 	};
 };
 

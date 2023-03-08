@@ -6,24 +6,11 @@ import { connect } from "react-redux";
 import ExpenseInputForm from "../components/expenses/ExpenseInputForm";
 import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
-import moment from "moment";
-
-const defaultDate = moment().format("YYYY-MM-DD");
 
 let ExpensePage = (props) => {
     const { expenses, users, contacts, properties, handleItemSubmit } = props;
     let expenseToEditId = props.match.params.expenseId;
     let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId);
-    expenseToEdit =
-        typeof expenseToEdit === "undefined"
-            ? {
-                expense_notes: '',
-                expense_date: defaultDate,
-                amount: '',
-                property: '',
-                type: '',
-            }
-            : expenseToEdit;
     let pageTitle = expenseToEditId ? "Edit Expense" : "New Expense";
     return (
         <Layout pageTitle="Expense Details">

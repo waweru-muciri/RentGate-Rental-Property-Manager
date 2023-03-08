@@ -1,64 +1,12 @@
 /* Use PdfMake to generate a financial report. */
-
-
-// -- Get the raw data from another CodePen resource.
 //    And transform the data to the required format for aggregation and presentation.
 //    This retrieval happens asynchronously, but fast enough for the report
 //    generation button not to be compromised.
 let transformedLNRData = [];
 const xhrLNR = new XMLHttpRequest();
-xhrLNR.addEventListener('load', function () {
-    transformedLNRData = JSON.parse(this.responseText).map((textRow) => {
-        return {
-            'loanNote': textRow.loanNote,
-            'reference': textRow.reference,
-            'interestRate': new Big(textRow.interestRate),
-            'initialPrincipal': new Big(textRow.initialPrincipal),
-            'currentBalance': new Big(textRow.currentBalance)
-        };
-    });
-});
-//xhrLNR.open('GET', 'https://codepen.io/s5b/pen/1455fa236018d0a6f54651482e97f011.js');
-xhrLNR.open('GET', 'https://crossorigin.me/https://www.dropbox.com/s/dvin1alvc4l5nvd/data-LNR.json');
-xhrLNR.send();
 
 let transformedMRData = [
     { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@special.example.com", "loanUnits": "36.19", "cashUnits": "51.08", "totalUnits": "87.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@123456example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@12345example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@1234example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
-    , { "memberName": "Barry McKenzie", "memberEmail": "baz@example.com", "loanUnits": "368.19", "cashUnits": "51.08", "totalUnits": "419.27" }
 ].map((textRow) => {
     return {
         'memberName': textRow.memberName,
@@ -71,25 +19,6 @@ let transformedMRData = [
 
 let transformedULSData = [
     { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "irregular" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "810345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "881888", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-05-28", "payments": "4", "status": "Prepaid" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "Repaid" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
-    , { "borrowerName": "Gavins Smallgoods", "loanNoteFirst": "1", "loanNoteLast": "10345", "originalPrincipal": "200000", "currentBalance": "156734.6345", "borrowerRate": "14.5", "term": "36", "drawdown": "2017-12-28", "payments": "4", "status": "" }
 ].map((textRow) => {
     return {
         "borrowerName": textRow.borrowerName,
@@ -104,23 +33,6 @@ let transformedULSData = [
         "status": textRow.status
     }
 });
-
-/*  *
-const xhrMR = new XMLHttpRequest();
-xhrMR.addEventListener('load', function () {
-    transformedMRData = JSON.parse(this.responseText).map((textRow) => {
-        return {
-            'memberName': textRow.memberName,
-            'loanUnits': new Big(textRow.loanUnits),
-            'cashUnits': new Big(textRow.cashUnits),
-            'totalUnits': new Big(textRow.totalUnits)
-        };
-    });
-});
-xhrMR.open('GET', 'https://codepen.io/s5b/pen/GMOoYj.js');
-xhrMR.send();
-/*  */
-
 
 // Formatting money.
 const asMoney = (rawMoney) => rawMoney.round(2, 1).toFixed(2).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
@@ -149,7 +61,7 @@ const reportDate = () => '31 August 2017'
 
 // --  Calculate the total of the current balances.
 const sumCurrentBalance = (data) => {
-    return asMoney(data.reduce((sum, current) => sum.plus(current['currentBalance']), new Big(0.0)));
+    return asMoney(data.reduce((sum, current) => sum.plus(current['currentBalance']), new BigInt(0.0)));
 }
 
 const truncateContent = (content, maxLength = 17) => {

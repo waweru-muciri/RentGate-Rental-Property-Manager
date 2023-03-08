@@ -35,6 +35,12 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Email Subject",
     },
+    {
+        id: "email_message",
+        numeric: false,
+        disablePadding: true,
+        label: "Email Message",
+    },
 ];
 
 let EmailsPage = ({
@@ -63,7 +69,7 @@ let EmailsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the communication_emails here according to search criteria
-        let filteredContacts = communication_emails
+        let filteredEmailCommunications = communication_emails
             .filter(({ date_sent }) =>
                 !fromDateFilter ? true : date_sent >= fromDateFilter
             )
@@ -71,7 +77,7 @@ let EmailsPage = ({
                 !toDateFilter ? true : date_sent <= toDateFilter
             );
 
-        setEmailItems(filteredContacts);
+        setEmailItems(filteredEmailCommunications);
     };
 
     const resetSearchForm = (event) => {

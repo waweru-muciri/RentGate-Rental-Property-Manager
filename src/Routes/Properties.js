@@ -45,8 +45,8 @@ const headCells = [
         label: "Square Footage",
     },
     { id: "price", numeric: false, disablePadding: true, label: "Rent" },
-    { id: "tenant", numeric: false, disablePadding: true, label: "Tenant" },
-    { id: "owner", numeric: false, disablePadding: true, label: "Owner" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+    { id: "owner_name", numeric: false, disablePadding: true, label: "Owner" },
     {
         id: "landlord_name",
         numeric: false,
@@ -65,26 +65,20 @@ let PropertyPage = ({
     error,
 }) => {
     const classes = commonStyles();
-    // REMOVE THIS IN PRODUCTION APP
     let [propertyItems, setPropertyItems] = useState([])
+    let [filteredPropertyItems, setFilteredPropertyItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
     let [propertyAddressFilter, setPropertyAddressFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [propertyTypeFilter, setPropertyTypeFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setPropertyItems(getMappedProperties())
-    }, [properties, contacts])
-
-    const getMappedProperties = () => {
-        console.log(properties)
-        const mappedproperties = properties.map(
+        const mappedProperties = properties.map(
             (property) => {
                 const tenant = contacts.find(
                     (contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
                 );
-                //replace this with users on production
                 const owner = users.find(
                     (user) => user.id === property.owner
                 );
@@ -92,41 +86,43 @@ let PropertyPage = ({
                     (user) => user.id === property.assigned_to
                 );
                 const propertyDetails = {}
-                propertyDetails.owner = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
+                propertyDetails.owner_name = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
                 propertyDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-                propertyDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
+                propertyDetails.tenant_name = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
                 return Object.assign({}, property, propertyDetails);
             }
         );
-        return mappedproperties;
-    };
+
+        setPropertyItems(mappedProperties)
+        setFilteredPropertyItems(mappedProperties)
+    }, [properties, contacts, users])
 
     const exportPropertyRecordsToExcel = () => {
         let items = propertyItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
-            "Properties  Records",
-            "Property Data",
+            "Rental Properties Records",
+            "Rental Properties Data",
             items,
-            "PropertyData"
+            "Rental Properties Data"
         );
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
-        let filteredProperties = getMappedProperties()
+        let filteredProperties = propertyItems
             .filter(({ ref }) => !propertyRefFilter ? true : ref === propertyRefFilter)
             .filter(({ property_type }) => !propertyTypeFilter ? true : property_type === propertyTypeFilter)
             .filter((property) => !propertyAddressFilter ? true : typeof property.address !== 'undefined' ? property.address.toLowerCase().includes(propertyAddressFilter.toLowerCase()) : false)
 
             .filter((property) => !assignedToFilter ? true : property.assigned_to === assignedToFilter)
 
-        setPropertyItems(filteredProperties);
+        setFilteredPropertyItems(filteredProperties);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setPropertyItems(getMappedProperties());
+        setFilteredPropertyItems(propertyItems);
         setPropertyRefFilter("");
         setPropertyAddressFilter("");
         setAssignedToFilter("");
@@ -134,7 +130,7 @@ let PropertyPage = ({
     };
 
     return (
-        <Layout pageTitle="Rentals">
+        <Layout pageTitle="Rental Properties">
             <Grid
                 container
                 spacing={3}
@@ -142,7 +138,7 @@ let PropertyPage = ({
                 alignItems="center"
             >
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <PageHeading text="Rental" />
+                    <PageHeading text="Rental Properties" />
                 </Grid>
                 <Grid
                     container
@@ -345,7 +341,7 @@ let PropertyPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={propertyItems}
+                        rows={filteredPropertyItems}
                         headCells={headCells}
                         deleteUrl={'properties'}
                         handleDelete={handleDelete}

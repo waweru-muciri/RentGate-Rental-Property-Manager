@@ -49,6 +49,7 @@ const noticesTableHeadCells = [
 ];
 
 let VacatingNoticesPage = ({
+    currentUser,
     notices,
     users,
     properties,
@@ -59,28 +60,15 @@ let VacatingNoticesPage = ({
 }) => {
     const classes = commonStyles();
     let [noticeItems, setNoticeItems] = useState([]);
+    let [filteredNoticeItems, setFilteredNoticeItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [contactFilter, setContactFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
 
     useEffect(() => {
-        setNoticeItems(getMappedNotices());
-    }, [notices]);
-
-    const exportVacatingNoticesToExcel = () => {
-        let items = noticeItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Contacts  Records",
-            "Contact Data",
-            items,
-            "ContactData"
-        );
-    };
-
-    const getMappedNotices = () => {
         const mappedNotices = notices.map((notice) => {
             const tenant = contacts.find(
                 (contact) => contact.id === notice.tenant
@@ -95,8 +83,10 @@ let VacatingNoticesPage = ({
             if (typeof tenant !== 'undefined') {
                 noticeDetails.tenant_id_number = tenant.id_number
                 noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name
+                noticeDetails.tenant_phone_number = tenant.personal_mobile_number
+                noticeDetails.tenant_email = tenant.contact_email
             }
-            noticeDetails.days_left = moment(notice.vacating_date).diff(moment().format('YYYY-MM-DD'), 'days') + ' Days'
+            noticeDetails.days_left = moment(notice.vacating_date).diff(moment(), 'days') + ' Days'
             if (typeof landlord !== "undefined") {
                 noticeDetails.landlord_name = landlord.first_name + " " + landlord.last_name
                 noticeDetails.landlord_email = landlord.email
@@ -109,13 +99,24 @@ let VacatingNoticesPage = ({
             }
             return Object.assign({}, notice, noticeDetails);
         });
-        return mappedNotices;
+        setNoticeItems(mappedNotices);
+        setFilteredNoticeItems(mappedNotices);
+    }, [notices, contacts, properties, users]);
+
+    const exportVacatingNoticesToExcel = () => {
+        let items = noticeItems.filter(({ id }) => selected.includes(id));
+        exportDataToXSL(
+            "Contacts  Records",
+            "Contact Data",
+            items,
+            "ContactData"
+        );
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the notices here according to search criteria
-        let filteredNotices = getMappedNotices()
+        let filteredNotices = noticeItems
             .filter(({ notification_date }) =>
                 !fromDateFilter ? true : notification_date >= fromDateFilter
             )
@@ -129,12 +130,12 @@ let VacatingNoticesPage = ({
                 !assignedToFilter ? true : assigned_to === assignedToFilter
             );
 
-        setNoticeItems(filteredNotices);
+        setFilteredNoticeItems(filteredNotices);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setNoticeItems(getMappedNotices());
+        setFilteredNoticeItems(noticeItems);
         setFromDateFilter("");
         setToDateFilter("");
         setAssignedToFilter("");
@@ -142,7 +143,7 @@ let VacatingNoticesPage = ({
     };
 
     return (
-        <Layout pageTitle="Vacating Notices">
+        <Layout pageTitle="Move Outs">
             <Grid
                 container
                 spacing={3}
@@ -202,7 +203,7 @@ let VacatingNoticesPage = ({
                                 noticeItems.find(({ id }) => id === selected[0])
                             }
                         >
-                            print
+                            pdf
                         </PrintTenantVacatingNotice>
                     </Grid>
                 </Grid>
@@ -368,7 +369,7 @@ let VacatingNoticesPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={noticeItems}
+                        rows={filteredNoticeItems}
                         headCells={noticesTableHeadCells}
                         handleDelete={handleItemDelete}
                         deleteUrl={"notices"}
@@ -385,7 +386,8 @@ const mapStateToProps = (state) => {
         users: state.users,
         contacts: state.contacts,
         properties: state.properties,
-        error: state.error
+        error: state.error,
+        currentUser: state.currentUser,
     };
 };
 

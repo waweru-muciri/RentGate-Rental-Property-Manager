@@ -80,6 +80,7 @@ let TenantStatementsPage = ({
     users
 }) => {
     let [statementItems, setStatementItems] = useState([]);
+    let [filteredStatementItems, setFilteredStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
@@ -88,12 +89,6 @@ let TenantStatementsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setStatementItems(getMappedStatements());
-    }, [transactions, contacts]);
-
-    const classes = commonStyles();
-
-    const getMappedStatements = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
@@ -116,8 +111,11 @@ let TenantStatementsPage = ({
             transactionDetails.transaction_balance = typeof property !== 'undefined' ? property.price - transaction.transaction_price : null
             return Object.assign({}, transaction, transactionDetails);
         });
-        return mappedTransactions;
-    }
+        setStatementItems(mappedTransactions);
+        setFilteredStatementItems(mappedTransactions);
+    }, [transactions, contacts, users, properties]);
+
+    const classes = commonStyles();
 
     const exportTransactionsRecordsToExcel = () => {
         let items = statementItems.filter(({ id }) => selected.includes(id));
@@ -132,7 +130,7 @@ let TenantStatementsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredStatements = getMappedStatements()
+        let filteredStatements = statementItems
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -148,12 +146,12 @@ let TenantStatementsPage = ({
             .filter(({ landlord }) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setStatementItems(filteredStatements);
+        setFilteredStatementItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setStatementItems(getMappedStatements());
+        setFilteredStatementItems(statementItems);
         setPropertyFilter("");
         setContactFilter("");
         setAssignedToFilter("");
@@ -369,7 +367,7 @@ let TenantStatementsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={statementItems}
+                        rows={filteredStatementItems}
                         headCells={headCells}
                         noDetailsCol={true}
                         noEditCol={true}

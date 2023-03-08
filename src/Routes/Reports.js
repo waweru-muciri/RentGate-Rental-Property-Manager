@@ -101,6 +101,7 @@ let ReportsPage = ({
 }) => {
     const classes = commonStyles();
     let [transactionItems, setTransactionItems] = useState([]);
+    let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState("");
@@ -108,10 +109,6 @@ let ReportsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setTransactionItems(getMappedTransactions());
-    }, [transactions, contacts]);
-
-    const getMappedTransactions = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
@@ -137,8 +134,9 @@ let ReportsPage = ({
                 typeof property !== "undefined" ? property.id : null;
             return Object.assign({}, transaction, transactionDetails);
         });
-        return mappedTransactions;
-    };
+        setTransactionItems(mappedTransactions);
+        setFilteredTransactionItems(mappedTransactions);
+    }, [transactions, contacts, users, properties]);
 
     const exportTransactionsRecordsToExcel = () => {
         let items = transactionItems.filter(({ id }) => selected.includes(id));
@@ -153,7 +151,7 @@ let ReportsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = getMappedTransactions()
+        let filteredTransactions = transactionItems
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -166,12 +164,12 @@ let ReportsPage = ({
             .filter(({ assigned_to }) =>
                 !assignedToFilter ? true : assigned_to === assignedToFilter
             );
-        setTransactionItems(filteredTransactions);
+        setFilteredTransactionItems(filteredTransactions);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setTransactionItems(getMappedTransactions());
+        setFilteredTransactionItems(transactionItems);
         setPropertyFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -393,7 +391,7 @@ let ReportsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={transactionItems}
+                        rows={filteredTransactionItems}
                         headCells={headCells}
                         handleDelete={handleDelete}
                         deleteUrl={"transactions"}

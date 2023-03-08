@@ -5,10 +5,10 @@ import Layout from "../components/myLayout";
 import { connect } from "react-redux";
 import UserInputForm from "../components/users/UserInputForm";
 import { withRouter } from "react-router-dom";
-import { handleItemFormSubmit, handleDelete } from '../actions/actions'
+import { handleItemFormSubmit } from '../actions/actions'
 
 let UserPage = (props) => {
-	const { match, currentUser, handleItemDelete, handleItemSubmit } = props
+	const { match, currentUser, handleItemSubmit } = props
 	let pageTitle = "Edit Profile"
 	return (
 		<Layout pageTitle="User Profile">
@@ -23,7 +23,7 @@ let UserPage = (props) => {
 					item
 					key={3}
 				>
-					<UserInputForm match={match} userToEdit={currentUser} handleItemSubmit={handleItemSubmit} handleItemDelete={handleItemDelete} />
+					<UserInputForm match={match} userToEdit={currentUser} handleItemSubmit={handleItemSubmit} />
 				</Grid>
 			</Grid>
 		</Layout>
@@ -38,7 +38,6 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };

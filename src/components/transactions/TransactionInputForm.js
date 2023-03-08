@@ -53,7 +53,7 @@ let TransactionInputForm = (props) => {
 		transaction_ref: transactionToEdit.transaction_ref || "",
 		transaction_date: transactionToEdit.transaction_date || defaultDate,
 		security_deposit: transactionToEdit.security_deposit || 0,
-		landlord: transactionToEdit.landlord || "",
+		landlord: transactionToEdit.landlord || currentUser.id ,
 		lease_start: transactionToEdit.lease_start || defaultDate,
 		lease_end: transactionToEdit.lease_end || defaultDate,
 		payment_term: transactionToEdit.payment_term || "",

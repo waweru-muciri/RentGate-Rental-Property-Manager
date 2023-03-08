@@ -171,8 +171,8 @@ const othersLinkNestedLinks = [
 
 const propertyLinkNestedLinks = [
   { text: "Rentals", to: "/properties", icon: <ApartmentIcon /> },
-  { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
   { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
+  { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
   { text: "Meter Readings", to: "/properties/meter-reading", icon: <PaymentIcon /> },
 ];
 
@@ -193,9 +193,9 @@ const reportLinkNestedLinks = [
 ];
 
 const accountsLinkNestedLinks = [
-  { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
+  { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
   {
-    text: "Property Expenditure",
+    text: "Property Expenses",
     to: "/property_expenditure",
     icon: <AccountBalanceWalletIcon />,
   },
@@ -247,6 +247,7 @@ let MainPage = ({
               emailVerified: user.emailVerified,
               photoURL: user.photoURL,
               uid: user.uid,
+              id: user.uid,
               phoneNumber: user.phoneNumber,
               providerData: user.providerData,
             };
@@ -347,7 +348,7 @@ let MainPage = ({
             >
               <MenuItem
 				component={Link}
-				to={`${match.path}users/${currentUser.id}/edit`}
+				to={`${match.path}users/${currentUser.uid}/edit`}
                 onClick={() => {
                   handleProfileMenuClose();
                 }}

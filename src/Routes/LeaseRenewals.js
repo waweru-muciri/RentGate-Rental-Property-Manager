@@ -42,26 +42,22 @@ const headCells = [
 ];
 
 let RentRollPage = ({
+    currentUser,
     transactions,
     properties,
     contacts,
     users
 }) => {
     let [statementItems, setStatementItems] = useState([]);
+    let [filteredStatementItems, setFilteredStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setStatementItems(getMappedStatements());
-    }, [transactions, contacts]);
-
-    const classes = commonStyles();
-
-    const getMappedStatements = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
@@ -93,8 +89,11 @@ let RentRollPage = ({
             }
             return Object.assign({}, transaction, transactionDetails);
         });
-        return mappedTransactions;
-    }
+        setStatementItems(mappedTransactions);
+        setFilteredStatementItems(mappedTransactions);
+    }, [transactions, contacts, users, properties]);
+
+    const classes = commonStyles();
 
     const exportTransactionsRecordsToExcel = () => {
         let items = statementItems.filter(({ id }) => selected.includes(id));
@@ -109,7 +108,7 @@ let RentRollPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredStatements = getMappedStatements()
+        let filteredStatements = statementItems
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -125,12 +124,12 @@ let RentRollPage = ({
             .filter((landlord) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setStatementItems(filteredStatements);
+        setFilteredStatementItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setStatementItems(getMappedStatements());
+        setFilteredStatementItems(statementItems);
         setPropertyFilter("");
         setContactFilter("");
         setAssignedToFilter("");
@@ -139,7 +138,7 @@ let RentRollPage = ({
     };
 
     return (
-        <Layout pageTitle="Rent Roll">
+        <Layout pageTitle="Lease Renewals">
             <Grid
                 container
                 spacing={3}
@@ -360,7 +359,7 @@ let RentRollPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={statementItems}
+                        rows={filteredStatementItems}
                         headCells={headCells}
                         noDetailsCol={true}
                         noEditCol={true}
@@ -378,6 +377,7 @@ const mapStateToProps = (state, ownProps) => {
         transactions: state.transactions,
         contacts: state.contacts,
         users: state.users,
+        currentUser: state.currentUser,
     };
 };
 

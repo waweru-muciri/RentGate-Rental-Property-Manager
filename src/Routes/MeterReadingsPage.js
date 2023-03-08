@@ -35,7 +35,9 @@ const meterReadingsTableHeadCells = [
     { id: "prior_value", numeric: false, disablePadding: true, label: "Prior Value" },
     { id: "current_value", numeric: false, disablePadding: true, label: "Curent Value" },
     { id: "usage", numeric: false, disablePadding: true, label: "Usage" },
-    { id: "amount", numeric: false, disablePadding: true, label: "Amount" },
+    { id: "base_charge", numeric: false, disablePadding: true, label: "Base Charge" },
+    { id: "unit_charge", numeric: false, disablePadding: true, label: "Unit Charge" },
+    { id: "amount", numeric: false, disablePadding: true, label: "Amount(Ksh)" },
 ];
 
 let MeterReadingsPage = ({
@@ -48,6 +50,7 @@ let MeterReadingsPage = ({
 }) => {
     const classes = commonStyles();
     let [meterReadingItems, setMeterReadingItems] = useState([]);
+    let [filteredMeterReadingItems, setFilteredMeterReadingItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [propertyFilter, setPropertyFilter] = useState("");
@@ -55,21 +58,7 @@ let MeterReadingsPage = ({
 
 
     useEffect(() => {
-        setMeterReadingItems(getMappedMeterReadings());
-    }, [meterReadings]);
-
-    const exportMeterReadingsToExcel = () => {
-        let items = meterReadingItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "MeterReadings  Records",
-            "Expense Data",
-            items,
-            "ExpenseData"
-        );
-    };
-
-    const getMappedMeterReadings = () => {
-        const mappedMeterReadings = meterReadings.map((meterReading) => {
+        const mappedMeterReadings = meterReadings.sort((meterReading1, meterReading2) => meterReading2.reading_date > meterReading1.reading_date).map((meterReading) => {
             const property = properties.find(
                 (property) => property.id === meterReading.property
             );
@@ -90,13 +79,24 @@ let MeterReadingsPage = ({
                 typeof property !== "undefined" ? property.ref : null;
             return Object.assign({}, meterReading, meterReadingDetails);
         });
-        return mappedMeterReadings;
+        setMeterReadingItems(mappedMeterReadings);
+        setFilteredMeterReadingItems(mappedMeterReadings);
+    }, [meterReadings,properties, contacts]);
+
+    const exportMeterReadingsToExcel = () => {
+        let items = meterReadingItems.filter(({ id }) => selected.includes(id));
+        exportDataToXSL(
+            "MeterReadings  Records",
+            "Expense Data",
+            items,
+            "ExpenseData"
+        );
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the meterReadings here according to search criteria
-        let filteredMeterReadings = getMappedMeterReadings()
+        let filteredMeterReadings = meterReadingItems
             .filter(({ reading_date }) =>
                 !fromDateFilter ? true : reading_date >= fromDateFilter
             )
@@ -107,12 +107,12 @@ let MeterReadingsPage = ({
                 !propertyFilter ? true : property === propertyFilter
             )
 
-        setMeterReadingItems(filteredMeterReadings);
+        setFilteredMeterReadingItems(filteredMeterReadings);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setMeterReadingItems(getMappedMeterReadings());
+        setFilteredMeterReadingItems(meterReadingItems);
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("");
@@ -313,7 +313,7 @@ let MeterReadingsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={meterReadingItems}
+                        rows={filteredMeterReadingItems}
                         headCells={meterReadingsTableHeadCells}
                         handleDelete={handleItemDelete}
                         deleteUrl={"meter_readings"}
