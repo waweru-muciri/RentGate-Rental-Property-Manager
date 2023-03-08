@@ -12,7 +12,7 @@ import * as emailsReducers from "./emails";
 import * as communicationEmailsReducers from "./CommunicationEmails";
 import * as phoneNumbersReducers from "./phoneNumbers";
 import * as addressesReducers from "./addresses";
-import * as faxesReducers from "./faxes";
+import * as leaseReducers from "./leases";
 import * as noticesReducers from "./notices";
 import * as expensesReducers from "./expenses";
 import * as toDosReducers from "./toDos";
@@ -73,7 +73,7 @@ function reducers(state = {}, action) {
         users: usersReducers.users(state.users, action),
         expenses: expensesReducers.expenses(state.expenses, action),
         contacts: contactsReducers.contacts(state.contacts, action),
-        contact_faxes: faxesReducers.faxes(state.contact_faxes, action),
+        leases: leaseReducers.leases(state.leases, action),
         contact_emails: emailsReducers.emails(state.contact_emails, action),
         contact_addresses: addressesReducers.addresses(
             state.contact_addresses,

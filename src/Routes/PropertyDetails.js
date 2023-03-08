@@ -29,6 +29,7 @@ import { commonStyles } from "../components/commonStyles";
 import { getUnitTypes } from "../assets/commonAssets.js";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import PropertySummaryPage from "./PropertySummaryPage";
+import PropertySettingsForm from "../components/property/PropertySettingsForm";
 
 const PROPERTY_TYPES = getUnitTypes();
 
@@ -56,9 +57,11 @@ const headCells = [
     },
     // { id: "price", numeric: false, disablePadding: true, label: "Rent" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
-let PropertyPage = ({
+let PropertyDetailsPage = ({
     properties,
     propertyUnits,
     isLoading,
@@ -72,7 +75,7 @@ let PropertyPage = ({
     match,
     error, handleItemDelete
 }) => {
-    const classes = commonStyles();
+    const classes = commonStyles()
     const propertyToShowDetailsId = match.params.propertyId;
     const propertyToShowDetails = properties.find(({ id }) => id === propertyToShowDetailsId) || {}
     let [propertyUnitsItems, setPropertyUnitItems] = useState([])
@@ -92,7 +95,7 @@ let PropertyPage = ({
         const mappedPropertyUnits = propertyUnits.filter(({ property_id }) => property_id === propertyToShowDetailsId).map(
             (property_unit) => {
                 const tenant = contacts.find(
-                    ({id}) => property_unit.tenants ? property_unit.tenants.includes(id) : ''
+                    ({ id }) => property_unit.tenants ? property_unit.tenants.includes(id) : ''
                 ) || {}
                 return Object.assign({}, property_unit, { tenant_name: tenant.first_name + ' ' + tenant.last_name });
             }
@@ -136,14 +139,19 @@ let PropertyPage = ({
                     <Tab label="Summary" />
                     <Tab label="Financials" />
                     <Tab label="Rental Units" />
+                    <Tab label="Payment Settings" />
                 </Tabs>
             </AppBar>
+            <TabPanel value={tabValue} index={3}>
+                <PropertySettingsForm classes={classes}/>
+            </TabPanel>
             <TabPanel value={tabValue} index={0}>
                 <PropertySummaryPage propertyToShowDetails={propertyToShowDetails}
-                    propertyUnits={propertyUnitsItems} users={users} />
+                    propertyUnits={propertyUnitsItems} users={users} classes={classes}/>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits} transactions={transactions} expenses={expenses} meterReadings={meterReadings} />
+                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits} 
+                transactions={transactions} expenses={expenses} meterReadings={meterReadings}  classes={classes}/>
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
                 <Grid
@@ -363,6 +371,6 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-PropertyPage = connect(mapStateToProps, mapDispatchToProps)(PropertyPage);
+PropertyDetailsPage = connect(mapStateToProps, mapDispatchToProps)(PropertyDetailsPage);
 
-export default withRouter(PropertyPage);
+export default withRouter(PropertyDetailsPage);

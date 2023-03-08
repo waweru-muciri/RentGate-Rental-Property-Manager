@@ -12,7 +12,7 @@ import * as addressesActions from "./addresses";
 import * as phoneNumbersActions from "./phoneNumbers";
 import * as emailsActions from "./emails";
 import * as communicationEmailsActions from "./CommunicationEmails";
-import * as faxesActions from "./faxes";
+import * as leaseActions from "./leases";
 import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
 import * as meterReadingsActions from "./meterReadings";
@@ -412,8 +412,8 @@ export function handleDelete(user, itemId, url) {
                     );
                     break;
 
-                case "contact_faxes":
-                    dispatch(faxesActions.deleteFax(itemId));
+                case "leases":
+                    dispatch(leaseActions.deleteLease(itemId));
                     break;
 
                 case "contact_addresses":
@@ -554,8 +554,8 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
-                            case "contact_faxes":
-                                dispatch(faxesActions.editFax(modifiedObject));
+                            case "leases":
+                                dispatch(leaseActions.editLease(modifiedObject));
                                 break;
 
                             case "contact_addresses":
@@ -674,8 +674,8 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
-                            case "contact_faxes":
-                                dispatch(faxesActions.addFax(addedItem));
+                            case "leases":
+                                dispatch(leaseActions.addLease(addedItem));
                                 break;
 
                             case "contact_addresses":

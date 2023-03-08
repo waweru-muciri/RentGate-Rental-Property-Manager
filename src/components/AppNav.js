@@ -9,7 +9,7 @@ import {
     Link,
 } from "react-router-dom";
 import clsx from "clsx";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
 import Menu from "@material-ui/core/Menu";
 import Drawer from "@material-ui/core/Drawer";
@@ -41,82 +41,17 @@ import HouseIcon from "@material-ui/icons/House";
 import EventNoteIcon from "@material-ui/icons/EventNote";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
+import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import NoteIcon from '@material-ui/icons/Note';
 import ApartmentIcon from '@material-ui/icons/Apartment';
 import PaymentIcon from '@material-ui/icons/Payment';
+import ShowChartIcon from '@material-ui/icons/ShowChart';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
 import Head from "../components/Head";
-
-const drawerWidth = 240;
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-    },
-    title: {
-        flexGrow: 1,
-    },
-    nested: {
-        paddingLeft: theme.spacing(4),
-    },
-    appBar: {
-        transition: theme.transitions.create(["margin", "width"], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-    },
-    appBarShift: {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: drawerWidth,
-        transition: theme.transitions.create(["margin", "width"], {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    hide: {
-        display: "none",
-    },
-    drawer: {
-        width: drawerWidth,
-        flexShrink: 0,
-    },
-    drawerPaper: {
-        width: drawerWidth,
-    },
-    drawerHeader: {
-        display: "flex",
-        alignItems: "center",
-        padding: theme.spacing(0, 1),
-        ...theme.mixins.toolbar,
-        justifyContent: "flex-end",
-    },
-    content: {
-        flexGrow: 1,
-        padding: theme.spacing(3),
-        transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        marginLeft: -drawerWidth,
-    },
-    contentShift: {
-        transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginLeft: 0,
-    },
-    profileAvatar: {
-        width: theme.spacing(10),
-        height: theme.spacing(10),
-    },
-}));
+import {commonStyles} from '../components/commonStyles'
 
 const navigationLinks = [
     { text: "Home", to: "/", icon: <DashboardIcon /> },
@@ -136,32 +71,38 @@ const othersLinkNestedLinks = [
 ];
 
 const propertyLinkNestedLinks = [
-    { text: "Rentals", to: "/properties", icon: <ApartmentIcon /> },
+    { text: "Rentals Properties", to: "/properties", icon: <ApartmentIcon /> },
     { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
     { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
 ];
 
 const reportLinkNestedLinks = [
-    //{
-    // text: "Property Performance",
-    //to: "/reports/property-performance",
-    // icon: <AssessmentIcon />,
-    //},
+    // *** NOTE *** include relevant data points on each of these modules for easy reference.
+    //show income here from all charges and provide a way to filter the charges according to type, 
+    //show payments received from these charges and any outstanding balances
     {
-        text: "Property Income",
+        text: "Property Income Statement",
         to: "/reports/property-income",
-        icon: <PaymentIcon />,
-    }, {
+        icon: <ShowChartIcon />,
+    }, 
+    //show income and expenses received from each property and show net income for each of the expenses
+    { text: "Property Performance", to: "/reports/property-performance", icon: <AssessmentIcon /> },
+    //show property occupancy rate over periods of time and provide for filtering criteria by property, unit, 
+    //generate tenant statements and filtering criteria by each property and others
+    //show total of values and other relevant data points
+    //show outstanding balances on tenant statements
+    {
         text: "Tenant Statements",
         to: "/reports/tenant-statements",
-        icon: <PaymentIcon />,
+        icon: <AttachMoneyIcon />,
     },
 ];
 
 const accountsLinkNestedLinks = [
     { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
-    { text: "Meter Readings", to: "/properties/meter-reading", icon: <AccountBalanceIcon /> },
-    { text: "Payments", to: "/payments", icon: <AttachMoneyIcon /> },
+    { text: "Other Charges", to: "/properties/other-charges", icon: <MoneyIcon /> },
+    { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
+    { text: "Payments", to: "/payments", icon: <PaymentIcon /> },
     {
         text: "Property Expenses",
         to: "/property_expenditure",
@@ -180,9 +121,8 @@ let AppNavLayout = ({
     match,
 }) => {
     const history = useHistory();
-
-    const classes = useStyles();
     const theme = useTheme();
+    const classes = commonStyles()
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isProfileMenuOpen = Boolean(anchorEl);
 
@@ -379,7 +319,7 @@ let AppNavLayout = ({
                         }}
                     >
                         <ListItemIcon>
-                            <MoneyIcon />
+                            <AccountBalanceIcon />
                         </ListItemIcon>
                         <ListItemText primary={"Accounts"} />
                         {selectedTab.parent === 20 ? <ExpandLess /> : <ExpandMore />}

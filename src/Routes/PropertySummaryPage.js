@@ -9,24 +9,23 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
-import { commonStyles } from "../components/commonStyles";
+import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import {
     PieChart,
     Pie,
     Tooltip,
-    Legend,
     ResponsiveContainer,
 } from "recharts";
 
 
-let PropertyPage = (props) => {
-    const classes = commonStyles();
+let PropertySummaryPage = (props) => {
+    const {classes} = props;
     let { propertyToShowDetails, propertyUnits, users } = props
     const occupiedUnitsNumber = propertyUnits.filter((unit) => unit.tenants.length !== 0).length
     //get occupancy graph data
     const occupancyChartData = [
-        {name: 'Occupied Units', value: occupiedUnitsNumber}, 
-        {name: 'Vacant Units', value: propertyUnits.length - occupiedUnitsNumber}, 
+        { name: 'Occupied Units', value: occupiedUnitsNumber },
+        { name: 'Vacant Units', value: propertyUnits.length - occupiedUnitsNumber },
     ]
     //get the number of the different units by category
     const unitTypesData = [
@@ -71,8 +70,8 @@ let PropertyPage = (props) => {
                 alignItems="stretch"
                 spacing={2}
             >
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
+                <Grid item xs={12} md>
+                    <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardActionArea>
                             <CardMedia
                                 height="200"
@@ -92,70 +91,33 @@ let PropertyPage = (props) => {
                                 {propertyToShowDetails.city}, {propertyToShowDetails.county}
                             </Typography>
                         </CardContent>
-                        <CardActions>
-                            <Button size="medium" color="primary">
-                                Edit
-                            </Button>
-                        </CardActions>
                     </Card>
                 </Grid>
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
-                        <CardHeader
-                            avatar={
-                                <Avatar aria-label="recipe" className={classes.avatar}>
-                                    {propertyOwner.first_name[0]}{propertyOwner.last_name[0]}
-                                </Avatar>
-                            }
-                            title="Property Owner"
+                <Grid item xs={12} md>
+                <TenantInfoDisplayCard title="Property Owner"
                             subheader="Owner of this property"
-                        />
-                        <CardContent>
-                            <Typography gutterBottom variant="subtitle1" component="h2">
-                                {propertyOwner.first_name} {propertyOwner.last_name}
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Phone Number {propertyOwner.phone_number || '-'},
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Email {propertyOwner.primary_email || '-'}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button size="medium" color="primary">
-                                Edit
-                            </Button>
-                        </CardActions>
-                    </Card>
+                        avatar={`${propertyOwner.first_name[0]}${propertyOwner.last_name[0]}`}
+                        cardContent={[
+                            { name: 'Name:', value: `${propertyOwner.first_name} ${propertyOwner.last_name}` },
+                            { name: 'Mobile Phone Number', value: propertyOwner.phone_number || '-' },
+                            { name: 'Work Phone Number', value: propertyOwner.home_phone_number || '-' },
+                            { name: 'Primary Email', value: propertyOwner.primary_email || '-' },
+                            { name: 'Current Address', value: propertyOwner.address || '-' },
+                        ]}
+                    />
                 </Grid>
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
-                        <CardHeader
-                            avatar={
-                                <Avatar aria-label="recipe" className={classes.avatar}>
-                                    {propertyManager.first_name[0]}{propertyManager.last_name[0]}
-                                </Avatar>
-                            }
-                            title="Rental Manager"
-                            subheader="Landlord for this property"
-                        />
-                        <CardContent>
-                            <Typography gutterBottom variant="subtitle1" component="h2">
-                                {propertyManager.first_name} {propertyManager.last_name}
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Phone Number {propertyManager.phone_number || '-'},
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Email {propertyManager.primary_email || '-'}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button size="medium" color="primary">
-                                Edit
-                            </Button>
-                        </CardActions>
-                    </Card>
+                <Grid item xs={12} md>
+                    <TenantInfoDisplayCard title="Rental Manager"
+                        subheader="Landlord for this property"
+                        avatar={`${propertyManager.first_name[0]}${propertyManager.last_name[0]}`}
+                        cardContent={[
+                            { name: 'Name:', value: `${propertyManager.first_name} ${propertyManager.last_name}` },
+                            { name: 'Mobile Phone Number', value: propertyManager.phone_number || '-' },
+                            { name: 'Work Phone Number', value: propertyManager.home_phone_number || '-' },
+                            { name: 'Primary Email', value: propertyManager.primary_email || '-' },
+                            { name: 'Current Address', value: propertyManager.address || '-' },
+                        ]}
+                    />
                 </Grid>
             </Grid>
             <Grid
@@ -165,47 +127,48 @@ let PropertyPage = (props) => {
                 alignItems="stretch"
                 spacing={2}
             >
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
+                <Grid item xs={12} md={4}>
+                    <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
-                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                            Occupancy Data
+                            <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                Rental Units Distribution
                             </Typography>
                             <ResponsiveContainer width="100%" height={200}>
-                                <PieChart width={800} height={200}>
-                                    <Pie isAnimationActive={true} data={occupancyChartData} dataKey="value" 
-                                    outerRadius={80} fill="#7DB3FF" label />
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
-                        <CardContent>
-                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                            Hello world
-                            </Typography>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <PieChart width={800} height={200}>
+                                <PieChart>
                                     <Pie isAnimationActive={true} data={unitTypesData} dataKey="value"
-                                     outerRadius={80} fill="#FF7C78" label />
+                                        outerRadius={80} fill="#8884d8" label />
                                     <Tooltip />
                                 </PieChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item sm>
-                    <Card variant="outlined" elevation={1}>
+                <Grid item xs={12} md={4}>
+                    <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
-                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                            Rental Units Distribution
+                            <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                Occupancy Data
                             </Typography>
                             <ResponsiveContainer width="100%" height={200}>
-                                <PieChart width={800} height={200}>
-                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value" outerRadius={80} fill="#8884d8" label />
+                                <PieChart>
+                                    <Pie isAnimationActive={true} data={occupancyChartData} dataKey="value"
+                                        outerRadius={80} fill="#7DB3FF" label />
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
+                        <CardContent>
+                            <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                Hello world
+                            </Typography>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart>
+                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value"
+                                        outerRadius={80} fill="#FF7C78" label />
                                     <Tooltip />
                                 </PieChart>
                             </ResponsiveContainer>
@@ -222,4 +185,4 @@ let PropertyPage = (props) => {
     );
 };
 
-export default PropertyPage;
+export default PropertySummaryPage;

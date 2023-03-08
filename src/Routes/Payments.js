@@ -33,52 +33,36 @@ const headCells = [
         label: "Payment Date",
     },
     {
+        id: "payment_type",
+        numeric: false,
+        disablePadding: true,
+        label: "Payment Type",
+    },
+    {
         id: "tenant",
         numeric: false,
         disablePadding: true,
         label: "Tenant Name",
     },
     {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Landlord Name",
-    },
-    {
         id: "property_ref",
         numeric: false,
         disablePadding: true,
-        label: "Property Ref",
+        label: "Unit Number/Ref",
     },
     {
-        id: "lease_start",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Start",
-    },
-    {
-        id: "lease_end",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease End",
-    },
-    {
-        id: "security_deposit",
-        numeric: false,
-        disablePadding: true,
-        label: "Deposit Held",
-    },
-        {
         id: "transaction_price",
         numeric: false,
         disablePadding: true,
-        label: "Rent",
-    },{
+        label: "Payment Amount",
+    }, {
         id: "rent_balance",
         numeric: false,
         disablePadding: true,
-        label: "Rent Balance",
+        label: "Balance",
     },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
@@ -246,8 +230,8 @@ let TransactionPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Rental Payments Records'}
-							reportTitle = {'Rental Payments Records'}
+                            reportName={'Rental Payments Records'}
+                            reportTitle={'Rental Payments Records'}
                             headCells={headCells}
                             dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
                         >

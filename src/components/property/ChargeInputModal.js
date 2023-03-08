@@ -110,7 +110,7 @@ export default function FormDialog(props) {
                                         <Grid item xs={12} md key={1}>
                                             <TextField
                                                 fullWidth
-                                                label="Charge Details"
+                                                label="Charge Name"
                                                 variant="outlined"
                                                 type="text"
                                                 value={values.account}

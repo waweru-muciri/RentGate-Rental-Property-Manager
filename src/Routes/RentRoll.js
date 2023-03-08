@@ -45,6 +45,8 @@ const headCells = [
         disablePadding: true,
         label: "Rent",
     },
+    { id: "paid_status", numeric: false, disablePadding: true, label: "Paid Status" },
+    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
 ];
 
 let RentRollPage = ({

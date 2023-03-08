@@ -19,13 +19,13 @@ import {
 import { commonStyles } from "../../components/commonStyles";
 import { withRouter } from "react-router-dom";
 import {
-	getPropertyTypes, getPropertyBeds,
+	getPropertyBeds,
 	getPropertyBaths, getUnitTypes
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
 
 const PropertySchema = Yup.object().shape({
-	property_type: Yup.string().trim().required("Type is Required"),
+	ref: Yup.string().trim().required("Property Name/Ref/Number is Required"),
 	assigned_to: Yup.string().trim().required("Who will be the primary manager for this property"),
 	address: Yup.string().trim().required('Property Address is Required'),
 	postal_code: Yup.string().trim().default(''),
@@ -40,7 +40,6 @@ const PropertySchema = Yup.object().shape({
 	}))
 });
 
-const PROPERTY_TYPES = getPropertyTypes();
 const UNIT_TYPES = getUnitTypes();
 const PROPERTY_BEDS = getPropertyBeds();
 const PROPERTY_BATHS = getPropertyBaths();
@@ -51,12 +50,11 @@ let PropertyInputForm = (props) => {
 	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
 	const propertyValues = {
 		id: propertyToEdit.id,
-		ref: propertyToEdit.ref || "",
 		assigned_to: propertyToEdit.assigned_to || "",
 		city: propertyToEdit.city || "",
 		postal_code: propertyToEdit.postal_code || "",
 		address: propertyToEdit.address || "",
-		property_type: propertyToEdit.property_type || "",
+		ref: propertyToEdit.ref || "",
 		property_units: [],
 		owner: propertyToEdit.owner || "",
 	};
@@ -211,11 +209,10 @@ let PropertyInputForm = (props) => {
 				let property = {
 					id: values.id,
 					assigned_to: values.assigned_to,
-					ref: values.address,
 					city: values.city,
 					postal_code: values.postal_code,
 					address: values.address,
-					property_type: values.property_type,
+					ref: values.ref,
 					owner: values.owner,
 				};
 				// handleItemSubmit(currentUser, property, "property_units").then((propertyId) => {
@@ -278,31 +275,20 @@ let PropertyInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2} direction="column">
-							<Grid sm={12} item>
-								<Typography variant="h5">
-									{values.address}
-								</Typography>
-							</Grid>
 							<Grid item>
 								<TextField
 									fullWidth
 									variant="outlined"
-									select
-									name="property_type"
-									label="Type"
-									id="property_type"
+									type="text"
+									name="ref"
+									label="Property Name/Ref"
+									id="ref"
 									onBlur={handleBlur}
 									onChange={handleChange}
-									value={values.property_type}
-									error={errors.property_type && touched.property_type}
-									helperText={touched.property_type && errors.property_type}
-								>
-									{PROPERTY_TYPES.map((property_type, index) => (
-										<MenuItem key={index} value={property_type}>
-											{property_type}
-										</MenuItem>
-									))}
-								</TextField>
+									value={values.ref}
+									error={errors.ref && touched.ref}
+									helperText={touched.ref && errors.ref}
+								/>
 							</Grid>
 							<Grid item>
 								<Typography variant="subtitle1">Street Address</Typography>

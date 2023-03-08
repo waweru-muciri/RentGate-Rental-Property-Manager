@@ -35,6 +35,8 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Entity Id",
     },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 const rows = [

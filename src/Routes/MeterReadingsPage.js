@@ -40,12 +40,15 @@ const meterReadingsTableHeadCells = [
     { id: "base_charge", numeric: false, disablePadding: true, label: "Base Charge" },
     { id: "unit_charge", numeric: false, disablePadding: true, label: "Unit Charge" },
     { id: "amount", numeric: false, disablePadding: true, label: "Amount(Ksh)" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let MeterReadingsPage = ({
     currentUser,
     meterReadings,
     handleItemDelete,
+    propertyUnits,
     properties,
     contacts,
     match,
@@ -62,7 +65,7 @@ let MeterReadingsPage = ({
 
     useEffect(() => {
         const mappedMeterReadings = meterReadings.sort((meterReading1, meterReading2) => meterReading2.reading_date > meterReading1.reading_date).map((meterReading) => {
-            const property = properties.find(
+            const property = propertyUnits.find(
                 (property) => property.id === meterReading.property
             );
             const meterReadingDetails = {};
@@ -84,7 +87,7 @@ let MeterReadingsPage = ({
         });
         setMeterReadingItems(mappedMeterReadings);
         setFilteredMeterReadingItems(mappedMeterReadings);
-    }, [meterReadings,properties, contacts]);
+    }, [meterReadings, propertyUnits, contacts]);
 
     const exportMeterReadingsToExcel = () => {
         let items = meterReadingItems.filter(({ id }) => selected.includes(id));
@@ -99,17 +102,15 @@ let MeterReadingsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the meterReadings here according to search criteria
-        let filteredMeterReadings = meterReadingItems
+        const unitsForPropertyIds = propertyUnits.filter((unit) => unit.property_id === propertyFilter).map((unit) => unit.id)
+        const filteredMeterReadings = meterReadingItems.filter(({ property }) =>
+            unitsForPropertyIds.includes(property))
             .filter(({ reading_date }) =>
                 !fromDateFilter ? true : reading_date >= fromDateFilter
             )
             .filter(({ reading_date }) =>
                 !toDateFilter ? true : reading_date <= toDateFilter
             )
-            .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
-            )
-
         setFilteredMeterReadingItems(filteredMeterReadings);
     };
 
@@ -122,7 +123,7 @@ let MeterReadingsPage = ({
     };
 
     return (
-        <Layout pageTitle="Property Meter Readings">
+        <Layout pageTitle="Rental Units Meter Readings">
             <Grid
                 container
                 spacing={3}
@@ -130,7 +131,7 @@ let MeterReadingsPage = ({
                 alignItems="center"
             >
                 <Grid item lg={12}>
-                    <PageHeading text="Property Meter Readings" />
+                    <PageHeading text="Rental Units Meter Readings" />
                 </Grid>
                 <Grid
                     container
@@ -167,7 +168,7 @@ let MeterReadingsPage = ({
                             Edit
                         </Button>
                     </Grid>
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
                             type="button"
                             color="primary"
@@ -175,8 +176,8 @@ let MeterReadingsPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Meter Readings Records'}
-							reportTitle = {'Meter Readings Records'}
+                            reportName={'Meter Readings Records'}
+                            reportTitle={'Meter Readings Records'}
                             headCells={meterReadingsTableHeadCells}
                             dataToPrint={meterReadingItems.filter(({ id }) => selected.includes(id))}
                         >
@@ -349,6 +350,7 @@ const mapStateToProps = (state, ownProps) => {
         currentUser: state.currentUser,
         meterReadings: state.meterReadings,
         properties: state.properties,
+        propertyUnits: state.propertyUnits,
         contacts: state.contacts,
         isLoading: state.isLoading,
         error: state.error,

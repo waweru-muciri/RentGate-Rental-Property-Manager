@@ -41,6 +41,8 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Email Message",
     },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let EmailsPage = ({

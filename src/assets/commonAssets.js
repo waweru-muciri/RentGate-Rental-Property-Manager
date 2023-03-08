@@ -71,6 +71,10 @@ export function getPropertyBeds() {
 	return beds;
 }
 
+export const getLateFeeFrequencyOptions = () => {
+	return ['One-time fee', 'Daily']
+}
+
 export function getCheckOptions() {
 	let check_options = [];
 	for (let i = 1; i < 13; i++) {

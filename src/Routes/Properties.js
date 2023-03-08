@@ -42,6 +42,9 @@ const headCells = [
         disablePadding: true,
         label: "Type",
     },
+    { id: "details", numeric: false, disablePadding: true, label: "Details" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let PropertyPage = ({
@@ -285,7 +288,7 @@ let PropertyPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     {error && (
                         <div>
                             <CustomizedSnackbar
@@ -301,7 +304,7 @@ let PropertyPage = ({
                         rows={filteredPropertyItems}
                         headCells={headCells}
                         noDetailsCol={true}
-                        deleteUrl={'property_units'}
+                        deleteUrl={'properties'}
                         tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
                     />

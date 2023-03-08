@@ -45,7 +45,10 @@ const noticesTableHeadCells = [
         numeric: false,
         disablePadding: true,
         label: "Move Out Date",
-    },
+    },	
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+
 ];
 
 let VacatingNoticesPage = ({

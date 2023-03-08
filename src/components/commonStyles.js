@@ -1,6 +1,9 @@
 import { makeStyles } from "@material-ui/core/styles";
 import { red } from '@material-ui/core/colors';
 
+const drawerWidth = 240;
+
+
 let useStyles = makeStyles((theme) => ({
 	form: {
 		marginTop: theme.spacing(2),
@@ -83,6 +86,69 @@ let useStyles = makeStyles((theme) => ({
 	selectChip: {
 		margin: 2,
 	},
+	root: {
+        display: "flex",
+    },
+    title: {
+        flexGrow: 1,
+    },
+    nested: {
+        paddingLeft: theme.spacing(4),
+    },
+    appBar: {
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    appBarShift: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    menuButton: {
+        marginRight: theme.spacing(2),
+    },
+    hide: {
+        display: "none",
+    },
+    drawer: {
+        width: drawerWidth,
+        flexShrink: 0,
+    },
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    drawerHeader: {
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(0, 1),
+        ...theme.mixins.toolbar,
+        justifyContent: "flex-end",
+    },
+    content: {
+        flexGrow: 1,
+        padding: theme.spacing(3),
+        transition: theme.transitions.create("margin", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        marginLeft: -drawerWidth,
+    },
+    contentShift: {
+        transition: theme.transitions.create("margin", {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: 0,
+    },
+    profileAvatar: {
+        width: theme.spacing(10),
+        height: theme.spacing(10),
+    },
 }));
 
 export { useStyles as commonStyles };

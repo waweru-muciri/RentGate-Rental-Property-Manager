@@ -33,6 +33,9 @@ const expensesTableHeadCells = [
         label: "Property/Unit Ref",
     },
     { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+
 ];
 
 let ExpensesPage = ({

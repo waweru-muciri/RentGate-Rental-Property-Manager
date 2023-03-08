@@ -23,7 +23,7 @@ let TenantInfoDisplayCard = (props) => {
             <CardContent>
                {
                    cardContent.map((content, contentIndex) => 
-                   <Typography key={contentIndex} gutterBottom variant="body2" component="h2">
+                   <Typography key={contentIndex} gutterBottom variant="body2">
                     {content.name} : {content.value}
                    </Typography>)
                }

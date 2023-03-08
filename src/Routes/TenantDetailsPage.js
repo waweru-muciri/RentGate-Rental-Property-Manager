@@ -2,10 +2,6 @@ import React from "react";
 import Layout from "../components/myLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import Avatar from '@material-ui/core/Avatar';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
@@ -15,9 +11,8 @@ import TenantChargesStatement from "./TenantChargesStatement";
 import TenantPaymentsSummary from "./TenantPaymentsSummary";
 import TabPanel from "../components/TabPanel";
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
+import {commonStyles} from '../components/commonStyles'
 import { withRouter } from "react-router-dom";
-import { commonStyles } from "../components/commonStyles";
-
 
 
 let TenantDetailsPage = ({
@@ -33,7 +28,7 @@ let TenantDetailsPage = ({
     match,
     error, handleItemDelete
 }) => {
-    const classes = commonStyles();
+    const classes = commonStyles()
     const contactToShowDetailsId = match.params.contactId;
     const contactToShowDetails = contacts.find(({ id }) => id === contactToShowDetailsId) || {}
     const emergencyContact = {
@@ -92,7 +87,7 @@ let TenantDetailsPage = ({
                         <Grid item xs={12} md>
                             <TenantInfoDisplayCard title="Tenant Details"
                                 subheader="Contact Info"
-                                avatar={'EC'}
+                                avatar={''}
                                 cardContent={[
                                     { name: 'Work Phone Number', value: contactToShowDetails.work_mobile_number || '-' },
                                     { name: 'Home Phone Number', value: contactToShowDetails.home_phone_number || '-' },

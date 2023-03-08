@@ -10,7 +10,6 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
-import { commonStyles } from "../components/commonStyles";
 import {
   LineChart,
   Line,
@@ -21,6 +20,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import {commonStyles} from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
 import moment from "moment";
@@ -36,7 +36,7 @@ const FilterYearSchema = Yup.object().shape({
 });
 
 let DashBoardPage = (props) => {
-  const classes = commonStyles();
+  const classes = commonStyles()
   const [transactionItems, setTransactionItems] = useState([]);
   const { propertyUnits, contacts, transactions, notices, error } = props;
 

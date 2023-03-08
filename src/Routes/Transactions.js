@@ -79,7 +79,8 @@ const headCells = [
         disablePadding: true,
         label: "Rent Balance",
     },
-
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let TransactionPage = ({

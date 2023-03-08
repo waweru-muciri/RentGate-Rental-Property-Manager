@@ -49,6 +49,8 @@ const usersTableHeadCells = [
 		label: "ID Number",
 	},
 	{ id: "disabled", numeric: false, disablePadding: true, label: "Status" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let UsersPage = ({

@@ -33,15 +33,14 @@ const defaultDate = moment().format("YYYY-MM-DD");
 
 const UnitLeaseSchema = Yup.object().shape({
 	lease_type: Yup.string().trim().required("Lease Type is Required"),
-	rent_account: Yup.string().trim().required("Rent account is Required"),
 	rent_cycle: Yup.string().trim().required("Rent Cycle is Required"),
 	tenant: Yup.string().trim().required("Unit Tenant is Required"),
 	start_date: Yup.date().required('Start Date is Required'),
-	transaction_price: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
+	rent_amount: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
 	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0),
 	property: Yup.string().trim().required('Property is Required'),
 	property_unit: Yup.string().trim().required('Unit is Required'),
-	end_date: Yup.date().required('End Date is Required'),
+	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
 	next_due_date: Yup.date().required('Next Due Date is Required'),
 	security_deposit_due_date: Yup.date(),
 	recurring_charges: Yup.array().of(Yup.object().shape({
@@ -66,7 +65,7 @@ let UnitLeaseInputForm = (props) => {
 	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
 	const unitLeaseValues = {
 		id: propertyToEdit.id,
-		rent_account: propertyToEdit.rent_account || "",
+		property_unit: propertyToEdit.property_unit || "",
 		tenants: propertyToEdit.tenants || [],
 		cosigner: propertyToEdit.cosigner || "",
 		start_date: propertyToEdit.start_date || defaultDate,
@@ -74,13 +73,12 @@ let UnitLeaseInputForm = (props) => {
 		next_due_date: propertyToEdit.next_due_date || moment().add(1, 'M').format('YYYY-MM-DD'),
 		security_deposit_due_date: propertyToEdit.security_deposit_due_date || defaultDate,
 		property: propertyToEdit.property || "",
-		transaction_price: propertyToEdit.transaction_price || 0,
+		rent_amount: propertyToEdit.rent_amount || 0,
 		security_deposit: propertyToEdit.security_deposit || 0,
 		lease_type: propertyToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: propertyToEdit.rent_cycle || "Monthly",
 		one_time_charges: propertyToEdit.one_time_charges || [],
 		recurring_charges: propertyToEdit.recurring_charges || [],
-		property_unit: propertyToEdit.property_unit || "",
 	};
 
 	const RecurringChargesInputComponent = ({ remove, push, form }) => {
@@ -95,7 +93,7 @@ let UnitLeaseInputForm = (props) => {
 					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].account`}>
 						<TextField
 							fullWidth
-							label="Account"
+							label="Charge Name/Details"
 							variant="outlined"
 							type="text"
 							value={unit_charge.account}
@@ -193,7 +191,7 @@ let UnitLeaseInputForm = (props) => {
 					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].account`}>
 						<TextField
 							fullWidth
-							label="Account"
+							label="Charge Name/Details"
 							variant="outlined"
 							type="text"
 							value={unit_charge.account}
@@ -272,14 +270,13 @@ let UnitLeaseInputForm = (props) => {
 					id: values.id,
 					tenant: values.tenant,
 					cosigner: values.cosigner,
-					rent_account: values.rent_account,
 					end_date: values.end_date,
 					next_due_date: values.next_due_date,
 					security_deposit: values.security_deposit,
 					security_deposit_due_date: values.security_deposit_due_date,
 					property: values.property,
 					start_date: values.start_date,
-					transaction_price: values.transaction_price,
+					rent_amount: values.rent_amount,
 					lease_type: values.lease_type,
 					rent_cycle: values.rent_cycle,
 					property_unit: values.property_unit,
@@ -507,22 +504,6 @@ let UnitLeaseInputForm = (props) => {
 									<TextField
 										fullWidth
 										variant="outlined"
-										type="text"
-										name="rent_account"
-										label="Account"
-										id="rent_account"
-										onBlur={handleBlur}
-										onChange={handleChange}
-										value={values.rent_account}
-										error={errors.rent_account && touched.rent_account}
-										helperText={touched.rent_account && errors.rent_account || 'Account to Record Rent Collection'
-										}
-									/>
-								</Grid>
-								<Grid item sm>
-									<TextField
-										fullWidth
-										variant="outlined"
 										select
 										name="rent_cycle"
 										label="Rent Cycle"
@@ -546,15 +527,15 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										label="Rent Amount"
-										id="transaction_price"
+										id="rent_amount"
 										type="text"
-										name="transaction_price"
-										value={values.transaction_price}
+										name="rent_amount"
+										value={values.rent_amount}
 										onChange={handleChange}
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
-										error={errors.transaction_price && touched.transaction_price}
-										helperText={touched.transaction_price && errors.transaction_price}
+										error={errors.rent_amount && touched.rent_amount}
+										helperText={touched.rent_amount && errors.rent_amount}
 									/>
 								</Grid>
 								<Grid item sm>

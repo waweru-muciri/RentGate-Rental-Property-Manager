@@ -58,7 +58,9 @@ const contactsTableHeadCells = [
     },
     { id: "personal_mobile_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
-
+	{ id: "details", numeric: false, disablePadding: true, label: "Details" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 

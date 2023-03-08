@@ -47,6 +47,9 @@ const maintenanceRequestsTableHeadCells = [
 		label: "Request Details",
 	},
 	{ id: "status", numeric: false, disablePadding: true, label: "Status" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+
 ];
 
 let MaintenanceRequestsPage = ({

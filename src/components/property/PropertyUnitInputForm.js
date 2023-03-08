@@ -30,6 +30,7 @@ import {
 	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
+import moment from "moment";
 
 const UNIT_TYPES = getUnitTypes();
 const PROPERTY_BEDS = getPropertyBeds();
@@ -37,9 +38,11 @@ const PROPERTY_BATHS = getPropertyBaths();
 const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
 
+const defaultDate = moment().format("YYYY-MM-DD");
+
 const recurringChargesTableHeadCells = [
 	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
-	{ id: "account", numeric: false, disablePadding: true, label: "Charge Details" },
+	{ id: "account", numeric: false, disablePadding: true, label: "Charge Name" },
 	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
 	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
 	{ id: "frequency", numeric: false, disablePadding: true, label: "Frequency" },
@@ -47,7 +50,7 @@ const recurringChargesTableHeadCells = [
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ]
 
-const PropertySchema = Yup.object().shape({
+const PropertyUnitSchema = Yup.object().shape({
 	property_id: Yup.string().trim().required("Property is Required"),
 	unit_type: Yup.string().trim().required("Unit Type is Required"),
 	baths: Yup.string().trim().required("Baths is Required"),
@@ -55,14 +58,23 @@ const PropertySchema = Yup.object().shape({
 	ref: Yup.string().trim().required("Unit Ref Required"),
 	sqft: Yup.number().typeError('Sqft must be a number').min(0).default(0),
 	address: Yup.string().trim().required('Address is Required'),
+	lease_type: Yup.string().trim().required("Lease Type is Required"),
 	rent_cycle: Yup.string().trim().required('Frequency to charge rent on unit is required'),
+	start_date: Yup.date().required('Start Date is Required'),
+	rent_amount: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
+	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0),
+	property_unit: Yup.string().trim().required('Unit is Required'),
+	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
+	next_due_date: Yup.date().required('Next Due Date is Required'),
+	security_deposit_due_date: Yup.date(),
 });
 
 
 let PropertyUnitInputForm = (props) => {
 	const classes = commonStyles();
-	const { properties, propertyUnitCharges, currentUser, contacts, history, handleItemDelete, handleItemSubmit } = props
-	let propertyUnitToEdit = typeof props.propertyUnitToEdit !== 'undefined' ? props.propertyUnitToEdit : {};
+	const { properties, leases, propertyUnitCharges, currentUser, contacts, history, handleItemDelete, handleItemSubmit } = props
+	let propertyUnitToEdit = props.propertyUnitToEdit || {};
+	const unitLease = leases.find((lease) => lease.unit_id === propertyUnitToEdit.id) || {}
 	const propertyValues = {
 		id: propertyUnitToEdit.id,
 		ref: propertyUnitToEdit.ref || "",
@@ -72,17 +84,27 @@ let PropertyUnitInputForm = (props) => {
 		beds: propertyUnitToEdit.beds || "",
 		baths: propertyUnitToEdit.baths || "",
 		sqft: propertyUnitToEdit.sqft || '',
-		lease_type: propertyUnitToEdit.lease_type || "",
-		rent_cycle: propertyUnitToEdit.rent_cycle || "",
-		tenants: propertyUnitToEdit.tenants || [],
-		cosigner: propertyUnitToEdit.cosigner || "",
+		lease_id: unitLease.id || '',
+		tenants: unitLease.tenants || [],
+		cosigner: unitLease.cosigner || "",
+		rent_account: unitLease.rent_account,
+		next_due_date: unitLease.next_due_date || defaultDate,
+		security_deposit: unitLease.security_deposit,
+		security_deposit_due_date: unitLease.security_deposit_due_date,
+		property: unitLease.property,
+		start_date: unitLease.start_date || defaultDate,
+		end_date: unitLease.end_date,
+		rent_amount: unitLease.rent_amount,
+		lease_type: unitLease.lease_type || LEASE_TYPES[1],
+		rent_cycle: unitLease.rent_cycle || "",
+		property_unit: unitLease.property_unit,
 	};
 
 	const defaultChargeValues = {
 		unit_id: propertyUnitToEdit.id,
 		frequency: '',
 		amount: '',
-		due_date: '',
+		due_date: defaultDate,
 		account: '',
 		type: 'recurring_charge',
 	}
@@ -109,7 +131,7 @@ let PropertyUnitInputForm = (props) => {
 	return (
 		<Formik
 			initialValues={propertyValues}
-			enableReinitialize validationSchema={PropertySchema}
+			enableReinitialize validationSchema={PropertyUnitSchema}
 			onSubmit={async (values, { resetForm }) => {
 				let property_unit = {
 					property_id: values.property_id,
@@ -120,9 +142,23 @@ let PropertyUnitInputForm = (props) => {
 					beds: values.beds,
 					baths: values.baths,
 					sqft: values.sqft,
-					lease_type: values.lease_type,
 					tenants: values.tenants,
+				};
+				let propertyUnitLease = {
+					id: values.lease_id,
+					property_unit: values.property_unit,
+					property: values.property_id,
+					lease_type: values.lease_type,
+					rent_cycle: values.rent_cycle,
+					tenant: values.tenant,
 					cosigner: values.cosigner,
+					start_date: values.start_date,
+					end_date: values.end_date,
+					rent_account: values.rent_account,
+					next_due_date: values.next_due_date,
+					security_deposit: values.security_deposit,
+					security_deposit_due_date: values.security_deposit_due_date,
+					rent_amount: values.rent_amount,
 				};
 				//check if the unit has an image to upload
 				if (property_unit.image && property_unit.image.data) {
@@ -155,7 +191,7 @@ let PropertyUnitInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2}>
-							<Grid container spacing={4} direction="row">
+							<Grid container item spacing={4} direction="row">
 								<Grid md={6} container item spacing={1} direction="column">
 									<Grid item>
 										<Typography variant="subtitle2">
@@ -525,7 +561,7 @@ let PropertyUnitInputForm = (props) => {
 										handleEditClick={handleEditClick}
 										handleItemSubmit={handleItemSubmit}
 										handleDelete={handleItemDelete}
-										deleteUrl={"recurring-charges"} />
+										deleteUrl={"unit-charges"} />
 									{
 										modalOpenState ? <ChargeInputModal open={modalOpenState}
 											handleClose={handleModalClose} history={history}
@@ -538,7 +574,7 @@ let PropertyUnitInputForm = (props) => {
 										className={classes.oneMarginTopBottom}
 										variant="outlined"
 										size="medium"
-										startIcon={<AddIcon/>}
+										startIcon={<AddIcon />}
 										onClick={() => handleAddChargeClick()}
 										disableElevation>
 										Add Charge
@@ -587,6 +623,7 @@ let PropertyUnitInputForm = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		propertyUnitCharges: state.propertyUnitCharges,
+		leases: state.leases,
 		properties: state.properties,
 		error: state.error,
 		contacts: state.contacts.filter(({ id }) => !state.propertyUnits.find((property_unit) => property_unit.tenants.includes(id))),
