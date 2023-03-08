@@ -192,7 +192,7 @@ let ContactsSearchForm = withFormik({
 			last_name: values.last_name,
 			gender: values.gender,
 		};
-		//        values.submitForm(contact);
+		//        handleItemFormSubmit(contact);
 		//       resetForm({});
 	},
 	enableReinitialize: true,

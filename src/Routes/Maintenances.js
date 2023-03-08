@@ -10,7 +10,7 @@ import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
+import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -84,8 +84,6 @@ let MaintenanceRequestsPage = ({
 	contacts,
 	match,
 	error,
-	fetchData,
-	handleDelete,
 }) => {
 	let [maintenanceRequestItems, setMaintenanceRequestItems] = useState([]);
 	let [fromDateFilter, setFromDateFilter] = useState("");
@@ -96,14 +94,7 @@ let MaintenanceRequestsPage = ({
 
 	const classes = commonStyles();
 
-	useEffect(() => {
-		if (!maintenanceRequests.length) {
-			fetchData("maintenance-requests");
-			fetchData("contacts");
-		}
-	}, [maintenanceRequests.length, fetchData]);
-
-	useEffect(() => {
+	const getMappedMaintenanceRequests = () => {
 		const mappedMaintenanceRequests = maintenanceRequests.map(
 			(maintenanceRequest) => {
 				const contactWithRequest = contacts.find(
@@ -113,11 +104,16 @@ let MaintenanceRequestsPage = ({
 					{},
 					typeof contactWithRequest != "undefined"
 						? contactWithRequest
-						: null, maintenanceRequest
+						: null,
+					maintenanceRequest
 				);
 			}
 		);
-		setMaintenanceRequestItems(mappedMaintenanceRequests);
+		return mappedMaintenanceRequests;
+	};
+
+	useEffect(() => {
+		setMaintenanceRequestItems(getMappedMaintenanceRequests());
 	}, [maintenanceRequests, contacts]);
 
 	const exportMaintenanceRequestRecordsToExcel = () => {
@@ -135,7 +131,7 @@ let MaintenanceRequestsPage = ({
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the maintenanceRequests here according to search criteria
-		let filteredMaintenanceRequests = maintenanceRequests
+		let filteredMaintenanceRequests = getMappedMaintenanceRequests()
 			.filter(({ date_created }) =>
 				!fromDateFilter ? true : date_created >= fromDateFilter
 			)
@@ -154,7 +150,7 @@ let MaintenanceRequestsPage = ({
 
 	const resetSearchForm = (event) => {
 		event.preventDefault();
-		setMaintenanceRequestItems(maintenanceRequests);
+		setMaintenanceRequestItems(getMappedMaintenanceRequests());
 		setContactFilter("");
 		setStatusFilter("");
 		setFromDateFilter("");
@@ -380,6 +376,8 @@ let MaintenanceRequestsPage = ({
 						setSelected={setSelected}
 						rows={maintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
+						handleDelete={handleDelete}
+						deleteUrl={"maintenance-requests"}
 					/>
 				</Grid>
 				{isLoading && <LoadingBackdrop open={isLoading} />}
@@ -398,20 +396,8 @@ const mapStateToProps = (state, ownProps) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		fetchData: (url) => {
-			dispatch(itemsFetchData(url));
-		},
-		handleDelete: (id) => {
-			dispatch(handleDelete(id, "maintenance-requests"));
-		},
-	};
-};
-
 MaintenanceRequestsPage = connect(
 	mapStateToProps,
-	mapDispatchToProps
 )(MaintenanceRequestsPage);
 
 export default withRouter(MaintenanceRequestsPage);

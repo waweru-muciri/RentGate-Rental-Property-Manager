@@ -13,7 +13,6 @@ import { connect } from "react-redux";
 import { withFormik } from "formik";
 import { handleItemFormSubmit } from "../../actions/actions";
 import { withRouter } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import {
 	getContactTitles,
@@ -150,7 +149,7 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.contact_type}
-							required
+							
 							error={errors.contact_type && touched.contact_type}
 							helperText={
 								touched.contact_type && errors.contact_type
@@ -171,7 +170,7 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.title}
-							required
+							
 							error={errors.title && touched.title}
 							helperText={touched.title && errors.title}
 						>
@@ -182,7 +181,7 @@ let InputForm = ({
 							))}
 						</TextField>
 						<TextField
-							required
+							
 							variant="outlined"
 							id="first_name"
 							name="first_name"
@@ -194,7 +193,7 @@ let InputForm = ({
 							helperText={touched.first_name && errors.first_name}
 						/>
 						<TextField
-							required
+							
 							variant="outlined"
 							id="last_name"
 							name="last_name"
@@ -223,7 +222,7 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.gender}
-							required
+							
 							error={errors.gender && touched.gender}
 							helperText={touched.gender && errors.gender}
 						>
@@ -234,7 +233,7 @@ let InputForm = ({
 							))}
 						</TextField>
 						<TextField
-							required
+							
 							variant="outlined"
 							id="date_of_birth"
 							name="date_of_birth"
@@ -313,7 +312,7 @@ let InputForm = ({
 									<Grid item md={7}>
 										<TextField
 											fullWidth
-											required
+											
 											variant="outlined"
 											id="mobile_number"
 											name="mobile_number"
@@ -335,7 +334,6 @@ let InputForm = ({
 											onBlur={handleBlur}
 											onChange={handleChange}
 											value={values.mobile_type || ""}
-											required
 											helperText="Mobile Type"
 										>
 											{MOBILE_TYPES.map(
@@ -561,8 +559,7 @@ let InputForm = ({
 						variant="contained"
 						size="medium"
 						startIcon={<CancelIcon />}
-						component={Link}
-						onClick = { () => values.history.goBack()}
+						onClick={() => values.history.goBack()}
 						disableElevation
 					>
 						Cancel
@@ -647,7 +644,6 @@ let ContactInputForm = withFormik({
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		window.alert("Submit called");
 		let contact = {
 			id: values.id,
 			assigned_to: values.assigned_to || null,
@@ -667,10 +663,15 @@ let ContactInputForm = withFormik({
 			facebook_url: values.facebook_url,
 		};
 		console.log("Contact object => ", contact);
-		values.submitForm(contact);
+		handleItemFormSubmit(contact, "contacts").then((response) => {
+			console.log('Saved contact successfully => ', response)
+		});
 		resetForm({});
+		if (values.id) {
+			values.history.goBack()
+		}
 	},
-	enableReinitialize: true,
+	enableReinitialize: false,
 	displayName: "Contact Input Form", // helps with React DevTools
 })(InputForm);
 
@@ -683,17 +684,6 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (contact) => {
-			dispatch(handleItemFormSubmit(contact, "contacts"));
-		},
-	};
-};
-
-ContactInputForm = connect(
-	mapStateToProps,
-	mapDispatchToProps
-)(ContactInputForm);
+ContactInputForm = connect(mapStateToProps)(ContactInputForm);
 
 export default withRouter(ContactInputForm);

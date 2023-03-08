@@ -30,7 +30,7 @@ const headCells = [
     },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
-    { id: "fitted", numeric: false, disablePadding: true, label: "Fitted" },
+    { id: "is_fully_furnished", numeric: false, disablePadding: true, label: "Fitted" },
     {
         id: "postal_code",
         numeric: false,
@@ -44,18 +44,13 @@ const headCells = [
         label: "Square Footage",
     },
     { id: "price", numeric: false, disablePadding: true, label: "Price" },
+    { id: "tenant", numeric: false, disablePadding: true, label: "Tenant" },
     { id: "owner", numeric: false, disablePadding: true, label: "Owner" },
     {
         id: "assigned_to",
         numeric: false,
         disablePadding: true,
         label: "Assigned To",
-    },
-    {
-        id: "created_by",
-        numeric: true,
-        disablePadding: false,
-        label: "Created By",
     },
 ];
 //sample working data here
@@ -120,10 +115,9 @@ let PropertyPage = ({
     contacts,
     match,
     error,
-    fetchData,
-    handleDelete,
 }) => {
     const classes = commonStyles();
+    // REMOVE THIS IN PRODUCTION APP
     const ASSIGNED_TO = []
     let [propertyItems, setPropertyItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
@@ -133,18 +127,30 @@ let PropertyPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        if (!properties.length) {
-            fetchData("properties");
-            fetchData("contacts");
-        }
-    }, [properties.length, fetchData]);
+        setPropertyItems(getMappedProperties())
+    }, [properties, contacts])
 
-    useEffect(() => {
-        setPropertyItems(properties)
-    }, [properties.length])
+    const getMappedProperties = () => {
+        const mappedproperties = properties.map(
+            (property) => {
+               const tenant = contacts.find(
+                    (contact) => contact.id === property.tenants[0]
+                );
+            //replace this with users on production
+            const owner = contacts.find(
+                    (contact) => contact.id === property.owner
+                );
+            const propertyDetails = {}
+            propertyDetails.owner = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
+            propertyDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
+            return Object.assign({}, property, propertyDetails);
+            }
+        );
+        return mappedproperties;
+    };
 
     const exportPropertyRecordsToExcel = () => {
-        let items = propertyItems.filter(({ id }) => selected.includes(id));
+        let items = getMappedProperties().filter(({ id }) => selected.includes(id));
         exportDataToXSL(
             "Properties  Records",
             "Property Data",
@@ -155,10 +161,10 @@ let PropertyPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
-        let filteredProperties = properties
+        let filteredProperties = getMappedProperties()
         .filter(({ ref }) => !propertyRefFilter ? true : ref === propertyRefFilter)
         .filter(({ property_type }) => !propertyTypeFilter ? true : property_type === propertyTypeFilter)
-        .filter(({ postal_code }) => !propertyAddressFilter ? true : postal_code.includes(propertyAddressFilter))
+        .filter(({ postal_code }) => !propertyAddressFilter ? true : postal_code.toLowerCase().includes(propertyAddressFilter.toLowerCase()))
         .filter(({ assigned_to }) => !assignedToFilter ? true : assigned_to === assignedToFilter)
 
         setPropertyItems(filteredProperties);
@@ -166,7 +172,7 @@ let PropertyPage = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setPropertyItems(properties);
+        setPropertyItems(getMappedProperties());
         setPropertyRefFilter("");
         setPropertyAddressFilter("");
         setAssignedToFilter("");
@@ -387,6 +393,8 @@ let PropertyPage = ({
                         setSelected={setSelected}
                         rows={propertyItems}
                         headCells={headCells}
+                        deleteUrl={'properties'}
+                        handleDelete={handleDelete}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
@@ -405,17 +413,7 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        fetchData: (url) => {
-            dispatch(itemsFetchData(url));
-        },
-        handleDelete: (id) => {
-            dispatch(handleDelete(id, "properties"));
-        },
-    };
-};
 
-PropertyPage = connect(mapStateToProps, mapDispatchToProps)(PropertyPage);
+PropertyPage = connect(mapStateToProps, null)(PropertyPage);
 
 export default withRouter(PropertyPage);

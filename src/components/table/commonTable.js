@@ -21,7 +21,7 @@ import useStyles from "./tableStyles";
 import { stableSort, getSorting } from "./tablesSortingFunctions";
 
 function CommonTable(props) {
-    const { rows, headCells, selected, setSelected } = props;
+    const { rows, headCells, selected, setSelected, deleteUrl, handleDelete } = props;
     const { match } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState("asc");
@@ -135,7 +135,7 @@ function CommonTable(props) {
                                                         scope="row"
                                                         padding="none"
                                                     >
-                                                        {tableCellData}
+                                                        {typeof tableCellData === "boolean" ? (tableCellData ? "Yes" : "No") : tableCellData}
                                                     </TableCell>
                                                 );
                                             }
@@ -188,7 +188,7 @@ function CommonTable(props) {
                                             >
                                             <IconButton
                                                 onClick={(event) => {
-                                                    event.preventDefault();
+                                                    handleDelete(row.id,deleteUrl);
                                                 }}
                                                 color="primary"
                                                 size="small"

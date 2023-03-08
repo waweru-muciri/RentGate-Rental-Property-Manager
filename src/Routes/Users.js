@@ -85,9 +85,7 @@ let UsersPage = ({
 	users,
 	match,
 	error,
-	fetchData,
 	handleDelete,
-	submitForm,
 }) => {
 	let [userItems, setUserItems] = useState(rows);
 	let [firstNameFilter, setFirstNameFilter] = useState("");
@@ -97,12 +95,6 @@ let UsersPage = ({
 	const [selected, setSelected] = useState([]);
 
 	const classes = commonStyles();
-
-	useEffect(() => {
-		if (!users.length) {
-			fetchData("users");
-		}
-	}, [users.length, fetchData]);
 
 	const exportUserRecordsToExcel = () => {
 		let items = users.filter(({ id }) => selected.includes(id));
@@ -352,9 +344,6 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		fetchData: (url) => {
-			dispatch(itemsFetchData(url));
-		},
 		handleDelete: (id) => {
 			dispatch(handleDelete(id, "users"));
 		},

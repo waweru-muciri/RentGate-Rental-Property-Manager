@@ -10,7 +10,7 @@ import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
+import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -43,7 +43,7 @@ const contactsTableHeadCells = [
     },
     { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
     {
-        id: "birth_date",
+        id: "date_of_birth",
         numeric: false,
         disablePadding: true,
         label: "Date of Birth",
@@ -90,7 +90,6 @@ let ContactsPage = ({
     contact_addresses,
     match,
     error,
-    fetchData,
     handleDelete,
     submitForm,
 }) => {
@@ -102,16 +101,6 @@ let ContactsPage = ({
     const [selected, setSelected] = useState([]);
 
     const classes = commonStyles();
-
-    useEffect(() => {
-        if (!contacts.length) {
-            fetchData("contacts");
-            fetchData("contact_phone_numbers");
-            fetchData("contact_emails");
-            fetchData("contact_faxes");
-            fetchData("contact_addresses");
-        }
-    }, [contacts.length, contact_emails.length, fetchData]);
 
     useEffect(() => {
         setContactItems(contacts)
@@ -363,6 +352,8 @@ let ContactsPage = ({
                         setSelected={setSelected}
                         rows={contactItems}
                         headCells={contactsTableHeadCells}
+                        handleDelete={handleDelete}
+                        deleteUrl={'contacts'}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
@@ -384,17 +375,6 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        fetchData: (url) => {
-            dispatch(itemsFetchData(url));
-        },
-        handleDelete: (id) => {
-            dispatch(handleDelete(id, "contacts"));
-        },
-    };
-};
-
-ContactsPage = connect(mapStateToProps, mapDispatchToProps)(ContactsPage);
+ContactsPage = connect(mapStateToProps)(ContactsPage);
 
 export default withRouter(ContactsPage);

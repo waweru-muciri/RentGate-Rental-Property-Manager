@@ -8,14 +8,9 @@ import { withRouter } from "react-router-dom";
 
 let MaintenanceRequestPage = (props) => {
 	let maintenanceRequestToEditId = props.match.params.maintenanceRequestId;
-	let maintenanceRequestToEdit;
-
-	if (typeof maintenanceRequestToEditId != "undefined") {
-		maintenanceRequestToEdit = props.maintenanceRequests.find(
-			({ id }) => id === maintenanceRequestToEditId
-		);
-	}
-
+	let maintenanceRequestToEdit = props.maintenanceRequests.find(
+		({ id }) => id === maintenanceRequestToEditId
+	);
 	let pageTitle = maintenanceRequestToEditId
 		? "Edit Maintenance Request(s)"
 		: "New Maintenance Request(s)";

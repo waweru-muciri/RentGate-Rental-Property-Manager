@@ -72,7 +72,6 @@ let AuditLogsPage = ({
     contacts,
     match,
     error,
-    fetchData,
     handleDelete,
     submitForm,
 }) => {
@@ -87,12 +86,6 @@ let AuditLogsPage = ({
     const [selected, setSelected] = useState([]);
 
     const classes = commonStyles();
-
-    useEffect(() => {
-        if (!contacts.length) {
-            fetchData("contacts");
-        }
-    }, [contacts.length, fetchData]);
 
     const exportContactRecordsToExcel = () => {
         let items = contacts.filter(({ id }) => selected.includes(id));
@@ -329,9 +322,6 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchData: (url) => {
-            dispatch(itemsFetchData(url));
-        },
         handleDelete: (id) => {
             dispatch(handleDelete(id, "contacts"));
         },

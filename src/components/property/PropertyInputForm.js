@@ -26,9 +26,11 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { DropzoneAreaBase } from "material-ui-dropzone";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
-import { handleItemFormSubmit } from "../../actions/actions";
+import {
+	handleItemFormSubmit,
+	uploadFilesToFirebase,
+} from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
-import { Link } from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import {
 	getPropertyTypes,
@@ -59,7 +61,6 @@ const CURRENCY_OPTIONS = getCurrencyOptions();
 
 let InputForm = ({
 	values,
-	match,
 	touched,
 	errors,
 	handleChange,
@@ -68,19 +69,9 @@ let InputForm = ({
 	handleSubmit,
 	isSubmitting,
 }) => {
-	const [uploadedPropertyImages, setUploadedPropertyImages] = React.useState(
-		[]
-	);
-
 	const classes = commonStyles();
 
 	const ASSIGNED_TO = [];
-
-	const removeUploadedImage = (index) => {
-		const propertyImages = [...uploadedPropertyImages];
-		propertyImages.splice(index, 1);
-		setUploadedPropertyImages(propertyImages);
-	};
 
 	return (
 		<form
@@ -90,14 +81,13 @@ let InputForm = ({
 			onSubmit={handleSubmit}
 		>
 			<Grid container spacing={4} direction="row">
-				<Grid sm={6} item direction="column">
+				<Grid sm={6} item>
 					<Typography variant="h6">
 						Property Address & Details
 					</Typography>
 					<TextField
 						fullWidth
 						select
-						required
 						error={errors.assigned_to && touched.assigned_to}
 						helperText={touched.assigned_to && errors.assigned_to}
 						variant="outlined"
@@ -109,7 +99,7 @@ let InputForm = ({
 						onChange={handleChange}
 						onBlur={handleBlur}
 					>
-					{ASSIGNED_TO.map((assigned_to, index) => (
+						{ASSIGNED_TO.map((assigned_to, index) => (
 							<MenuItem key={index} value={assigned_to}>
 								{assigned_to}
 							</MenuItem>
@@ -117,7 +107,6 @@ let InputForm = ({
 					</TextField>
 					<TextField
 						fullWidth
-						required
 						error={errors.ref && touched.ref}
 						helperText={touched.ref && errors.ref}
 						variant="outlined"
@@ -139,7 +128,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.property_type}
-						required
 						error={errors.property_type && touched.property_type}
 						helperText={
 							touched.property_type && errors.property_type
@@ -161,7 +149,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.beds}
-						required
 						error={errors.beds && touched.beds}
 						helperText={touched.beds && errors.beds}
 					>
@@ -181,7 +168,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.baths}
-						required
 						error={errors.baths && touched.baths}
 						helperText={touched.baths && errors.baths}
 					>
@@ -293,7 +279,6 @@ let InputForm = ({
 						type="text"
 						label="View"
 						name="view"
-						required
 						value={values.view}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -310,7 +295,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.furnished}
-						required
 						error={errors.furnished && touched.furnished}
 						helperText={touched.furnished && errors.furnished}
 					>
@@ -330,7 +314,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.currency}
-						required
 						error={errors.currency && touched.currency}
 						helperText={touched.currency && errors.currency}
 					>
@@ -347,7 +330,6 @@ let InputForm = ({
 						type="number"
 						label="Price"
 						name="price"
-						required
 						value={values.price}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -377,7 +359,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.frequency}
-						required
 						error={errors.frequency && touched.frequency}
 						helperText={touched.frequency && errors.frequency}
 					>
@@ -397,7 +378,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.checks}
-						required
 						error={errors.checks && touched.checks}
 						helperText={touched.checks && errors.checks}
 					>
@@ -414,7 +394,6 @@ let InputForm = ({
 						type="number"
 						label="Commission"
 						name="company_commission"
-						required
 						value={values.company_commission}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -434,7 +413,6 @@ let InputForm = ({
 						type="number"
 						label="Deposit"
 						name="deposit"
-						required
 						value={values.deposit}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -451,7 +429,6 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.lease_type}
-						required
 						error={errors.lease_type && touched.lease_type}
 						helperText={touched.lease_type && errors.lease_type}
 					>
@@ -489,14 +466,14 @@ let InputForm = ({
 										"Drag and drop an image here or click to upload"
 									}
 									onAdd={(files) => {
-										setUploadedPropertyImages([
-											...uploadedPropertyImages,
+										setFieldValue("property_media", [
+											...values.property_media,
 											...files,
 										]);
 									}}
 									onDrop={(files) => {
-										setUploadedPropertyImages([
-											...uploadedPropertyImages,
+										setFieldValue("property_media", [
+											...values.property_media,
 											...files,
 										]);
 									}}
@@ -518,15 +495,15 @@ let InputForm = ({
 											Uploaded Files
 										</ListSubheader>
 									</GridListTile>
-									{uploadedPropertyImages.map(
-										(propertyImage, index) => {
+									{values.property_media.map(
+										(propertyImage, imageIndex) => {
 											const fileName =
 												typeof propertyImage.file !=
 												"undefined"
 													? propertyImage.file.name
-													: "File " + index;
+													: "File " + imageIndex;
 											return (
-												<GridListTile key={index}>
+												<GridListTile key={imageIndex}>
 													<img
 														src={propertyImage.data}
 														alt={fileName}
@@ -541,11 +518,19 @@ let InputForm = ({
 																className={
 																	classes.icon
 																}
-																onClick={() =>
-																	removeUploadedImage(
-																		index
-																	)
-																}
+																onClick={() => {
+																	const propertyImages = [
+																		...values.property_media,
+																	];
+																	propertyImages.splice(
+																		imageIndex,
+																		1
+																	);
+																	setFieldValue(
+																		"property_media",
+																		propertyImages
+																	);
+																}}
 															>
 																<DeleteIcon />
 															</IconButton>
@@ -693,7 +678,7 @@ let InputForm = ({
 						</Grid>
 					</Grid>
 					{/* end of other property features here */}
-					<Grid item direction="column">
+					<Grid item>
 						{/* Owner and tenant info here */}
 						<Typography variant="h6">Owner/Tenant</Typography>
 						<TextField
@@ -736,7 +721,6 @@ let InputForm = ({
 									setFieldValue("tenants", event.target.value)
 								}
 								onBlur={handleBlur}
-								helperText="Tenant"
 								renderValue={(selectedContacts) => {
 									const contactsWithDetails = values.contacts.filter(
 										({ id }) =>
@@ -774,7 +758,6 @@ let InputForm = ({
 					item
 					container
 					justify="center"
-					alignItems="space-evenly"
 					direction="row"
 					className={classes.buttonBox}
 				>
@@ -783,8 +766,7 @@ let InputForm = ({
 						variant="contained"
 						size="medium"
 						startIcon={<CancelIcon />}
-						component={Link}
-						to={`${match.url}`}
+						onClick={() => values.history.goBack()}
 						disableElevation
 					>
 						Cancel
@@ -809,14 +791,7 @@ let InputForm = ({
 
 let PropertyInputForm = withFormik({
 	mapPropsToValues: (props) => {
-		let propertyToEditId = props.match.params.propertyId;
-		let propertyToEdit;
-
-		if (typeof propertyToEditId != "undefined") {
-			propertyToEdit = props.properties.find(
-				({ id }) => id === propertyToEditId
-			);
-		}
+		let propertyToEdit = props.propertyToEdit;
 		if (!propertyToEdit) {
 			propertyToEdit = {};
 		}
@@ -851,8 +826,10 @@ let PropertyInputForm = withFormik({
 			has_sea_water_view: propertyToEdit.has_sea_water_view || false,
 			on_high_floor: propertyToEdit.on_high_floor || false,
 			tenants: propertyToEdit.tenants || [],
+			property_media: propertyToEdit.property_media || [],
 			owner: propertyToEdit.owner || "",
 			contacts: props.contacts,
+			history: props.history,
 			match: props.match,
 			error: props.error,
 			submitForm: props.submitForm,
@@ -881,7 +858,7 @@ let PropertyInputForm = withFormik({
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		window.alert("handleSubmitCalled");
+		let property_media = values.property_media;
 		let property = {
 			id: values.id,
 			ref: values.ref,
@@ -911,10 +888,35 @@ let PropertyInputForm = withFormik({
 			has_air_conditioning: values.has_air_conditioning,
 			has_sea_water_view: values.has_sea_water_view,
 			on_high_floor: values.on_high_floor,
+			tenants: values.tenants,
+			owner: values.owner,
 		};
-		console.log("Property Details => ", property);
-		values.submitForm(property);
+		handleItemFormSubmit(property, "properties").then((propertyId) => {
+			if (property_media.length <= 0) {
+				// no need to proceed
+				return null;
+			}
+			let fileDownloadUrlsPromises = uploadFilesToFirebase(
+				property_media
+			);
+			Promise.all(fileDownloadUrlsPromises).then((fileDownloadUrls) => {
+				//here is the fileDownloadUrls array
+				fileDownloadUrls.forEach((fileDownloadUrl) => {
+					let fileDownloadUrlObject = {
+						url: fileDownloadUrl,
+						property: propertyId,
+					};
+					handleItemFormSubmit(
+						fileDownloadUrlObject,
+						"property_media"
+					);
+				});
+			});
+		});
 		resetForm({});
+		if (values.id) {
+			values.history.goBack();
+		}
 	},
 	enableReinitialize: true,
 	displayName: "Property Input Form", // helps with React DevTools
@@ -928,17 +930,6 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (property) => {
-			dispatch(handleItemFormSubmit(property, "properties"));
-		},
-	};
-};
-
-PropertyInputForm = connect(
-	mapStateToProps,
-	mapDispatchToProps
-)(PropertyInputForm);
+PropertyInputForm = connect(mapStateToProps)(PropertyInputForm);
 
 export default withRouter(PropertyInputForm);

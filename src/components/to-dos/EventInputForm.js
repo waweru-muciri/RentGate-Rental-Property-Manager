@@ -221,7 +221,7 @@ let ToDoInputForm = withFormik({
 			reminder: values.reminder,
 			description: values.description,
 		};
-		values.submitForm(todo);
+		handleItemFormSubmit(todo);
 		resetForm({});
 	},
 	enableReinitialize: true,

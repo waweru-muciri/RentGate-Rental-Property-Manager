@@ -25,23 +25,51 @@ import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 
 let DashboardPage = ({
-    isLoading,
+    properties,
+    maintenanceRequests,
+    transactions,
     contacts,
+    contact_faxes,
+    contact_emails,
+    contact_phone_numbers,
+    contact_addresses,
+    isLoading,
     match,
     error,
     fetchData,
     handleDelete,
-    submitForm,
 }) => {
     const [selected, setSelected] = useState([]);
 
     const classes = commonStyles();
 
     useEffect(() => {
-        if (!contacts.length) {
-            fetchData("contacts");
+        if (!properties.length) {
+            fetchData([
+                "properties",
+                "transactions",
+                "maintenance-requests",
+                "property_media",
+                "to-dos",
+                "contacts",
+                "contact_phone_numbers",
+                "contact_emails",
+                "contact_faxes",
+                "contact_addresses",
+            ]);
         }
-    }, [contacts.length, fetchData]);
+    }, [
+        contacts,
+        transactions,
+        maintenanceRequests,
+        contact_emails,
+        properties,
+        contact_phone_numbers,
+        contact_faxes,
+        contact_emails,
+        contact_addresses,
+        fetchData,
+    ]);
 
     const exportContactRecordsToExcel = () => {
         let items = contacts.filter(({ id }) => selected.includes(id));
@@ -107,6 +135,13 @@ let DashboardPage = ({
 const mapStateToProps = (state, ownProps) => {
     return {
         contacts: state.contacts,
+        properties: state.properties,
+        transactions: state.transactions,
+        maintenanceRequests: state.maintenanceRequests,
+        contact_emails: state.contact_emails,
+        contact_phone_numbers: state.contact_phone_numbers,
+        contact_faxes: state.contact_faxes,
+        contact_addresses: state.contact_addresses,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,

@@ -10,7 +10,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
+import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import LoadingBackdrop from "../components/loadingBackdrop";
@@ -26,22 +26,22 @@ const headCells = [
         label: "Transaction Type",
     },
     {
-        id: "buyer_tenant",
+        id: "tenant",
         numeric: false,
         disablePadding: true,
-        label: "Buyer/Tenant Name",
+        label: "Tenant Name",
     },
     {
-        id: "seller_landlord",
+        id: "landlord",
         numeric: false,
         disablePadding: true,
-        label: "Seller/Landlord Name",
+        label: "Landlord Name",
     },
     {
-        id: "property_details",
+        id: "property",
         numeric: false,
         disablePadding: true,
-        label: "Property Details",
+        label: "Property Ref",
     },
     {
         id: "transaction_price",
@@ -123,9 +123,7 @@ let TransactionPage = ({
     contacts,
     match,
     error,
-    fetchData,
     handleDelete,
-    submitForm,
 }) => {
     let [transactionItems, setTransactionItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
@@ -137,19 +135,30 @@ let TransactionPage = ({
     const USERS = []
 
     useEffect(() => {
-        if (!transactions.length) {
-            fetchData("transactions");
-            fetchData("properties");
-            fetchData("contacts");
-
-        }
-    }, [transactions, contacts, properties, fetchData]);
-
-    useEffect(() => {
-        setTransactionItems(transactions);
-    }, [transactions.length]);
+        setTransactionItems(getMappedTransactions());
+    }, [transactions, contacts]);
 
     const classes = commonStyles();
+
+    const getMappedTransactions = () => {
+        const mappedTransactions = transactions.map((transaction) => {
+            const tenant = contacts.find(
+                    (contact) => contact.id === transaction.tenant
+                );
+            const landlord = contacts.find(
+                    (contact) => contact.id === transaction.landlord
+                );
+            const property = properties.find(
+                    (property) => property.id === transaction.property
+                );
+            const transactionDetails = {}
+            transactionDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
+            transactionDetails.landlord = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
+            transactionDetails.property = typeof property !== 'undefined' ?  property.ref : null
+            return Object.assign({}, transaction, transactionDetails);
+        });
+        return mappedTransactions;
+    }
 
     const exportTransactionsRecordsToExcel = () => {
         let items = transactionItems.filter(({ id }) => selected.includes(id));
@@ -164,7 +173,7 @@ let TransactionPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = transactions
+        let filteredTransactions = getMappedTransactions()
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -182,7 +191,7 @@ let TransactionPage = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setTransactionItems(transactions);
+        setTransactionItems(getMappedTransactions());
         setPropertyFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -404,6 +413,8 @@ let TransactionPage = ({
                         setSelected={setSelected}
                         rows={transactionItems}
                         headCells={headCells}
+                        handleDelete={handleDelete}
+                        deleteUrl={'transactions'}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
@@ -425,9 +436,6 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchData: (url) => {
-            dispatch(itemsFetchData(url));
-        },
         handleDelete: (id) => {
             dispatch(handleDelete(id, "transactions"));
         },

@@ -69,7 +69,6 @@ let InputForm = ({
 					</TextField>
 					<TextField
 						fullWidth
-						required
 						type="date"
 						InputLabelProps={{ shrink: true }}
 						variant="outlined"
@@ -86,7 +85,6 @@ let InputForm = ({
 						fullWidth
 						rows={4}
 						multiline
-						required
 						variant="outlined"
 						id="maintenance_details"
 						name="maintenance_details"
@@ -191,10 +189,7 @@ let InputForm = ({
 				</Grid>
 				{/** end of maintenance request details grid **/}
 
-				<Grid
-					item
-					className={styles.buttonBox}
-				>
+				<Grid item className={styles.buttonBox}>
 					<Button
 						color="secondary"
 						variant="contained"
@@ -230,7 +225,8 @@ let MaintenanceRequestInputForm = withFormik({
 			maintenanceRequestToEdit = {};
 		}
 		return {
-			contact: maintenanceRequestToEdit.contact || '',
+			id: maintenanceRequestToEdit.id,
+			contact: maintenanceRequestToEdit.contact || "",
 			date_created: maintenanceRequestToEdit.date_created || defaultDate,
 			maintenance_details:
 				maintenanceRequestToEdit.maintenance_details || " ",
@@ -243,7 +239,6 @@ let MaintenanceRequestInputForm = withFormik({
 			history: props.history,
 			match: props.match,
 			error: props.error,
-			submitForm: props.submitForm,
 		};
 	},
 
@@ -256,13 +251,12 @@ let MaintenanceRequestInputForm = withFormik({
 			errors.date_created = "Date Created is Required";
 		}
 		if (!values.maintenance_details) {
-			errors.maintenance_details = "Maintenance Details are required";
+			errors.maintenance_details = "Maintenance Details Required";
 		}
 		return errors;
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		window.alert("handleSubmitCalled");
 		let maintenanceRequest = {
 			id: values.id,
 			date_created: values.date_created,
@@ -273,16 +267,15 @@ let MaintenanceRequestInputForm = withFormik({
 			issue_urgency: values.issue_urgency,
 			status: values.status,
 		};
-		values.submitForm(maintenanceRequest);
-		resetForm({
-			id: "",
-			contact: '',
-			date_created: defaultDate,
-			maintenance_details: " ",
-			other_details: " ",
-			enter_permission: "Yes",
-			issue_urgency: "No",
-		});
+		handleItemFormSubmit(maintenanceRequest, "maintenance-requests").then(
+			(response) => {
+				console.log("Saved contact successfully => ", response);
+			}
+		);
+		resetForm();
+		if (values.id) {
+			values.history.goBack();
+		}
 	},
 	enableReinitialize: true,
 	displayName: "Maintenance Request Input Form", // helps with React DevTools
@@ -295,19 +288,8 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (maintenanceRequest) => {
-			dispatch(
-				handleItemFormSubmit(maintenanceRequest, "maintenance-requests")
-			);
-		},
-	};
-};
-
-MaintenanceRequestInputForm = connect(
-	mapStateToProps,
-	mapDispatchToProps
-)(MaintenanceRequestInputForm);
+MaintenanceRequestInputForm = connect(mapStateToProps)(
+	MaintenanceRequestInputForm
+);
 
 export default withRouter(MaintenanceRequestInputForm);

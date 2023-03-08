@@ -241,21 +241,13 @@ let UserInputForm = withFormik({
 			phone_number: values.phone_number,
 			user_roles: values.user_roles,
 		};
-		values.submitForm(user);
+		handleItemFormSubmit(user, 'users');
 		resetForm({});
 	},
 	enableReinitialize: true,
 	displayName: "User Input Form", // helps with React DevTools
 })(InputForm);
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (user) => {
-			dispatch(handleItemFormSubmit(user, "users"));
-		},
-	};
-};
-
-UserInputForm = connect(null, mapDispatchToProps)(UserInputForm);
+UserInputForm = connect()(UserInputForm);
 
 export default withRouter(UserInputForm);

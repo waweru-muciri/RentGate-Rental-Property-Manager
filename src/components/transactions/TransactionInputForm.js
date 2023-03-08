@@ -8,28 +8,25 @@ import {
 } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
 import { handleItemFormSubmit } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
 import { withRouter } from "react-router-dom";
 import {
-	getCurrencyOptions,
 	getPaymentOptions,
 	getTransactionTypes,
 	getLeaseOptions,
 } from "../../assets/commonAssets.js";
-import moment from 'moment';
+import moment from "moment";
 
 const LEASE_OPTIONS = getLeaseOptions();
-const CURRENCY_OPTIONS = getCurrencyOptions();
 const TRANSACTION_TYPES = getTransactionTypes();
 const PAYMENT_OPTIONS = getPaymentOptions();
 
 const ASSIGNED_TO = ["Assinged To 1", "Assigned To 2", "Assigned To 3"];
 
-const defaultDate = moment().format('YYYY-MM-DD')
+const defaultDate = moment().format("YYYY-MM-DD");
 
 let InputForm = ({
 	values,
@@ -77,7 +74,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.property}
-							
 							error={errors.property && touched.property}
 							helperText={touched.property && errors.property}
 						>
@@ -89,7 +85,6 @@ let InputForm = ({
 						</TextField>
 
 						<TextField
-							
 							error={errors.assigned_to && touched.assigned_to}
 							helperText={
 								touched.assigned_to && errors.assigned_to
@@ -138,7 +133,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.transaction_type}
-							
 							error={
 								errors.transaction_type &&
 								touched.transaction_type
@@ -160,7 +154,6 @@ let InputForm = ({
 							)}
 						</TextField>
 						<TextField
-							
 							error={errors.lease_type && touched.lease_type}
 							helperText={touched.lease_type && errors.lease_type}
 							variant="outlined"
@@ -263,7 +256,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.landlord}
-							
 							error={errors.landlord && touched.landlord}
 							helperText={touched.landlord && errors.landlord}
 						>
@@ -324,7 +316,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.payment_term}
-							
 							error={errors.payment_term && touched.payment_term}
 							helperText={
 								touched.payment_term && errors.payment_term
@@ -343,11 +334,21 @@ let InputForm = ({
 						</TextField>
 						<TextField
 							variant="outlined"
-							id="commission"
+							id="company_commission"
 							type="number"
-							label="Commission"
+							label="Company Commission"
+							name="company_commission"
+							value={values.company_commission}
+							onChange={handleChange}
+							onBlur={handleBlur}
+						/>
+						<TextField
+							variant="outlined"
+							id="agent_commission"
+							type="number"
+							label="Agent Commission"
 							name="commission"
-							value={values.commission}
+							value={values.agent_commission}
 							onChange={handleChange}
 							onBlur={handleBlur}
 						/>
@@ -357,7 +358,6 @@ let InputForm = ({
 						item
 						container
 						justify="center"
-						alignItems="space-evenly"
 						direction="row"
 						className={styles.buttonBox}
 					>
@@ -401,22 +401,22 @@ let TransactionInputForm = withFormik({
 		}
 		return {
 			id: transactionToEdit.id || null,
-			property: transactionToEdit.property || '',
-			tenant: transactionToEdit.tenant || '',
+			property: transactionToEdit.property || "",
+			tenant: transactionToEdit.tenant || "",
 			lease_renewal: transactionToEdit.lease_renewal || defaultDate,
 			renewal_reminder: transactionToEdit.renewal_reminder || defaultDate,
-			transaction_ref: transactionToEdit.transaction_ref || '',
+			transaction_ref: transactionToEdit.transaction_ref || "",
 			transaction_date: transactionToEdit.transaction_date || defaultDate,
 			security_deposit: transactionToEdit.security_deposit || 0,
-			transaction_type: transactionToEdit.transaction_type || '',
-			tenant: transactionToEdit.tenant || '',
-			landlord: transactionToEdit.landlord || '',
+			transaction_type: transactionToEdit.transaction_type || "",
+			landlord: transactionToEdit.landlord || "",
 			lease_start: transactionToEdit.lease_start || defaultDate,
 			lease_end: transactionToEdit.lease_end || defaultDate,
-			payment_term: transactionToEdit.payment_term || '',
-			commission: transactionToEdit.commission || 0,
+			payment_term: transactionToEdit.payment_term || "",
 			deposit: transactionToEdit.deposit || 0,
-			lease_type: transactionToEdit.lease_type || '',
+			agent_commission: transactionToEdit.agent_commission || 0,
+			company_commission: transactionToEdit.company_commission || 0,
+			lease_type: transactionToEdit.lease_type || "",
 			transaction_price: transactionToEdit.transaction_price || 0,
 			properties: props.properties,
 			contacts: props.contacts,
@@ -429,8 +429,8 @@ let TransactionInputForm = withFormik({
 
 	validate: (values) => {
 		let errors = {};
-		if(!values.property){
-			errors.property = 'Property for Transaction is Required'
+		if (!values.property) {
+			errors.property = "Property for Transaction is Required";
 		}
 		if (!values.lease_type) {
 			errors.lease_type = "Lease Type is Required";
@@ -454,7 +454,6 @@ let TransactionInputForm = withFormik({
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		window.alert("handleSubmitCalled");
 		let transaction = {
 			id: values.id,
 			property: values.property,
@@ -469,13 +468,19 @@ let TransactionInputForm = withFormik({
 			lease_start: values.lease_start,
 			lease_end: values.lease_end,
 			payment_term: values.payment_term,
-			commission: values.commission,
+			agent_commission: values.agent_commission || 0,
+			company_commission: values.company_commission || 0,
 			deposit: values.deposit,
 			lease_type: values.lease_type,
 			transaction_price: values.transaction_price,
 		};
-		values.submitForm(transaction);
+		handleItemFormSubmit(transaction, "transactions").then((response) => {
+			console.log('Saved transaction successfully => ', response)
+		});
 		resetForm({});
+		if (values.id) {
+			values.history.goBack();
+		}
 	},
 	enableReinitialize: true,
 	displayName: "Transaction Input Form", // helps with React DevTools
@@ -490,17 +495,6 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (transaction) => {
-			dispatch(handleItemFormSubmit(transaction, "transactions"));
-		},
-	};
-};
-
-TransactionInputForm = connect(
-	mapStateToProps,
-	mapDispatchToProps
-)(TransactionInputForm);
+TransactionInputForm = connect(mapStateToProps)(TransactionInputForm);
 
 export default withRouter(TransactionInputForm);
