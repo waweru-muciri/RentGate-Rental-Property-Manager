@@ -1,4 +1,3 @@
-import PageHeading from "../components/PageHeading";
 import React, { useState, useEffect } from "react";
 import exportDataToXSL from "../assets/printToExcel";
 import Grid from "@material-ui/core/Grid";
@@ -12,7 +11,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { commonStyles } from "../components/commonStyles";
 import moment from "moment";
 import Typography from "@material-ui/core/Typography";
-import { getTransactionsFilterOptions } from "../assets/commonAssets";
+import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -46,7 +45,7 @@ let PropertyIncomeStatement = ({
                 eachPastMonthDate = [...Array(12).keys()].map((value) => moment().subtract(1, 'years').startOf('year').add(value, 'months').format('YYYY-MM-DD'))
                 break;
             default:
-                eachPastMonthDate = [...Array(fromFilter).keys()].map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
+                eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
                 break;
         }
         setHeadCells([...eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')), `Total as of ${moment(eachPastMonthDate[eachPastMonthDate.length -1]).format('DD/MM/YYYY')}`])
@@ -171,7 +170,7 @@ let PropertyIncomeStatement = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setPropertyUnitFilter("");
-        setFromDateFilter("");
+        setFromDateFilter(1);
     };
 
     return (
@@ -315,7 +314,7 @@ let PropertyIncomeStatement = ({
                         {
                             headCells.map((headCell, index) =>
                                 <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                    {headCell}
+                                    {headCell} (Ksh)
                                 </Box>
                             )
                         }
@@ -324,7 +323,7 @@ let PropertyIncomeStatement = ({
                         incomeStatements.map((incomeStatement, incomeIndex) => {
                             const otherColumns = headCells.map((headCell, index) =>
                                 <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                    Ksh: {incomeStatement[headCell]}
+                                    {currencyFormatter.format(incomeStatement[headCell])}
                                 </Box>
                             )
                             return (
@@ -346,7 +345,7 @@ let PropertyIncomeStatement = ({
                         {
                             headCells.map((headCell, index) =>
                                 <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                    {headCell}
+                                    {headCell} (Ksh)
                                 </Box>
                             )
                         }
@@ -355,7 +354,7 @@ let PropertyIncomeStatement = ({
                         expensesStatements.map((expenseStatement, incomeIndex) => {
                             const otherColumns = headCells.map((headCell, index) =>
                                 <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                    Ksh: {expenseStatement[headCell] || 0}
+                                    {currencyFormatter.format(expenseStatement[headCell] || 0)}
                                 </Box>
                             )
                             return (

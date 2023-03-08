@@ -56,12 +56,6 @@ const headCells = [
     },
     // { id: "price", numeric: false, disablePadding: true, label: "Rent" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Assigned To",
-    },
 ];
 
 let PropertyPage = ({
@@ -95,12 +89,12 @@ let PropertyPage = ({
 
 
     useEffect(() => {
-        const mappedPropertyUnits = propertyUnits.filter(({ property_id }) => property_id == propertyToShowDetailsId).map(
-            (property) => {
+        const mappedPropertyUnits = propertyUnits.filter(({ property_id }) => property_id === propertyToShowDetailsId).map(
+            (property_unit) => {
                 const tenant = contacts.find(
-                    (contact) => property.tenants ? contact.id === property.tenants[0] : ''
+                    ({id}) => property_unit.tenants ? property_unit.tenants.includes(id) : ''
                 ) || {}
-                return Object.assign({}, property, { tenant_name: tenant.first_name + ' ' + tenant.last_name });
+                return Object.assign({}, property_unit, { tenant_name: tenant.first_name + ' ' + tenant.last_name });
             }
         );
 
@@ -117,10 +111,6 @@ let PropertyPage = ({
             "Rental Properties Data"
         );
     };
-
-    const tableRowOnClickHandler = (propertyId) => {
-        // history.push('/helloworld')
-    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -335,7 +325,6 @@ let PropertyPage = ({
                             </div>
                         )}
                         <CommonTable
-                            tableRowOnClickHandler={tableRowOnClickHandler}
                             selected={selected}
                             setSelected={setSelected}
                             rows={filteredPropertyItems}

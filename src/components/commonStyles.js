@@ -1,4 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
+import { red } from '@material-ui/core/colors';
+
 let useStyles = makeStyles((theme) => ({
 	form: {
 		marginTop: theme.spacing(2),
@@ -13,6 +15,11 @@ let useStyles = makeStyles((theme) => ({
 			marginTop: theme.spacing(1),
 			marginBottom: theme.spacing(1),
 		},
+	},
+	avatar: {
+		height: 56,
+		width: 56,
+		backgroundColor: red[500],
 	},
 	buttonBox: {
 		paddingTop: `${theme.spacing(2)}px`,

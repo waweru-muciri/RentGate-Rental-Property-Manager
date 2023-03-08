@@ -1,5 +1,4 @@
 import React from "react";
-import { makeStyles } from '@material-ui/core/styles';
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Avatar from '@material-ui/core/Avatar';
@@ -10,20 +9,52 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
-import { red } from '@material-ui/core/colors';
+import { commonStyles } from "../components/commonStyles";
+import {
+    PieChart,
+    Pie,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+} from "recharts";
 
-
-const useStyles = makeStyles((theme) => ({
-    avatar: {
-        height: 56,
-        width: 56,
-        backgroundColor: red[500],
-    },
-}));
 
 let PropertyPage = (props) => {
-    const classes = useStyles();
+    const classes = commonStyles();
     let { propertyToShowDetails, propertyUnits, users } = props
+    const occupiedUnitsNumber = propertyUnits.filter((unit) => unit.tenants.length !== 0).length
+    //get occupancy graph data
+    const occupancyChartData = [
+        {name: 'Occupied Units', value: occupiedUnitsNumber}, 
+        {name: 'Vacant Units', value: propertyUnits.length - occupiedUnitsNumber}, 
+    ]
+    //get the number of the different units by category
+    const unitTypesData = [
+        {
+            name: "BedSitters",
+            value: propertyUnits.filter((property) => property.unit_type === 'Bedsitter').length,
+        },
+        {
+            name: "One Bedroom",
+            value: propertyUnits.filter((property) => property.unit_type === 'One Bedroom').length,
+        },
+        {
+            name: "Two Bedroom",
+            value: propertyUnits.filter((property) => property.unit_type === 'Two Bedroom').length,
+        },
+        {
+            name: "Single Room",
+            value: propertyUnits.filter((property) => property.unit_type === 'Single Room').length,
+        },
+        {
+            name: "Double Room",
+            value: propertyUnits.filter((property) => property.unit_type === 'Double Room').length,
+        },
+        {
+            name: "Shop",
+            value: propertyUnits.filter((property) => property.unit_type === 'Shop').length,
+        }
+    ]
     const propertyManager = users.find((user) => user.id === propertyToShowDetails.assigned_to) ||
         { first_name: 'R', last_name: 'O' }
     const propertyOwner = users.find((user) => user.id === propertyToShowDetails.owner) ||
@@ -84,10 +115,10 @@ let PropertyPage = (props) => {
                                 {propertyOwner.first_name} {propertyOwner.last_name}
                             </Typography>
                             <Typography variant="body2" component="p">
-                                Phone Number {propertyOwner.phone_number || '254712345678'},
+                                Phone Number {propertyOwner.phone_number || '-'},
                             </Typography>
                             <Typography variant="body2" component="p">
-                                Email {propertyOwner.primary_email || '123@acme.com'}
+                                Email {propertyOwner.primary_email || '-'}
                             </Typography>
                         </CardContent>
                         <CardActions>
@@ -113,10 +144,10 @@ let PropertyPage = (props) => {
                                 {propertyManager.first_name} {propertyManager.last_name}
                             </Typography>
                             <Typography variant="body2" component="p">
-                                Phone Number {propertyManager.phone_number || '254712345678'},
+                                Phone Number {propertyManager.phone_number || '-'},
                             </Typography>
                             <Typography variant="body2" component="p">
-                                Email {propertyManager.primary_email || '123@acme.com'}
+                                Email {propertyManager.primary_email || '-'}
                             </Typography>
                         </CardContent>
                         <CardActions>
@@ -137,45 +168,47 @@ let PropertyPage = (props) => {
                 <Grid item sm>
                     <Card variant="outlined" elevation={1}>
                         <CardContent>
-                            <Typography gutterBottom variant="subtitle1" component="h2">
-                                {propertyOwner.first_name} {propertyOwner.last_name}
+                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                            Occupancy Data
                             </Typography>
-                            <Typography variant="body2" component="p">
-                                Phone Number {propertyOwner.phone_number || '254712345678'},
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Email {propertyOwner.primary_email || '123@acme.com'}
-                            </Typography>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart width={800} height={200}>
+                                    <Pie isAnimationActive={true} data={occupancyChartData} dataKey="value" 
+                                    outerRadius={80} fill="#7DB3FF" label />
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </Grid>
                 <Grid item sm>
                     <Card variant="outlined" elevation={1}>
                         <CardContent>
-                            <Typography gutterBottom variant="subtitle1" component="h2">
-                                {propertyOwner.first_name} {propertyOwner.last_name}
+                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                            Hello world
                             </Typography>
-                            <Typography variant="body2" component="p">
-                                Phone Number {propertyOwner.phone_number || '254712345678'},
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Email {propertyOwner.primary_email || '123@acme.com'}
-                            </Typography>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart width={800} height={200}>
+                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value"
+                                     outerRadius={80} fill="#FF7C78" label />
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </Grid>
                 <Grid item sm>
                     <Card variant="outlined" elevation={1}>
                         <CardContent>
-                            <Typography gutterBottom variant="subtitle1" component="h2">
-                                {propertyManager.first_name} {propertyManager.last_name}
+                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                            Rental Units Distribution
                             </Typography>
-                            <Typography variant="body2" component="p">
-                                Phone Number {propertyManager.phone_number || '254712345678'},
-                            </Typography>
-                            <Typography variant="body2" component="p">
-                                Email {propertyManager.primary_email || '123@acme.com'}
-                            </Typography>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart width={800} height={200}>
+                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value" outerRadius={80} fill="#8884d8" label />
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -183,7 +216,7 @@ let PropertyPage = (props) => {
             <Grid item>
                 <Typography gutterBottom variant="subtitle1" component="h2">
                     Files
-                                </Typography>
+                </Typography>
             </Grid>
         </Grid>
     );

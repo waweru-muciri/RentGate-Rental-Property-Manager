@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import FormControl from "@material-ui/core/FormControl";
+import FormHelperText from "@material-ui/core/FormHelperText";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import Grid from "@material-ui/core/Grid";
 import Chip from "@material-ui/core/Chip";
-import Input from "@material-ui/core/Input";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -53,28 +52,17 @@ const UnitLeaseSchema = Yup.object().shape({
 		amount: Yup.number().typeError('Amount must be a number').integer().min(0).required('Charge Amount is required'),
 	})),
 	one_time_charges: Yup.array().of(Yup.object().shape({
-		type: Yup.string().default('one_time_charges'),
+		type: Yup.string().default('one_time_charge'),
 		due_date: Yup.date().required("Due Date is required"),
 		account: Yup.string().trim().required("Account is required"),
 		amount: Yup.number().typeError('Amount must be a number').integer().min(0).required('Charge Amount is required'),
 	})),
 });
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-	PaperProps: {
-		style: {
-			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-			width: 250,
-		},
-	},
-};
-
 
 let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
-	const { currentUser, contacts, propertyAccounts, history, properties, propertyUnits, handleItemSubmit } = props
+	const { currentUser, contacts, history, properties, propertyUnits, handleItemSubmit } = props
 	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
 	const unitLeaseValues = {
 		id: propertyToEdit.id,
@@ -109,20 +97,14 @@ let UnitLeaseInputForm = (props) => {
 							fullWidth
 							label="Account"
 							variant="outlined"
-							select
+							type="text"
 							value={unit_charge.account}
 							name={`recurring_charges.${unitChargeIndex}.account`}
 							onChange={handleChange}
 							onBlur={handleBlur}
 							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
 							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
-						>
-							{propertyAccounts.map((account, index) => (
-								<MenuItem key={index} value={account.id}>
-									{account.name}
-								</MenuItem>
-							))}
-						</TextField>
+						/>
 					</Grid>
 					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].due_date`}>
 						<TextField
@@ -213,20 +195,14 @@ let UnitLeaseInputForm = (props) => {
 							fullWidth
 							label="Account"
 							variant="outlined"
-							select
+							type="text"
 							value={unit_charge.account}
 							name={`one_time_charges.${unitChargeIndex}.account`}
 							onChange={handleChange}
 							onBlur={handleBlur}
 							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
 							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
-						>
-							{propertyAccounts.map((account, index) => (
-								<MenuItem key={index} value={account.id}>
-									{account.name}
-								</MenuItem>
-							))}
-						</TextField>
+						/>
 					</Grid>
 					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].due_date`}>
 						<TextField
@@ -445,57 +421,59 @@ let UnitLeaseInputForm = (props) => {
 									Tenants and Cosigner
 								</Typography>
 							</Grid>
-							<Grid item container direction="row" spacing={2}>
-								{/* <Grid item sm>
-									<FormControl fullWidth className={classes.selectFormControl}>
-										<InputLabel id="demo-mutiple-chip-label">Tenants</InputLabel>
+							<Grid item container direction="row" spacing={4}>
+								<Grid item xs={12} md={6}>
+									<FormControl
+										variant="outlined"
+										fullWidth
+										className={classes.formControl}
+									>
+										<InputLabel id="demo-simple-select-outlined-label">
+											Tenants
+										</InputLabel>
 										<Select
-											labelId="demo-mutiple-chip-label"
-											id="demo-mutiple-chip"
+											fullWidth
 											multiple
+											labelId="demo-simple-select-outlined-label"
+											id="demo-simple-select-outlined"
+											name="tenant"
+											label="Tenants"
 											value={values.tenants}
-											input={<Input id="select-multiple-chip" />}
-											// renderValue={(selected) => {
-											// 	const contactsWithDetails = contacts.filter(
-											// 		({ id }) =>
-											// 			selected.includes(id)
-											// 	);
-											// 	return (
-											// 		<div className={classes.selectChips}>
-											// 			{contactsWithDetails.map((value) => (
-											// 				<Chip key={value.id} label={value.first_name + ' ' + value.last_name}
-											// 					className={classes.selectChip} />
-											// 			))}
-											// 		</div>
-											// 	)
-											// }}
-											MenuProps={MenuProps}
+											onChange={(event) =>
+												setFieldValue("tenants", event.target.value)
+											}
+											onBlur={handleBlur}
+											renderValue={(selectedContacts) => {
+												const contactsWithDetails = contacts.filter(
+													({ id }) =>
+														selectedContacts.includes(id)
+												);
+												return contactsWithDetails.map(
+													(selectedContact, index) => (
+														<Chip
+															color="primary"
+															key={index}
+															label={
+																selectedContact.first_name +
+																" " +
+																selectedContact.last_name
+															}
+															className={classes.chip}
+														/>
+													)
+												);
+											}}
 										>
-											{contacts.map((contact, index) => (
-												<MenuItem key={index} value={contact.id}>
-													{contact.first_name + ' ' + contact.last_name}
+											{contacts.map((contact, contactIndex) => (
+												<MenuItem key={contactIndex} value={contact.id}>
+													{contact.first_name +
+														" " +
+														contact.last_name}
 												</MenuItem>
 											))}
 										</Select>
+										<FormHelperText>Select Tenants</FormHelperText>
 									</FormControl>
-								</Grid> */}
-								<Grid item xs={12} md={6}>
-									<Autocomplete
-										fullWidth
-										id="combo-box-tenants-select"
-										filterSelectedOptions
-										options={contacts}
-										value={values.tenants}
-										onChange={(event, newInputValues) => { setFieldValue("tenants", newInputValues) }}
-										getOptionLabel={(option) => option.first_name + ' ' + option.last_name}
-										style={{ width: '100%' }}
-										renderTags={(value, getTagProps) =>
-											value.map((option, index) => (
-												<Chip variant="outlined" label={option} {...getTagProps({ index })} />
-											))
-										}
-										renderInput={(params) => <TextField {...params} label="Tenants" variant="outlined" />}
-									/>
 								</Grid>
 								<Grid item xs={12} md={6}>
 									<TextField
@@ -529,7 +507,7 @@ let UnitLeaseInputForm = (props) => {
 									<TextField
 										fullWidth
 										variant="outlined"
-										select
+										type="text"
 										name="rent_account"
 										label="Account"
 										id="rent_account"
@@ -539,13 +517,7 @@ let UnitLeaseInputForm = (props) => {
 										error={errors.rent_account && touched.rent_account}
 										helperText={touched.rent_account && errors.rent_account || 'Account to Record Rent Collection'
 										}
-									>
-										{propertyAccounts.map((rent_account, index) => (
-											<MenuItem key={index} value={rent_account}>
-												{rent_account}
-											</MenuItem>
-										))}
-									</TextField>
+									/>
 								</Grid>
 								<Grid item sm>
 									<TextField
@@ -712,7 +684,6 @@ let UnitLeaseInputForm = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		contacts: state.contacts,
-		propertyAccounts: state.propertyAccounts,
 		properties: state.properties,
 		error: state.error,
 		propertyUnits: state.propertyUnits,

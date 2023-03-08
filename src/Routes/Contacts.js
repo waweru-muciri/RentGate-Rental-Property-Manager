@@ -48,6 +48,7 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Last Name",
     },
+    { id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
     { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
     {
         id: "date_of_birth",
@@ -363,6 +364,7 @@ let ContactsPage = ({
                         headCells={contactsTableHeadCells}
                         tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
+                        noDetailsCol={true}
                         deleteUrl={"contacts"}
                     />
                 </Grid>

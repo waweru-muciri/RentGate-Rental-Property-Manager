@@ -300,6 +300,7 @@ let PropertyPage = ({
                         setSelected={setSelected}
                         rows={filteredPropertyItems}
                         headCells={headCells}
+                        noDetailsCol={true}
                         deleteUrl={'property_units'}
                         tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}

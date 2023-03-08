@@ -60,7 +60,7 @@ let PropertyInputForm = (props) => {
 		property_units: [],
 		owner: propertyToEdit.owner || "",
 	};
-	const CustomInputComponent = ({ remove, push, replace, form }) => {
+	const UnitInputComponent = ({ remove, push, replace, form }) => {
 		const { errors, touched, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['property_units']
 		const propertyUnitTouched = touched['property_units']
@@ -218,6 +218,26 @@ let PropertyInputForm = (props) => {
 					property_type: values.property_type,
 					owner: values.owner,
 				};
+				// handleItemSubmit(currentUser, property, "property_units").then((propertyId) => {
+				// 	if (propertyFilesToSave.length) {
+				// 		let fileDownloadUrls = uploadFilesToFirebase(
+				// 			propertyFilesToSave
+				// 		);
+				// 		//here is the fileDownloadUrls array. Filter the array to remove 
+				// 		//undefined values
+				// 		fileDownloadUrls.filter((fileDownloadUrl) => typeof fileDownloadUrl !== 'undefined').forEach((fileDownloadUrl) => {
+				// 			let fileDownloadUrlObject = {
+				// 				url: fileDownloadUrl,
+				// 				property: propertyId,
+				// 			};
+				// 			handleItemSubmit(
+				// 				currentUser,
+				// 				fileDownloadUrlObject,
+				// 				"property_media"
+				// 			);
+				// 		});
+				// 	}
+				// });
 				const propertyId = await handleItemSubmit(currentUser, property, "properties")
 				values.property_units.forEach(async (property_unit) => {
 					//assign a default address to each property unit
@@ -237,6 +257,9 @@ let PropertyInputForm = (props) => {
 					await handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
 				})
 				resetForm({});
+				if (values.id) {
+					history.goBack()
+				}
 			}}
 		>
 			{({
@@ -370,13 +393,17 @@ let PropertyInputForm = (props) => {
 									))}
 								</TextField>
 							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
-							</Grid>
-							<FieldArray
-								name="property_units"
-								component={CustomInputComponent}
-							/>
+							{
+								values.id ? null : (
+									<Grid item>
+										<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
+										<FieldArray
+											name="property_units"
+											component={UnitInputComponent}
+										/>
+									</Grid>
+								)
+							}
 							<Grid
 								item
 								container
@@ -406,7 +433,7 @@ let PropertyInputForm = (props) => {
 										form="propertyInputForm"
 										disabled={isSubmitting}
 									>
-										Create Property
+										{values.id ? "Save Details" : "Create Property"}
 									</Button>
 								</Grid>
 							</Grid>

@@ -1,7 +1,7 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as vacatingNoticesActions from "./notices";
 import * as propertyActions from "./property";
-import * as propertyAccountActions from "./propertyAccounts";
+import * as propertyUnitChargeActions from "./propertyUnitCharges";
 import * as propertyUnitActions from "./propertyUnits";
 import * as mediaFilesActions from "./mediaFiles";
 import * as contactsActions from "./contacts";
@@ -229,9 +229,9 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
-                    case "property_accounts":
+                    case "unit-charges":
                         dispatch(
-                            propertyAccountActions.propertyAccountsFetchDataSuccess(
+                            propertyUnitChargeActions.propertyUnitChargesFetchDataSuccess(
                                 fetchedItems
                             )
                         );
@@ -528,9 +528,9 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
-                            case "property_accounts":
+                            case "unit-charges":
                                 dispatch(
-                                    propertyAccountActions.editPropertyAccount(modifiedObject)
+                                    propertyUnitChargeActions.editPropertyUnitCharge(modifiedObject)
                                 );
                                 break;
 
@@ -652,9 +652,9 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
-                            case "property_accounts":
+                            case "unit-charges":
                                 dispatch(
-                                    propertyAccountActions.addPropertyAccount(addedItem)
+                                    propertyUnitChargeActions.addPropertyUnitCharge(addedItem)
                                 );
                                 break;
 

@@ -113,3 +113,9 @@ export function getTransactionsFilterOptions() {
 	{id: 'year-to-date', text: 'Year To Date'}, {id: 'last-year', text: 'Last Year'}, 
 	{id: 'last-month', text: 'Last Month'} ];
 }
+
+// Create our number formatter.
+export const currencyFormatter = new Intl.NumberFormat(undefined, {
+	style: 'decimal',
+	currency: 'KES',
+});

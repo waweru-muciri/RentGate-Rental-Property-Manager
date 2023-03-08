@@ -23,7 +23,7 @@ import { stableSort, getSorting } from "./tablesSortingFunctions";
 function CommonTable(props) {
     const {
         rows,
-        tableRowOnClickHandler,
+        // tableRowOnClickHandler,
         headCells,
         selected,
         setSelected,
@@ -32,8 +32,8 @@ function CommonTable(props) {
         handleDelete,
         noEditCol,
         noDeleteCol,
+        noDetailsCol,
     } = props;
-    const  noDetailsCol = true;
     const { match } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState("asc");
@@ -56,6 +56,7 @@ function CommonTable(props) {
     };
 
     const handleClick = (event, id) => {
+        event.stopPropagation();
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
 
@@ -90,6 +91,7 @@ function CommonTable(props) {
         <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
             <TableContainer>
                 <Table
+                    stickyHeader
                     className={classes.table}
                     aria-labelledby="tableTitle"
                     size={"medium"}
@@ -117,7 +119,7 @@ function CommonTable(props) {
 
                                 return (
                                     <TableRow
-                                        onClick={() => {if(typeof tableRowOnClickHandler === 'function') tableRowOnClickHandler(row.id) }}
+                                        // onClick={() => {if(typeof tableRowOnClickHandler === 'function') tableRowOnClickHandler(row.id) }}
                                         hover
                                         role="checkbox"
                                         aria-checked={isItemSelected}
@@ -158,7 +160,7 @@ function CommonTable(props) {
                                                 );
                                             }
                                         )}
-                                        {noDetailsCol ? null : (
+                                        {!noDetailsCol ? null : (
                                             <TableCell
                                                 component="th"
                                                 scope="row"
@@ -172,7 +174,7 @@ function CommonTable(props) {
                                                         color="primary"
                                                         size="small"
                                                         component={Link}
-                                                        to={`${match.url}${row.id}`}
+                                                        to={`${match.url}/${row.id}/details`}
                                                     >
                                                         <DetailsIcon fontSize="default" />
                                                     </IconButton>

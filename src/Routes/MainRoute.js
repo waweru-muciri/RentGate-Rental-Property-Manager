@@ -15,7 +15,10 @@ import {
 import TenantStatementsPage from "./ContactStatements";
 import PropertyIncomeStatement from "./PropertyIncomeStatement";
 import PropertiesPage from "./Properties";
+import PropertyPage from "./PropertyPage";
+import PropertyUnitPage from "./PropertyUnitPage";
 import PropertyDetailsPage from "./PropertyDetails";
+import TenantDetailsPage from "./TenantDetailsPage";
 import MaintenancesPage from "./Maintenances";
 import ReportsPage from "./Reports";
 import UsersPage from "./Users";
@@ -33,7 +36,6 @@ import TransactionsPage from "./Transactions";
 import TransactionPage from "./TransactionPage";
 import PaymentsPage from "./Payments";
 import PaymentPage from "./PaymentPage";
-import PropertyPage from "./PropertyPage";
 import ContactPage from "./ContactPage";
 import ContactsPage from "./Contacts";
 import NoticesPage from "./Notices";
@@ -79,8 +81,9 @@ let MainPage = ({
       fetchData([
         "properties",
         "property_units",
+        "unit-charges",
         // "property_accounts",
-        // "transactions",
+        "transactions",
         // "maintenance-requests",
         // "property_media",
         "contacts",
@@ -91,8 +94,8 @@ let MainPage = ({
         // "notices",
         // "to-dos",
         "users",
-        // "expenses",
-        // "meter_readings",
+        "expenses",
+        "meter_readings",
       ]);
     }
   }, [currentUser]);
@@ -168,6 +171,21 @@ let MainPage = ({
               exact
               path={`${match.path}properties/:propertyId/details`}
               component={PropertyDetailsPage}
+            />
+            <Route
+              exact
+              path={`${match.path}contacts/:contactId/details`}
+              component={TenantDetailsPage}
+            />
+            <Route
+              exact
+              path={`${match.path}properties/:propertyId/details/:propertyUnitId/edit`}
+              component={PropertyUnitPage}
+            />
+            <Route
+              exact
+              path={`${match.path}properties/:propertyId/details/new`}
+              component={PropertyUnitPage}
             />
             <Route
               exact
