@@ -162,8 +162,8 @@ let PropertyIncomeStatement = ({
         event.preventDefault();
         //filter the transactions according to the search criteria here
         let filteredTransactions = transactionItems
-            .filter(({ propertyUnit }) =>
-                !propertyUnitFilter ? true : propertyUnit.id === propertyUnitFilter
+            .filter((transaction) =>
+                !propertyUnitFilter ? true : transaction.property_unit === propertyUnitFilter
             )
         setTransactionItems(filteredTransactions)
     };
@@ -199,7 +199,7 @@ let PropertyIncomeStatement = ({
                     />
                 </Grid>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid item sm>
                 <Box
                     border={1}
                     borderRadius="borderRadius"
@@ -216,13 +216,13 @@ let PropertyIncomeStatement = ({
                             justify="center"
                             direction="row"
                         >
-                            <Grid item sm>
+                            <Grid item md>
                                 <TextField
                                     fullWidth
                                     select
                                     variant="outlined"
                                     name="property_filter"
-                                    label="Select Property"
+                                    label="Select Unit"
                                     id="property_filter"
                                     onChange={(event) => {
                                         setPropertyUnitFilter(
@@ -241,7 +241,7 @@ let PropertyIncomeStatement = ({
                                     ))}
                                 </TextField>
                             </Grid>
-                            <Grid item sm>
+                            <Grid item md>
                                 <TextField
                                     fullWidth
                                     variant="outlined"

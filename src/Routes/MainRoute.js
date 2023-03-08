@@ -11,12 +11,11 @@ import {
   Switch,
   useHistory,
   withRouter,
-  Link,
 } from "react-router-dom";
 import TenantStatementsPage from "./ContactStatements";
 import PropertyIncomeStatement from "./PropertyIncomeStatement";
 import PropertiesPage from "./Properties";
-import PropertyUnitsPage from "./PropertyUnits";
+import PropertyDetailsPage from "./PropertyDetails";
 import MaintenancesPage from "./Maintenances";
 import ReportsPage from "./Reports";
 import UsersPage from "./Users";
@@ -166,7 +165,7 @@ let MainPage = ({
             <Route
               exact
               path={`${match.path}properties/:propertyId/details`}
-              component={PropertyUnitsPage}
+              component={PropertyDetailsPage}
             />
             <Route
               exact

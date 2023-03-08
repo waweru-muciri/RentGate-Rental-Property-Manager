@@ -1,15 +1,13 @@
 import React from "react";
-import {
-	FormControl,
-	FormLabel,
-	FormControlLabel,
-	MenuItem,
-	Radio,
-	RadioGroup,
-	Button,
-	TextField,
-	Grid,
-} from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import FormControl from "@material-ui/core/FormControl";
+import TextField from "@material-ui/core/TextField";
+import FormLabel from "@material-ui/core/FormLabel";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";

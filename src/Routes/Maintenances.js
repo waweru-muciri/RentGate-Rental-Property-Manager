@@ -55,7 +55,7 @@ let MaintenanceRequestsPage = ({
 	maintenanceRequests,
 	users,
 	contacts,
-	properties,
+	propertyUnits,
 	match,
 	error, handleItemDelete
 }) => {
@@ -79,7 +79,7 @@ let MaintenanceRequestsPage = ({
 				if (typeof contactWithRequest !== 'undefined') {
 					maintenanceRequestDetails.tenant_id_number = contactWithRequest.id_number
 					maintenanceRequestDetails.tenant_name = contactWithRequest.first_name + " " + contactWithRequest.last_name
-					const property = properties.find(
+					const property = propertyUnits.find(
 						({ tenants }) => tenants.length ? tenants[0] === contactWithRequest.id : false
 					);
 					if (typeof property !== "undefined") {
@@ -104,7 +104,7 @@ let MaintenanceRequestsPage = ({
 		);
 		setMaintenanceRequestItems(mappedMaintenanceRequests);
 		setFilteredMaintenanceRequestItems(mappedMaintenanceRequests);
-	}, [maintenanceRequests, contacts, users, properties]);
+	}, [maintenanceRequests, contacts, users, propertyUnits]);
 
 	const exportMaintenanceRequestRecordsToExcel = () => {
 		let items = maintenanceRequests.filter(({ id }) =>
@@ -387,7 +387,7 @@ const mapStateToProps = (state, ownProps) => {
 	return {
 		currentUser: state.currentUser,
 		maintenanceRequests: state.maintenanceRequests,
-		properties: state.properties,
+		propertyUnits: state.propertyUnits,
 		users: state.users,
 		contacts: state.contacts,
 		isLoading: state.isLoading,
