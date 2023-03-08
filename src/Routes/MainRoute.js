@@ -365,32 +365,32 @@ function AppNavLayout(props) {
    <Router>
     <AppNavLayout selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} pageTitle={"Yarra Property Management"}/>
         <Switch>
-          <Route path={`${match.path}dashboard`} component={DashBoard} />
-          <Route
+          <Route exact path={`${match.path}dashboard`} component={DashBoard} />
+          <Route exact
             path={`${match.path}maintenance-requests/new`}
             component={MaintenanceRequestPage}
           />
-          <Route
+          <Route exact
             path={`${match.path}maintenance-requests/:maintenanceRequestId/edit`}
             component={MaintenanceRequestPage}
           />
-          <Route
+          <Route exact
             path={`${match.path}maintenance-requests`}
             component={MaintenancesPage}
           />
-          <Route path={`${match.path}to-dos`} component={ToDosPage} />
-          <Route path={`${match.path}audit-logs`} component={AuditLogsPage} />
-          <Route
+          <Route exact path={`${match.path}to-dos`} component={ToDosPage} />
+          <Route exact path={`${match.path}audit-logs`} component={AuditLogsPage} />
+          <Route exact
             path={`${match.path}properties/new`}
             component={PropertyPage}
           />
-          <Route path={`${match.path}users/new`} component={UserPage} />
-          <Route path={`${match.path}users`} component={UsersPage} />
-          <Route
+          <Route exact path={`${match.path}users/new`} component={UserPage} />
+          <Route exact path={`${match.path}users`} component={UsersPage} />
+          <Route exact
             path={`${match.path}transactions/new`}
             component={TransactionPage}
           />
-          <Route
+          <Route exact
             path={`${match.path}properties/:propertyId/edit`}
             component={PropertyPage}
           />
@@ -399,7 +399,7 @@ function AppNavLayout(props) {
             path={`${match.path}contacts`}
             component={ContactsPage}
           />
-          <Route
+          <Route exact
             path={`${match.path}transactions/:transactionId/edit`}
             component={TransactionPage}
           />
@@ -414,7 +414,7 @@ function AppNavLayout(props) {
             component={ContactPage}
           />
           <Route path={`${match.path}properties`} component={PropertiesPage} />
-          <Route
+          <Route exact
             path={`${match.path}transactions`}
             component={TransactionsPage}
           />
