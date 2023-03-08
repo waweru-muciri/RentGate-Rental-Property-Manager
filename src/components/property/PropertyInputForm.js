@@ -59,7 +59,7 @@ let PropertyInputForm = (props) => {
 		property_units: [],
 		owner: propertyToEdit.owner || "",
 	};
-	const CustomInputComponent = ({ remove, push, unshift, form }) => {
+	const CustomInputComponent = ({ remove, push, form }) => {
 		const { errors, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['property_units']
 		const layout = values.property_units.map((property_unit, propertyUnitIndex) =>
@@ -68,8 +68,8 @@ let PropertyInputForm = (props) => {
 					<TextField
 						label="Unit Number/Ref"
 						variant="outlined"
-						id={`property_units.${propertyUnitIndex}.ref`}
 						type="text"
+						value={property_unit.ref}
 						name={`property_units.${propertyUnitIndex}.ref`}
 						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['ref'] !== 'undefined'}
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].ref}
@@ -81,8 +81,8 @@ let PropertyInputForm = (props) => {
 					<TextField
 						label="Unit Address"
 						variant="outlined"
-						id={`property_units.${propertyUnitIndex}.address`}
 						type="text"
+						value={property_unit.address}
 						name={`property_units.${propertyUnitIndex}.address`}
 						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['address'] !== 'undefined'}
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].address}
@@ -95,9 +95,9 @@ let PropertyInputForm = (props) => {
 						fullWidth
 						label="Beds/Rooms"
 						variant="outlined"
-						id={`property_units.${propertyUnitIndex}.beds`}
 						defaultValue=""
 						select
+						value={property_unit.beds}
 						name={`property_units.${propertyUnitIndex}.beds`}
 						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['beds'] !== 'undefined'}
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].beds}
@@ -116,8 +116,8 @@ let PropertyInputForm = (props) => {
 						label="Baths"
 						variant="outlined"
 						defaultValue=""
-						id={`property_units.${propertyUnitIndex}.baths`}
 						select
+						value={property_unit.baths}
 						name={`property_units.${propertyUnitIndex}.baths`}
 						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['baths'] !== 'undefined'}
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].baths}
@@ -134,8 +134,8 @@ let PropertyInputForm = (props) => {
 					<TextField
 						label="Sqft"
 						variant="outlined"
-						id={`property_units.${propertyUnitIndex}.sqft`}
 						type="text"
+						value={property_unit.sqft}
 						name={`property_units.${propertyUnitIndex}.sqft`}
 						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['sqft'] !== 'undefined'}
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].sqft}
@@ -145,7 +145,7 @@ let PropertyInputForm = (props) => {
 				</Grid>
 				<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
 					<IconButton aria-label="delete"
-						onClick={function (){remove(propertyUnitIndex);}}
+						onClick={ () => { remove(propertyUnitIndex)}}
 						size="medium">
 						<DeleteIcon />
 					</IconButton>
