@@ -3,28 +3,27 @@ import * as actionTypes from "../assets/actionTypes";
 export function transactionsFetchDataSuccess(transactions) {
     return {
         type: actionTypes.TRANSACTIONS_FETCH_DATA_SUCCESS,
-        transactions
+        transactions,
     };
 }
 
 export function deleteTransaction(transactionId) {
     return {
         type: actionTypes.DELETE_TRANSACTION,
-        transactionId
+        transactionId,
     };
 }
 
 export function addTransaction(transaction) {
     return {
         type: actionTypes.ADD_TRANSACTION,
-        transaction
+        transaction,
     };
 }
 
 export function editTransaction(transaction) {
     return {
         type: actionTypes.EDIT_TRANSACTION,
-        transaction
+        transaction,
     };
 }
-

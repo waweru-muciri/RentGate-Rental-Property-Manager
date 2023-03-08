@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from "@material-ui/core/styles";
 
 function desc(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -17,11 +17,13 @@ function stableSort(array, cmp) {
         if (order !== 0) return order;
         return a[1] - b[1];
     });
-    return stabilizedThis.map(el => el[0]);
+    return stabilizedThis.map((el) => el[0]);
 }
 
 function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
+    return order === "desc"
+        ? (a, b) => desc(a, b, orderBy)
+        : (a, b) => -desc(a, b, orderBy);
 }
 
-export {desc, stableSort, getSorting};
+export { desc, stableSort, getSorting };

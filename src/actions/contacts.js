@@ -3,28 +3,27 @@ import * as actionTypes from "../assets/actionTypes";
 export function contactsFetchDataSuccess(contacts) {
     return {
         type: actionTypes.CONTACTS_FETCH_DATA_SUCCESS,
-        contacts
+        contacts,
     };
 }
 
 export function deleteContact(contactId) {
     return {
         type: actionTypes.DELETE_CONTACT,
-        contactId
+        contactId,
     };
 }
 
 export function addContact(contact) {
     return {
         type: actionTypes.ADD_CONTACT,
-        contact
+        contact,
     };
 }
 
 export function editContact(contact) {
     return {
         type: actionTypes.EDIT_CONTACT,
-        contact
+        contact,
     };
 }
-

@@ -1,11 +1,26 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import { TableHead, TableCell,Checkbox, TableRow, TableSortLabel } from '@material-ui/core';
+import React from "react";
+import PropTypes from "prop-types";
+import clsx from "clsx";
+import {
+    TableHead,
+    TableCell,
+    Checkbox,
+    TableRow,
+    TableSortLabel,
+} from "@material-ui/core";
 
 function EnhancedTableHead(props) {
-    const { classes, onSelectAllClick, order, orderBy, headCells, numSelected, rowCount, onRequestSort } = props;
-    const createSortHandler = property => event => {
+    const {
+        classes,
+        onSelectAllClick,
+        order,
+        orderBy,
+        headCells,
+        numSelected,
+        rowCount,
+        onRequestSort,
+    } = props;
+    const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
 
@@ -14,17 +29,19 @@ function EnhancedTableHead(props) {
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
+                        indeterminate={
+                            numSelected > 0 && numSelected < rowCount
+                        }
                         checked={numSelected === rowCount}
                         onChange={onSelectAllClick}
-                        inputProps={{ 'aria-label': 'select all' }}
+                        inputProps={{ "aria-label": "select all" }}
                     />
                 </TableCell>
-                {headCells.map(headCell => (
+                {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : 'left'}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        align={headCell.numeric ? "right" : "left"}
+                        padding={headCell.disablePadding ? "none" : "default"}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel
@@ -35,7 +52,9 @@ function EnhancedTableHead(props) {
                             {headCell.label}
                             {orderBy === headCell.id ? (
                                 <span className={classes.visuallyHidden}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                    {order === "desc"
+                                        ? "sorted descending"
+                                        : "sorted ascending"}
                                 </span>
                             ) : null}
                         </TableSortLabel>
@@ -46,15 +65,14 @@ function EnhancedTableHead(props) {
     );
 }
 
-
 EnhancedTableHead.propTypes = {
     classes: PropTypes.object.isRequired,
     numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
     onSelectAllClick: PropTypes.func.isRequired,
-    order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+    order: PropTypes.oneOf(["asc", "desc"]).isRequired,
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
 };
 
-export default EnhancedTableHead
+export default EnhancedTableHead;

@@ -1,16 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import InfoIcon from '@material-ui/icons/Info';
-import CloseIcon from '@material-ui/icons/Close';
-import { amber, green } from '@material-ui/core/colors';
-import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import WarningIcon from '@material-ui/icons/Warning';
-import { makeStyles } from '@material-ui/core/styles';
+import React from "react";
+import PropTypes from "prop-types";
+import clsx from "clsx";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import ErrorIcon from "@material-ui/icons/Error";
+import InfoIcon from "@material-ui/icons/Info";
+import CloseIcon from "@material-ui/icons/Close";
+import { amber, green } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
+import WarningIcon from "@material-ui/icons/Warning";
+import { makeStyles } from "@material-ui/core/styles";
 
 const variantIcon = {
     success: CheckCircleIcon,
@@ -19,7 +19,7 @@ const variantIcon = {
     info: InfoIcon,
 };
 
-const useStyles1 = makeStyles(theme => ({
+const useStyles1 = makeStyles((theme) => ({
     success: {
         backgroundColor: green[600],
     },
@@ -40,8 +40,8 @@ const useStyles1 = makeStyles(theme => ({
         marginRight: theme.spacing(1),
     },
     message: {
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
     },
 }));
 
@@ -61,7 +61,12 @@ function MySnackbarContentWrapper(props) {
                 </span>
             }
             action={[
-                <IconButton key="close" aria-label="close" color="inherit" onClick={onClose}>
+                <IconButton
+                    key="close"
+                    aria-label="close"
+                    color="inherit"
+                    onClick={onClose}
+                >
                     <CloseIcon className={classes.icon} />
                 </IconButton>,
             ]}
@@ -74,14 +79,15 @@ MySnackbarContentWrapper.propTypes = {
     className: PropTypes.string,
     message: PropTypes.string,
     onClose: PropTypes.func,
-    variant: PropTypes.oneOf(['error', 'info', 'success', 'warning']).isRequired,
+    variant: PropTypes.oneOf(["error", "info", "success", "warning"])
+        .isRequired,
 };
 
 export default function CustomizedSnackbar(props) {
     const [open, setOpen] = React.useState(true);
 
     const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === "clickaway") {
             return;
         }
 
@@ -91,8 +97,8 @@ export default function CustomizedSnackbar(props) {
     return (
         <Snackbar
             anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
+                vertical: "bottom",
+                horizontal: "center",
             }}
             open={open}
             autoHideDuration={6000}
@@ -101,7 +107,9 @@ export default function CustomizedSnackbar(props) {
             <MySnackbarContentWrapper
                 onClose={handleClose}
                 variant={props.variant ? props.variant : "success"}
-                message={props.message ? props.message : "This is a success message!"}
+                message={
+                    props.message ? props.message : "This is a success message!"
+                }
             />
         </Snackbar>
     );

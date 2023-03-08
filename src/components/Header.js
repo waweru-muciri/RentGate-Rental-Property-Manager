@@ -1,30 +1,32 @@
-import React from 'react'
+import React from "react";
 import {
     Collapse,
-    Navbar, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem,
+    Navbar,
+    UncontrolledDropdown,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem,
     NavbarToggler,
     NavbarBrand,
     Nav,
     NavItem,
     NavLink,
-} from 'reactstrap'
+} from "reactstrap";
 
 export default class Header extends React.Component {
     navCssStyles = {
-        width: '100%',
+        width: "100%",
         alignItems: "center",
         justifyContent: "space-evenly",
-    }
+    };
     state = {
-        isOpen: false
-    }
+        isOpen: false,
+    };
     toggle = () => {
-        this.setState(
-            {
-                isOpen: !this.state.isOpen
-            }
-        );
-    }
+        this.setState({
+            isOpen: !this.state.isOpen,
+        });
+    };
     render() {
         return (
             <Navbar dark className="bg-dark" expand="lg">
@@ -40,9 +42,7 @@ export default class Header extends React.Component {
                                 <DropdownItem href="/rentals">
                                     Rentals
                                 </DropdownItem>
-                                <DropdownItem href="/sales">
-                                    Sales
-                                </DropdownItem>
+                                <DropdownItem href="/sales">Sales</DropdownItem>
                             </DropdownMenu>
                         </UncontrolledDropdown>
                         <UncontrolledDropdown nav inNavbar>
@@ -69,12 +69,8 @@ export default class Header extends React.Component {
                                 Marketing
                             </DropdownToggle>
                             <DropdownMenu right>
-                                <DropdownItem href="/sms">
-                                    SMS
-                                </DropdownItem>
-                                <DropdownItem href="/email">
-                                    Email
-                                </DropdownItem>
+                                <DropdownItem href="/sms">SMS</DropdownItem>
+                                <DropdownItem href="/email">Email</DropdownItem>
                             </DropdownMenu>
                         </UncontrolledDropdown>
                         <UncontrolledDropdown nav inNavbar>
@@ -100,7 +96,8 @@ export default class Header extends React.Component {
                             <DropdownMenu right>
                                 <DropdownItem href="/company_profile">
                                     Profile
-                                </DropdownItem>                       <DropdownItem href="/company_settings">
+                                </DropdownItem>{" "}
+                                <DropdownItem href="/company_settings">
                                     Settings
                                 </DropdownItem>
                             </DropdownMenu>
