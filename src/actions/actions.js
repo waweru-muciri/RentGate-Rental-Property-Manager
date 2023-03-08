@@ -39,7 +39,7 @@ export function setCurrentUser(user) {
 }
 
 const firebaseGetOptions = {
-    source: 'server'
+    source: 'cache'
 };
 
 export const firebaseSignOutUser = () => {
