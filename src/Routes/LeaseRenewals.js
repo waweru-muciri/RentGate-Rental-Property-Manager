@@ -77,7 +77,7 @@ let RentRollPage = ({
                 transactionDetails.lease = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
                 transactionDetails.current_terms = `${transaction.lease_type} | ${transaction.transaction_price} \n ${transaction.lease_start} - ${transaction.lease_end}`;
             }
-            transactionDetails.days_left = moment(transaction.lease_end).diff(moment(transaction.lease_start), 'days') + ' Days'
+            transactionDetails.days_left = moment(transaction.lease_end).diff(moment().format('YYYY-MM-DD'), 'days') + ' Days'
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
@@ -165,7 +165,7 @@ let RentRollPage = ({
                             disabled={selected.length <= 0}
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`/transactions/${selected[0]}/edit`}
+                            to={`/transactions/new`}
                         >
                             RENEW LEASE
                         </Button>

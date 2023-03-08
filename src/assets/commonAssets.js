@@ -3,25 +3,32 @@ export function getContactTitles() {
 	return ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"];
 }
 
-export function getNationalitiesOptions() {
-	let nationalities_options = ["Kenyan", "Jamaican", "Canadian"];
-	return nationalities_options;
-}
-
 export function getGendersList() {
 	let gendersList = ["Male", "Female", "Not Specified"];
 	return gendersList;
 }
 
-export function getAddressTypes() {
-	return ["Present", "Permanent", "Work"];
-}
-export function getMobilePhoneTypes() {
-	return ["Home", "Custom", "Work"];
-}
-
 export function getContactTypes() {
 	return ["Individual", "Company"];
+}
+
+export function getExpensesCategories() {
+	return [
+		'Taxes',
+		'Utilities',
+		'Mortgage',
+		'Office',
+		'Entertainment',
+		'Maintenance & Cleaning',
+		'Advertising',
+		'Insurance',
+		'Legal & Other Professional Fees',
+		'Auto & Travel',
+		'Management Fees',
+		'Supplies',
+		'Repairs',
+		'Other'
+	]
 }
 
 //general property values

@@ -58,44 +58,46 @@ export function addRolesToUserByEmail(email, rolesToAddObject) {
     });
 }
 
-export function deleteUploadedFileByUrl(fileUrl) {
-    storageRef.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
+export async function deleteUploadedFileByUrl(fileUrl) {
+    return await storageRef.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
 }
 
 export function uploadFilesToFirebase(filesArray) {
-    return filesArray.map((file) => {
+    return filesArray.map(async (file) => {
         var fileRef = storageRef.child(`propertyImages/${file.file.name}`);
-        return fileRef
-            .putString(file.data, "data_url")
-            .then((snapshot) => {
-                console.log("Uploaded files successfully!");
-                return snapshot.ref
-                    .getDownloadURL()
-                    .then((url) => url)
-                    .catch(function (error) {
-                        switch (error.code) {
-                            case "storage/object-not-found":
-                                console.log("File doesn't exist");
-                                break;
-                            case "storage/unauthorized":
-                                console.log(
-                                    "User doesn't have permission to access the object"
-                                );
-                                break;
-                            case "storage/canceled":
-                                console.log("User canceled the upload");
-                                break;
-                            case "storage/unknown":
-                                console.log(
-                                    "Unknown error occurred, inspect the server response"
-                                );
-                                break;
-                        }
-                    });
-            })
-            .catch((error) =>
-                console.log("Error during file upload => ", error)
-            );
+        try {
+            const snapshot = await fileRef
+                .putString(file.data, "data_url");
+            console.log("Uploaded files successfully!");
+            try {
+                const url = await snapshot.ref
+                    .getDownloadURL();
+                return url;
+            }
+            catch (error) {
+                switch (error.code) {
+                    case "storage/object-not-found":
+                        console.log("File doesn't exist");
+                        break;
+                    case "storage/unauthorized":
+                        console.log(
+                            "User doesn't have permission to access the object"
+                        );
+                        break;
+                    case "storage/canceled":
+                        console.log("User canceled the upload");
+                        break;
+                    case "storage/unknown":
+                        console.log(
+                            "Unknown error occurred, inspect the server response"
+                        );
+                        break;
+                }
+            }
+        }
+        catch (error_1) {
+            return console.log("Error during file upload => ", error_1);
+        }
     });
 }
 
@@ -250,122 +252,123 @@ export function itemsIsLoading(bool) {
 }
 export function handleDelete(itemId, url) {
     //send request to server to delete selected item
-    return (dispatch) => {
-        return db
-            .collection(url)
-            .doc(itemId)
-            .delete().then(() => {
-                console.log("Document successfully deleted!");
-                switch (url) {
-                    case "properties":
-                        dispatch(
-                            propertyActions.deleteProperty(
-                                itemId
-                            )
-                        );
-                        break;
+    return async (dispatch) => {
+        try {
+            await db
+                .collection(url)
+                .doc(itemId)
+                .delete();
+            console.log("Document successfully deleted!");
+            switch (url) {
+                case "properties":
+                    dispatch(
+                        propertyActions.deleteProperty(
+                            itemId
+                        )
+                    );
+                    break;
 
-                    case "contacts":
-                        dispatch(
-                            contactsActions.deleteContact(itemId)
-                        );
-                        break;
+                case "contacts":
+                    dispatch(
+                        contactsActions.deleteContact(itemId)
+                    );
+                    break;
 
-                    case "contact_emails":
-                        dispatch(
-                            emailsActions.deleteEmail(itemId)
-                        );
-                        break;
+                case "contact_emails":
+                    dispatch(
+                        emailsActions.deleteEmail(itemId)
+                    );
+                    break;
 
-                    case "contact_phone_numbers":
-                        dispatch(
-                            phoneNumbersActions.deletePhoneNumber(
-                                itemId
-                            )
-                        );
-                        break;
+                case "contact_phone_numbers":
+                    dispatch(
+                        phoneNumbersActions.deletePhoneNumber(
+                            itemId
+                        )
+                    );
+                    break;
 
-                    case "contact_faxes":
-                        dispatch(faxesActions.deleteFax(itemId));
-                        break;
+                case "contact_faxes":
+                    dispatch(faxesActions.deleteFax(itemId));
+                    break;
 
-                    case "contact_addresses":
-                        dispatch(
-                            addressesActions.deleteAddress(
-                                itemId
-                            )
-                        );
-                        break;
+                case "contact_addresses":
+                    dispatch(
+                        addressesActions.deleteAddress(
+                            itemId
+                        )
+                    );
+                    break;
 
-                    case "transactions":
-                        dispatch(
-                            transactionsActions.deleteTransaction(
-                                itemId
-                            )
-                        );
-                        break;
+                case "transactions":
+                    dispatch(
+                        transactionsActions.deleteTransaction(
+                            itemId
+                        )
+                    );
+                    break;
 
-                    case "to-dos":
-                        dispatch(toDoActions.deleteToDo(itemId));
-                        break;
+                case "to-dos":
+                    dispatch(toDoActions.deleteToDo(itemId));
+                    break;
 
-                    case "maintenance-requests":
-                        dispatch(
-                            maintenanceRequestsActions.deleteMaintenanceRequest(
-                                itemId
-                            )
-                        );
-                        break;
+                case "maintenance-requests":
+                    dispatch(
+                        maintenanceRequestsActions.deleteMaintenanceRequest(
+                            itemId
+                        )
+                    );
+                    break;
 
-                    case "logs":
-                        dispatch(
-                            logActions.deleteAuditLog(itemId)
-                        );
-                        break;
+                case "logs":
+                    dispatch(
+                        logActions.deleteAuditLog(itemId)
+                    );
+                    break;
 
-                    case "notices":
-                        dispatch(
-                            vacatingNoticesActions.deleteNotice(itemId)
-                        );
-                        break;
+                case "notices":
+                    dispatch(
+                        vacatingNoticesActions.deleteNotice(itemId)
+                    );
+                    break;
 
-                    case "property_media":
-                        dispatch(
-                            mediaFilesActions.deleteMediaFile(itemId)
-                        );
-                        break;
+                case "property_media":
+                    dispatch(
+                        mediaFilesActions.deleteMediaFile(itemId)
+                    );
+                    break;
 
-                    case "expenses":
-                        dispatch(
-                            expensesActions.deleteExpense(itemId)
-                        );
-                        break;
+                case "expenses":
+                    dispatch(
+                        expensesActions.deleteExpense(itemId)
+                    );
+                    break;
 
-                    case "users":
-                        dispatch(
-                            usersActions.deleteUser(itemId)
-                        );
-                        break;
+                case "users":
+                    dispatch(
+                        usersActions.deleteUser(itemId)
+                    );
+                    break;
 
-                    case "meter_readings":
-                        dispatch(
-                            meterReadingsActions.deleteMeterReading(itemId)
-                        );
-                        break;
+                case "meter_readings":
+                    dispatch(
+                        meterReadingsActions.deleteMeterReading(itemId)
+                    );
+                    break;
 
-                    case "communication_emails":
-                        dispatch(
-                            communicationEmailsActions.deleteCommunicationEmail(itemId)
-                        );
-                        break;
+                case "communication_emails":
+                    dispatch(
+                        communicationEmailsActions.deleteCommunicationEmail(itemId)
+                    );
+                    break;
 
-                    default:
-                        break;
-                }
-            }).catch((error) => {
-                console.log("Failed to Delete Document!", error);
-
-            })
+                default:
+                    break;
+            }
+        }
+        catch (error) {
+            console.log("Failed to Delete Document!", error);
+        }
     }
 }
 
@@ -469,11 +472,11 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
 
-                    case "meter_readings":
-                        dispatch(
-                            meterReadingsActions.editMeterReading(modifiedObject)
-                        );
-                        break;
+                            case "meter_readings":
+                                dispatch(
+                                    meterReadingsActions.editMeterReading(modifiedObject)
+                                );
+                                break;
 
                             case "users":
                                 dispatch(communicationEmailsActions.editCommunicationEmail(modifiedObject));
@@ -569,11 +572,11 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(usersActions.addUser(addedItem));
                                 break;
 
-                    case "meter_readings":
-                        dispatch(
-                            meterReadingsActions.addMeterReading(addedItem)
-                        );
-                        break;
+                            case "meter_readings":
+                                dispatch(
+                                    meterReadingsActions.addMeterReading(addedItem)
+                                );
+                                break;
 
                             case "communication_emails":
                                 dispatch(communicationEmailsActions.addCommunicationEmail(addedItem));

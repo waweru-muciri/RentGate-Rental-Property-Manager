@@ -86,7 +86,6 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
 import Head from "../components/Head";
 
-
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -157,7 +156,7 @@ const useStyles = makeStyles((theme) => ({
 
 const navigationLinks = [
   { text: "Home", to: "/", icon: <DashboardIcon /> },
-  { text: "Contacts", to: "/contacts", icon: <ContactsIcon /> },
+  { text: "Tenants", to: "/contacts", icon: <ContactsIcon /> },
   { text: "Users", to: "/users", icon: <GroupIcon /> },
   {
     text: "Maintenance Requests",
@@ -219,7 +218,7 @@ let MainPage = ({
 
   useEffect(() => {
     if (!properties.length) {
-       fetchData([
+      fetchData([
         "properties",
         "transactions",
         "maintenance-requests",

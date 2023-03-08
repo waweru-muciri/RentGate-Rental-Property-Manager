@@ -33,14 +33,13 @@ const FilterYearSchema = Yup.object().shape({
 let DashBoardPage = (props) => {
   const classes = commonStyles();
   const [transactionItems, setTransactionItems] = useState([]);
-  const [filterYear, setFilterYear] = useState(moment().get("year"));
   const { properties, contacts, transactions, notices } = props;
 
   useEffect(() => {
     setTransactionItems(transactions);
   }, [transactions]);
 
-  const setFilteredTransactionItemsByYear = () => {
+  const setFilteredTransactionItemsByYear = (filterYear) => {
     setTransactionItems(
       transactions.filter(
         ({ transaction_date }) =>
@@ -147,11 +146,10 @@ let DashBoardPage = (props) => {
                   borderColor="grey.400"
                 >
                   <Formik
-                    initialValues={{ filter_year: filterYear }}
+                    initialValues={{ filter_year: moment().get("year") }}
                     validationSchema={FilterYearSchema}
                     onSubmit={(values) => {
-                      setFilterYear(values.filter_year);
-                      setFilteredTransactionItemsByYear();
+                      setFilteredTransactionItemsByYear(values.filter_year);
                     }}
                   >
                     {({
@@ -162,48 +160,48 @@ let DashBoardPage = (props) => {
                       handleChange,
                       handleBlur,
                     }) => (
-                      <form
-                        className={classes.form}
-                        id="yearFilterForm"
-                        onSubmit={handleSubmit}
-                      >
-                        <Grid
-                          container
-                          spacing={2}
-                          alignItems="center"
-                          justify="center"
-                          direction="row"
+                        <form
+                          className={classes.form}
+                          id="yearFilterForm"
+                          onSubmit={handleSubmit}
                         >
-                          <Grid item>
-                            <TextField
-                              variant="outlined"
-                              id="filter_year"
-                              name="filter_year"
-                              label="Year"
-                              value={values.filter_year}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              error={errors.filter_year && touched.filter_year}
-                              helperText={
-                                touched.filter_year && errors.filter_year
-                              }
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Button
-                              type="submit"
-                              form="yearFilterForm"
-                              color="primary"
-                              variant="contained"
-                              size="medium"
-                              startIcon={<SearchIcon />}
-                            >
-                              SEARCH
+                          <Grid
+                            container
+                            spacing={2}
+                            alignItems="center"
+                            justify="center"
+                            direction="row"
+                          >
+                            <Grid item>
+                              <TextField
+                                variant="outlined"
+                                id="filter_year"
+                                name="filter_year"
+                                label="Year"
+                                value={values.filter_year}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                error={errors.filter_year && touched.filter_year}
+                                helperText={
+                                  touched.filter_year && errors.filter_year
+                                }
+                              />
+                            </Grid>
+                            <Grid item>
+                              <Button
+                                type="submit"
+                                form="yearFilterForm"
+                                color="primary"
+                                variant="contained"
+                                size="medium"
+                                startIcon={<SearchIcon />}
+                              >
+                                SEARCH
                             </Button>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </form>
-                    )}
+                        </form>
+                      )}
                   </Formik>
                 </Box>
               </Grid>

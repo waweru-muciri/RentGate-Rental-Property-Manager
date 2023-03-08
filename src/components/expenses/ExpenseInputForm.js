@@ -6,6 +6,8 @@ import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
+import { getExpensesCategories } from "../../assets/commonAssets";
+
 
 const VacatingNoticeSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
@@ -17,6 +19,7 @@ const VacatingNoticeSchema = Yup.object().shape({
 const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
   const history = useHistory();
   const classes = commonStyles();
+  const expenseCategories = getExpensesCategories();
 
   return (
     <Formik
@@ -30,6 +33,7 @@ const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
           amount: values.amount,
           property: values.property,
           expense_date: values.expense_date,
+          expense_notes: values.expense_notes,
         };
         handleItemSubmit(expense, "expenses").then((response) => {
           resetForm({});
@@ -53,13 +57,6 @@ const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
             id="expenseInputForm"
             onSubmit={handleSubmit}
           >
-            {
-              console.log('Values => ', values)
-            }
-            {
-              console.log('Properties => ', properties)
-
-            }
             <Grid
               container
               spacing={4}
@@ -68,6 +65,24 @@ const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
               direction="column"
             >
               <Grid item>
+                <TextField
+                  fullWidth
+                  select
+                  variant="outlined"
+                  name="property"
+                  label="Property/Unit Ref"
+                  id="property"
+                  onChange={handleChange}
+                  value={values.property || ''}
+                  error={"property" in errors}
+                  helperText={errors.property}
+                >
+                  {properties.map((property, index) => (
+                    <MenuItem key={index} value={property.id}>
+                      {property.ref}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   fullWidth
                   type="date"
@@ -84,16 +99,23 @@ const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
                 />
                 <TextField
                   fullWidth
+                  select
                   variant="outlined"
                   id="type"
                   name="type"
-                  label="Expenditure Type/Name"
+                  label="Expense Type"
                   value={values.type}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={"type" in errors}
                   helperText={errors.type}
-                />
+                >
+                  {expenseCategories.map((category, index) => (
+                    <MenuItem key={index} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -108,22 +130,17 @@ const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
                 />
                 <TextField
                   fullWidth
-                  select
+                  multiline
+                  rows={4}
                   variant="outlined"
-                  name="property"
-                  label="Property"
-                  id="property"
+                  id="expense_notes"
+                  name="expense_notes"
+                  label="Notes"
+                  value={values.expense_notes}
                   onChange={handleChange}
-                  value={values.property || ''}
-                  error={"property" in errors}
-                  helperText={errors.property}
-                >
-                  {properties.map((property, index) => (
-                    <MenuItem key={index} value={property.id}>
-                      {property.ref}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  onBlur={handleBlur}
+                  helperText={"Any notes regarding this expense?"}
+                />
               </Grid>
               <Grid item className={classes.buttonBox}>
                 <Button

@@ -28,7 +28,7 @@ const GENDERS_LIST = getGendersList();
 
 const contactsTableHeadCells = [
     {
-        id: "assigned_to",
+        id: "landlord_name",
         numeric: false,
         disablePadding: true,
         label: "Assigned To",
@@ -88,8 +88,14 @@ let ContactsPage = ({
     const classes = commonStyles();
 
     useEffect(() => {
-        setContactItems(contacts);
-    }, [contacts]);
+		const mappedContacts = contacts.map((contact) => {
+			const landlord = users.find((user) => user.id === contact.assigned_to)	
+			const landlordDetails = {}
+			landlordDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
+			return Object.assign({}, contact, landlordDetails);
+		});
+        setContactItems(mappedContacts);
+    }, [contacts, users]);
 
     const exportContactRecordsToExcel = () => {
         let items = contacts.filter(({ id }) => selected.includes(id));

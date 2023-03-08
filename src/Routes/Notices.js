@@ -16,10 +16,11 @@ import PrintTenantVacatingNotice from "../assets/PrintTenantVacatingNotice";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
-
+import moment from "moment";
 
 
 const noticesTableHeadCells = [
+    { id: "days_left", numeric: false, disablePadding: true, label: "Days Left" },
     {
         id: "landlord_name",
         numeric: false,
@@ -43,7 +44,7 @@ const noticesTableHeadCells = [
         id: "vacating_date",
         numeric: false,
         disablePadding: true,
-        label: "Date to Vacate",
+        label: "Move Out Date",
     },
 ];
 
@@ -103,6 +104,7 @@ let VacatingNoticesPage = ({
                 noticeDetails.tenant_id_number = tenant.id_number
                 noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name
             }
+            noticeDetails.days_left = moment(notice.vacating_date).diff(moment().format('YYYY-MM-DD'), 'days') + ' Days'
             noticeDetails.tenant_email = typeof tenantEmail !== 'undefined' ? tenantEmail.email : ''
             noticeDetails.tenant_phone_number = typeof tenantPhoneNumber !== 'undefined' ? tenantPhoneNumber.phone_number : ''
             if (typeof landlord !== "undefined") {
@@ -157,7 +159,7 @@ let VacatingNoticesPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Vacating Notices'} />
+                    <PageHeading paddingLeft={2} text={'Move Outs'} />
                 </Grid>
                 <Grid
                     container

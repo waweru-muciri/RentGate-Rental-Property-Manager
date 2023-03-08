@@ -17,6 +17,7 @@ let ExpensePage = (props) => {
     expenseToEdit =
         typeof expenseToEdit === "undefined"
             ? {
+                expense_notes: '',
                 expense_date: defaultDate,
                 amount: '',
                 property: '',
