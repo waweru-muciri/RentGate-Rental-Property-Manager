@@ -8,7 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import EmailsSelect from "./EmailsSelect";
 import EmailDetailsForm from "./EmailDetailsForm";
 import { commonStyles } from "../commonStyles";
-
+import { sendEmails } from "../../actions/actions";
 
 function getSteps() {
   return ["Create an email", "Select an email group"];
@@ -26,7 +26,7 @@ export default function HorizontalLinearStepper(props) {
   }
   //for the transfer list below
   const [emailValues, setEmailValues] = React.useState(defaultEmailValues);
-  
+
   const steps = getSteps();
 
   const handleNext = () => {
@@ -46,13 +46,14 @@ export default function HorizontalLinearStepper(props) {
     history.goBack()
   }
 
-  const submitEmailDetailsForm =(emailValues) => {
+  const submitEmailDetailsForm = (emailValues) => {
     setEmailValues(emailValues)
     handleNext()
   }
-  
-  const sendEmails = (emailsArray) => {
+
+  const handleSendEmailSubmit = async (emailsArray) => {
     //send the fucking emails here
+    await sendEmails(emailValues.email_subject, emailValues.email_message, emailsArray)
     handleNext()
   }
 
@@ -71,19 +72,19 @@ export default function HorizontalLinearStepper(props) {
         {activeStep === steps.length ? (
           <div>
             <Typography className={classes.oneMarginTopBottom}>
-              Sending email...
+              Email Sent...
             </Typography>
             <Button onClick={handleReset} className={classes.oneMarginRight}>
               Reset
             </Button>
           </div>
         ) : activeStep === 0 ? (
-            <Grid container direction="column">
-             <EmailDetailsForm emailValues={emailValues} handleCancel={handleCancel} 
-               submitEmailValues={submitEmailDetailsForm} emailTemplates={emailTemplates} />
-            </Grid> 
-          ): activeStep === 1 ? (
-            <EmailsSelect contacts={contacts} users={users} handleBack={handleBack} submitEmailSourceValues={sendEmails} />) : null}
+          <Grid container direction="column">
+            <EmailDetailsForm emailValues={emailValues} handleCancel={handleCancel}
+              submitEmailValues={submitEmailDetailsForm} emailTemplates={emailTemplates} />
+          </Grid>
+        ) : activeStep === 1 ? (
+          <EmailsSelect contacts={contacts} users={users} handleBack={handleBack} submitEmailSourceValues={handleSendEmailSubmit} />) : null}
       </div>
     </div>
   );

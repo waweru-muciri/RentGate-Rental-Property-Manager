@@ -34,7 +34,6 @@ const headCells = [
     { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
-    { id: "address", numeric: false, disablePadding: true, label: "Unit Adddress" },
     { id: "sqft", numeric: false, disablePadding: true, label: "Square Footage" },
     { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent Amount" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },

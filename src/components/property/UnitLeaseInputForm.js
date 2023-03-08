@@ -63,6 +63,7 @@ let UnitLeaseInputForm = (props) => {
 		rent_due_date: leaseToEdit.rent_due_date || format(addMonths(startOfMonth(new Date()), 1), 'yyyy-MM-dd'),
 		security_deposit_due_date: leaseToEdit.security_deposit_due_date || defaultDate,
 		rent_amount: leaseToEdit.rent_amount || '',
+		terminated: leaseToEdit.terminated || false,
 		security_deposit: leaseToEdit.security_deposit || 0,
 		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
@@ -114,6 +115,7 @@ let UnitLeaseInputForm = (props) => {
 					security_deposit: values.security_deposit,
 					security_deposit_due_date: values.security_deposit_due_date,
 					rent_amount: values.rent_amount,
+					terminated: values.terminated
 				};
 				await handleItemSubmit(propertyUnitLease, "leases")
 				if (!values.id) {
@@ -142,10 +144,10 @@ let UnitLeaseInputForm = (props) => {
 					await handleItemSubmit(newRentCharge, 'transactions-charges')
 					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 				}
+				resetForm({});
 				if (values.id) {
 					history.goBack()
 				}
-				resetForm({});
 			}}
 		>
 			{({

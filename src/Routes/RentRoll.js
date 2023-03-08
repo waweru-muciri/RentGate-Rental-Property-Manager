@@ -37,7 +37,6 @@ const headCells = [
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Rent Balance" },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
@@ -45,6 +44,7 @@ let RentRollPage = ({
     transactionsCharges,
     properties,
     contacts,
+    leases,
     transactions,
     handleItemSubmit,
     handleItemDelete
@@ -53,7 +53,7 @@ let RentRollPage = ({
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
     let [contactFilter, setContactFilter] = useState(null);
-    let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [periodFilter, setPeriodFilter] = useState("all");
     let [fromDateFilter, setFromDateFilter] = useState('');
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -82,13 +82,6 @@ let RentRollPage = ({
         setFilteredChargeItems(transactionsCharges);
     }, [transactionsCharges]);
 
-    const handleRentChargeDelete = async (chargeId, url) => {
-        transactions.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
-            await handleItemDelete(payment.id, "charge-payments")
-        });
-        await handleItemDelete(chargeId, url)
-    }
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the charges according to the search criteria here
@@ -98,6 +91,10 @@ let RentRollPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -130,16 +127,10 @@ let RentRollPage = ({
             })
         }
         filteredRentCharges = filteredRentCharges
-            .filter(({ charge_date }) =>
-                !fromDateFilter ? true : charge_date >= fromDateFilter
-            )
-            .filter(({ charge_date }) =>
-                !toDateFilter ? true : charge_date <= toDateFilter
-            )
+            .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
+            .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) =>
-                !contactFilter ? true : tenant_id === contactFilter.id
-            )
+            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
         setFilteredChargeItems(filteredRentCharges);
     };
 
@@ -148,7 +139,7 @@ let RentRollPage = ({
         setFilteredChargeItems(rentCharges);
         setPropertyFilter("all");
         setContactFilter(null);
-        setPeriodFilter("");
+        setPeriodFilter("all");
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -160,17 +151,35 @@ let RentRollPage = ({
         chargesToAddPayments.forEach(async (charge) => {
             const chargePayment = {
                 charge_id: charge.id,
-                amount: charge.charge_amount,
+                payment_amount: charge.charge_amount,
                 payment_date: defaultDate,
                 tenant_id: charge.tenant_id,
-                unit_ref: charge.unit_ref,
                 unit_id: charge.unit_id,
                 property_id: charge.property_id,
                 payment_label: charge.charge_label,
+                memo: "Rent Payment",
                 payment_type: charge.charge_type,
             };
             await handleItemSubmit(chargePayment, 'charge-payments')
         })
+    }
+
+    const handleRentChargeDelete = async (chargeId, url) => {
+        transactions.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
+            await handleItemDelete(payment.id, "charge-payments")
+            if (payment.security_deposit_charge_id) {
+                const leaseWithChargeOnDeposit = leases.find(({ id }) => id === payment.security_deposit_charge_id)
+                if (leaseWithChargeOnDeposit) {
+                    const securityDepositBeforePayment = parseFloat(leaseWithChargeOnDeposit.security_deposit) + parseFloat(payment.payment_amount)
+                    const leaseToEdit = {
+                        id: payment.security_deposit_charge_id,
+                        security_deposit: securityDepositBeforePayment
+                    }
+                    await handleItemSubmit(leaseToEdit, 'leases')
+                }
+            }
+        });
+        await handleItemDelete(chargeId, url)
     }
 
     return (
@@ -208,6 +217,7 @@ let RentRollPage = ({
                                 color="primary"
                                 variant="contained"
                                 size="medium"
+                                startIcon={<AddIcon />}
                                 disabled={selected.length <= 0}
                                 onClick={() => setChargesPaidInFull()}
                             >
@@ -236,11 +246,7 @@ let RentRollPage = ({
                                 size="medium"
                                 disabled={selected.length <= 0}
                                 startIcon={<AddIcon />}
-                                to={() => {
-                                    const selectedCharge = rentCharges.find(({ id }) => selected[0] === id) || {}
-                                    const tenantIdWithSelectedCharge = selectedCharge.tenant_id
-                                    return `/app/charge-on-deposit/${tenantIdWithSelectedCharge}/new`
-                                }}
+                                to={`/app/payments/${selected[0]}/new?charge_deposit=1`}
                                 component={Link}
                             >
                                 Charge on Deposit
@@ -333,6 +339,7 @@ let RentRollPage = ({
                                                     }}
                                                     InputLabelProps={{ shrink: true }}
                                                 >
+                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                         <MenuItem
                                                             key={index}
@@ -463,6 +470,7 @@ let RentRollPage = ({
                             setSelected={setSelected}
                             rows={filteredChargeItems}
                             headCells={headCells}
+                            noEditCol={true}
                             noDetailsCol={true}
                             deleteUrl={'transactions-charges'}
                             handleDelete={handleRentChargeDelete}
@@ -479,9 +487,10 @@ const mapStateToProps = (state) => {
         properties: state.properties,
         transactions: state.transactions.filter((payment) => payment.payment_type === 'rent'),
         transactionsCharges: state.transactionsCharges
-            .filter((charge) => charge.charge_type === 'rent').sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
+            .filter((charge) => charge.charge_type === 'rent')
             .map((charge) => {
                 const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
+                const unitWithCharge = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
                 const chargeDetails = {}
                 chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
                 chargeDetails.tenant_id_number = tenant.id_number
@@ -493,10 +502,12 @@ const mapStateToProps = (state) => {
                 chargeDetails.payed_amount = payed_amount
                 chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
                 const property = state.properties.find(property => property.id === charge.property_id) || {}
-                chargeDetails.unit_details = `${property.ref} - ${charge.unit_ref}`;
+                chargeDetails.unit_details = `${property.ref} - ${unitWithCharge.ref}`;
                 return Object.assign({}, charge, chargeDetails);
-            }),
+            }).sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
+            parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
+        leases: state.leases,
     };
 };
 

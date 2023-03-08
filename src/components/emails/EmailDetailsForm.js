@@ -13,8 +13,8 @@ import * as Yup from "yup";
 
 const EmailSchema = Yup.object().shape({
   from_user: Yup.string().required("From User is required"),
-  email_subject: Yup.string().required("Email Subject Required"),
-  email_message: Yup.string().trim(),
+  email_subject: Yup.string().trim().required("Email Subject Required"),
+  email_message: Yup.string().trim().required("Email Message is Required"),
 });
 
 const quillEditorModules = {
@@ -62,6 +62,7 @@ const EmailDetailsForm = ({ emailValues, submitEmailValues, handleCancel, emailT
         values,
         handleSubmit,
         touched,
+        setFieldValue,
         errors,
         handleChange,
         handleBlur,
@@ -136,23 +137,13 @@ const EmailDetailsForm = ({ emailValues, submitEmailValues, handleCancel, emailT
               <Grid item>
                 <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
                 <ReactQuill
-                  placeholder="Email Message"
                   value={values.email_message}
-                  onChange={handleChange}
+                  onChange={(content) => {
+                    setFieldValue('email_message', content)
+                  }}
                   theme="snow"
                   modules={quillEditorModules}
                   formats={quillEditorFormats} >
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    id="email_message"
-                    name="email_message"
-                    onBlur={handleBlur}
-                    error={'email_message' in errors}
-                    helperText={
-                      errors.email_message
-                    }
-                  />
                 </ReactQuill>
               </Grid>
               <Grid

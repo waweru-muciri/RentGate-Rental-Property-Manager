@@ -18,11 +18,11 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
-    { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
-    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
+    { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
+    { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
     { id: "payment_amount", numeric: false, disablePadding: true, label: "Payment Amount" },
     { id: "memo", numeric: false, disablePadding: true, label: "Payment Notes/Memo" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
@@ -39,7 +39,7 @@ let TenantsPaymentsPage = ({
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
-    let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [periodFilter, setPeriodFilter] = useState("all");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
@@ -60,6 +60,10 @@ let TenantsPaymentsPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -95,8 +99,9 @@ let TenantsPaymentsPage = ({
             .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id
-            )
+            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
+            .sort((payment1, payment2) => parse(payment1.payment_date, 'yyyy-MM-dd', new Date()) <
+                parse(payment2.payment_date, 'yyyy-MM-dd', new Date()))
         setFilteredPaymentsItems(filteredPayments);
     }
 
@@ -104,7 +109,7 @@ let TenantsPaymentsPage = ({
         event.preventDefault();
         setFilteredPaymentsItems(paymentsItems);
         setPropertyFilter("all");
-        setPeriodFilter("");
+        setPeriodFilter("all");
         setFromDateFilter("");
         setToDateFilter("");
         setContactFilter("");
@@ -214,6 +219,7 @@ let TenantsPaymentsPage = ({
                                             }}
                                             InputLabelProps={{ shrink: true }}
                                         >
+                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                 <MenuItem
                                                     key={index}

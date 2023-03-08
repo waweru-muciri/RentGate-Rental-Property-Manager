@@ -8,7 +8,6 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { Formik } from "formik";
 import { commonStyles } from "../../components/commonStyles";
 import * as Yup from "yup";
-import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { format, startOfToday } from "date-fns";
 
@@ -27,7 +26,7 @@ const PaymentSchema = Yup.object().shape({
 
 let PaymentInputForm = (props) => {
 	const classes = commonStyles();
-	const { history, chargeToAddPayment, handleItemSubmit } = props
+	const { history, chargeToAddPayment, tenantLease, handleItemSubmit } = props
 	const paymentValues = {
 		charge_id: chargeToAddPayment.id,
 		unit_id: chargeToAddPayment.unit_id,
@@ -40,6 +39,8 @@ let PaymentInputForm = (props) => {
 		memo: "",
 		payment_date: defaultDate,
 		tenant_id: chargeToAddPayment.tenant_id,
+		property_id: chargeToAddPayment.property_id,
+		tenantLease: tenantLease,
 	};
 
 	return (
@@ -55,9 +56,20 @@ let PaymentInputForm = (props) => {
 					tenant_id: values.tenant_id,
 					unit_ref: values.unit_ref,
 					unit_id: values.unit_id,
+					property_id: values.property_id,
 					payment_label: values.charge_label,
 					payment_type: values.charge_type,
 				};
+				if (values.tenantLease) {
+					// charge the payment on the security deposit
+					const securityDepositAfterCharge = parseFloat(values.tenantLease.security_deposit) - parseFloat(values.payment_amount)
+					const leaseToEdit = {
+						id: values.tenantLease.id,
+						security_deposit: securityDepositAfterCharge
+					}
+					await handleItemSubmit(leaseToEdit, 'leases')
+					chargePayment.security_deposit_charge_id = values.tenantLease.id
+				}
 				await handleItemSubmit(chargePayment, 'charge-payments')
 				resetForm({});
 				history.goBack()
@@ -177,14 +189,5 @@ let PaymentInputForm = (props) => {
 	);
 };
 
-const mapStateToProps = (state) => {
-	return {
-		transactions: state.transactions,
-		transactionsCharges: state.transactionsCharges,
-		contacts: state.contacts,
-	};
-};
-
-PaymentInputForm = connect(mapStateToProps)(PaymentInputForm);
 
 export default withRouter(PaymentInputForm);

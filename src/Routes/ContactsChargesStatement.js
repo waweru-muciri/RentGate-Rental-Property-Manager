@@ -13,6 +13,7 @@ import { parse, isWithinInterval } from "date-fns";
 
 const headCells = [
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
@@ -24,20 +25,18 @@ const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 let TenantStatementsPage = ({
     transactionsCharges,
+    properties,
     contacts,
     classes
 }) => {
     const [tenantChargesItems, setTenantChargesItems] = useState([]);
     const [filteredChargeItems, setFilteredChargeItems] = useState([]);
     const [contactFilter, setContactFilter] = useState(null);
-    const [periodFilter, setPeriodFilter] = useState('month-to-date');
+    const [periodFilter, setPeriodFilter] = useState("all");
     const [fromDateFilter, setFromDateFilter] = useState("");
     const [toDateFilter, setToDateFilter] = useState("");
-    const [chargeType, setChargeTypeFilter] = useState("");
+    const [propertyFilter, setPropertyFilter] = useState("all");
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(transactionsCharges
-        .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
-        .map(chargeType => JSON.parse(chargeType))
 
     useEffect(() => {
         setTenantChargesItems(transactionsCharges);
@@ -47,12 +46,16 @@ let TenantStatementsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
-        let filteredStatements = tenantChargesItems
+        let statementsWithinDateRange = [];
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -79,22 +82,27 @@ let TenantStatementsPage = ({
                     endOfPeriod = dateRange[1]
                     break;
             }
-            filteredStatements = filteredStatements.filter((chargeItem) => {
+            statementsWithinDateRange = tenantChargesItems.filter((chargeItem) => {
                 const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
                 return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
-        filteredStatements = filteredStatements.filter(({ charge_type }) =>
-            !chargeType ? true : charge_type === chargeType
-        )
+        const filteredStatements = statementsWithinDateRange
+            .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
+            .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+            .sort((charge1, charge2) => (parse(charge1.charge_date, 'yyyy-MM-dd', new Date()) <
+            parse(charge2.charge_date, 'yyyy-MM-dd', new Date())))
+
+
         setFilteredChargeItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
-        setChargeTypeFilter("");
-        setPeriodFilter('');
+        setPropertyFilter("all");
+        setPeriodFilter("all");
         setContactFilter("");
         setFromDateFilter("");
         setToDateFilter("");
@@ -107,7 +115,7 @@ let TenantStatementsPage = ({
             justify="center" direction="column"
         >
             <Grid item key={2}>
-                <PageHeading  text={"Tenants Charges Statement"} />
+                <PageHeading text={"Tenants Charges Statement"} />
             </Grid>
             <Grid
                 container
@@ -199,23 +207,24 @@ let TenantStatementsPage = ({
                                     fullWidth
                                     select
                                     variant="outlined"
-                                    name="chargeType"
-                                    label="Charge Type"
-                                    id="chargeType"
+                                    name="propertyFilter"
+                                    label="Property"
+                                    id="propertyFilter"
                                     onChange={(event) => {
-                                        setChargeTypeFilter(
+                                        setPropertyFilter(
                                             event.target.value
                                         );
                                     }}
-                                    value={chargeType}
+                                    value={propertyFilter}
                                 >
-                                    {CHARGE_TYPES.map(
-                                        (charge_type, index) => (
+                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                    {properties.map(
+                                        (property, index) => (
                                             <MenuItem
                                                 key={index}
-                                                value={charge_type.value}
+                                                value={property.id}
                                             >
-                                                {charge_type.label}
+                                                {property.ref}
                                             </MenuItem>
                                         )
                                     )}
@@ -244,6 +253,7 @@ let TenantStatementsPage = ({
                                     }}
                                     InputLabelProps={{ shrink: true }}
                                 >
+                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                     {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                         <MenuItem
                                             key={index}

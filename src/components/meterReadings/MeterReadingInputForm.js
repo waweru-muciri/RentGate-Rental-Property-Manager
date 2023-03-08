@@ -25,7 +25,7 @@ const MeterReadingSchema = Yup.object().shape({
 
 const METER_OPTIONS = getMeterTypes();
 
-const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, meterReadingToEdit, handleItemSubmit }) => {
+const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadingToEdit, handleItemSubmit }) => {
 
   const classes = commonStyles();
   const meterReadingValues = meterReadingToEdit || {
@@ -37,6 +37,7 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
     base_charge: '',
     unit_charge: '',
     meter_type: '',
+    tenant_id: '',
   }
 
   return (
@@ -54,16 +55,9 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
           unit_charge: values.unit_charge,
           property_unit: values.property_unit,
           property: values.property,
+          tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
           reading_date: values.reading_date,
         };
-        //assign tenant details to meter reading
-        const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.property_unit) || {}
-        const tenant = contacts.find(
-          (contact) => propertyUnitSelected.tenants.length ? contact.id === propertyUnitSelected.tenants[0] || propertyUnitSelected.tenants[1] : false) || {};
-        meterReading.property_ref = propertyUnitSelected.ref
-        meterReading.tenant = tenant.id
-        meterReading.tenant_id_number = tenant.id_number
-        meterReading.tenant_name = `${tenant.first_name} ${tenant.last_name}`
         //assign usage values to meter reading
         meterReading.usage = values.current_value - values.prior_value
         meterReading.amount = (meterReading.usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
@@ -75,10 +69,9 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
             charge_label: "Utility Income",
             charge_type: "meter_type",
             due_date: defaultDate,
-            tenant_id: tenant.id,
-            tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+            tenant_id: meterReading.tenant_id,
             unit_id: values.property_unit,
-            unit_ref: meterReading.property_ref,
+            property: values.property,
           }
           await handleItemSubmit( newMeterReadingCharge, "transactions-charges")
         }

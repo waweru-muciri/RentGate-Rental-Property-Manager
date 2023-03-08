@@ -1,11 +1,16 @@
 import Layout from "../components/PrivateLayout";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import MenuItem from "@material-ui/core/MenuItem";
+import Box from "@material-ui/core/Box";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -36,27 +41,24 @@ let VacatingNoticesPage = ({
     match,
 }) => {
     const classes = commonStyles();
-    let [filteredNoticeItems, setFilteredNoticeItems] = useState(notices);
+    let [filteredNoticeItems, setFilteredNoticeItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [propertyFilter, setPropertyFilter] = useState('');
-    let [tenantFilter, setTenantFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
+    let [tenantFilter, setTenantFilter] = useState(null);
     const [selected, setSelected] = useState([]);
 
+    useEffect(() => {
+        setFilteredNoticeItems(notices);
+    }, [notices]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the notices here according to search criteria
         let filteredNotices = notices
-            .filter(({ notification_date }) =>
-                !fromDateFilter ? true : notification_date >= fromDateFilter
-            )
-            .filter(({ notification_date }) =>
-                !toDateFilter ? true : notification_date <= toDateFilter
-            )
-            .filter(({ tenant }) =>
-                !tenantFilter ? true : tenant === tenantFilter
-            )
+            .filter(({ notification_date }) => !fromDateFilter ? true : notification_date >= fromDateFilter)
+            .filter(({ notification_date }) => !toDateFilter ? true : notification_date <= toDateFilter)
+            .filter(({ tenant_id }) => !tenantFilter ? true : tenant_id === tenantFilter.id)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
 
         setFilteredNoticeItems(filteredNotices);
@@ -68,7 +70,7 @@ let VacatingNoticesPage = ({
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("all");
-        setTenantFilter("");
+        setTenantFilter(null);
     };
 
     return (
@@ -209,29 +211,19 @@ let VacatingNoticesPage = ({
                                     </TextField>
                                 </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        id="tenant"
-                                        name="tenant"
-                                        label="Tenant"
-                                        value={tenantFilter}
-                                        onChange={(event) => {
-                                            setTenantFilter(
-                                                event.target.value
-                                            );
+                                    <Autocomplete
+                                        id="contact_filter"
+                                        options={contacts}
+                                        getOptionSelected={(option, value) => option.id === value.id}
+                                        name="contact_filter"
+                                        onChange={(event, newValue) => {
+                                            setTenantFilter(newValue);
                                         }}
-                                    >
-                                        {contacts.map((tenant, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={tenant.id}
-                                            >
-                                                {tenant.first_name} {tenant.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                        value={tenantFilter}
+                                        getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
+                                        style={{ width: "100%" }}
+                                        renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+                                    />
                                 </Grid>
                             </Grid>
                             <Grid
@@ -293,13 +285,14 @@ let VacatingNoticesPage = ({
 const mapStateToProps = (state) => {
     return {
         notices: state.notices.map((notice) => {
-            const noticeLease = state.leases.find(({ id }) => id === notice.lease_id) || {}
-            const tenant = state.contacts.find(({ id }) => id === noticeLease.tenants ? noticeLease.tenants[0] : false) || {};
+            const tenant = state.contacts.find(({ id }) => id === notice.tenant_id) || {};
+            const tenantUnit = state.propertyUnits.find(({ id }) => id === notice.unit_id) || {};
             const noticeDetails = {};
             noticeDetails.tenant_id_number = tenant.id_number
-            noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name
+            noticeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
             const days_left = differenceInDays(parse(notice.vacating_date, 'yyyy-MM-dd', new Date()), startOfToday())
             noticeDetails.days_left = days_left >= 0 ? days_left : 0
+            noticeDetails.unit_ref = tenantUnit.ref
             return Object.assign({}, notice, noticeDetails);
         }),
         properties: state.properties,

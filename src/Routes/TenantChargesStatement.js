@@ -37,7 +37,7 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [periodFilter, setPeriodFilter] = useState("all");
     const [selected, setSelected] = useState([]);
     const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges
         .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
@@ -77,6 +77,10 @@ let TenantChargesStatementPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -118,7 +122,7 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("");
+        setPeriodFilter("all");
     };
 
     return (
@@ -127,16 +131,6 @@ let TenantChargesStatementPage = ({
                 <Typography variant="h6">Tenant Charges Statement</Typography>
             </Grid>
             <Grid item container spacing={2} alignItems="center" direction="row">
-                <Grid item>
-                    <Button
-                        type="button"
-                        color="primary"
-                        variant="contained"
-                        size="medium"
-                    >
-                        Remove Late Fees
-                    </Button>
-                </Grid>
                 <Grid item>
                     <ExportToExcelBtn
                         disabled={selected.length <= 0}
@@ -186,6 +180,7 @@ let TenantChargesStatementPage = ({
                                             }}
                                             InputLabelProps={{ shrink: true }}
                                         >
+                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                 <MenuItem
                                                     key={index}

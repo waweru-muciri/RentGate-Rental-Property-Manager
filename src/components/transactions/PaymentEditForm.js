@@ -24,19 +24,16 @@ const PaymentSchema = Yup.object().shape({
 });
 
 
-let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubmit }) => {
+let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPayment, handleItemSubmit }) => {
 	const classes = commonStyles();
 	// Get the action to complete.
-	const paymentToEditId = match.params.paymentId;
-	const paymentToEdit = transactions.find(({ id }) => id === paymentToEditId) || {};
-	const contactWithPayment = contacts.find((contact) => contact.id === paymentToEdit.tenant_id) || {}
-	const pageTitle = `Edit Payment for - ${paymentToEdit.unit_ref} • ${contactWithPayment.first_name} ${contactWithPayment.last_name}`;
+	const pageTitle = `Edit Payment for - ${unitWithCharge.ref} • ${contactWithPayment.first_name} ${contactWithPayment.last_name}`;
 
 	const paymentValues = {
 		id: paymentToEdit.id,
 		charge_id: paymentToEdit.charge_id,
 		unit_id: paymentToEdit.unit_id,
-		unit_ref: paymentToEdit.unit_ref,
+		property_id: paymentToEdit.property_id,
 		payment_amount: paymentToEdit.payment_amount || 0,
 		memo: paymentToEdit.memo || '',
 		payment_label: paymentToEdit.payment_label || 0,
@@ -49,7 +46,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 		<Layout pageTitle="Payment Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading  text={pageTitle} />
+					<PageHeading text={pageTitle} />
 				</Grid>
 				<Grid
 					container
@@ -69,8 +66,8 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 								memo: values.memo,
 								payment_date: values.payment_date,
 								tenant_id: values.tenant_id,
-								unit_ref: values.unit_ref,
 								unit_id: values.unit_id,
+								property_id: values.property_id,
 								payment_label: values.payment_label,
 								payment_type: values.payment_type,
 							};
@@ -189,10 +186,12 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+	const paymentToEdit = state.transactions.find(({ id }) => id === ownProps.match.params.paymentId) || {};
 	return {
-		transactions: state.transactions,
-		contacts: state.contacts,
+		paymentToEdit: paymentToEdit,
+		contactWithPayment: state.contacts.find((contact) => contact.id === paymentToEdit.tenant_id) || {},
+		unitWithCharge: state.propertyUnits.find(({ id }) => id === paymentToEdit.unit_id) || {},
 	};
 };
 
@@ -202,6 +201,6 @@ const mapDispatchToProps = (dispatch) => {
 	}
 };
 
-PaymentInputForm = connect(mapStateToProps, mapDispatchToProps)(PaymentInputForm);
+PaymentEditForm = connect(mapStateToProps, mapDispatchToProps)(PaymentEditForm);
 
-export default withRouter(PaymentInputForm);
+export default withRouter(PaymentEditForm);

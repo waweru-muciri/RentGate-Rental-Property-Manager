@@ -14,11 +14,12 @@ const ResetPasswordSchema = Yup.object().shape({
 
 export default function FormDialog(props) {
   const { auth, open, handleClose } = props
- 
-const resetUserPasswordByEmail = (email) => {
-  return auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/' })}
 
- const emailValues = { email: '' }
+  const resetUserPasswordByEmail = (email) => {
+    return auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/' })
+  }
+
+  const emailValues = { email: '' }
   return (
     <div>
       <Formik
@@ -27,29 +28,27 @@ const resetUserPasswordByEmail = (email) => {
         onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
           var email = values.email;
           try {
-           	await resetUserPasswordByEmail(email)
+            await resetUserPasswordByEmail(email)
             resetForm({});
             setSubmitting(false);
             setStatus({ success: 'Password Reset Email Sent Successfully' });
           } catch (error) {
             setSubmitting(false);
-				  // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage =
-        errorCode === "auth/missing-continue-uri"
-          ? "A continue URL must be provided."
-          : errorCode === "auth/invalid-continue-uri"
-            ? "Continue URL provided is invalid"
-            : errorCode === "auth/invalid-email"
-              ? "Email is Invalid"
-              : errorCode === "auth/unauthorized-continue-uri"
-                ? "Continue URL domain is not whitelisted"
-                : errorCode === "auth/user-not-found"
-                  ? "No user found with email"
-                  : "May God help Us";
-
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage =
+              errorCode === "auth/missing-continue-uri"
+                ? "A continue URL must be provided."
+                : errorCode === "auth/invalid-continue-uri"
+                  ? "Continue URL provided is invalid"
+                  : errorCode === "auth/invalid-email"
+                    ? "Email is Invalid"
+                    : errorCode === "auth/unauthorized-continue-uri"
+                      ? "Continue URL domain is not whitelisted"
+                      : errorCode === "auth/user-not-found"
+                        ? "No user found with email"
+                        : "Failed to connect to resource. Check your internet connection";
             setStatus({ error: errorMessage });
-		// console.log('Error sending password reset email => ', error);
           };
         }}>
         {({
@@ -74,23 +73,23 @@ const resetUserPasswordByEmail = (email) => {
                 <DialogTitle id="form-dialog-title">Reset Password</DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    To reset your password, please enter your email address here. We
+                    To reset your password, please enter your email address. We
                     will send the reset link to your email.
                   </DialogContentText>
-                    {status &&  status.success && (
-                  <FormControl fullWidth>
+                  {status && status.success && (
+                    <FormControl fullWidth>
                       <FormHelperText>
                         {status.success}
                       </FormHelperText>
-                  </FormControl>
-                    )}
-                    {status && status.error && (
-                  <FormControl fullWidth>
+                    </FormControl>
+                  )}
+                  {status && status.error && (
+                    <FormControl fullWidth>
                       <FormHelperText error={true}>
                         {status.error}
                       </FormHelperText>
-                  </FormControl>
-                    )}
+                    </FormControl>
+                  )}
                   <TextField
                     fullWidth
                     variant="outlined"

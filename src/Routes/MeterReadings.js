@@ -5,7 +5,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
@@ -23,18 +22,8 @@ const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 
 const meterReadingsTableHeadCells = [
-    {
-        id: "reading_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Date Recorded",
-    },
-    {
-        id: "property_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Number/Ref",
-    },
+    { id: "reading_date", numeric: false, disablePadding: true, label: "Date Recorded" },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant Id Number" },
     { id: "meter_type", numeric: false, disablePadding: true, label: "Meter Type" },
@@ -49,12 +38,10 @@ const meterReadingsTableHeadCells = [
 ];
 
 let MeterReadingsPage = ({
-    currentUser,
     meterReadings,
     handleItemDelete,
     properties,
     match,
-    error,
 }) => {
     const classes = commonStyles();
     let [meterReadingItems, setMeterReadingItems] = useState([]);
@@ -114,8 +101,8 @@ let MeterReadingsPage = ({
             })
         }
         filteredMeterReadings = filteredMeterReadings
-        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-        .filter(({ reading_date }) =>
+            .filter(({ property }) => propertyFilter === "all" ? true : property === propertyFilter)
+            .filter(({ reading_date }) =>
                 !fromDateFilter ? true : reading_date >= fromDateFilter
             )
             .filter(({ reading_date }) =>
@@ -381,20 +368,11 @@ let MeterReadingsPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
                         rows={filteredMeterReadingItems}
                         headCells={meterReadingsTableHeadCells}
-
                         handleDelete={handleItemDelete}
                         deleteUrl={"meter_readings"}
                     />
@@ -404,16 +382,23 @@ let MeterReadingsPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        currentUser: state.currentUser,
-        meterReadings: state.meterReadings,
+        meterReadings: state.meterReadings
+            .map(reading => {
+                const tenant = state.contacts.find((contact) => contact.id === reading.tenant_id) || {};
+                const unit = state.propertyUnits.find((unit) => unit.id === reading.property_unit) || {};
+                return Object.assign({}, reading, {
+                    tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                    tenant_id_number: tenant.id_number,
+                    unit_ref: unit.ref,
+                })
+            })
+            .sort((meterReading1, meterReading2) => parse(meterReading2.reading_date, 'yyyy-MM-dd', new Date()) -
+                parse(meterReading1.reading_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         propertyUnits: state.propertyUnits,
         contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 const mapDispatchToProps = (dispatch) => {

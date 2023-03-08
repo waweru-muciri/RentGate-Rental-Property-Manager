@@ -15,22 +15,25 @@ import { commonStyles } from "../commonStyles";
 import { format, startOfToday } from "date-fns";
 import * as Yup from "yup";
 
+const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
+
 const MaintenanceRequestSchema = Yup.object().shape({
-	contact: Yup.string().required("Tenant is required"),
+	property_unit: Yup.string().required("Unit is required"),
+	property: Yup.string().required("Property is required"),
 	date_created: Yup.date().required("Date Created is Required"),
 	maintenance_details: Yup.string().trim().required("Maintenance Details Required"),
 	expected_completion_date: Yup.date().required("Expected Completion Date Required"),
 });
 
-
-const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 let MaintenanceRequestInputForm = (props) => {
 	let classes = commonStyles();
-	const { handleItemSubmit, history, maintenanceRequestToEdit, contacts } = props
+	const { handleItemSubmit, history, maintenanceRequestToEdit, properties, propertyUnits } = props
 	let maintenanceRequest = maintenanceRequestToEdit;
 	let maintenanceRequestValues = {
 		id: maintenanceRequest.id,
-		contact: maintenanceRequest.contact || "",
+		property_unit: maintenanceRequest.property_unit || "",
+		property: maintenanceRequest.property || "",
+		tenant_id: maintenanceRequest.tenant_id || "",
 		date_created: maintenanceRequest.date_created || defaultDate,
 		expected_completion_date: maintenanceRequest.expected_completion_date || defaultDate,
 		actual_completion_date: maintenanceRequest.actual_completion_date || defaultDate,
@@ -48,36 +51,38 @@ let MaintenanceRequestInputForm = (props) => {
 			initialValues={maintenanceRequestValues}
 			enableReinitialize
 			validationSchema={MaintenanceRequestSchema}
-			onSubmit={(values, { resetForm }) => {
+			onSubmit={async (values, { resetForm }) => {
 				let maintenanceRequest = {
 					id: values.id,
+					property_unit: values.property_unit,
+					property: values.property,
 					date_created: values.date_created,
 					expected_completion_date: values.expected_completion_date,
 					actual_completion_date: values.actual_completion_date,
-					contact: values.contact,
+					tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
 					maintenance_details: values.maintenance_details,
 					other_details: values.other_details,
 					enter_permission: values.enter_permission,
 					issue_urgency: values.issue_urgency,
 					status: values.status,
 				};
-				handleItemSubmit(maintenanceRequest, "maintenance-requests").then(
-					(response) => {
-						resetForm({});
-						if (values.id) {
-							history.goBack();
-						}
-					}
-				);
+				await handleItemSubmit(maintenanceRequest, "maintenance-requests")
+				resetForm({});
+				if (values.id) {
+					history.goBack();
+				}
 			}}
 		>
-			{({ values,
+			{({
+				values,
 				touched,
 				errors,
 				handleChange,
+				setFieldValue,
 				handleBlur,
 				handleSubmit,
-				isSubmitting, }) => (
+				isSubmitting,
+			}) => (
 					<form
 						className={classes.form}
 						method="post"
@@ -91,28 +96,55 @@ let MaintenanceRequestInputForm = (props) => {
 							alignItems="center"
 							direction="column"
 						>
-							<Grid item container direction="column" spacing={2}>
-								<Grid item>
+							<Grid item container direction="row" spacing={2}>
+								<Grid item xs={12} md={6}>
 									<TextField
 										fullWidth
 										select
 										variant="outlined"
-										id="contact"
-										name="contact"
-										label="Contact"
-										value={values.contact}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.contact && touched.contact}
-										helperText={touched.contact && errors.contact}
+										name="property"
+										label="Property"
+										id="property"
+										onChange={(event) => {
+											setFieldValue('property', event.target.value)
+											setFieldValue('property_unit', '')
+										}
+										}
+										value={values.property}
+										error={errors.property && touched.property}
+										helperText={touched.property && errors.property}
+
 									>
-										{contacts.map((contact, index) => (
-											<MenuItem key={index} value={contact.id}>
-												{contact.first_name + " " + contact.last_name}
+										{properties.map((property, index) => (
+											<MenuItem key={index} value={property.id}>
+												{property.ref}
 											</MenuItem>
 										))}
 									</TextField>
 								</Grid>
+								<Grid item xs={12} md={6}>
+									<TextField
+										fullWidth
+										select
+										variant="outlined"
+										name="property_unit"
+										label="Unit"
+										id="property_unit"
+										onChange={handleChange}
+										value={values.property_unit}
+										error={errors.property_unit && touched.property_unit}
+										helperText={touched.property_unit && errors.property_unit}
+
+									>
+										{propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
+											<MenuItem key={index} value={property_unit.id}>
+												{property_unit.ref}
+											</MenuItem>
+										))}
+									</TextField>
+								</Grid>
+							</Grid>
+							<Grid item container direction="column" spacing={2}>
 								<Grid item>
 									<TextField
 										fullWidth

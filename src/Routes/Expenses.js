@@ -14,6 +14,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import { parse } from "date-fns";
 
 const expensesTableHeadCells = [
     { id: "expense_date", numeric: false, disablePadding: true, label: "Date", },
@@ -27,12 +28,10 @@ const expensesTableHeadCells = [
 ];
 
 let ExpensesPage = ({
-    currentUser,
     expenses,
     handleItemDelete,
     properties,
     match,
-    error,
 }) => {
     const classes = commonStyles();
     let [expenseItems, setExpenseItems] = useState([]);
@@ -73,7 +72,6 @@ let ExpensesPage = ({
 
     return (
         <Layout pageTitle="Property Expenses">
-
             <Grid
                 container
                 spacing={3}
@@ -271,7 +269,6 @@ let ExpensesPage = ({
                         setSelected={setSelected}
                         rows={filteredExpenseItems}
                         headCells={expensesTableHeadCells}
-                        tenant={currentUser.tenant}
                         handleDelete={handleItemDelete}
                         deleteUrl={"expenses"}
                     />
@@ -281,14 +278,17 @@ let ExpensesPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        currentUser: state.currentUser,
-        expenses: state.expenses.sort((expense1, expense2) => expense2.expense_date > expense1.expense_date),
+        expenses: state.expenses
+        .map(expense => {
+            const unitWithExpense = state.propertyUnits.find(({id}) => id === expense.unit_id) || {}
+            const propertyWithUnit = state.properties.find(({id}) => id === expense.property_id) || {}
+            return Object.assign({}, expense, { unit_ref: unitWithExpense.ref, property_ref: propertyWithUnit.ref })
+        })
+        .sort((expense1, expense2) => parse(expense2.expense_date, 'yyyy-MM-dd', new Date()) -
+                parse(expense1.expense_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 

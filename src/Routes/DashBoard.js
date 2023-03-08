@@ -78,6 +78,7 @@ let DashBoardPage = (props) => {
   const singleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Single Room').length;
   const doubleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Double Room').length;
   const shopUnits = propertyUnits.filter((property) => property.unit_type === 'Shop').length;
+  const otherUnits = propertyUnits.filter((property) => property.unit_type === 'Other').length;
   //get the current number of occupied houses
   const occupiedHouses = propertyActiveLeases.length;
   //get months in an year in short format
@@ -232,11 +233,12 @@ let DashBoardPage = (props) => {
           key={3}
         >
           <InfoDisplayPaper xs={6} title={"Bed Sitters"} value={bedSitterUnits} />
-          <InfoDisplayPaper xs={6} title={"1 Bed"} value={oneBedUnits} />
-          <InfoDisplayPaper xs={6} title={"2 Beds"} value={twoBedUnits} />
-          <InfoDisplayPaper xs={6} title={"Single Room"} value={singleRoomUnits} />
-          <InfoDisplayPaper xs={6} title={"Double Room"} value={doubleRoomUnits} />
-          <InfoDisplayPaper xs={6} title={"Shop"} value={shopUnits} />
+          <InfoDisplayPaper xs={6} title={"One Bedrooms"} value={oneBedUnits} />
+          <InfoDisplayPaper xs={6} title={"Two Bedrooms"} value={twoBedUnits} />
+          <InfoDisplayPaper xs={6} title={"Single Rooms"} value={singleRoomUnits} />
+          <InfoDisplayPaper xs={6} title={"Double Rooms"} value={doubleRoomUnits} />
+          <InfoDisplayPaper xs={6} title={"Shops"} value={shopUnits} />
+          <InfoDisplayPaper xs={6} title={"Others"} value={otherUnits} />
         </Grid>
         <Grid
           item

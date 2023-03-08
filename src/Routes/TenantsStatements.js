@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import ContactsChargesStatement from "./ContactsChargesStatement";
 import ContactsPaymentsStatement from "./ContactsPaymentsStatement";
+import { parse } from "date-fns";
 
 let TenantStatementsPage = ({
     transactions,
@@ -17,7 +18,6 @@ let TenantStatementsPage = ({
     properties,
 }) => {
     const classes = commonStyles()
-
     const [tabValue, setTabValue] = React.useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -25,7 +25,7 @@ let TenantStatementsPage = ({
     };
 
     return (
-        <Layout pageTitle="Tenants Statement">
+        <Layout pageTitle="Tenants Statements">
             <AppBar position="static">
                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
                     <Tab label="Tenants Charges Statement" />
@@ -33,7 +33,7 @@ let TenantStatementsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
-                <ContactsChargesStatement contacts={contacts} transactionsCharges={transactionsCharges} classes={classes} />
+                <ContactsChargesStatement contacts={contacts} transactionsCharges={transactionsCharges} properties={properties} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
                 <ContactsPaymentsStatement contacts={contacts} transactions={transactions} properties={properties} classes={classes} />
@@ -42,10 +42,32 @@ let TenantStatementsPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        transactionsCharges: state.transactionsCharges,
-        transactions: state.transactions,
+        transactionsCharges: state.transactionsCharges
+            .map(charge => {
+                const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
+                const tenantUnit = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
+                return Object.assign({}, charge, {
+                    tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                    tenant_id_number: tenant.id_number,
+                    unit_ref: tenantUnit.ref
+                })
+            })
+            .sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
+                parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
+        transactions: state.transactions
+            .map(transaction => {
+                const tenant = state.contacts.find(({ id }) => id === transaction.tenant_id) || {};
+                const tenantUnit = state.propertyUnits.find(({ id }) => id === transaction.unit_id) || {};
+                return Object.assign({}, transaction, {
+                    tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                    tenant_id_number: tenant.id_number,
+                    unit_ref: tenantUnit.ref
+                })
+            })
+            .sort((payment1, payment2) => parse(payment2.payment_date, 'yyyy-MM-dd', new Date()) -
+                parse(payment1.payment_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
         properties: state.properties,
     };

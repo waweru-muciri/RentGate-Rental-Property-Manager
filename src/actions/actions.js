@@ -116,20 +116,21 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
 
 }
 
-export function sendEmails(email, recipients) {
+export async function sendEmails(subject, email, recipients) {
     var sendEmail = firebaseFunctions.httpsCallable('sendEmail');
-    sendEmail({ email: email, recipients: recipients }).then(function (result) {
+    try {
+        const response = await sendEmail({ subject: subject, email: email, recipients: recipients })
         // Read result of the Cloud Function.
-        var responseData = result.data;
-        console.log('Successfully sent emails => ', responseData.message)
-    }).catch((error) => {
+        var responseData = response.data;
+        console.log(responseData.message)
+    } catch (error) {
         //getting the error details
         var code = error.code;
         var message = error.message;
         var details = error.details;
         console.error(`There was an error when calling the Cloud Function.\n 
         Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
-    });
+    }
 }
 
 export function addRolesToUserByEmail(email, rolesToAddObject) {
@@ -158,42 +159,42 @@ export async function deleteUploadedFileByUrl(fileUrl) {
 }
 
 export async function uploadFilesToFirebase(fileToUpload) {
-        var fileRef = firebaseStorageRef.child(`propertyImages/${fileToUpload.name}`);
+    var fileRef = firebaseStorageRef.child(`propertyImages/${fileToUpload.name}`);
+    try {
+        const snapshot = await fileRef
+            .putString(fileToUpload.data, "data_url");
+        // console.log("Uploaded files successfully!");
         try {
-            const snapshot = await fileRef
-                .putString(fileToUpload.data, "data_url");
-            // console.log("Uploaded files successfully!");
-            try {
-                const url = await snapshot.ref.getDownloadURL();
-                return url;
-            }
-            catch (error) {
-                switch (error.code) {
-                    case "storage/object-not-found":
-                        console.log("File doesn't exist");
-                        break;
-                    case "storage/unauthorized":
-                        console.log(
-                            "User doesn't have permission to access the object"
-                        );
-                        break;
-                    case "storage/canceled":
-                        console.log("User canceled the upload");
-                        break;
-                    case "storage/unknown":
-                        console.log(
-                            "Unknown error occurred, inspect the server response"
-                        );
-                        break;
-                    default:
-                        console.log('Unknown error');
-                }
+            const url = await snapshot.ref.getDownloadURL();
+            return url;
+        }
+        catch (error) {
+            switch (error.code) {
+                case "storage/object-not-found":
+                    console.log("File doesn't exist");
+                    break;
+                case "storage/unauthorized":
+                    console.log(
+                        "User doesn't have permission to access the object"
+                    );
+                    break;
+                case "storage/canceled":
+                    console.log("User canceled the upload");
+                    break;
+                case "storage/unknown":
+                    console.log(
+                        "Unknown error occurred, inspect the server response"
+                    );
+                    break;
+                default:
+                    console.log('Unknown error');
             }
         }
-        catch (error_1) {
-             console.log("Error during file upload => ", error_1);
-             return ''
-        }
+    }
+    catch (error_1) {
+        console.log("Error during file upload => ", error_1);
+        return ''
+    }
 }
 
 export function itemsFetchData(collectionsUrls) {

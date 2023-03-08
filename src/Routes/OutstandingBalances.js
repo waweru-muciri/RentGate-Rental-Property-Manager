@@ -24,6 +24,7 @@ const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant", },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type", },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
@@ -43,7 +44,7 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [periodFilter, setPeriodFilter] = useState('all');
     let [contactFilter, setContactFilter] = useState(null);
     let [propertyFilter, setPropertyFilter] = useState("all");
 
@@ -81,6 +82,10 @@ let TenantChargesStatementPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -112,11 +117,10 @@ let TenantChargesStatementPage = ({
                 return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
-        filteredStatements = filteredStatements.filter(({ charge_type }) =>
-            !chargeType ? true : charge_type === chargeType
-        ).filter(({ tenant_id }) =>
-            !contactFilter ? true : tenant_id === contactFilter.id
-        )
+        filteredStatements = filteredStatements
+            .filter(({ charge_type }) => !chargeType ? true : charge_type === chargeType)
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
         setFilteredChargeItems(filteredStatements);
     };
 
@@ -125,9 +129,9 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("");
+        setPeriodFilter("all");
         setContactFilter(null)
-        setPropertyFilter('')
+        setPropertyFilter("all")
     };
 
     return (
@@ -202,6 +206,7 @@ let TenantChargesStatementPage = ({
                                                         );
                                                     }}
                                                 >
+                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
                                                         <MenuItem
                                                             key={index}
@@ -393,19 +398,27 @@ let TenantChargesStatementPage = ({
 const mapStateToProps = (state) => {
     return {
         transactions: state.transactions,
-        transactionsCharges: state.transactionsCharges.map((charge) => {
-            const chargeDetails = {}
-            //get payments with this charge id
-            const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
-            chargeDetails.payed_status = chargePayments.length ? true : false;
-            const payed_amount = chargePayments.reduce((total, currentValue) => {
-                return total + parseFloat(currentValue.payment_amount) || 0
-            }, 0)
-            chargeDetails.payed_amount = payed_amount
-            chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
-            return Object.assign({}, charge, chargeDetails);
-        }).filter((charge) => charge.balance > 0)
-            .sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
+        transactionsCharges: state.transactionsCharges
+            .map((charge) => {
+                const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
+                const unitWithCharge = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
+                const chargeDetails = {}
+                chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
+                chargeDetails.tenant_id_number = tenant.id_number
+                chargeDetails.unit_ref = unitWithCharge.ref
+                //get payments with this charge id
+                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                chargeDetails.payed_status = chargePayments.length ? true : false;
+                const payed_amount = chargePayments.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue.payment_amount) || 0
+                }, 0)
+                chargeDetails.payed_amount = payed_amount
+                chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
+                return Object.assign({}, charge, chargeDetails);
+            })
+            .filter((charge) => charge.balance > 0)
+            .sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
+                parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
         properties: state.properties,
     };

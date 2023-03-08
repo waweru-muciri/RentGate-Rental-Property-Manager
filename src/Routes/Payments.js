@@ -48,7 +48,7 @@ let PaymentsPage = ({
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
-    let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [periodFilter, setPeriodFilter] = useState("all");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
@@ -69,6 +69,10 @@ let PaymentsPage = ({
         let dateRange = []
         if (periodFilter) {
             switch (periodFilter) {
+                case 'all':
+                    startOfPeriod = new Date(1990, 1, 1)
+                    endOfPeriod = new Date(2100, 1, 1)
+                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -104,8 +108,7 @@ let PaymentsPage = ({
             .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id
-            )
+            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
         setFilteredPaymentsItems(filteredPayments);
     }
 
@@ -113,7 +116,7 @@ let PaymentsPage = ({
         event.preventDefault();
         setFilteredPaymentsItems(paymentsItems);
         setPropertyFilter("all");
-        setPeriodFilter("");
+        setPeriodFilter("all");
         setFromDateFilter("");
         setToDateFilter("");
         setContactFilter("");
@@ -239,6 +242,7 @@ let PaymentsPage = ({
                                                 }}
                                                 InputLabelProps={{ shrink: true }}
                                             >
+                                                <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                 {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                     <MenuItem
                                                         key={index}
@@ -354,13 +358,19 @@ let PaymentsPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions.map((payment) => {
+        transactions: state.transactions
+        .map((payment) => {
             const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
+            const tenantUnit = state.propertyUnits.find(({ id }) => id === payment.unit_id) || {};
+
             return Object.assign({}, payment, {
                 tenant_name: `${tenant.first_name} ${tenant.last_name}`,
                 tenant_id_number: tenant.id_number,
+                unit_ref : tenantUnit.ref
             })
-        }).sort((payment1, payment2) => payment1.payment_date > payment2.payment_date),
+        })
+        .sort((payment1, payment2) => parse(payment2.payment_date, 'yyyy-MM-dd', new Date()) -
+        parse(payment1.payment_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         contacts: state.contacts,
     };

@@ -46,6 +46,7 @@ const PropertyPerformancePage = lazy(() => import('./PropertyPerformancePage'));
 const TenantsStatementsPage = lazy(() => import('./TenantsStatements'));
 const EmailPage = lazy(() => import('./EmailPage'));
 const EmailsPage = lazy(() => import('./Emails'));
+const AccountSettingsPage = lazy(() => import('./AccountSettings'));
 const MeterReadingPage = lazy(() => import('./MeterReadingPage'));
 const MeterReadingsPage = lazy(() => import('./MeterReadings'));
 const OtherChargesPage = lazy(() => import('./OtherCharges'));
@@ -86,12 +87,11 @@ let MainPage = ({
         "unit-charges",
         "transactions-charges",
         "charge-payments",
-        // "maintenance-requests",
-        // "property_media",
+        "maintenance-requests",
         "contacts",
-        // "notices",
+        "notices",
         "leases",
-        // "to-dos",
+        "to-dos",
         "users",
         "expenses",
         "meter_readings",
@@ -111,6 +111,7 @@ let MainPage = ({
                 <Route exact path={`${match.path}`} component={DashBoard} />
                 <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
                 <Route exact path={`${match.path}emails`} component={EmailsPage} />
+                <Route exact path={`${match.path}account-settings`} component={AccountSettingsPage} />
                 <Route
                   exact
                   path={`${match.path}maintenance-requests/new`}

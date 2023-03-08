@@ -348,6 +348,36 @@ let UserInputForm = (props) => {
 										/>
 									</Grid>
 								</Grid>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item xs={12} sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											name="user_password"
+											label="Password"
+											id="user_password"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.user_password}
+											error={errors.user_password && touched.user_password}
+											helperText={touched.user_password && errors.user_password}
+										/>
+									</Grid>
+									<Grid item xs={12} sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											name="confirm_password"
+											label="Confirm Password"
+											id="confirm_password"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.confirm_password}
+											error={errors.confirm_password && touched.confirm_password}
+											helperText={touched.confirm_password && errors.confirm_password}
+										/>
+									</Grid>
+								</Grid>
 							</Grid>
 							{/** end of user details grid **/}
 							<Grid

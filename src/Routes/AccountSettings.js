@@ -3,14 +3,15 @@ import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
-import ContactInputForm from "../components/contacts/ContactInputForm";
+import AccountSettings from "../components/users/AccountSettings";
 import { withRouter } from "react-router-dom";
 
-let ContactPage = ({contactToEdit}) => {
-	const pageTitle = contactToEdit.id ? "Edit Contact" : "New Contact";
+let ContactPage = ({userToShow}) => {
+    
+	const pageTitle = "Account Settings";
 
 	return (
-		<Layout pageTitle="Contact Details">
+		<Layout pageTitle={pageTitle}>
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading  text={pageTitle} />
@@ -22,16 +23,17 @@ let ContactPage = ({contactToEdit}) => {
 					item
 					key={3}
 				>
-					<ContactInputForm contactToEdit={contactToEdit} />
+					<AccountSettings userToShow={userToShow} />
 				</Grid>
 			</Grid>
 		</Layout>
 	);
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
+	console.log("currentUser => ", state.currentUser)
 	return {
-		contactToEdit: state.contacts.find(({ id }) => id === ownProps.match.params.contactId) || {},
+		userToShow: state.contacts.find(({id}) => id === state.currentUser.uid) || {},
 	};
 };
 

@@ -22,7 +22,7 @@ import * as Yup from "yup";
 const SignUpSchema = Yup.object().shape({
   password: Yup.string()
     .min(6, "Too Short!")
-    .max(50, "We prefer insecure system, try a shorter password.")
+    .max(50, "We prefer an insecure system, try a shorter password.")
     .required("Pasword is Required"),
   email: Yup.string().email("Invalid email").required("Email is Required"),
   confirmPassword: Yup.string()

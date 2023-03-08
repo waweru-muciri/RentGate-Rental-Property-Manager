@@ -6,23 +6,27 @@ import { connect } from "react-redux";
 import { handleItemFormSubmit } from '../actions/actions'
 import PaymentInputForm from "../components/transactions/PaymentInputForm";
 import { withRouter } from "react-router-dom";
+import queryString from 'query-string';
 
-let PaymentPage = ({ history, match, transactions, transactionsCharges, contacts, handleItemSubmit }) => {
+let PaymentPage = ({ history, location, chargeToAddPayment, leases, contactWithCharge, unitWithCharge, handleItemSubmit }) => {
 	// Get the action to complete.
-	const chargeToAddPaymentId = match.params.chargeId;
-	const chargeToAddPayment = transactionsCharges.find(({ id }) => id === chargeToAddPaymentId) || {};
-	const chargePayments = transactions.filter((payment) => payment.charge_id === chargeToAddPaymentId)
-	const totalPaymentsToCharge = chargePayments.reduce((total, currentValue) =>
-		total + parseFloat(currentValue.payment_amount) || 0, 0);
-	chargeToAddPayment.payed_amount = totalPaymentsToCharge
-	chargeToAddPayment.balance = parseFloat(chargeToAddPayment.charge_amount) - totalPaymentsToCharge
-	const contactWithCharge = contacts.find((contact) => contact.id === chargeToAddPayment.tenant_id) || {}
-	const pageTitle = `Receive Payment for - ${chargeToAddPayment.unit_ref} • ${contactWithCharge.first_name} ${contactWithCharge.last_name}`;
+	let pageTitle;
+	let tenantLease;
+	//get params
+	const params = queryString.parse(location.search)
+	if (params.charge_deposit) {
+		tenantLease = leases.filter(({ terminated }) => terminated !== true)
+			.find(({ unit_id }) => unit_id === chargeToAddPayment.unit_id) || {}
+		pageTitle = `Charge on Deposit for - ${unitWithCharge.ref} • ${contactWithCharge.first_name} ${contactWithCharge.last_name}`;
+	} else {
+		pageTitle = `Receive Payment for - ${unitWithCharge.ref} • ${contactWithCharge.first_name} ${contactWithCharge.last_name}`;
+
+	}
 	return (
 		<Layout pageTitle="Payment Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading  text={pageTitle} />
+					<PageHeading text={pageTitle} />
 				</Grid>
 				<Grid
 					container
@@ -33,6 +37,7 @@ let PaymentPage = ({ history, match, transactions, transactionsCharges, contacts
 				>
 					<PaymentInputForm
 						chargeToAddPayment={chargeToAddPayment}
+						tenantLease={tenantLease}
 						handleItemSubmit={handleItemSubmit}
 						history={history}
 					/>
@@ -42,11 +47,21 @@ let PaymentPage = ({ history, match, transactions, transactionsCharges, contacts
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+	const chargeToAddPayment = state.transactionsCharges.find(({ id }) => id === ownProps.match.params.chargeId) || {};
+	const unitWithCharge = state.propertyUnits.find(({ id }) => id === chargeToAddPayment.unit_id) || {};
+	const chargePayments = state.transactions.filter((payment) => payment.charge_id === chargeToAddPayment.id)
+	const totalPaymentsToCharge = chargePayments.reduce((total, currentValue) =>
+		total + parseFloat(currentValue.payment_amount) || 0, 0);
+	chargeToAddPayment.payed_amount = totalPaymentsToCharge
+	chargeToAddPayment.balance = parseFloat(chargeToAddPayment.charge_amount) - totalPaymentsToCharge
+	const contactWithCharge = state.contacts.find((contact) => contact.id === chargeToAddPayment.tenant_id) || {}
+
 	return {
-		transactions: state.transactions,
-		transactionsCharges: state.transactionsCharges,
-		contacts: state.contacts,
+		unitWithCharge: unitWithCharge,
+		contactWithCharge: contactWithCharge,
+		chargeToAddPayment: chargeToAddPayment,
+		leases: state.leases,
 	};
 };
 

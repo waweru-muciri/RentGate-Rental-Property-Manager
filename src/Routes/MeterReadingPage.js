@@ -8,17 +8,13 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let MeterReadingPage = (props) => {
-    const {history, meterReadings, contacts, propertyUnits, properties, handleItemSubmit } = props;
-    //only allow adding meter readings to units with tenants
-    const propertyUnitsWithTenants = propertyUnits
-    let meterReadingToEditId = props.match.params.meterReadingId;
-    const meterReadingToEdit = meterReadings.find(({ id }) => id === meterReadingToEditId)
-    const pageTitle = "Charge Tenants for Meter Reading";
+    const { history, meterReadingToEdit, contacts, propertyUnits, properties, handleItemSubmit } = props;
+    const pageTitle = "Charge Tenant for Meter Reading";
     return (
         <Layout pageTitle={pageTitle}>
             <Grid container justify="center" direction="column">
                 <Grid item key={1}>
-                    <PageHeading  text={pageTitle} />
+                    <PageHeading text={pageTitle} />
                 </Grid>
                 <Grid item key={2}>
                     <MeterReadingInputForm
@@ -27,7 +23,7 @@ let MeterReadingPage = (props) => {
                         contacts={contacts}
                         history={history}
                         properties={properties}
-                        propertyUnits={propertyUnitsWithTenants}
+                        propertyUnits={propertyUnits}
                     />
                 </Grid>
             </Grid>
@@ -35,17 +31,24 @@ let MeterReadingPage = (props) => {
     );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+    //only allow adding meter readings to units with active leases
+    const unitsWithActiveLeases = state.leases
+        .filter(({ terminated }) => terminated !== true)
+        .map(activeLease => ({
+            ...state.propertyUnits.find(unit => unit.id === activeLease.unit_id),
+            tenant_id: Array.isArray(activeLease.tenants) ? activeLease.tenants[0] : ''
+        }))
+
     return {
         properties: state.properties,
-        propertyUnits: state.propertyUnits,
-        meterReadings: state.meterReadings,
-        contacts: state.contacts,
+        propertyUnits: unitsWithActiveLeases,
+        meterReadingToEdit: state.meterReadings.find(({ id }) => id === ownProps.match.params.meterReadingId),
     };
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
     }
 };
 

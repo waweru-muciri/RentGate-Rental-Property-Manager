@@ -15,6 +15,7 @@ import { commonStyles } from "../components/commonStyles";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import { parse } from "date-fns";
 
 const STATUS_LIST = ["Open", "Closed"];
 
@@ -31,13 +32,10 @@ const maintenanceRequestsTableHeadCells = [
 
 let MaintenanceRequestsPage = ({
 	maintenanceRequests,
-	users,
 	contacts,
-	propertyUnits,
-	match, 
+	match,
 	handleItemDelete
 }) => {
-	let [maintenanceRequestItems, setMaintenanceRequestItems] = useState([]);
 	let [filteredMaintenanceRequestItems, setFilteredMaintenanceRequestItems] = useState([]);
 	let [fromDateFilter, setFromDateFilter] = useState("");
 	let [toDateFilter, setToDateFilter] = useState("");
@@ -48,28 +46,13 @@ let MaintenanceRequestsPage = ({
 	const classes = commonStyles();
 
 	useEffect(() => {
-		const mappedMaintenanceRequests = maintenanceRequests.map(
-			(maintenanceRequest) => {
-				const contactWithRequest = contacts.find(
-					(contact) => contact.id === maintenanceRequest.contact
-				) || {};
-				const maintenanceRequestDetails = {}
-					maintenanceRequestDetails.tenant_id_number = contactWithRequest.id_number
-					maintenanceRequestDetails.tenant_name = contactWithRequest.first_name + " " + contactWithRequest.last_name
-				return Object.assign(
-					{},
-					maintenanceRequest, maintenanceRequestDetails
-				);
-			}
-		);
-		setMaintenanceRequestItems(mappedMaintenanceRequests);
-		setFilteredMaintenanceRequestItems(mappedMaintenanceRequests);
-	}, [maintenanceRequests, contacts, users, propertyUnits]);
+		setFilteredMaintenanceRequestItems(maintenanceRequests);
+	}, [maintenanceRequests]);
 
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the maintenanceRequests here according to search criteria
-		let filteredMaintenanceRequests = maintenanceRequestItems
+		let filteredMaintenanceRequests = maintenanceRequests
 			.filter(({ date_created }) =>
 				!fromDateFilter ? true : date_created >= fromDateFilter
 			)
@@ -77,8 +60,8 @@ let MaintenanceRequestsPage = ({
 				!toDateFilter ? true : date_created === toDateFilter
 			)
 			.filter(({ tenant_id }) =>
-                !contactFilter ? true : tenant_id === contactFilter.id
-            )
+				!contactFilter ? true : tenant_id === contactFilter.id
+			)
 			.filter(({ status }) =>
 				!statusFilter ? true : status === statusFilter
 			);
@@ -88,7 +71,7 @@ let MaintenanceRequestsPage = ({
 
 	const resetSearchForm = (event) => {
 		event.preventDefault();
-		setFilteredMaintenanceRequestItems(maintenanceRequestItems);
+		setFilteredMaintenanceRequestItems(maintenanceRequests);
 		setContactFilter("");
 		setStatusFilter("");
 		setFromDateFilter("");
@@ -149,7 +132,7 @@ let MaintenanceRequestsPage = ({
 							reportName={'Maintenance Requests Records'}
 							reportTitle={'Maintenance Requests Data'}
 							headCells={maintenanceRequestsTableHeadCells}
-							dataToPrint={maintenanceRequestItems.filter(({ id }) => selected.includes(id))}
+							dataToPrint={maintenanceRequests.filter(({ id }) => selected.includes(id))}
 						/>
 					</Grid>
 					<Grid item>
@@ -306,15 +289,24 @@ let MaintenanceRequestsPage = ({
 	);
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
 	return {
 		currentUser: state.currentUser,
-		maintenanceRequests: state.maintenanceRequests,
-		propertyUnits: state.propertyUnits,
-		users: state.users,
+		maintenanceRequests: state.maintenanceRequests
+			.map(
+				(maintenanceRequest) => {
+					const tenant = state.contacts
+						.find((contact) => contact.id === maintenanceRequest.tenant_id) || {};
+					const unit = state.propertyUnits.find((unit) => unit.id === maintenanceRequest.property_unit) || {};
+					return Object.assign({}, maintenanceRequest, {
+						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+						tenant_id_number: tenant.id_number,
+						unit_ref: unit.ref,
+					})
+				})
+			.sort((maintenanceRequest1, maintenanceRequest2) => parse(maintenanceRequest2.date_created, 'yyyy-MM-dd', new Date()) -
+				parse(maintenanceRequest1.date_created, 'yyyy-MM-dd', new Date())),
 		contacts: state.contacts,
-		isLoading: state.isLoading,
-		match: ownProps.match,
 	};
 };
 

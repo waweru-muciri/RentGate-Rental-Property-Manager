@@ -49,22 +49,20 @@ import ShowChartIcon from '@material-ui/icons/ShowChart';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
+import SettingsIcon from '@material-ui/icons/Settings';
 import MoneyOffIcon from '@material-ui/icons/MoneyOff';
 
 const navigationLinks = [
     { text: "Home", to: "/app/", icon: <DashboardIcon /> },
     { text: "Tenants", to: "/app/contacts", icon: <ContactsIcon /> },
     { text: "Users", to: "/app/users", icon: <GroupIcon /> },
-    {
-        text: "Maintenance Requests",
-        to: "/app/maintenance-requests",
-        icon: <EventNoteIcon />,
-    },
     { text: "Email", to: "/app/emails", icon: <ContactMailIcon /> },
+    { text: "Account Settings", to: "/app/account-settings", icon: <SettingsIcon /> },
     { text: "Audit Logs", to: "/app/audit-logs", icon: <HistoryIcon /> },
 ];
 const othersLinkNestedLinks = [
     { text: "Vacating Notices", to: "/app/notices", icon: <NoteIcon /> },
+    { text: "Maintenance Requests", to: "/app/maintenance-requests", icon: <EventNoteIcon /> },
     { text: "To-Dos", to: "/app/to-dos", icon: <AssignmentIcon /> },
 ];
 

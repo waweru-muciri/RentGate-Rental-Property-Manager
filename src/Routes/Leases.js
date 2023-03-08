@@ -19,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import { parse } from "date-fns";
 
 const headCells = [
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property", },
@@ -325,7 +326,7 @@ let TransactionPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        leases: state.leases.sort((lease1, lease2) => lease2.start_date > lease1.start_date)
+        leases: state.leases
             .map((lease) => {
                 const tenant = state.contacts.find((contact) => contact.id === lease.tenants[0]) || {};
                 const property = state.properties.find(({ id }) => id === lease.property_id) || {};
@@ -335,7 +336,9 @@ const mapStateToProps = (state) => {
                         tenant_id_number: tenant.id_number,
                         property_ref: property.ref,
                     });
-            }),
+            })
+            .sort((lease1, lease2) => parse(lease2.start_date, 'yyyy-MM-dd', new Date()) -
+                parse(lease1.start_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
     };
 };

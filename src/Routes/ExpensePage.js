@@ -7,11 +7,8 @@ import ExpenseInputForm from "../components/expenses/ExpenseInputForm";
 import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
-let ExpensePage = (props) => {
-    const { expenses, properties, propertyUnits, handleItemSubmit, history } = props;
-    let expenseToEditId = props.match.params.expenseId;
-    let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId) || {};
-    let pageTitle = expenseToEdit.id ? "Edit Expense" : "New Expense";
+let ExpensePage = ({ properties, expenseToEdit, propertyUnits, handleItemSubmit, history }) => {
+    const pageTitle = expenseToEdit.id ? "Edit Expense" : "New Expense";
     return (
         <Layout pageTitle="Expense Details">
             <Grid container justify="center" direction="column">
@@ -32,11 +29,11 @@ let ExpensePage = (props) => {
     );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
         properties: state.properties,
         propertyUnits: state.propertyUnits,
-        expenses: state.expenses,
+        expenseToEdit: state.expenses.find(({ id }) => id === ownProps.match.params.expenseId) || {},
     };
 };
 const mapDispatchToProps = (dispatch) => {

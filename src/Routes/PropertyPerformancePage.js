@@ -276,7 +276,7 @@ const mapStateToProps = (state) => {
             chargeDetails.payed_amount = payed_amount
             chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
             return Object.assign({}, charge, chargeDetails);
-        }).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
+        }),
     };
 };
 

@@ -25,28 +25,29 @@ const NoticeInputForm = (props) => {
     notification_date: noticeToEdit.notification_date || defaultDate,
     vacating_date: noticeToEdit.vacating_date || defaultDate,
     lease_id: noticeToEdit.lease_id || '',
-    lease_details: activeLeases.find(({id}) => id === noticeToEdit.lease_id) || { start_date: '', unit_ref: "", lease_type: ""},
+    lease_details: activeLeases.find(({ id }) => id === noticeToEdit.lease_id) || { start_date: '', unit_ref: "", lease_type: "" },
   };
 
   return (
     <Formik
       initialValues={noticeValues}
       validationSchema={VacatingNoticeSchema}
-      onSubmit={(values, { resetForm }) => {
+      onSubmit={async (values, { resetForm }) => {
+        console.log('Lease details => ', values)
         const vacatingNotice = {
           id: values.id,
           lease_id: values.lease_id,
           vacating_date: values.vacating_date,
           notification_date: values.notification_date,
+          unit_id: values.lease_details.unit_id,
+          property_id: values.lease_details.property_id,
+          tenant_id: values.lease_details.tenants[0]
         };
-        submitForm(vacatingNotice, "notices").then(
-          (response) => {
-            resetForm({});
-            if (values.id) {
-              history.goBack()
-            }
-          }
-        );
+        await submitForm(vacatingNotice, "notices")
+        resetForm({});
+        if (values.id) {
+          history.goBack()
+        }
       }}
     >
       {({
@@ -89,7 +90,7 @@ const NoticeInputForm = (props) => {
                     value={values.lease_id}
                     onChange={(event) => {
                       setFieldValue('lease_id', event.target.value)
-                      setFieldValue('lease_details', activeLeases.find(({id}) => id === event.target.value))
+                      setFieldValue('lease_details', activeLeases.find(({ id }) => id === event.target.value))
                     }}
                     onBlur={handleBlur}
                     error={"lease_id" in errors}

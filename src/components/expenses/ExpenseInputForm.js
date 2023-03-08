@@ -41,9 +41,6 @@ const ExpenseInputForm = (props) => {
       validationSchema={PropertyExpenseSchema}
       onSubmit={async (values, { resetForm }) => {
         try {
-          //assign tenant details to meter reading
-          const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.unit_id) || {}
-          const propertyWithUnit = properties.find((property) => property.id === values.property_id) || {}
           const expense = {
             id: values.id,
             type: values.type,
@@ -52,8 +49,6 @@ const ExpenseInputForm = (props) => {
             property_id: values.property_id,
             expense_date: values.expense_date,
             expense_notes: values.expense_notes,
-            property_ref: propertyWithUnit.ref,
-            unit_ref: propertyUnitSelected.ref,
           };
           await handleItemSubmit(expense, "expenses")
           resetForm({});
@@ -61,14 +56,14 @@ const ExpenseInputForm = (props) => {
             history.goBack();
           }
         } catch (error) {
-            return error && (
-              <div>
-                <CustomSnackbar
-                  variant="error"
-                  message={error.message}
-                />
-              </div>
-            )
+          return error && (
+            <div>
+              <CustomSnackbar
+                variant="error"
+                message={error.message}
+              />
+            </div>
+          )
         }
       }}
     >

@@ -40,6 +40,11 @@ export default function TransferList(props) {
     setSelectedEmailsSource('Users')
   }, [users])
 
+  const getEmailsFromSource = () => {
+    return selectedEmailsSource === "Tenants" ? right.map(tenantDetails => tenantDetails.contact_email)
+     : right.map(userDetails => userDetails.primary_email)
+  }
+
   useEffect(() => {
     switch (selectedEmailsSource) {
       case 'Tenants': setLeft(contacts); setRight([]); setChecked([]);
@@ -234,7 +239,7 @@ export default function TransferList(props) {
                 <Grid item>
                   <Button
                     disabled={!right.length}
-                    onClick={() => { submitEmailSourceValues(right)}}
+                    onClick={() => { submitEmailSourceValues(getEmailsFromSource())}}
                     variant="contained"
                     color="primary">
                     Send

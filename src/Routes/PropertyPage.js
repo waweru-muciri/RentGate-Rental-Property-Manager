@@ -6,18 +6,9 @@ import { connect } from "react-redux";
 import PropertyInputForm from "../components/property/PropertyInputForm";
 import { withRouter } from "react-router-dom";
 
-let PropertyPage = (props) => {
-	let propertyToEditId = props.match.params.propertyId;
+let PropertyPage = ({propertyToEdit}) => {
 
-	let propertyToEdit;
-
-	if (typeof propertyToEditId != "undefined") {
-		propertyToEdit = props.properties.find(
-			({ id }) => id === propertyToEditId
-		);
-	}
-
-	let pageTitle = propertyToEditId ? "Edit Property" : "Add Property";
+	const pageTitle = propertyToEdit.id ? "Edit Property" : "Add Property";
 
 	return (
 		<Layout pageTitle={pageTitle}>
@@ -39,9 +30,9 @@ let PropertyPage = (props) => {
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
 	return {
-		properties: state.properties,
+		propertyToEdit : state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
 	};
 };
 

@@ -5,18 +5,17 @@ import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import UserInputForm from "../components/users/UserInputForm";
 import { withRouter } from "react-router-dom";
-import { handleItemFormSubmit} from '../actions/actions'
+import { handleItemFormSubmit } from '../actions/actions'
 
-let UserPage = ({ match, users, handleItemSubmit }) => {
-	let userToEditId = match.params.userId;
-	let userToEdit = users.find(({ id }) => id === userToEditId);
-	let pageTitle = userToEdit ? "Edit User" : "New User";
+let UserPage = ({ match, userToEdit, handleItemSubmit }) => {
+
+	const pageTitle = userToEdit.id ? "Edit User" : "New User";
 
 	return (
 		<Layout pageTitle="User Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading  text={pageTitle} />
+					<PageHeading text={pageTitle} />
 				</Grid>
 				<Grid
 					container
@@ -32,14 +31,14 @@ let UserPage = ({ match, users, handleItemSubmit }) => {
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
 	return {
-		users: state.users,
+		userToEdit : state.users.find(({ id }) => id === ownProps.match.params.userId) || {},
 	};
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

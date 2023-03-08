@@ -185,7 +185,9 @@ const mapStateToProps = (state, ownProps) => {
                 chargeDetails.payed_amount = payed_amount
                 chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
                 return Object.assign({}, charge, chargeDetails);
-            }),
+            })
+            .sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
+                parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         tenantUnit: Object.assign({}, unitInLease, currentTenantActiveLease),
         transactions: state.transactions.filter((payment) => payment.tenant_id === ownProps.match.params.contactId),
         tenantDetails: state.contacts.find(({ id }) => id === ownProps.match.params.contactId) || {}

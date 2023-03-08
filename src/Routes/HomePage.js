@@ -26,7 +26,7 @@ import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
+import { Link as ReactRouterLink } from "react-router-dom";
 import ListItemText from '@material-ui/core/ListItemText';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
@@ -218,7 +218,7 @@ const appServices = [
     { icon: <EmailIcon />, title: "In-App Email" },
 ]
 
-const tiers = [
+const pricingTiers = [
     {
         title: 'Starter',
         price: '3500',
@@ -244,7 +244,7 @@ const tiers = [
         price: '10000',
         description: [
             '50 users included',
-            '30 GB of storage',
+            'Unlimited Storage',
             'Help center access',
             'Phone & email support',
         ],
@@ -333,10 +333,11 @@ export default function HomePage() {
                             <Link variant="button" color="textPrimary" href="#contact" className={classes.link}>
                                 Support
                         </Link>
-                            <Button href="#" color="primary" variant="outlined" className={classes.link}>
+                            <Button color="primary" variant="outlined" className={classes.link} component={ReactRouterLink}
+                            to={"/login"}>
                                 Login
                             </Button>
-                            <Button href="#" color="primary" variant="outlined" className={classes.link}>
+                            <Button href="#contact" color="primary" variant="outlined" className={classes.link}>
                                 Sign Up
                             </Button>
 
@@ -386,7 +387,7 @@ export default function HomePage() {
                                 </Grid>
                                 <Grid item container direction='row' spacing={2}>
                                     <Grid item>
-                                        <Button variant="contained" color="primary">Sign Up</Button>
+                                        <Button variant="contained" href="#contact" color="primary">Sign Up</Button>
                                     </Grid>
                                     <Grid item>
                                         <Button variant="outlined" href="#features" color="primary">Features</Button>
@@ -567,7 +568,7 @@ export default function HomePage() {
                             </Grid>
                         </Grid>
                         <Grid container item spacing={5} alignItems="center" justify="center">
-                            {tiers.map((tier) => (
+                            {pricingTiers.map((tier) => (
                                 // Enterprise card is full width at sm breakpoint
                                 <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 6} md={4}>
                                     <Card>
@@ -599,7 +600,7 @@ export default function HomePage() {
                                                     ))}
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button variant={tier.buttonVariant} color="primary">
+                                                    <Button href="#contact" variant={tier.buttonVariant} color="primary">
                                                         {tier.buttonText}
                                                     </Button>
                                                 </Grid>

@@ -51,6 +51,7 @@ let RentBalancesPage = ({
         const tenantsWithCharges = transactionsCharges
             .map(rentCharge => ({
                 id: rentCharge.tenant_id, tenant_id: rentCharge.tenant_id, tenant_name: rentCharge.tenant_name,
+                property_id: rentCharge.property_id,
                 unit_ref: rentCharge.unit_ref
             }))
         let totalRentBalances = 0
@@ -102,6 +103,7 @@ let RentBalancesPage = ({
         event.preventDefault();
         setContactFilter(null)
         setPropertyFilter('all')
+        setFilteredMappedRentalBalances(mappedRentBalances)
     };
 
     return (

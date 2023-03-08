@@ -9,20 +9,7 @@ import { handleItemFormSubmit } from '../actions/actions'
 import queryString from 'query-string';
 
 let NoticePage = (props) => {
-    const { notices, history, contacts, propertyUnits, leases, submitForm } = props;
-    const activeMappedLeases = leases.filter(({ terminated }) => terminated !== true)
-        .filter(({ tenants }) => tenants && tenants.length)
-        .map((lease) => {
-            const tenantDetails = contacts.find(({ id }) => lease.tenants ? lease.tenants.includes(id) : false) || {}
-            return Object.assign({}, lease, {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`})
-        })
-        .map((lease) => {
-            const unitDetails = propertyUnits.find(({ id }) => lease.unit_id === id) || {}
-            return Object.assign({}, lease, {unit_ref: `${unitDetails.ref}`})
-        })
-    let noticeToEditId = props.match.params.noticeId;
-    let noticeToEdit = notices.find(({ id }) => id === noticeToEditId) || {};
-    // Get the leaseId to end agreement
+    const { noticeToEdit, history, activeMappedLeases, submitForm } = props;
     const params = queryString.parse(props.location.search)
     var leaseToEnd = params.lease;
     if (leaseToEnd) {
@@ -49,12 +36,18 @@ let NoticePage = (props) => {
     );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
-        notices: state.notices,
-        propertyUnits: state.propertyUnits,
-        leases: state.leases,
-        contacts: state.contacts,
+        noticeToEdit: state.notices.find(({ id }) => id === ownProps.match.params.noticeId) || {},
+        activeMappedLeases: state.leases.filter(({ terminated }) => terminated !== true)
+        .map((lease) => {
+            const tenantDetails = state.contacts.find(({ id }) => lease.tenants ? lease.tenants.includes(id) : false) || {}
+            return Object.assign({}, lease, {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`})
+        })
+        .map((lease) => {
+            const unitDetails = state.propertyUnits.find(({ id }) => lease.unit_id === id) || {}
+            return Object.assign({}, lease, {unit_ref: `${unitDetails.ref}`})
+        }),
     };
 };
 
