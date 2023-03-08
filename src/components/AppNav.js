@@ -54,26 +54,26 @@ import Head from "../components/Head";
 import {commonStyles} from '../components/commonStyles'
 
 const navigationLinks = [
-    { text: "Home", to: "/", icon: <DashboardIcon /> },
-    { text: "Tenants", to: "/contacts", icon: <ContactsIcon /> },
-    { text: "Users", to: "/users", icon: <GroupIcon /> },
+    { text: "Home", to: "/app/", icon: <DashboardIcon /> },
+    { text: "Tenants", to: "/app/contacts", icon: <ContactsIcon /> },
+    { text: "Users", to: "/app/users", icon: <GroupIcon /> },
     {
         text: "Maintenance Requests",
-        to: "/maintenance-requests",
+        to: "/app/maintenance-requests",
         icon: <EventNoteIcon />,
     },
-    { text: "Email", to: "/emails", icon: <ContactMailIcon /> },
-    { text: "Audit Logs", to: "/audit-logs", icon: <HistoryIcon /> },
+    { text: "Email", to: "/app/emails", icon: <ContactMailIcon /> },
+    { text: "Audit Logs", to: "/app/audit-logs", icon: <HistoryIcon /> },
 ];
 const othersLinkNestedLinks = [
-    { text: "Vacating Notices", to: "/notices", icon: <NoteIcon /> },
-    { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
+    { text: "Vacating Notices", to: "/app/notices", icon: <NoteIcon /> },
+    { text: "To-Dos", to: "/app/to-dos", icon: <AssignmentIcon /> },
 ];
 
 const propertyLinkNestedLinks = [
-    { text: "Rentals Properties", to: "/properties", icon: <ApartmentIcon /> },
-    { text: "Rental Agreements", to: "/leases", icon: <WorkIcon /> },
-    { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
+    { text: "Rentals Properties", to: "/app/properties", icon: <ApartmentIcon /> },
+    { text: "Rental Agreements", to: "/app/leases", icon: <WorkIcon /> },
+    { text: "Meter Readings", to: "/app/meter-reading", icon: <MonetizationOnIcon /> },
 ];
 
 const reportLinkNestedLinks = [
@@ -83,22 +83,22 @@ const reportLinkNestedLinks = [
     //show outstanding balances on tenant statements
     {
         text: "Outstanding Balances",
-        to: "/reports/outstanding-balances",
+        to: "/app/reports/outstanding-balances",
         icon: <MoneyOffIcon/>,
     }, 
     {
         text: "Properties Performance",
-        to: "/reports/property-performance",
+        to: "/app/reports/property-performance",
         icon: <ShowChartIcon />,
     }, 
     {
         text: "Properties Income Statement",
-        to: "/reports/property-income",
+        to: "/app/reports/property-income",
         icon: <AssessmentIcon />,
     }, 
     {
         text: "Tenant Statements",
-        to: "/reports/tenant-statements",
+        to: "/app/reports/tenant-statements",
         icon: <AttachMoneyIcon />,
     },
     //show income and expenses received from each property and show net income for each of the expenses
@@ -108,12 +108,12 @@ const reportLinkNestedLinks = [
 ];
 
 const accountsLinkNestedLinks = [
-    { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
-    { text: "Other Charges", to: "/properties/other-charges", icon: <MoneyIcon /> },
-    { text: "Payments", to: "/payments", icon: <PaymentIcon /> },
+    { text: "Rent Roll", to: "/app/rent-roll", icon: <ScheduleIcon /> },
+    { text: "Other Charges", to: "/app/other-charges", icon: <MoneyIcon /> },
+    { text: "Payments", to: "/app/payments", icon: <PaymentIcon /> },
     {
         text: "Property Expenses",
-        to: "/property_expenditure",
+        to: "/app/property_expenditure",
         icon: <AccountBalanceWalletIcon />,
     },
 ];
@@ -199,8 +199,8 @@ let AppNavLayout = ({
                     >
                         <MenuItem
                             component={Link}
-                            to={ currentUser.isAdmin ? `/admin/profile` :
-                             `${match.path}users/${currentUser.uid}/edit`
+                            to={ currentUser.isAdmin ? `/app/admin/profile` :
+                             `/app/users/${currentUser.uid}/edit`
                             }
                             onClick={() => {
                                 handleProfileMenuClose();

@@ -8,46 +8,24 @@ import BlockIcon from '@material-ui/icons/Block';
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 
 const STATUS_LIST = [{ disabled: false, displayName: "Active" }, { disabled: true, displayName: "Inactive" }];
-const ROLES_LIST = [];
 
 const usersTableHeadCells = [
-	{
-		id: "first_name",
-		numeric: false,
-		disablePadding: true,
-		label: "First Name",
-	},
-	{
-		id: "last_name",
-		numeric: false,
-		disablePadding: true,
-		label: "Last Name",
-	},
-	{
-		id: "phone_number",
-		numeric: false,
-		disablePadding: true,
-		label: "Phone Number",
-	},
+	{ id: "first_name", numeric: false, disablePadding: true, label: "First Name" },
+	{ id: "last_name", numeric: false, disablePadding: true, label: "Last Name" },
+	{ id: "phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
 	{ id: "primary_email", numeric: false, disablePadding: true, label: "Primary Email" },
-	{
-		id: "id_number",
-		numeric: false,
-		disablePadding: true,
-		label: "ID Number",
-	},
+	{ id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
 	{ id: "disabled", numeric: false, disablePadding: true, label: "Status" },
+	{ id: "details", numeric: false, disablePadding: true, label: "Details" },
 	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
@@ -167,7 +145,7 @@ let UsersPage = ({
 							startIcon={<BlockIcon />}
 							disabled={selected.length <= 0}
 						>
-							{selected.length <= 0 ? "Disable" : selected.length[0].disabled ? "Enable" : "Disable"}
+							Disable
 						</Button>
 					</Grid>
 					<Grid item>
@@ -247,11 +225,7 @@ let UsersPage = ({
 											setRoleFilter(event.target.value);
 										}}
 									>
-										{ROLES_LIST.map((role, index) => (
-											<MenuItem key={index} value={role}>
-												{role}
-											</MenuItem>
-										))}
+										<MenuItem>Hello World</MenuItem>
 									</TextField>
 								</Grid>
 								<Grid item lg={6} md={12} xs={12}>
@@ -319,25 +293,17 @@ let UsersPage = ({
 					</Box>
 				</Grid>
 				<Grid item xs={12}>
-					{error && (
-						<div>
-							<CustomizedSnackbar
-								variant="error"
-								message={error.message}
-							/>
-						</div>
-					)}
 					<CommonTable
 						selected={selected}
 						setSelected={setSelected}
 						deleteUrl={'users'}
 						rows={userItems}
+						noDetailsCol={true}
 						headCells={usersTableHeadCells}
-						
 						handleDelete={handleItemDelete}
 					/>
 				</Grid>
-				
+
 			</Grid>
 		</Layout>
 	);
@@ -354,7 +320,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 	};
 };
 

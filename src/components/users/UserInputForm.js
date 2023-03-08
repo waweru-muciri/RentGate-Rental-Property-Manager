@@ -5,6 +5,10 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { useHistory } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import { DropzoneDialogBase } from "material-ui-dropzone";
+import {
+	getContactTitles,
+	getGendersList,
+} from "../../assets/commonAssets.js";
 import * as Yup from "yup";
 import {
 	uploadFilesToFirebase,
@@ -12,12 +16,18 @@ import {
 } from "../../actions/actions";
 import { Formik } from "formik";
 
+const CONTACT_TITLES = getContactTitles();
+const GENDERS_LIST = getGendersList();
+
+
 const UserSchema = Yup.object().shape({
+	title: Yup.string().trim().required("Title is required"),
+	gender: Yup.string().trim().required("Gender is required"),
 	primary_email: Yup.string().trim().email("Invalid Email").required("Email is required"),
 	other_email: Yup.string().trim().email("Invalid Email"),
 	first_name: Yup.string().trim().required("First Name is required"),
 	last_name: Yup.string().trim().required("Last Name is Required"),
-	personal_mobile_number: Yup.string().trim().min(8).required("Phone Number is Required"),
+	phone_number: Yup.string().trim().min(8).required("Phone Number is Required"),
 	work_mobile_number: Yup.string().trim().min(8).required("Work Phone Number"),
 	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
 });
@@ -27,15 +37,17 @@ let UserInputForm = (props) => {
 	const userToEdit = typeof props.userToEdit !== 'undefined' ? props.userToEdit : {};
 	const userValues = {
 		id: userToEdit.uid || '',
+		gender: userToEdit.gender || "",
+		title: userToEdit.title || "",
+		id_number: userToEdit.id_number || '',
 		first_name: userToEdit.first_name || '',
 		last_name: userToEdit.last_name || '',
 		primary_email: userToEdit.primary_email || '',
 		other_email: userToEdit.other_email || '',
-		personal_mobile_number: userToEdit.personal_mobile_number || '',
+		phone_number: userToEdit.phone_number || '',
 		work_mobile_number: userToEdit.work_mobile_number || '',
-		id_number: userToEdit.id_number || '',
+		home_phone_number: userToEdit.home_phone_number || "",
 		user_avatar_url: userToEdit.user_avatar_url || '',
-		user_roles: userToEdit.user_roles || [],
 	}
 	userValues.contact_image = [];
 	const history = useHistory();
@@ -46,8 +58,6 @@ let UserInputForm = (props) => {
 	const toggleImageDialog = () => {
 		toggleImageDialogState(!imageDialogState);
 	};
-	//get all roles that can be assigned to users from the server
-	const USER_ROLES_LIST = [];
 
 	return (
 		<Formik
@@ -56,14 +66,16 @@ let UserInputForm = (props) => {
 			onSubmit={(values, { resetForm }) => {
 				const user = {
 					id: values.id,
+					title: values.title,
+					gender: values.gender,
 					id_number: values.id_number,
 					primary_email: values.primary_email,
 					other_email: values.other_email,
 					first_name: values.first_name,
 					last_name: values.last_name,
-					personal_mobile_number: values.personal_mobile_number,
+					phone_number: values.phone_number,
 					work_mobile_number: values.work_mobile_number,
-					user_roles: values.user_roles,
+					home_phone_number: userToEdit.home_phone_number || "",
 				};
 				//first upload the image to firebase
 				if (values.contact_image.length) {
@@ -170,107 +182,181 @@ let UserInputForm = (props) => {
 										/>
 									</Grid>
 								</Grid>
-								<TextField
-									variant="outlined"
-									id="first_name"
-									name="first_name"
-									label="First Name"
-									value={values.first_name}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.first_name && touched.first_name}
-									helperText={touched.first_name && errors.first_name}
-								/>
-								<TextField
-									variant="outlined"
-									id="last_name"
-									name="last_name"
-									label="Last Name"
-									value={values.last_name}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.last_name && touched.last_name}
-									helperText={touched.last_name && errors.last_name}
-								/>
-								<TextField
-									variant="outlined"
-									id="id_number"
-									name="id_number"
-									label="ID Number"
-									value={values.id_number}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.id_number && touched.id_number}
-									helperText={touched.id_number && errors.id_number}
-								/>
-								<TextField
-									variant="outlined"
-									id="personal_mobile_number"
-									name="personal_mobile_number"
-									label="Phone Number"
-									value={values.personal_mobile_number}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.personal_mobile_number && touched.personal_mobile_number}
-									helperText={touched.personal_mobile_number && errors.personal_mobile_number}
-								/>
-								<TextField
-									variant="outlined"
-									id="work_mobile_number"
-									name="work_mobile_number"
-									label="Work Mobile Number"
-									value={values.work_mobile_number}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.work_mobile_number && touched.work_mobile_number}
-									helperText={touched.work_mobile_number && errors.work_mobile_number}
-								/>
-								<TextField
-									variant="outlined"
-									name="primary_email"
-									label="Primary Email"
-									id="primary_email"
-									onBlur={handleBlur}
-									onChange={handleChange}
-									value={values.primary_email}
-									error={errors.primary_email && touched.primary_email}
-									helperText={touched.primary_email && errors.primary_email}
-								/>
-								<TextField
-									variant="outlined"
-									name="other_email"
-									label="Other Email"
-									id="other_email"
-									onBlur={handleBlur}
-									onChange={handleChange}
-									value={values.other_email}
-									error={errors.other_email && touched.other_email}
-									helperText={touched.other_email && errors.other_email}
-								/>
-								<TextField
-									variant="outlined"
-									select
-									multiple
-									name="user_roles"
-									label="User Roles"
-									id="user_roles"
-									onBlur={handleBlur}
-									onChange={handleChange}
-									value={values.user_roles}
-									error={errors.user_roles && touched.user_roles}
-									helperText={touched.user_roles && errors.user_roles}
-								>
-									{USER_ROLES_LIST.map(
-										(user_roles_type, index) => (
-											<MenuItem
-												key={index}
-												value={user_roles_type}
-											>
-												{user_roles_type}
-											</MenuItem>
-										)
-									)}
-								</TextField>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											select
+											name="title"
+											label="Title"
+											id="title"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.title}
+											error={errors.title && touched.title}
+											helperText={touched.title && errors.title}
+										>
+											{CONTACT_TITLES.map((contact_title, index) => (
+												<MenuItem key={index} value={contact_title}>
+													{contact_title}
+												</MenuItem>
+											))}
+										</TextField>
+									</Grid>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											select
+											name="gender"
+											label="Gender"
+											id="gender"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.gender}
+											error={errors.gender && touched.gender}
+											helperText={touched.gender && errors.gender}
+										>
+											{GENDERS_LIST.map((gender_type, index) => (
+												<MenuItem key={index} value={gender_type}>
+													{gender_type}
+												</MenuItem>
+											))}
+										</TextField>
+									</Grid>
+								</Grid>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="first_name"
+											name="first_name"
+											label="First Name"
+											value={values.first_name}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.first_name && touched.first_name}
+											helperText={touched.first_name && errors.first_name}
+										/>
+									</Grid>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="last_name"
+											name="last_name"
+											label="Last Name"
+											value={values.last_name}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.last_name && touched.last_name}
+											helperText={touched.last_name && errors.last_name}
+										/>
+									</Grid>
+								</Grid>
+								<Grid item sm>
+									<TextField
+										fullWidth
+										variant="outlined"
+										id="id_number"
+										name="id_number"
+										label="ID Number"
+										value={values.id_number}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.id_number && touched.id_number}
+										helperText={touched.id_number && errors.id_number}
+									/>
+								</Grid>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id={"phone_number"}
+											name={"phone_number"}
+											label="Phone Number"
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.phone_number && touched.phone_number}
+											helperText={touched.phone_number && errors.phone_number}
+											value={values.phone_number}
+										/>
+									</Grid>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id={"home_phone_number"}
+											name={"home_phone_number"}
+											label="Home Phone Number"
+											onChange={handleChange}
+											onBlur={handleBlur}
+											helperText="Home Phone Number"
+											value={values.home_phone_number}
+										/>
+									</Grid>
+								</Grid>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id={"work_mobile_number"}
+											name={"work_mobile_number"}
+											label="Work Mobile Number"
+											onChange={handleChange}
+											onBlur={handleBlur}
+											helperText="Work Mobile Number"
+											value={values.work_mobile_number}
+										/>
+									</Grid>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id={"custom_mobile_number"}
+											name={"custom_mobile_number"}
+											label="Custom Mobile Number"
+											onChange={handleChange}
+											onBlur={handleBlur}
+											helperText="Custom Mobile Number"
+											value={values.custom_mobile_number}
+										/>
+									</Grid>
+								</Grid>
+								<Grid item container direction="row" spacing={2}>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											name="primary_email"
+											label="Primary Email"
+											id="primary_email"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.primary_email}
+											error={errors.primary_email && touched.primary_email}
+											helperText={touched.primary_email && errors.primary_email}
+										/>
+									</Grid>
+									<Grid item sm>
+										<TextField
+											fullWidth
+											variant="outlined"
+											name="other_email"
+											label="Other Email"
+											id="other_email"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.other_email}
+											error={errors.other_email && touched.other_email}
+											helperText={touched.other_email && errors.other_email}
+										/>
+									</Grid>
+								</Grid>
 							</Grid>
 							{/** end of user details grid **/}
 							<Grid

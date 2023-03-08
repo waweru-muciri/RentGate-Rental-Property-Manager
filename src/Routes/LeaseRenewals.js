@@ -51,7 +51,7 @@ let RentRollPage = ({
 }) => {
     let [statementItems, setStatementItems] = useState([]);
     let [filteredStatementItems, setFilteredStatementItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     let [contactFilter, setContactFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
@@ -108,9 +108,7 @@ let RentRollPage = ({
             .filter(({ transaction_date }) =>
                 !toDateFilter ? true : transaction_date <= toDateFilter
             )
-            .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
-            )
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenantId }) =>
                 !contactFilter ? true : tenantId === contactFilter
             )
@@ -123,7 +121,7 @@ let RentRollPage = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredStatementItems(statementItems);
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setContactFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -254,6 +252,8 @@ let RentRollPage = ({
                                             }}
                                             value={propertyFilter}
                                         >
+
+
                                             {properties.map(
                                                 (property, index) => (
                                                     <MenuItem

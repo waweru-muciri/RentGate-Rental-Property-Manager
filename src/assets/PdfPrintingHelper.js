@@ -5,28 +5,20 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 const makeCell = (content, rowIndex = -1, options = {}) => {
     return Object.assign({ text: content, fillColor: rowIndex % 2 ? 'white' : '#e8e8e8' }, options);
 }
-
 // -- Format the table cells for presentation.
 const thl = (content, rowIndex = -1, options = {}) => {
     return makeCell(content, rowIndex, Object.assign({ bold: true, alignment: 'left', fontSize: 9 }, options));
 }
 
-const thr = (content, rowIndex = -1, options = {}) => {
-    return makeCell(content, rowIndex, Object.assign({ bold: true, alignment: 'right', fontSize: 9 }, options));
-}
 const tdl = (content, rowIndex = -1, options = {}) => {
     return makeCell(content, rowIndex, Object.assign({ bold: false, alignment: 'left', fontSize: 9 }, options));
 }
-const tdr = (content, rowIndex = -1, options = {}) => {
-    return makeCell(content, rowIndex, Object.assign({ bold: false, alignment: 'right', fontSize: 9 }, options));
-}
-
-const truncateContent = (content, maxLength = 17) => {
-    return ''.concat(content.slice(0, maxLength), content.length > maxLength ? '…' : '');
+const getReportDate = () => {
+    return new Date().toDateString()
 }
 
 // -- Create a base document template for the reports.
-const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
+const createDocumentDefinition = (reportTitle, ...contentParts) => {
     const baseDocDefinition = {
         pageSize: 'A4',
         info: {
@@ -65,7 +57,7 @@ const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
                 text: `Company Name Here`, style: 'title', width: '*'
             },
             { text: reportTitle, style: 'titleSub', width: '*' },
-            { text: `Created: ${reportDate}`, style: 'titleDate', width: '*' },
+            { text: `Created: ${getReportDate()}`, style: 'titleDate', width: '*' },
         ],
     };
     const docDefinition = JSON.parse(JSON.stringify(baseDocDefinition));
@@ -75,15 +67,15 @@ const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
 };
 
 export const printDocument = (reportName, reportTitle, documentContent) => {
-    const reportDate = new Date().toDateString()
-    const docDefinition = createDocumentDefinition(reportDate, reportTitle, documentContent);
+    const docDefinition = createDocumentDefinition(reportTitle, documentContent);
+    // pdfMake.createPdf(docDefinition).download(`underlyingLoanSummary-.pdf`);
     pdfMake.createPdf(docDefinition).open()
 }
 
 
 // -- Generate the Pdf with Data in Rows.
 export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
-    const headCellsToPrint = headCells.filter(({id}) => id !== 'edit' && id !== 'delete' && id !== 'details')
+    const headCellsToPrint = headCells.filter(({ id }) => id !== 'edit' && id !== 'delete' && id !== 'details')
 
     const fontSize = 9;
 
@@ -115,6 +107,5 @@ export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
             body: tableBody(dataToPrint),
         }
     };
-    const reportDate = new Date().toDateString()
-    printDocument(`${reportName} ${reportDate}`, reportTitle, tableData)
+    printDocument(`${reportName} ${getReportDate()}`, reportTitle, tableData)
 }

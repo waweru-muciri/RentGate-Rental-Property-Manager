@@ -12,21 +12,25 @@ import { withRouter } from "react-router-dom";
 
 let TransactionPage = ({ leases, match, contacts, history, properties, propertyUnits,
 	propertyUnitCharges, handleItemSubmit, handleItemDelete }) => {
-	const unitsWithActiveLeases = leases.filter(({ terminated }) => terminated !== true)
-		.map(lease => lease.unit_id)
-	let leaseToEditId = match.params.leaseId;
-	let leaseToEdit = leases.find(({ id }) => id === leaseToEditId) || {};
-	let pageTitle = leaseToEdit.id ? "Edit Rental Agreement" : "Add New Rental Agreement";
-	const propertyUnitsToShow = propertyUnits.filter(({id}) => !unitsWithActiveLeases.includes(id))
+	const leaseToEditId = match.params.leaseId;
+	const leaseToEdit = leases.find(({ id }) => id === leaseToEditId) || {};
+	const pageTitle = leaseToEdit.id ? "Edit Rental Agreement" : "Add Rental Agreement";
+	let activeLeases = leases.filter(({ terminated }) => terminated !== true)
 	if (leaseToEdit.id) {
 		//add unit to units without active leases for it to be selected
-		propertyUnitsToShow.unshift(propertyUnits.find(({id}) => id === leaseToEdit.unit_id))
+		activeLeases = activeLeases.filter(({id}) => id !== leaseToEditId)
 	}
+	const unitsWithActiveLeases = activeLeases
+		.map(lease => lease.unit_id)
+	const contactsWithActiveLeases = []
+	activeLeases.forEach(lease => contactsWithActiveLeases.push(...lease.tenants))
+	const propertyUnitsToShow = propertyUnits.filter(({ id }) => !unitsWithActiveLeases.includes(id))
+	const tenantsToShow = contacts.filter(({ id }) => !contactsWithActiveLeases.includes(id))
 	return (
 		<Layout pageTitle="Rental Agreement Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading  text={pageTitle} />
+					<PageHeading text={pageTitle} />
 				</Grid>
 				<Grid
 					container
@@ -36,12 +40,12 @@ let TransactionPage = ({ leases, match, contacts, history, properties, propertyU
 					key={3}
 				>
 					<UnitLeaseInputForm
-						leaseToEdit={leaseToEdit}
-						contacts={contacts} history={history}
+						contacts={tenantsToShow} history={history}
 						properties={properties} propertyUnits={propertyUnitsToShow}
 						propertyUnitCharges={propertyUnitCharges}
 						handleItemSubmit={handleItemSubmit}
 						handleItemDelete={handleItemDelete}
+						leaseToEdit={leaseToEdit}
 					/>
 				</Grid>
 			</Grid>

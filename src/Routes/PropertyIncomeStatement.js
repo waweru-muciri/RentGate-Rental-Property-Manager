@@ -8,12 +8,12 @@ import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
 import { startOfToday, parse, subMonths, addMonths, getMonth, format, isSameMonth } from 'date-fns'
+import {ExportStatementToExcelBtn} from "../components/ExportToExcelBtn";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -64,13 +64,13 @@ let PropertyIncomeStatement = ({
         let totalRentalIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
             //get transactions recorded in the same month and year as monthDate
-            const totalRentalIncome = paymentItems.filter(({ payment_type }) => payment_type === 'rent')
+            const totalRentalIncomeForMonth = paymentItems.filter(({ payment_type }) => payment_type === 'rent')
                 .filter((payment) => {
                     const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
                     return isSameMonth(monthDate, paymentDate)
                 }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
-            totalRentalIncomeForPeriod += totalRentalIncome
-            rentalIncomeObject[format(monthDate, 'MMMM yyyy')] = totalRentalIncome
+            totalRentalIncomeForPeriod += totalRentalIncomeForMonth
+            rentalIncomeObject[format(monthDate, 'MMMM yyyy')] = totalRentalIncomeForMonth
         })
         rentalIncomeObject[headCellsForMonths[headCellsForMonths.length - 1]] = totalRentalIncomeForPeriod
         incomeMappedByMonth.push(rentalIncomeObject)
@@ -162,10 +162,10 @@ let PropertyIncomeStatement = ({
         event.preventDefault();
         //filter the transactions according to the search criteria here
         let filteredTransactions = transactions
-            .filter(({ property_id }) => !propertyFilter ? true : property_id === propertyFilter)
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         setPaymentItems(filteredTransactions)
         const filteredExpenses = expenses
-            .filter(({ property_id }) => !propertyFilter ? true : property_id === propertyFilter)
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         setExpensesItems(filteredExpenses)
     };
 
@@ -196,11 +196,21 @@ let PropertyIncomeStatement = ({
                     key={1}
                 >
                     <Grid item>
-                        <ExportToExcelBtn
+                        <ExportStatementToExcelBtn
+                            displayText={"Export Income"}
                             reportName={'Properties Income Records'}
                             reportTitle={'Properties Income Records'}
                             headCells={headCells}
                             dataToPrint={incomeStatements}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <ExportStatementToExcelBtn
+                            displayText={"Export Expenses"}
+                            reportName={"Properties Expenses  Records"}
+                            reportTitle={"Properties Expenses Data"}
+                            headCells={headCells}
+                            dataToPrint={expensesStatements}
                         />
                     </Grid>
                 </Grid>

@@ -119,10 +119,10 @@ let DashBoardPage = (props) => {
   })
 
   return (
-    <Layout pageTitle="Dashboard">
+    <Layout pageTitle="Overview">
       <Grid container justify="center" direction="column" spacing={4}>
         <Grid item key={0}>
-          <PageHeading text={"Dashboard"} />
+          <PageHeading text={"Overview"} />
         </Grid>
         <Grid item>
           <Grid container item direction="column" spacing={4}>

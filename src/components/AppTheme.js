@@ -5,6 +5,9 @@ import { ThemeProvider } from "@material-ui/styles";
 function AppTheme(props) {
   const theme = createMuiTheme({
     palette: {
+      // primary: {
+      //   main: "#34314c",
+      // },
       success: {
         main: "#4caf50",
       },

@@ -11,7 +11,7 @@ import Tabs from '@material-ui/core/Tabs';
 import { handleDelete } from "../actions/actions";
 import TenantChargesStatement from "./TenantChargesStatement";
 import TabPanel from "../components/TabPanel";
-import { DataGrid } from '@material-ui/data-grid';
+import DataGridTable from '../components/DataGridTable'
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
@@ -90,7 +90,7 @@ let TenantDetailsPage = ({
                                 cardContent={[
                                     { name: 'Name', value: `${tenantDetails.title} ${tenantDetails.first_name} ${tenantDetails.last_name}` },
                                     { name: 'ID Number', value: tenantDetails.id_number || '-' },
-                                    { name: 'Personal Phone Number', value: tenantDetails.personal_mobile_number || tenantUnit.address || '-' },
+                                    { name: 'Personal Phone Number', value: tenantDetails.phone_number || tenantUnit.address || '-' },
                                     { name: 'Work Phone Number', value: tenantDetails.work_mobile_number || '-' },
                                     { name: 'Home Phone Number', value: tenantDetails.home_phone_number || '-' },
                                     { name: 'Email', value: tenantDetails.contact_email || '-' },
@@ -143,7 +143,7 @@ let TenantDetailsPage = ({
                                         Recent Charges History
                                     </Typography>
                                     <div style={{ height: 400, width: '100%' }}>
-                                        <DataGrid rows={currentMonthCharges} columns={chargesColumns} pageSize={5} />
+                                        <DataGridTable rows={currentMonthCharges} headCells={chargesColumns} pageSize={5} />
                                     </div>
                                 </CardContent>
                             </Card>
@@ -155,7 +155,7 @@ let TenantDetailsPage = ({
                                         Recent Payments History
                                     </Typography>
                                     <div style={{ height: 400, width: '100%' }}>
-                                        <DataGrid rows={currentMonthPayments} columns={paymentsColumns} pageSize={5} />
+                                        <DataGridTable rows={currentMonthPayments} headCells={paymentsColumns} pageSize={5} />
                                     </div>
                                 </CardContent>
                             </Card>

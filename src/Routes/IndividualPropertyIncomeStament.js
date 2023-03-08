@@ -6,7 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import {ExportStatementToExcelBtn} from "../components/ExportToExcelBtn";
 import { commonStyles } from "../components/commonStyles";
 import Typography from "@material-ui/core/Typography";
 import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
@@ -157,10 +157,10 @@ let PropertyIncomeStatement = ({
         event.preventDefault();
         //filter the transactions according to the search criteria here
         let filteredTransactions = transactions
-            .filter(({unit_id}) => !propertyUnitFilter ? true : unit_id === propertyUnitFilter)
+            .filter(({ unit_id }) => !propertyUnitFilter ? true : unit_id === propertyUnitFilter)
         setPaymentItems(filteredTransactions)
         const filteredExpenses = expenses
-        .filter(({unit_id}) =>!propertyUnitFilter ? true : unit_id === propertyUnitFilter)
+            .filter(({ unit_id }) => !propertyUnitFilter ? true : unit_id === propertyUnitFilter)
         setExpensesItems(filteredExpenses)
     };
 
@@ -189,11 +189,21 @@ let PropertyIncomeStatement = ({
                 key={1}
             >
                 <Grid item>
-                    <ExportToExcelBtn
-                        reportName={'Income Statements Records'}
-                        reportTitle={'Income Statements Data'}
+                    <ExportStatementToExcelBtn
+                        displayText={"Export Income"}
+                        reportName={'Properties Income Records'}
+                        reportTitle={'Properties Income Records'}
                         headCells={headCells}
                         dataToPrint={incomeStatements}
+                    />
+                </Grid>
+                <Grid item>
+                    <ExportStatementToExcelBtn
+                        displayText={"Export Expenses"}
+                        reportName={"Properties Expenses  Records"}
+                        reportTitle={"Properties Expenses Data"}
+                        headCells={headCells}
+                        dataToPrint={expensesStatements}
                     />
                 </Grid>
             </Grid>

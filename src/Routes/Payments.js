@@ -47,7 +47,7 @@ let PaymentsPage = ({
     const classes = commonStyles();
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
@@ -103,7 +103,7 @@ let PaymentsPage = ({
         filteredPayments = filteredPayments
             .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)
-            .filter(({ property_id }) => !propertyFilter ? true : property_id === propertyFilter)
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id
             )
         setFilteredPaymentsItems(filteredPayments);
@@ -112,7 +112,7 @@ let PaymentsPage = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredPaymentsItems(paymentsItems);
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setPeriodFilter("");
         setFromDateFilter("");
         setToDateFilter("");
@@ -127,7 +127,7 @@ let PaymentsPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={'Payments'} />
+                    <PageHeading text={'Payments'} />
                 </Grid>
                 <Grid
                     container
@@ -266,6 +266,7 @@ let PaymentsPage = ({
                                                 }}
                                                 value={propertyFilter}
                                             >
+                                                <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                                 {properties.map(
                                                     (property, index) => (
                                                         <MenuItem

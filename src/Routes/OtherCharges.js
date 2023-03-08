@@ -52,7 +52,7 @@ let TenantChargesStatementPage = ({
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [contactFilter, setContactFilter] = useState(null);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
 
     const [selected, setSelected] = useState([]);
 
@@ -151,7 +151,7 @@ let TenantChargesStatementPage = ({
                 justify="center" direction="column"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={"Other Charges"} />
+                    <PageHeading text={"Other Charges"} />
                 </Grid>
                 <Grid
                     container
@@ -170,7 +170,7 @@ let TenantChargesStatementPage = ({
                             disabled={selected.length <= 0}
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`/payments/${selected[0]}/new`}
+                            to={`/app/payments/${selected[0]}/new`}
                         >
                             Receive Payment
                         </Button>
@@ -283,6 +283,7 @@ let TenantChargesStatementPage = ({
                                                     }}
                                                     value={propertyFilter}
                                                 >
+                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem

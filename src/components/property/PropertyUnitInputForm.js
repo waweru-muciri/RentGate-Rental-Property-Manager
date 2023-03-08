@@ -5,6 +5,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
+import CustomSnackbar from '../CustomSnackbar'
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
 import { Formik } from "formik";
@@ -57,22 +58,33 @@ let PropertyUnitInputForm = (props) => {
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertyUnitSchema}
 			onSubmit={async (values, { resetForm }) => {
-				let unit = {
-					property_id: values.property_id,
-					id: values.id,
-					ref: values.ref,
-					address: values.ref,
-					unit_type: values.unit_type,
-					beds: values.beds,
-					baths: values.baths,
-					sqft: values.sqft,
-					tenants: values.tenants,
-				};
-				//save the unit details
-				await handleItemSubmit(unit, 'property_units')
-				resetForm({});
-				if (values.id) {
-					history.goBack();
+				try {
+					let unit = {
+						property_id: values.property_id,
+						id: values.id,
+						ref: values.ref,
+						address: values.ref,
+						unit_type: values.unit_type,
+						beds: values.beds,
+						baths: values.baths,
+						sqft: values.sqft,
+						tenants: values.tenants,
+					};
+					//save the unit details
+					await handleItemSubmit(unit, 'property_units')
+					resetForm({});
+					if (values.id) {
+						history.goBack();
+					}
+				} catch (error) {
+					return error && (
+						<div>
+						  <CustomSnackbar
+							variant="error"
+							message={error.message}
+						  />
+						</div>
+					  )
 				}
 			}}
 		>

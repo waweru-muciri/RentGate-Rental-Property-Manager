@@ -16,11 +16,11 @@ import DashBoard from "./DashBoard";
 import LoadingBackdrop from '../components/LoadingBackdrop'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { auth } from '../firebase'
-import PropertiesPage from "./Properties";
-import PropertyPage from "./PropertyPage";
-import PropertyUnitPage from "./PropertyUnitPage";
-import TenantDetailsPage from "./TenantDetailsPage";
-import PaymentEditForm from "../components/transactions/PaymentEditForm";
+const PaymentEditForm = lazy(() => import('../components/transactions/PaymentEditForm'));
+const PropertyUnitPage = lazy(() => import('./PropertyUnitPage'));
+const TenantDetailsPage = lazy(() => import('./TenantDetailsPage'));
+const PropertyPage = lazy(() => import('./PropertyPage'));
+const PropertiesPage = lazy(() => import('./Properties'));
 const ExpensesPage = lazy(() => import('./Expenses'));
 const ExpensePage = lazy(() => import('./ExpensePage'));
 const UsersPage = lazy(() => import('./Users'));
@@ -36,6 +36,7 @@ const MaintenancesPage = lazy(() => import('./Maintenances'));
 const PropertyDetailsPage = lazy(() => import('./PropertyDetails'));
 const AdminUserProfilePage = lazy(() => import('./AdminUserProfilePage'));
 const UserPage = lazy(() => import('./UserPage'));
+const UserProfilePage = lazy(() => import('./UserProfilePage'));
 const MaintenanceRequestPage = lazy(() => import('./MaintenanceRequestPage'));
 const ToDosPage = lazy(() => import('./ToDos'));
 const NoticePage = lazy(() => import('./NoticePage'));
@@ -175,6 +176,11 @@ let MainPage = ({
                 />
                 <Route
                   exact
+                  path={`${match.path}users/:userId/details`}
+                  component={UserProfilePage}
+                />
+                <Route
+                  exact
                   path={`${match.path}properties/:propertyId/details/:propertyUnitId/edit`}
                   component={PropertyUnitPage}
                 />
@@ -195,7 +201,7 @@ let MainPage = ({
                 />
                 <Route
                   exact
-                  path={`${match.path}properties/other-charges`}
+                  path={`${match.path}other-charges`}
                   component={OtherChargesPage}
                 />
                 <Route
@@ -252,12 +258,12 @@ let MainPage = ({
                 />
                 <Route
                   exact
-                  path={`${match.path}properties/meter-reading/:meterReadingId/edit`}
+                  path={`${match.path}meter-reading/:meterReadingId/edit`}
                   component={MeterReadingPage}
                 />
                 <Route exact path={`${match.path}properties`} component={PropertiesPage} />
-                <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
-                <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
+                <Route exact path={`${match.path}meter-reading`} component={MeterReadingsPage} />
+                <Route exact path={`${match.path}meter-reading/new`} component={MeterReadingPage} />
                 <Route exact path={`${match.path}reports/tenant-statements`} component={TenantsStatementsPage} />
                 <Route exact path={`${match.path}leases`} component={LeasesPage} />
                 <Route exact path={`${match.path}payments`} component={PaymentsPage} />

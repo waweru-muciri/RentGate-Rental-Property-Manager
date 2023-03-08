@@ -51,7 +51,7 @@ let RentRollPage = ({
 }) => {
     let [rentCharges, setChargeItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     let [contactFilter, setContactFilter] = useState(null);
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [fromDateFilter, setFromDateFilter] = useState('');
@@ -136,9 +136,7 @@ let RentRollPage = ({
             .filter(({ charge_date }) =>
                 !toDateFilter ? true : charge_date <= toDateFilter
             )
-            .filter(({ property_id }) =>
-                !propertyFilter ? true : property_id === propertyFilter
-            )
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) =>
                 !contactFilter ? true : tenant_id === contactFilter.id
             )
@@ -148,8 +146,8 @@ let RentRollPage = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredChargeItems(rentCharges);
-        setPropertyFilter("");
-        setContactFilter("");
+        setPropertyFilter("all");
+        setContactFilter(null);
         setPeriodFilter("");
         setFromDateFilter("");
         setToDateFilter("");
@@ -176,16 +174,16 @@ let RentRollPage = ({
     }
 
     return (
-        <Layout pageTitle="Rent Roll">
+        <Layout pageTitle="Rent Charges Roll">
             <AppBar position="static">
                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
-                    <Tab label="Rent Roll" />
+                    <Tab label="Rent Charges Roll" />
                     <Tab label="Rent Outstanding Balances" />
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={1}>
                 <RentBalancesPage transactionsCharges={rentChargesWithBalances} properties={properties}
-                contacts={contacts} classes={classes} />
+                    contacts={contacts} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
                 <Grid
@@ -194,7 +192,7 @@ let RentRollPage = ({
                     justify="center" direction="column"
                 >
                     <Grid item key={2}>
-                        <PageHeading text={"Rent Roll"} />
+                        <PageHeading text={"Rent Charges Roll"} />
                     </Grid>
                     <Grid
                         container
@@ -214,7 +212,7 @@ let RentRollPage = ({
                                 onClick={() => setChargesPaidInFull()}
                             >
                                 Receive Full Payments
-                        </Button>
+                            </Button>
                         </Grid>
                         <Grid item>
                             <Button
@@ -225,16 +223,29 @@ let RentRollPage = ({
                                 disabled={selected.length <= 0}
                                 startIcon={<AddIcon />}
                                 component={Link}
-                                to={`/payments/${selected[0]}/new`}
+                                to={`/app/payments/${selected[0]}/new`}
                             >
                                 Receive Payment
-                        </Button>
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                type="button"
+                                color="primary"
+                                variant="contained"
+                                size="medium"
+                                disabled={selected.length <= 0}
+                                startIcon={<AddIcon />}
+                                component={Link}
+                            >
+                                Apply Deposit To Charge
+                            </Button>
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
                                 disabled={selected.length <= 0}
-                                reportName={'Rent Roll Records'}
-                                reportTitle={'Rent Roll Data'}
+                                reportName={'Rent Charges Roll Records'}
+                                reportTitle={'Rent Charges Roll Data'}
                                 headCells={headCells}
                                 dataToPrint={rentCharges.filter(({ id }) => selected.includes(id))}
                             />
@@ -242,8 +253,8 @@ let RentRollPage = ({
                         <Grid item>
                             <ExportToExcelBtn
                                 disabled={selected.length <= 0}
-                                reportName={'Rent Roll Records'}
-                                reportTitle={'Rent Roll Data'}
+                                reportName={'Rent Charges Roll Records'}
+                                reportTitle={'Rent Charges Roll Data'}
                                 headCells={headCells}
                                 dataToPrint={rentCharges.filter(({ id }) => selected.includes(id))}
                             />
@@ -344,6 +355,7 @@ let RentRollPage = ({
                                                     }}
                                                     value={propertyFilter}
                                                 >
+                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem

@@ -57,9 +57,7 @@ let VacatingNoticesPage = ({
             .filter(({ tenant }) =>
                 !tenantFilter ? true : tenant === tenantFilter
             )
-            .filter(({ unit_id }) =>
-                !propertyFilter ? true : unit_id  === propertyFilter
-            );
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
 
         setFilteredNoticeItems(filteredNotices);
     };
@@ -69,7 +67,7 @@ let VacatingNoticesPage = ({
         setFilteredNoticeItems(notices);
         setFromDateFilter("");
         setToDateFilter("");
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setTenantFilter("");
     };
 
@@ -81,7 +79,7 @@ let VacatingNoticesPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={'Move Outs'} />
+                    <PageHeading text={'Move Outs'} />
                 </Grid>
                 <Grid
                     container
@@ -199,6 +197,7 @@ let VacatingNoticesPage = ({
                                             );
                                         }}
                                     >
+                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                         {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}
@@ -294,8 +293,8 @@ let VacatingNoticesPage = ({
 const mapStateToProps = (state) => {
     return {
         notices: state.notices.map((notice) => {
-            const noticeLease = state.leases.find(({id}) => id ===  notice.lease_id) || {}
-            const tenant = state.contacts.find(({id}) => id === noticeLease.tenants ? noticeLease.tenants[0] : false) || {};
+            const noticeLease = state.leases.find(({ id }) => id === notice.lease_id) || {}
+            const tenant = state.contacts.find(({ id }) => id === noticeLease.tenants ? noticeLease.tenants[0] : false) || {};
             const noticeDetails = {};
             noticeDetails.tenant_id_number = tenant.id_number
             noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name

@@ -1,6 +1,9 @@
 import React from "react";
 import Box from "@material-ui/core/Box";
 import Avatar from "@material-ui/core/Avatar";
+import IconButton from "@material-ui/core/IconButton";
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import CustomSnackbar from '../CustomSnackbar'
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -21,9 +24,10 @@ import {
 	getContactTitles,
 	getGendersList,
 } from "../../assets/commonAssets.js";
-import { DropzoneDialogBase } from "material-ui-dropzone";
+import ImageCropper from '../ImageCropper';
 import * as Yup from "yup";
 import { format, startOfToday } from "date-fns";
+
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -38,23 +42,18 @@ const ContactSchema = Yup.object().shape({
 	contact_email: Yup.string().trim().email(),
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
-	personal_mobile_number: Yup.string().trim().required('Personal Mobile Number is Required'),
+	phone_number: Yup.string().trim().required('Phone Number is Required'),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 
 const currentDate = format(startOfToday(), 'yyyy-MM-dd')
 let ContactInputForm = (props) => {
 
-	const {history, handleItemSubmit } = props;
+	const { history, handleItemSubmit } = props;
 	let classes = commonStyles();
-	const [imageDialogState, toggleImageDialogState] = React.useState(false);
-
-	const toggleImageDialog = () => {
-		toggleImageDialogState(!imageDialogState);
-	};
 
 	let contactToEdit = props.contactToEdit || {};
-	
+
 	const contactValues = {
 		id: contactToEdit.id,
 		gender: contactToEdit.gender || "",
@@ -66,12 +65,10 @@ let ContactInputForm = (props) => {
 		alternate_address: contactToEdit.alternate_address || "",
 		contact_email: contactToEdit.contact_email || "",
 		alternate_email: contactToEdit.alternate_email || "",
-		personal_mobile_number: contactToEdit.personal_mobile_number || "",
+		phone_number: contactToEdit.phone_number || "",
 		work_mobile_number: contactToEdit.work_mobile_number || "",
 		home_phone_number: contactToEdit.home_phone_number || "",
 		custom_mobile_number: contactToEdit.custom_mobile_number || "",
-		id_issue_date: contactToEdit.id_issue_date || currentDate,
-		id_issue_place: contactToEdit.id_issue_place || "",
 		date_of_birth: contactToEdit.date_of_birth || currentDate,
 		emergency_contact_email: contactToEdit.emergency_contact_email || "",
 		emergency_contact_name: contactToEdit.emergency_contact_name || "",
@@ -79,57 +76,66 @@ let ContactInputForm = (props) => {
 		emergency_contact_relationship: contactToEdit.emergency_contact_relationship || "",
 		first_name: contactToEdit.first_name || "",
 		last_name: contactToEdit.last_name || "",
-		contact_images: [],
+		contact_image: '',
 	};
 
 	return (
 		<Formik
 			initialValues={contactValues}
 			enableReinitialize validationSchema={ContactSchema}
-			onSubmit={(values, { resetForm }) => {
-				let contact = {
-					id: values.id,
-					title: values.title,
-					gender: values.gender,
-					first_name: values.first_name,
-					last_name: values.last_name,
-					date_of_birth: values.date_of_birth,
-					id_number: values.id_number,
-					assigned_to: values.assigned_to,
-					id_issue_date: values.id_issue_date,
-					id_issue_place: values.id_issue_place,
-					present_address: values.present_address,
-					alternate_address: values.alternate_address,
-					contact_email: values.contact_email,
-					alternate_email: values.alternate_email,
-					personal_mobile_number: values.personal_mobile_number,
-					work_mobile_number: values.work_mobile_number,
-					home_phone_number: values.home_phone_number,
-					custom_mobile_number: values.custom_mobile_number,
-					emergency_contact_name: values.emergency_contact_name,
-					emergency_contact_relationship: values.emergency_contact_relationship,
-					emergency_contact_phone_number: values.emergency_contact_phone_number,
-					emergency_contact_email: values.emergency_contact_email,
-				};
-				//first upload the image to firebase
-				if (values.contact_images.length) {
-					//if the user had previously uploaded an avatar
-					// then delete it here and replace the url with new uploaded image
-					if (values.contact_avatar_url) {
-						//delete file from storage
-						deleteUploadedFileByUrl(values.contact_avatar_url);
+			onSubmit={async (values, { resetForm }) => {
+				try {
+					let contact = {
+						id: values.id,
+						title: values.title,
+						gender: values.gender,
+						first_name: values.first_name,
+						last_name: values.last_name,
+						date_of_birth: values.date_of_birth,
+						id_number: values.id_number,
+						assigned_to: values.assigned_to,
+						present_address: values.present_address,
+						alternate_address: values.alternate_address,
+						contact_email: values.contact_email,
+						alternate_email: values.alternate_email,
+						phone_number: values.phone_number,
+						work_mobile_number: values.work_mobile_number,
+						home_phone_number: values.home_phone_number,
+						custom_mobile_number: values.custom_mobile_number,
+						emergency_contact_name: values.emergency_contact_name,
+						emergency_contact_relationship: values.emergency_contact_relationship,
+						emergency_contact_phone_number: values.emergency_contact_phone_number,
+						emergency_contact_email: values.emergency_contact_email,
+					};
+					//first upload the image to firebase
+					if (values.contact_image && values.contact_image.data) {
+						//if the user had previously uploaded an avatar
+						// then delete it here and replace the url with new uploaded image
+						if (values.contact_avatar_url) {
+							//delete file from storage
+							await deleteUploadedFileByUrl(values.contact_avatar_url);
+						}
+						//upload the first and only image in the contact images array
+						var fileDownloadUrl = uploadFilesToFirebase([values.contact_image])
+						contact.contact_avatar_url = fileDownloadUrl;
 					}
-					//upload the first and only image in the contact images array
-					var fileDownloadUrl = uploadFilesToFirebase([values.contact_images[0]])
-					contact.contact_avatar_url = fileDownloadUrl;
-				}
-
-				handleItemSubmit( contact, "contacts").then((contactId) => {
+	
+					await handleItemSubmit(contact, "contacts")
 					resetForm({});
 					if (values.id) {
 						history.goBack();
 					}
-				});
+				} catch (error) {
+					console.log("A fucking error => ", error)
+					return error && (
+						<div>
+						  <CustomSnackbar
+							variant="error"
+							message={error.message}
+						  />
+						</div>
+					  )
+				}
 			}}
 		>
 			{({
@@ -163,166 +169,153 @@ let ContactInputForm = (props) => {
 										<Box>
 											<Typography variant="subtitle2">
 												Contact Image
-								</Typography>
+											</Typography>
 										</Box>
 									</Grid>
 									<Grid
 										item
 										container
+										direction="row"
 										justify="flex-start"
 										spacing={4}
 										alignItems="center"
 									>
 										<Grid key={1} item>
+											{
+												values.file_to_load_url &&
+												<ImageCropper open={true} selectedFile={values.file_to_load_url}
+													setCroppedImageData={(croppedImage) => {
+														setFieldValue('file_to_load_url', '');
+														setFieldValue('contact_image', croppedImage);
+													}} />
+											}
 											<Avatar
 												alt="Contact Image"
 												src={
-													typeof values.contact_images[0] !==
-														"undefined"
-														? values.contact_images[0].data
+													values.contact_image ?
+														values.contact_image.data
 														: values.contact_avatar_url
 												}
 												className={classes.largeAvatar}
 											/>
 										</Grid>
 										<Grid key={2} item>
-											<Button
-												variant="contained"
-												color="primary"
-												onClick={() => toggleImageDialog()}
-											>
-												{values.contact_avatar_url || values.contact_images[0] ? "Change Photo": "Add Photo"}
-											</Button>
-
-											<DropzoneDialogBase
-												filesLimit={1}
-												fileObjects={values.contact_images}
-												acceptedFiles={["image/*"]}
-												cancelButtonText={"cancel"}
-												submitButtonText={"submit"}
-												maxFileSize={5000000}
-												open={imageDialogState}
-												onClose={() => toggleImageDialog()}
-												onDelete={() => {
-													setFieldValue("contact_images", []);
-												}}
-												onSave={(files) => {
-													setFieldValue("contact_images", files);
-													toggleImageDialog();
-												}}
-												onAdd={(files) => {
-													setFieldValue("contact_images", files);
-													toggleImageDialog();
-												}}
-												showPreviews={true}
-												showFileNamesInPreview={true}
-											/>
+											<Box>
+												<input onChange={(event) => {
+													const selectedFile = event.currentTarget.files[0]
+													//remove the object then push a copy of it with added image object
+													setFieldValue("file_to_load_url", selectedFile);
+												}} accept="image/*" className={classes.fileInputDisplayNone} id={"contact-image-input"} type="file" />
+												<label htmlFor={"contact-image-input"}>
+													<IconButton color="primary" aria-label="upload picture" component="span">
+														<PhotoCamera />
+													</IconButton>
+												</label>
+												<Box>{values.contact_avatar_url || values.contact_image ? "Change Photo" : "Add Photo"}</Box>
+											</Box>
 										</Grid>
 									</Grid>
-									<TextField
-										variant="outlined"
-										select
-										name="title"
-										label="Title"
-										id="title"
-										onBlur={handleBlur}
-										onChange={handleChange}
-										value={values.title}
-										error={errors.title && touched.title}
-										helperText={touched.title && errors.title}
-									>
-										{CONTACT_TITLES.map((contact_title, index) => (
-											<MenuItem key={index} value={contact_title}>
-												{contact_title}
-											</MenuItem>
-										))}
-									</TextField>
-									<TextField
-										variant="outlined"
-										id="first_name"
-										name="first_name"
-										label="First Name"
-										value={values.first_name}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.first_name && touched.first_name}
-										helperText={touched.first_name && errors.first_name}
-									/>
-									<TextField
-										variant="outlined"
-										id="last_name"
-										name="last_name"
-										label="Last Name"
-										value={values.last_name}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.last_name && touched.last_name}
-										helperText={touched.last_name && errors.last_name}
-									/>
-									<TextField
-										variant="outlined"
-										select
-										name="gender"
-										label="Gender"
-										id="gender"
-										onBlur={handleBlur}
-										onChange={handleChange}
-										value={values.gender}
-										error={errors.gender && touched.gender}
-										helperText={touched.gender && errors.gender}
-									>
-										{GENDERS_LIST.map((gender_type, index) => (
-											<MenuItem key={index} value={gender_type}>
-												{gender_type}
-											</MenuItem>
-										))}
-									</TextField>
-									<TextField
-										variant="outlined"
-										id="date_of_birth"
-										name="date_of_birth"
-										label="Date of Birth"
-										type="date"
-										value={values.date_of_birth}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.date_of_birth && touched.date_of_birth}
-										helperText={touched.date_of_birth && errors.date_of_birth}
-										InputLabelProps={{ shrink: true }}
-									/>
-									<TextField
-										variant="outlined"
-										id="id_number"
-										label="ID No."
-										type="text"
-										name="id_number"
-										value={values.id_number}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={errors.id_number && touched.id_number}
-										helperText={touched.id_number && errors.id_number}
-									/>
-									<TextField
-										type="date"
-										variant="outlined"
-										id="id_issue_date"
-										name="id_issue_date"
-										label="ID Date of Issue"
-										value={values.id_issue_date}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
-									/>
-									<TextField
-										label="ID Place of Issue"
-										variant="outlined"
-										id="id_issue_place"
-										type="text"
-										name="id_issue_place"
-										value={values.id_issue_place}
-										onChange={handleChange}
-										onBlur={handleBlur}
-									/>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											select
+											name="title"
+											label="Title"
+											id="title"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.title}
+											error={errors.title && touched.title}
+											helperText={touched.title && errors.title}
+										>
+											{CONTACT_TITLES.map((contact_title, index) => (
+												<MenuItem key={index} value={contact_title}>
+													{contact_title}
+												</MenuItem>
+											))}
+										</TextField>
+									</Grid>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="first_name"
+											name="first_name"
+											label="First Name"
+											value={values.first_name}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.first_name && touched.first_name}
+											helperText={touched.first_name && errors.first_name}
+										/>
+									</Grid>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="last_name"
+											name="last_name"
+											label="Last Name"
+											value={values.last_name}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.last_name && touched.last_name}
+											helperText={touched.last_name && errors.last_name}
+										/>
+									</Grid>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											select
+											name="gender"
+											label="Gender"
+											id="gender"
+											onBlur={handleBlur}
+											onChange={handleChange}
+											value={values.gender}
+											error={errors.gender && touched.gender}
+											helperText={touched.gender && errors.gender}
+										>
+											{GENDERS_LIST.map((gender_type, index) => (
+												<MenuItem key={index} value={gender_type}>
+													{gender_type}
+												</MenuItem>
+											))}
+										</TextField>
+									</Grid>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="date_of_birth"
+											name="date_of_birth"
+											label="Date of Birth"
+											type="date"
+											value={values.date_of_birth}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.date_of_birth && touched.date_of_birth}
+											helperText={touched.date_of_birth && errors.date_of_birth}
+											InputLabelProps={{ shrink: true }}
+										/>
+									</Grid>
+									<Grid item>
+										<TextField
+											fullWidth
+											variant="outlined"
+											id="id_number"
+											label="ID No."
+											type="text"
+											name="id_number"
+											value={values.id_number}
+											onChange={handleChange}
+											onBlur={handleBlur}
+											error={errors.id_number && touched.id_number}
+											helperText={touched.id_number && errors.id_number}
+										/>
+									</Grid>
 								</Grid>
 								{/* start of Contact Details column */}
 								<Grid md={6}
@@ -334,7 +327,7 @@ let ContactInputForm = (props) => {
 									<Grid item>
 										<Typography variant="h6">
 											Contact Details
-							</Typography>
+										</Typography>
 									</Grid>
 									<Grid item>
 										<Typography variant="subtitle2"> Phone Numbers </Typography>
@@ -345,14 +338,14 @@ let ContactInputForm = (props) => {
 											<TextField
 												fullWidth
 												variant="outlined"
-												id={"personal_mobile_number"}
-												name={"personal_mobile_number"}
-												label="Personal Mobile Number"
+												id={"phone_number"}
+												name={"phone_number"}
+												label="Phone Number"
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={errors.personal_mobile_number && touched.personal_mobile_number}
-												helperText={touched.personal_mobile_number && errors.personal_mobile_number}
-												value={values.personal_mobile_number}
+												error={errors.phone_number && touched.phone_number}
+												helperText={touched.phone_number && errors.phone_number}
+												value={values.phone_number}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -416,7 +409,7 @@ let ContactInputForm = (props) => {
 												onChange={handleChange}
 												onBlur={handleBlur}
 												error={errors.contact_email && touched.contact_email}
-										helperText={touched.contact_email && errors.contact_email}
+												helperText={touched.contact_email && errors.contact_email}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -431,7 +424,7 @@ let ContactInputForm = (props) => {
 												onChange={handleChange}
 												onBlur={handleBlur}
 												error={errors.alternate_email && touched.alternate_email}
-										helperText={touched.alternate_email && errors.alternate_email}
+												helperText={touched.alternate_email && errors.alternate_email}
 											/>
 										</Grid>
 									</Grid>
@@ -451,11 +444,11 @@ let ContactInputForm = (props) => {
 											value={
 												values.present_address
 											}
-											
+
 											onChange={handleChange}
 											onBlur={handleBlur}
 											error={errors.present_address && touched.present_address}
-										helperText={touched.present_address && errors.present_address}
+											helperText={touched.present_address && errors.present_address}
 										/>
 										<TextField
 											fullWidth
@@ -489,7 +482,7 @@ let ContactInputForm = (props) => {
 												onChange={handleChange}
 												onBlur={handleBlur}
 												error={errors.emergency_contact_name && touched.emergency_contact_name}
-										helperText={touched.emergency_contact_name && errors.emergency_contact_name}
+												helperText={touched.emergency_contact_name && errors.emergency_contact_name}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -504,7 +497,7 @@ let ContactInputForm = (props) => {
 												onChange={handleChange}
 												onBlur={handleBlur}
 												error={errors.emergency_contact_relationship && touched.emergency_contact_relationship}
-										helperText={touched.emergency_contact_relationship && errors.emergency_contact_relationship}
+												helperText={touched.emergency_contact_relationship && errors.emergency_contact_relationship}
 											/>
 										</Grid>
 									</Grid>
@@ -521,7 +514,7 @@ let ContactInputForm = (props) => {
 												onChange={handleChange}
 												onBlur={handleBlur}
 												error={errors.emergency_contact_phone_number && touched.emergency_contact_phone_number}
-										helperText={touched.emergency_contact_phone_number && errors.emergency_contact_phone_number}
+												helperText={touched.emergency_contact_phone_number && errors.emergency_contact_phone_number}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -537,7 +530,7 @@ let ContactInputForm = (props) => {
 												onBlur={handleBlur}
 												error={errors.emergency_contact_email && touched.emergency_contact_email}
 												helperText={touched.emergency_contact_email && errors.emergency_contact_email}
-		
+
 											/>
 										</Grid>
 									</Grid>
@@ -584,10 +577,10 @@ let ContactInputForm = (props) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	}
 };
 
-ContactInputForm = connect(mapDispatchToProps)(ContactInputForm);
+ContactInputForm = connect(null, mapDispatchToProps)(ContactInputForm);
 
 export default withRouter(ContactInputForm);

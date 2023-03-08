@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import ChargesTable from './ChargesTable'
 import ChargeInputModal from './ChargeInputModal'
 import Typography from "@material-ui/core/Typography";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
 import Grid from "@material-ui/core/Grid";
-import Chip from "@material-ui/core/Chip";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -21,6 +16,7 @@ import {
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
 import { addMonths, format, startOfToday } from "date-fns";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const LEASE_TYPES = getLeaseOptions();
@@ -61,8 +57,8 @@ let UnitLeaseInputForm = (props) => {
 		id: leaseToEdit.id,
 		property_id: leaseToEdit.property_id || "",
 		unit_id: leaseToEdit.unit_id || "",
-		tenants: leaseToEdit.tenants || [],
-		cosigner: leaseToEdit.cosigner || "",
+		tenants: contacts.filter(({ id }) => leaseToEdit.tenants ? leaseToEdit.tenants.includes(id) : false),
+		cosigner: contacts.find(({ id }) => leaseToEdit.cosigner === id) || null,
 		start_date: leaseToEdit.start_date || defaultDate,
 		end_date: leaseToEdit.end_date || '',
 		rent_due_date: leaseToEdit.rent_due_date || format(addMonths(startOfToday(), 1), 'yyyy-MM-dd'),
@@ -71,7 +67,7 @@ let UnitLeaseInputForm = (props) => {
 		security_deposit: leaseToEdit.security_deposit || 0,
 		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
-		unit_charges :	propertyUnitChargesItems.filter((unit_charge) => unit_charge.unit_id === leaseToEdit.unit_id)
+		unit_charges: propertyUnitChargesItems.filter((unit_charge) => unit_charge.unit_id === leaseToEdit.unit_id)
 	};
 
 	useEffect(() => {
@@ -111,8 +107,8 @@ let UnitLeaseInputForm = (props) => {
 					unit_id: values.unit_id,
 					lease_type: values.lease_type,
 					rent_cycle: values.rent_cycle,
-					tenants: values.tenants,
-					cosigner: values.cosigner,
+					tenants: values.tenants.map(tenant => tenant.id),
+					cosigner: values.cosigner ? values.cosigner.id : "",
 					start_date: values.start_date,
 					end_date: values.end_date,
 					rent_due_date: values.rent_due_date,
@@ -123,7 +119,7 @@ let UnitLeaseInputForm = (props) => {
 				await handleItemSubmit(propertyUnitLease, "leases")
 				if (!values.id) {
 					//post charges for rent and  security deposit 
-					const tenant = contacts.find(({ id }) => id === values.tenants[0]) || {}
+					const tenant = values.tenants[0]
 					const newRentCharge = {
 						charge_amount: values.rent_amount,
 						charge_date: defaultDate,
@@ -131,8 +127,8 @@ let UnitLeaseInputForm = (props) => {
 						charge_type: "rent",
 						due_date: defaultDate,
 						tenant_id: tenant.id,
-						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
 						unit_id: values.unit_id,
+						property_id: values.property_id,
 					}
 					const newSecurityDepositCharge = {
 						charge_amount: values.rent_amount,
@@ -141,13 +137,13 @@ let UnitLeaseInputForm = (props) => {
 						charge_type: "security_deposit",
 						due_date: defaultDate,
 						tenant_id: tenant.id,
-						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
 						unit_id: values.unit_id,
+						property_id: values.property_id,
 					}
 					await handleItemSubmit(newRentCharge, 'transactions-charges')
 					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 				}
-				if(values.id){
+				if (values.id) {
 					history.goBack()
 				}
 				resetForm({});
@@ -389,75 +385,65 @@ let UnitLeaseInputForm = (props) => {
 							</Grid>
 							<Grid item container direction="row" spacing={4}>
 								<Grid item xs={12} md={6}>
-									<FormControl
-										variant="outlined"
-										fullWidth
-										className={classes.formControl}
-									>
-										<InputLabel id="demo-simple-select-outlined-label">
-											Tenants
-										</InputLabel>
-										<Select
-											fullWidth
-											multiple
-											labelId="demo-simple-select-outlined-label"
-											id="tenants"
-											name="tenants"
-											label="Tenants"
-											error={errors.tenants && touched.tenants}
-											value={values.tenants}
-											onChange={(event) =>
-												setFieldValue("tenants", event.target.value)
-											}
-											onBlur={handleBlur}
-											renderValue={(selectedContacts) => {
-												const contactsWithDetails = contacts.filter(
-													({ id }) =>
-														selectedContacts.includes(id)
-												);
-												return contactsWithDetails.map(
-													(selectedContact, index) => (
-														<Chip
-															color="primary"
-															key={index}
-															label={`
-																${selectedContact.first_name} ${selectedContact.last_name}`
-															}
-															className={classes.chip}
-														/>
-													)
-												);
-											}}
-										>
-											{contacts.map((contact, contactIndex) => (
-												<MenuItem key={contactIndex} value={contact.id}>
-													{contact.first_name} {contact.last_name}
-												</MenuItem>
-											))}
-										</Select>
-										<FormHelperText error={errors.tenants && touched.tenants}>Select Tenants</FormHelperText>
-									</FormControl>
+									<Autocomplete
+										id="tenants-select"
+										multiple
+										value={values.tenants}
+										onChange={(event, newValue) => {
+											setFieldValue("tenants", newValue);
+										}}
+										style={{ width: "100%" }}
+										options={contacts}
+										autoHighlight
+										getOptionLabel={(option) => option ? `${option.first_name} ${option.last_name}` : ''}
+										renderOption={(option) => (
+											<React.Fragment>
+												{option.first_name} {option.last_name}
+											</React.Fragment>
+										)}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												label="Tenants"
+												variant="outlined"
+												error={errors.tenants && touched.tenants}
+												helperText={touched.tenants && errors.tenants}
+												inputProps={{
+													...params.inputProps,
+												}}
+											/>
+										)}
+									/>
 								</Grid>
 								<Grid item xs={12} md={6}>
-									<TextField
-										fullWidth
-										select
-										error={errors.cosigner && touched.cosigner}
-										helperText={"Unit Tenancy Cosigner"}
-										variant="outlined"
-										name="cosigner"
-										id="cosigner"
-										label="Cosigner"
+									<Autocomplete
+										id="cosigner-select"
 										value={values.cosigner}
-										onChange={handleChange}
-										onBlur={handleBlur}
-									>
-										{contacts.map((contact, index) => (
-											<MenuItem key={index} value={contact.id}>
-												{contact.first_name} {contact.last_name}
-											</MenuItem>
-										))}
-									</TextField>
+										onChange={(event, newValue) => {
+											setFieldValue("cosigner", newValue);
+										}}
+										style={{ width: "100%" }}
+										options={contacts}
+										autoHighlight
+										getOptionLabel={(option) => option ? `${option.first_name} ${option.last_name}` : ''}
+										renderOption={(option) => (
+											<React.Fragment>
+												{option.first_name} {option.last_name}
+											</React.Fragment>
+										)}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												label="Cosigner"
+												variant="outlined"
+												error={errors.cosigner && touched.cosigner}
+												helperText={touched.cosigner && errors.cosigner}
+												inputProps={{
+													...params.inputProps,
+												}}
+											/>
+										)}
+									/>
 								</Grid>
 							</Grid>
 							<Grid item container direction="column" spacing={1}>
@@ -525,7 +511,7 @@ let UnitLeaseInputForm = (props) => {
 										form="unitLeaseInputForm"
 										disabled={isSubmitting}
 									>
-										{values.id ? "Edit Lease" : "Add Lease"}
+										{values.id ? "Edit Agreement" : "Add Agreement"}
 									</Button>
 								</Grid>
 							</Grid>

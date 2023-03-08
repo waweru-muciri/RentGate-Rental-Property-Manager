@@ -10,14 +10,13 @@ let InfoDisplayPaper = (props) => {
 		<Grid item xs={props.xs} md>
 			<Paper
 				className={classes.infoDisplayPaper}
-				number={24}
 				variant="elevation"
 			>
+				<Typography component="h3" variant="h6" align="center">
+					{props.value}
+				</Typography>
 				<Typography variant="subtitle1" align="center">
 					{props.title}
-				</Typography>
-				<Typography variant="subtitle2" align="center">
-					{props.value}
 				</Typography>
 			</Paper>
 		</Grid>

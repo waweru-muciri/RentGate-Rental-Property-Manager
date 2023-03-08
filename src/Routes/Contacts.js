@@ -30,7 +30,7 @@ const contactsTableHeadCells = [
     { id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
     { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
     { id: "date_of_birth", numeric: false, disablePadding: true, label: "Date of Birth" },
-    { id: "personal_mobile_number", numeric: false, disablePadding: true, label: "Phone Number" },
+    { id: "phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },

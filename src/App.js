@@ -5,6 +5,7 @@ import MainRoutePage from "./Routes/MainRoute";
 import SignUpPage from "./Routes/SignUp";
 import SignInPage from "./Routes/SignIn";
 import AccountActions from "./Routes/AccountActions";
+import HomePage from "./Routes/HomePage";
 
 
 const App = ({ store }) => {
@@ -15,7 +16,8 @@ const App = ({ store }) => {
           <Route exact path={"/account-actions"} component={AccountActions} />
           <Route exact path="/sign-up" component={SignUpPage} />
           <Route exact path="/login" component={SignInPage} />
-          <Route path="/" component={MainRoutePage} />
+          <Route path="/app/" component={MainRoutePage} />
+          <Route path="/" component={HomePage} />
         </Switch>
       </Router>
     </Provider>

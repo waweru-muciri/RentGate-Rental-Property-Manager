@@ -46,7 +46,7 @@ let TransactionPage = ({
     const classes = commonStyles();
     let [leaseItems, setLeaseItems] = useState([]);
     let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     let [activeStatusFilter, setActiveStatusFilter] = useState('');
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
@@ -67,9 +67,7 @@ let TransactionPage = ({
             .filter(({ end_date }) =>
                 !toDateFilter ? true : !end_date ? false : end_date <= toDateFilter
             )
-            .filter(({ property_id }) =>
-                !propertyFilter ? true : property_id === propertyFilter
-            )
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ terminated }) =>
                 activeStatusFilter === '' ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter
             );
@@ -79,7 +77,7 @@ let TransactionPage = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredLeaseItems(leaseItems);
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setActiveStatusFilter('');
         setFromDateFilter("");
         setToDateFilter("");
@@ -93,7 +91,7 @@ let TransactionPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={'Rental Agreements'} />
+                    <PageHeading text={'Rental Agreements'} />
                 </Grid>
                 <Grid
                     container
@@ -137,6 +135,7 @@ let TransactionPage = ({
                             variant="contained"
                             size="medium"
                             disabled={selected.length <= 0}
+                            to={`/app/notices/new?lease=${selected[0]}`}
                         >
                             Apply Charge To Deposit
                         </Button>
@@ -150,7 +149,7 @@ let TransactionPage = ({
                             startIcon={<BlockIcon />}
                             disabled={selected.length <= 0}
                             component={Link}
-                            to={`/notices/new?lease=${selected[0]}`}
+                            to={`/app/notices/new?lease=${selected[0]}`}
                         >
                             End Agreement
                         </Button>
@@ -231,6 +230,7 @@ let TransactionPage = ({
                                         }}
                                         value={propertyFilter}
                                     >
+                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                         {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}

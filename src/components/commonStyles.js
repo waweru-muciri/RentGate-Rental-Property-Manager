@@ -40,17 +40,6 @@ let useStyles = makeStyles((theme) => ({
 	chip: {
 		margin: theme.spacing(0.5),
 	},
-	gridListContainer: {
-		display: "flex",
-		flexWrap: "wrap",
-		justifyContent: "space-around",
-		overflow: "hidden",
-		backgroundColor: theme.palette.background.paper,
-	},
-	gridList: {
-		width: "auto",
-		height: 450,
-	},
 	icon: {
 		color: "rgba(255, 255, 255, 0.54)",
 	},

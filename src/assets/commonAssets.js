@@ -1,5 +1,9 @@
-import { parse, endOfMonth, endOfYear, startOfToday, isWithinInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
+import { endOfMonth, endOfYear, startOfToday, eachMonthOfInterval, startOfMonth, startOfYear, subMonths, subYears } from "date-fns";
 
+const monthsInYear = eachMonthOfInterval({
+	start: startOfYear(startOfToday()),
+	end: endOfYear(startOfToday()),
+})
 //general contact titles
 export function getContactTitles() {
 	return ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"];
@@ -123,6 +127,10 @@ export function getCurrentMonthFromToDates(){
 
 export function getLastThreeMonthsFromToDates(){
 	return [startOfMonth(subMonths(startOfToday(), 1)), endOfMonth(subMonths(startOfToday(), 1))]
+}
+
+export function getMonthsInYear () {
+	return monthsInYear
 }
 
 // Create our number formatter.

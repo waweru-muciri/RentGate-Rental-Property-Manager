@@ -45,7 +45,7 @@ let TenantChargesStatementPage = ({
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [contactFilter, setContactFilter] = useState(null);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
 
     const [selected, setSelected] = useState([]);
 
@@ -138,7 +138,7 @@ let TenantChargesStatementPage = ({
                 justify="center" direction="column"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={"Outstanding Balances"} />
+                    <PageHeading text={"Outstanding Balances"} />
                 </Grid>
                 <Grid
                     container
@@ -256,6 +256,7 @@ let TenantChargesStatementPage = ({
                                                     }}
                                                     value={propertyFilter}
                                                 >
+                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem
@@ -393,17 +394,17 @@ const mapStateToProps = (state) => {
     return {
         transactions: state.transactions,
         transactionsCharges: state.transactionsCharges.map((charge) => {
-                const chargeDetails = {}
-                //get payments with this charge id
-                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
-                chargeDetails.payed_status = chargePayments.length ? true : false;
-                const payed_amount = chargePayments.reduce((total, currentValue) => {
-                    return total + parseFloat(currentValue.payment_amount) || 0
-                }, 0)
-                chargeDetails.payed_amount = payed_amount
-                chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
-                return Object.assign({}, charge, chargeDetails);
-            }).filter((charge) => charge.balance > 0)
+            const chargeDetails = {}
+            //get payments with this charge id
+            const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+            chargeDetails.payed_status = chargePayments.length ? true : false;
+            const payed_amount = chargePayments.reduce((total, currentValue) => {
+                return total + parseFloat(currentValue.payment_amount) || 0
+            }, 0)
+            chargeDetails.payed_amount = payed_amount
+            chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
+            return Object.assign({}, charge, chargeDetails);
+        }).filter((charge) => charge.balance > 0)
             .sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
         contacts: state.contacts,
         properties: state.properties,

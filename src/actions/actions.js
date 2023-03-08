@@ -150,7 +150,7 @@ export async function deleteUploadedFileByUrl(fileUrl) {
 
 export function uploadFilesToFirebase(filesArray) {
     return filesArray.map(async (file) => {
-        var fileRef = storageRef.child(`propertyImages/${file.file.name}`);
+        var fileRef = storageRef.child(`propertyImages/${file.name}`);
         try {
             const snapshot = await fileRef
                 .putString(file.data, "data_url");
@@ -608,10 +608,10 @@ export function handleItemFormSubmit(data, url) {
                         resolve(data.id);
                     })
                     .catch((error) => {
-                        reject(error)
                         dispatch(itemsHasErrored(error.message))
                         dispatch(itemsIsLoading(false));
-                        console.log("Error => ", error.response);
+                        console.log("Error updating document => ", error.response);
+                        reject(error)
                     })
                 : //send post to create item
                 getDatabaseRef()
@@ -718,7 +718,8 @@ export function handleItemFormSubmit(data, url) {
                     .catch((error) => {
                         dispatch(itemsHasErrored(error.message))
                         dispatch(itemsIsLoading(false));
-                        console.log("Error => ", error.response);
+                        console.log("Error adding document => ", error.response);
+                        reject(error)
                     });
         })
     }

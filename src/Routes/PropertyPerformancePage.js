@@ -12,10 +12,10 @@ import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
 import { Bar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
-import { currencyFormatter } from "../assets/commonAssets";
+import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, startOfYear, startOfToday, parse, eachMonthOfInterval, endOfYear, getMonth } from "date-fns";
+import { format, getYear, parse, getMonth } from "date-fns";
 
 const options = {
     responsive: true,
@@ -39,10 +39,7 @@ const FilterYearSchema = Yup.object().shape({
         .integer(),
 });
 
-var monthsInYear = eachMonthOfInterval({
-    start: startOfYear(startOfToday()),
-    end: endOfYear(startOfToday()),
-})
+const monthsInYear = getMonthsInYear()
 
 let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
     const classes = commonStyles()
@@ -52,13 +49,14 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
     useEffect(() => {
         setChargesItems(transactionsCharges
             .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === getYear(new Date()))
-    );
+        );
     }, [transactionsCharges]);
 
     const setFilteredTransactionItemsByYear = (filterYear) => {
-        setChargesItems(
-            transactionsCharges
+            setChargesItems(
+                transactionsCharges
                 .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
+                .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         );
     };
 

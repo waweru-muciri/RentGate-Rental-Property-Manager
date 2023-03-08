@@ -91,9 +91,9 @@ let RentBalancesPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
-        const filteredMappedRentBalances = mappedRentBalances.filter(({ tenant_id }) =>
-            !contactFilter ? true : tenant_id === contactFilter.id
-        )
+        const filteredMappedRentBalances = mappedRentBalances
+        .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
+        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         setFilteredMappedRentalBalances(filteredMappedRentBalances)
     };
 

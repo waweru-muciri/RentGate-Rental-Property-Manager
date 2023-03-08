@@ -17,6 +17,7 @@ import {
 	handleDelete, uploadFilesToFirebase
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
+import ImageCropper from '../ImageCropper';
 import { withRouter } from "react-router-dom";
 import {
 	getPropertyBeds,
@@ -35,7 +36,7 @@ const PropertySchema = Yup.object().shape({
 		image: Yup.string().trim().default(''),
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
-		baths: Yup.string().trim().required("Beds is required").default(''),
+		baths: Yup.string().trim().default(''),
 		sqft: Yup.number().typeError('Square Footage must be a number').integer().min(0),
 	}))
 });
@@ -144,16 +145,18 @@ let PropertyInputForm = (props) => {
 						</TextField>
 					</Grid>
 					<Grid item key={`property_units[${propertyUnitIndex}].image`}>
+						{
+							property_unit.file_to_load_url &&
+							<ImageCropper open={true} selectedFile={property_unit.file_to_load_url}
+								setCroppedImageData={(croppedImage) => {
+									replace(propertyUnitIndex, Object.assign({}, property_unit, { file_to_load_url: '', image: croppedImage }));
+								}} />
+						}
 						<Box>
 							<input onChange={(event) => {
 								const selectedFile = event.currentTarget.files[0]
-								let reader = new FileReader();
-								reader.onloadend = () => {
-									selectedFile.data = reader.result
-								};
-								reader.readAsDataURL(selectedFile);
 								//remove the object then push a copy of it with added image object
-								replace(propertyUnitIndex, Object.assign({}, property_unit, { image: selectedFile }));
+								replace(propertyUnitIndex, Object.assign({}, property_unit, { file_to_load_url: selectedFile }));
 							}} accept="image/*" className={classes.fileInputDisplayNone} id={`icon-button-file-${propertyUnitIndex}`} type="file" />
 							<label htmlFor={`icon-button-file-${propertyUnitIndex}`}>
 								<IconButton color="primary" aria-label="upload picture" component="span">
@@ -217,7 +220,6 @@ let PropertyInputForm = (props) => {
 				};
 				const propertyId = await handleItemSubmit(property, "properties")
 				values.property_units.forEach(async (property_unit) => {
-					console.log("Property Unit => ", property_unit)
 					//assign a default address to each property unit
 					property_unit.address = values.address + ' - ' + property_unit.ref
 					//check if the unit has an image to upload
@@ -333,9 +335,7 @@ let PropertyInputForm = (props) => {
 								>
 									{users.map((user, index) => (
 										<MenuItem key={index} value={user.id}>
-											{user.first_name +
-												" " +
-												user.last_name}
+											{user.first_name} {user.last_name}
 										</MenuItem>
 									))}
 								</TextField>
@@ -356,7 +356,7 @@ let PropertyInputForm = (props) => {
 								>
 									{users.map((user, index) => (
 										<MenuItem key={index} value={user.id}>
-											{user.first_name + ' ' + user.last_name}
+											{user.first_name} {user.last_name}
 										</MenuItem>
 									))}
 								</TextField>

@@ -63,7 +63,7 @@ let MeterReadingsPage = ({
     let [periodFilter, setPeriodFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [meterTypeFilter, setMeterTypeFilter] = useState("");
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     const [selected, setSelected] = useState([]);
 
     const METER_TYPE_OPTIONS = Array.from(new Set(meterReadingItems.map((meterReading) => meterReading.meter_type)))
@@ -113,9 +113,9 @@ let MeterReadingsPage = ({
                 return isWithinInterval(meterReadingDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
-        filteredMeterReadings = filteredMeterReadings.filter(({ property }) =>
-            !propertyFilter ? true : property === propertyFilter)
-            .filter(({ reading_date }) =>
+        filteredMeterReadings = filteredMeterReadings
+        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        .filter(({ reading_date }) =>
                 !fromDateFilter ? true : reading_date >= fromDateFilter
             )
             .filter(({ reading_date }) =>
@@ -130,7 +130,7 @@ let MeterReadingsPage = ({
         setPeriodFilter("");
         setToDateFilter("");
         setMeterTypeFilter("");
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setFilteredMeterReadingItems(meterReadingItems);
     };
 
@@ -272,6 +272,7 @@ let MeterReadingsPage = ({
                                             }}
                                             value={propertyFilter}
                                         >
+                                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                             {properties.map(
                                                 (property, index) => (
                                                     <MenuItem

@@ -5,7 +5,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
@@ -40,7 +39,7 @@ let ExpensesPage = ({
     let [filteredExpenseItems, setFilteredExpenseItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     const [selected, setSelected] = useState([]);
 
 
@@ -59,9 +58,7 @@ let ExpensesPage = ({
             .filter(({ expense_date }) =>
                 !toDateFilter ? true : expense_date <= toDateFilter
             )
-            .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
-            )
+            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
 
         setFilteredExpenseItems(filteredExpenses);
     };
@@ -71,7 +68,7 @@ let ExpensesPage = ({
         setFilteredExpenseItems(expenseItems);
         setFromDateFilter("");
         setToDateFilter("");
-        setPropertyFilter("");
+        setPropertyFilter("all");
     };
 
     return (
@@ -213,6 +210,7 @@ let ExpensesPage = ({
                                         }}
                                         value={propertyFilter}
                                     >
+                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                         {properties.map(
                                             (property, index) => (
                                                 <MenuItem
@@ -268,14 +266,6 @@ let ExpensesPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

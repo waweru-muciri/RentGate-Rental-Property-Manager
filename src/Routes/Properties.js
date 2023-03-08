@@ -1,7 +1,7 @@
 import Layout from "../components/PrivateLayout";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import { Box, TextField, Button } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -21,7 +21,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 const headCells = [
     { id: "ref", numeric: false, disablePadding: true, label: "Property Name/Ref" },
     { id: "address", numeric: false, disablePadding: true, label: "Property Address" },
-    { id: "property_location", numeric: false, disablePadding: true, label: "Location" },
+    { id: "city", numeric: false, disablePadding: true, label: "Location" },
     { id: "owner_details", numeric: false, disablePadding: true, label: "Rental Owner" },
     { id: "landlord_name", numeric: false, disablePadding: true, label: "Rental Manager" },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
@@ -36,10 +36,10 @@ let PropertyPage = ({
     handleItemDelete
 }) => {
     const classes = commonStyles();
-    let [propertyUnitsItems, setPropertyUnitItems] = useState([])
+    let [propertyItems, setPropertyUnitItems] = useState([])
     let [filteredPropertyItems, setFilteredPropertiesItems] = useState([])
-    let [propertyRefFilter, setPropertyRefFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState('');
+    let [propertyFilter, setPropertyFilter] = useState(null);
+    let [assignedToFilter, setAssignedToFilter] = useState(null);
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
@@ -50,18 +50,18 @@ let PropertyPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
-        let filteredProperties = propertyUnitsItems
-            .filter(({ id }) => !propertyRefFilter ? true : id === propertyRefFilter)
-            .filter((property) => !assignedToFilter ? true : property.assigned_to === assignedToFilter.id)
+        let filteredProperties = propertyItems
+            .filter(({ id }) => !propertyFilter ? true : id === propertyFilter.id)
+            .filter(({ assigned_to }) => !assignedToFilter ? true : assigned_to === assignedToFilter.id)
 
         setFilteredPropertiesItems(filteredProperties);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredPropertiesItems(propertyUnitsItems);
-        setPropertyRefFilter("");
-        setAssignedToFilter("");
+        setPropertyFilter(null);
+        setAssignedToFilter(null);
+        setFilteredPropertiesItems(propertyItems);
     };
 
     return (
@@ -116,7 +116,7 @@ let PropertyPage = ({
                             reportName={'Rental Records'}
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
-                            dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -125,7 +125,7 @@ let PropertyPage = ({
                             reportName={'Rental Records'}
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
-                            dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -164,25 +164,21 @@ let PropertyPage = ({
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        name="property"
+                                    <Autocomplete
+                                        id="property_filter"
+                                        name="property_filter"
                                         label="Property"
-                                        id="property"
-                                        onChange={(event) => {
-                                            setPropertyRefFilter(
-                                                event.target.value
+                                        options={properties}
+                                        value={propertyFilter}
+                                        getOptionLabel={(option) => option ? `${option.ref}` : ''}
+                                        style={{ width: "100%" }}
+                                        onChange={(event, newValue) => {
+                                            setPropertyFilter(
+                                                newValue
                                             );
                                         }}
-                                        value={propertyRefFilter}>
-                                        {properties.map((property, propertyIndex) => (
-                                            <MenuItem key={propertyIndex} value={property.id}>
-                                                {property.address || property.ref}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                        renderInput={(params) => <TextField {...params} label="Property" variant="outlined" />}
+                                    />
                                 </Grid>
                             </Grid>
                             <Grid
@@ -247,10 +243,9 @@ const mapStateToProps = (state) => {
             const landlord = state.users.find((user) => user.id === property.assigned_to) || {};
             const owner = state.users.find((user) => user.id === property.owner) || {};
             const propertyDetails = {}
-            propertyDetails.property_location = `${property.city}`
             propertyDetails.landlord_name = `${landlord.first_name} ${landlord.last_name}`
             propertyDetails.owner_details = `${owner.first_name} ${owner.last_name}`
-            return Object.assign({}, property, propertyDetails);
+            return Object.assign(propertyDetails, property);
         }
         ),
         users: state.users,
