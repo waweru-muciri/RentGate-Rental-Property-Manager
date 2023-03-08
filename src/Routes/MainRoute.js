@@ -166,20 +166,20 @@ let MainPage = ({
 
   useEffect(() => {
     if (!properties.length) {
-      // fetchData([
-      //   "properties",
-      //   "transactions",
-      //   "maintenance-requests",
-      //   "property_media",
-      //   "contacts",
-      //   "contact_phone_numbers",
-      //   "contact_emails",
-      //   "contact_faxes",
-      //   "contact_addresses",
-      //   "notices",
-      //   "to-dos",
-      //   "users",
-      // ]);
+      fetchData([
+        "properties",
+        "transactions",
+        "maintenance-requests",
+        "property_media",
+        "contacts",
+        "contact_phone_numbers",
+        "contact_emails",
+        "contact_faxes",
+        "contact_addresses",
+        "notices",
+        "to-dos",
+        "users",
+      ]);
     }
   }, [
     contacts,

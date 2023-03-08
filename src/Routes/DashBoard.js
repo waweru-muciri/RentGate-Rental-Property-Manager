@@ -13,40 +13,25 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import moment from "moment";
 
 let DashBoardPage = (props) => {
   const classes = commonStyles();
 
   const { properties, contacts, transactions, notices } = props;
-  const transactionsGraphData = [
-    { month: "January", amount: 256400 },
-    { month: "February", amount: 248600 },
-    { month: "March", amount: 240800 },
-    { month: "April", amount: 240890 },
-    { month: "May", amount: 140640 },
-    { month: "June", amount: 340640 },
-    { month: "July", amount: 280640 },
-    { month: "August", amount: 50640 },
-    { month: "September", amount: 0 },
-    { month: "October", amount: 0 },
-    { month: "November", amount: 0 },
-    { month: "December", amount: 0 },
-  ];
-  const occupancyRateData = [
-    { month: "January", rate: 100 },
-    { month: "February", rate: 95 },
-    { month: "March", rate: 100 },
-    { month: "April", rate: 100 },
-    { month: "May", rate: 100 },
-    { month: "June", rate: 100 },
-    { month: "July", rate: 98 },
-    { month: "August", rate: 90 },
-    { month: "September", rate: 0 },
-    { month: "October", rate: 0 },
-    { month: "November", rate: 0 },
-    { month: "December", rate: 0 },
-  ];
 
+  const totalProperties  = properties.length
+  const occupiedHouses = properties.filter((property) => property.tenant).length
+  const monthsOfTheYear = moment.monthsShort()
+  const transactionsGraphData = Array.from(monthsOfTheYear, monthOfYear => ({month : monthOfYear, amount: 0, numberOfTransactions: 0 }));
+  transactions.forEach(({transaction_date, transaction_price}) => {
+    const currentMonth = moment(transaction_date).get('month')
+    transactionsGraphData[currentMonth].amount = transactionsGraphData[currentMonth].amount + parseFloat(transaction_price)
+    transactionsGraphData[currentMonth].numberOfTransactions = transactionsGraphData[currentMonth].numberOfTransactions + 1
+  })
+  const occupancyRateData = transactionsGraphData.map((transaction) => ({
+    month: transaction.month, rate: (transaction.numberOfTransactions/ totalProperties) * 100
+  }))
   return (
     <Layout pageTitle="Dashboard">
       <Grid container justify="center" direction="column" spacing={4}>
@@ -66,7 +51,7 @@ let DashBoardPage = (props) => {
             <InfoDisplayPaper>
               <Typography variant="subtitle1" align="center">Total Rentals</Typography>
               <Typography variant="subtitle2" align="center">
-                130
+                {totalProperties}
               </Typography>
             </InfoDisplayPaper>
           </Grid>
@@ -76,7 +61,7 @@ let DashBoardPage = (props) => {
                 Current Month Occupancy Rate
               </Typography>
               <Typography variant="subtitle2" align="center">
-                90%
+                {(occupiedHouses / totalProperties) * 100 }
               </Typography>
             </InfoDisplayPaper>
           </Grid>
@@ -86,7 +71,7 @@ let DashBoardPage = (props) => {
                 Currently Occupied Rentals
               </Typography>
               <Typography variant="subtitle2" align="center">
-                100
+                {occupiedHouses}
               </Typography>
             </InfoDisplayPaper>
           </Grid>
@@ -96,14 +81,14 @@ let DashBoardPage = (props) => {
                 Currently Unoccupied Rentals
               </Typography>
               <Typography variant="subtitle2" align="center">
-                20
+                {totalProperties - occupiedHouses}
               </Typography>
             </InfoDisplayPaper>
           </Grid>
         </Grid>
         <Grid item container direction="column" justify="center" key={1}>
           <Grid item>
-            <Typography variant="subtitle1">Monthly Rent Collection</Typography>
+            <Typography variant="subtitle1" align="center" gutterBottom>Monthly Rent Collection</Typography>
             <LineChart
               width={1000}
               height={300}
@@ -118,8 +103,8 @@ let DashBoardPage = (props) => {
             </LineChart>
           </Grid>
           <Grid item>
-            <Typography variant="subtitle1">
-              Monthly House Occupany Rate.
+            <Typography variant="subtitle1" align="center" gutterBottom>
+              Monthly House Occupany Rate
             </Typography>
             <LineChart
               width={1000}
