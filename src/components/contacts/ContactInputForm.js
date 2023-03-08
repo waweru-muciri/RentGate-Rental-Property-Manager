@@ -510,70 +510,7 @@ let ContactInputForm = (props) => {
 											helperText="Permanent Address"
 										/>
 									</Grid>
-									{/* end of addresses textfield and types row */}
-									<Grid item>
-										<Typography variant="h6">
-											Social Media Details
-							</Typography>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											type="url"
-											variant="outlined"
-											id="facebook_url"
-											name="facebook_url"
-											label="Facebook"
-											value={values.facebook_url}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={
-												'facebook_url' in errors
-											}
-											helperText={
-												errors.facebook_url
-											}
-										/>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											type="url"
-											variant="outlined"
-											id="linkedin_url"
-											name="linkedin_url"
-											label="Facebook"
-											value={values.linkedin_url}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={
-												'linkedin_url' in errors
-											}
-											helperText={
-												errors.linkedin_url
-											}
-										/>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											type="url"
-											variant="outlined"
-											id="skype_url"
-											name="skype_url"
-											label="Skype"
-											value={values.skype_url}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={
-												'skype_url' in errors
-											}
-											helperText={
-												errors.skype_url
-											}
-										/>
-									</Grid>
-								</Grid>
+							</Grid>
 							</Grid >
 							{/** end of contact details grid **/}
 							< Grid

@@ -3,13 +3,13 @@ import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import { Button, TextField, Grid } from "@material-ui/core";
+import ReactQuill from 'react-quill'; // ES6
+import 'react-quill/dist/quill.snow.css'; // ES6
 import Typography from "@material-ui/core/Typography";
 import EmailsSelect from "./EmailsSelect";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { commonStyles } from "../commonStyles";
 import { Formik } from "formik";
-import { DropzoneAreaBase } from "material-ui-dropzone";
-import { AttachFile, Description, PictureAsPdf, Theaters } from '@material-ui/icons';
 import * as Yup from "yup";
 
 const EmailSchema = Yup.object().shape({
@@ -17,6 +17,32 @@ const EmailSchema = Yup.object().shape({
   email_subject: Yup.string().required("Email Subject Required"),
   email_message: Yup.string().required("Email Message Required"),
 });
+
+const quillEditorModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }, { 'font': [] }],
+    [{ size: [] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' },
+    { 'indent': '-1' }, { 'indent': '+1' }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+  clipboard: {
+    // toggle to add extra line breaks when pasting HTML:
+    matchVisual: false,
+  }
+}
+/* 
+ * Quill editor formats
+ * See https://quilljs.com/docs/formats/
+ */
+const quillEditorFormats = [
+  'header', 'font', 'size',
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'video'
+]
 
 function getSteps() {
   return ["Create an email", "Create a contact group"];
@@ -30,7 +56,6 @@ export default function HorizontalLinearStepper(props) {
     from_user: "",
     email_subject: "",
     email_message: "",
-    email_attachments: []
   };
 
   //for the transfer list below
@@ -70,27 +95,6 @@ setEmailsSource(source);
   const handleReset = () => {
     setActiveStep(0);
   };
-
-  const handlePreviewIcon = (fileObject, classes) => {
-    const { type } = fileObject.file
-    const iconProps = {
-      className: classes.image,
-    }
-
-    if (type.startsWith("video/")) return <Theaters {...iconProps} />
-//    if (type.startsWith("audio/")) return <AudioTrack {...iconProps} />
-
-    switch (type) {
-      case "application/msword":
-      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        return <Description {...iconProps} />
-      case "application/pdf":
-        return <PictureAsPdf {...iconProps} />
-      default:
-        return <AttachFile {...iconProps} />
-    }
-  }
-
 
   return (
     <div className={classes.fullHeightWidthContainer}>
@@ -215,54 +219,28 @@ setEmailsSource(source);
                                 }
                               />
 
+			    <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
+                <ReactQuill
+				value={values.email_message}
+				onChange={handleChange}
+                  theme="snow"
+                  modules={quillEditorModules}
+                  formats={quillEditorFormats} >
                               <TextField
                                 fullWidth
-                                rows={4}
-                                multiline
-                                type="text"
-                                InputLabelProps={{ shrink: true }}
                                 variant="outlined"
-                                id="email_message"
-                                name="email_message"
-                                label="Email Message"
-                                value={values.email_message}
-                                onChange={handleChange}
+								id="email_message"
+								name="email_message"
+								label="Email Message"
+								placeholder="Email Message"
                                 onBlur={handleBlur}
                                 error={
-                                  errors.email_message && touched.email_message
-                                }
+                                 'email_message' in  errors                                  }
                                 helperText={
-                                  touched.email_message && errors.email_message
+                                  errors.email_message
                                 }
-                              />
-                                <DropzoneAreaBase fullWidth
-                                  filesLimit={50}
-								  dropzoneText={"Drag and drop email attachment here or click"}
-                                  fileObjects={values.email_attachments}
-                                  acceptedFiles={["image/*", 'video/*', 'application/*']}
-                                  cancelButtonText={"cancel"}
-                                  submitButtonText={"submit"}
-                                  getPreviewIcon={handlePreviewIcon}
-                                  maxFileSize={5000000}
-                                  onDelete={(deleteFileObj, deletedFileIndex) => {
-                                     setFieldValue("email_attachments", values.email_attachments.filter((file, fileIndex) => deletedFileIndex !== fileIndex));
-                                  }}
-                                  onSave={(files) => {
-                                    setFieldValue(
-                                      "email_attachments",
-                                      files
-                                    );
-                                  }}
-                                  onAdd={(newFileObjs) => {
-                                    setFieldValue(
-                                      "email_attachments",
-                                      [].concat(values.email_attachments, newFileObjs)
-                                    );
-                                  }}
-								  showAlerts={false}
-								  showFileName={true}
-                                  showFileNamesInPreview={true}
-                                />
+                />
+								</ReactQuill>
                             </Grid>
                           </Grid>
                         ) : (

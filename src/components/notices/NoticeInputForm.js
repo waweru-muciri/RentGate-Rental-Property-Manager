@@ -1,6 +1,8 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { Grid, Button, TextField, MenuItem } from "@material-ui/core";
+import ReactQuill from 'react-quill'; // ES6
+import 'react-quill/dist/quill.snow.css'; // ES6
+import { Typography, Grid, Button, TextField, MenuItem } from "@material-ui/core";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
@@ -18,19 +20,48 @@ const VacatingNoticeSchema = Yup.object().shape({
   notice_details: Yup.string().trim().required('Notice Details are required')
 });
 
+const quillEditorModules = {
+  toolbar: [
+    [{ 'header': [1,2, 3, 4, 5, 6, false] }, { 'font': [] }],
+    [{ size: [] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' },
+    { 'indent': '-1' }, { 'indent': '+1' }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+  clipboard: {
+    // toggle to add extra line breaks when pasting HTML:
+    matchVisual: false,
+  }
+}
+/* 
+ * Quill editor formats
+ * See https://quilljs.com/docs/formats/
+ */
+const quillEditorFormats = [
+  'header', 'font', 'size',
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'video'
+]
+
+
 const NoticeInputForm = (props) => {
   const history = useHistory();
   const { contacts, users, submitForm } = props;
   const classes = commonStyles();
-  const noticeToEdit = typeof props.noticeToEdit !== 'undefined' ? props.noticeToEdit :  {}
-  let noticeValues ={
-		  id: noticeToEdit.id, 
-		  notice_details: noticeToEdit.notice_details, 
-		  notification_date: noticeToEdit.notification_date || defaultDate, 
-		  vacating_date: noticeToEdit.vacating_date || defaultDate, 
-		  actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate, 
-		  landlord: noticeToEdit.landlord || '', 
-		  tenant: noticeToEdit.tenant || '' };
+  const noticeToEdit = typeof props.noticeToEdit !== 'undefined' ? props.noticeToEdit : {}
+
+  let noticeValues = {
+    id: noticeToEdit.id,
+    notice_details: noticeToEdit.notice_details || '',
+    notification_date: noticeToEdit.notification_date || defaultDate,
+    vacating_date: noticeToEdit.vacating_date || defaultDate,
+    actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate,
+    landlord: noticeToEdit.landlord || '',
+    tenant: noticeToEdit.tenant || ''
+  };
 
   return (
     <Formik
@@ -59,6 +90,7 @@ const NoticeInputForm = (props) => {
       {({
         values,
         handleSubmit,
+		setFieldValue,
         errors,
         handleChange,
         handleBlur,
@@ -159,20 +191,28 @@ const NoticeInputForm = (props) => {
                   error={"actual_vacated_date" in errors}
                   helperText={errors.actual_vacated_date}
                 />
-                <TextField
-                  fullWidth
-                  rows={4}
-                  multiline
-                  variant="outlined"
-                  id="notice_details"
-                  name="notice_details"
+			    <Typography color='textSecondary' variant='body1' paragraph> Notice Details </Typography>
+                <ReactQuill
                   label="Notice Details"
                   value={values.notice_details}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"notice_details" in errors}
-                  helperText={errors.notice_details}
+                  theme="snow"
+                  modules={quillEditorModules}
+                  formats={quillEditorFormats} 
+                  placeholder={"Notice Details Here"} >
+				 <TextField
+                                fullWidth
+                                variant="outlined"
+								id="notice_details"
+								name="notice_details"
+                                onBlur={handleBlur}
+                                error={
+                                 'notice_details' in  errors                                  }
+                                helperText={
+                                  errors.notice_details
+                                }
                 />
+		</ReactQuill>
               </Grid>
               <Grid item className={classes.buttonBox}>
                 <Button
