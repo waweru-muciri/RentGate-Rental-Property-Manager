@@ -10,7 +10,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
+import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import LoadingBackdrop from "../components/loadingBackdrop";

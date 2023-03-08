@@ -1,19 +1,23 @@
 import React from "react";
 import {
+	Box,
 	Avatar,
 	Typography,
+	IconButton,
 	Button,
 	TextField,
 	MenuItem,
 	Grid,
 } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import SaveIcon from "@material-ui/icons/Save";
+import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
 import {
 	handleItemFormSubmit,
-	uploadFilesToFirebase,
+	uploadFilesToFirebase, handleDelete
 } from "../../actions/actions";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
@@ -24,7 +28,7 @@ import {
 	getContactTypes,
 	getAddressTypes,
 } from "../../assets/commonAssets.js";
-import { DropzoneDialog } from "material-ui-dropzone";
+import { DropzoneDialogBase } from "material-ui-dropzone";
 import moment from "moment";
 
 const CONTACT_TITLES = getContactTitles();
@@ -33,6 +37,12 @@ const GENDERS_LIST = getGendersList();
 const MOBILE_TYPES = getMobilePhoneTypes();
 const CONTACT_TYPES = getContactTypes();
 const ADDRESS_TYPES = getAddressTypes();
+
+const contactInfoBoxStyles = {
+		width: "100%",
+		overflow: "auto",
+		overflowX: 'hidden'
+	}
 
 let InputForm = ({
 	values,
@@ -44,8 +54,7 @@ let InputForm = ({
 	setFieldValue,
 	isSubmitting,
 }) => {
-
-	let styles = commonStyles();
+	let classes = commonStyles();
 
 	const [imageDialogState, toggleImageDialogState] = React.useState(false);
 
@@ -55,28 +64,27 @@ let InputForm = ({
 
 	return (
 		<form
-			className={styles.form}
+			className={classes.form}
 			method="post"
 			id="contactInputForm"
 			onSubmit={handleSubmit}
 		>
-			<Grid container>
-				<Grid
-					container
-					spacing={4}
-					justify="center"
-					alignItems="flex-start"
-					direction="row"
-				>
+			<Grid container direction="column" justify="flex-start">
+				<Grid container spacing={4} direction="row">
 					<Grid
 						md={5}
 						lg={5}
-						justify="center"
 						container
 						item
 						direction="column"
 						spacing={2}
 					>
+					<Grid item>
+							<Typography variant="h6">Personal Info</Typography>
+						<Box m={2}>
+						<Typography variant="subtitle2">Contact Image</Typography>
+						</Box>
+				</Grid> 
 						<Grid
 							item
 							container
@@ -87,8 +95,13 @@ let InputForm = ({
 							<Grid key={1} item>
 								<Avatar
 									alt="Contact Image"
-									src={values.contact_avatar_url}
-									className={styles.largeAvatar}
+									src={
+										typeof values.contact_images[0] !==
+										"undefined"
+											? values.contact_images[0].data
+											: values.contact_avatar_url
+									}
+									className={classes.largeAvatar}
 								/>
 							</Grid>
 							<Grid key={2} item>
@@ -100,25 +113,31 @@ let InputForm = ({
 									Add Image
 								</Button>
 
-								<DropzoneDialog
+								<DropzoneDialogBase
 									filesLimit={1}
+									fileObjects={values.contact_images}
 									acceptedFiles={["image/*"]}
 									cancelButtonText={"cancel"}
 									submitButtonText={"submit"}
 									maxFileSize={5000000}
 									open={imageDialogState}
 									onClose={() => toggleImageDialog()}
+									onDelete={() => {
+										setFieldValue("contact_images", []);
+									}}
 									onSave={(files) => {
-										console.log("Files:", files[0].data);
-										setFieldValue('contact_image', files[0])
+										setFieldValue("contact_images", files);
 										toggleImageDialog();
 									}}
-									showPreviews={false}
+									onAdd={(files) => {
+										setFieldValue("contact_images", files);
+										toggleImageDialog();
+									}}
+									showPreviews={true}
 									showFileNamesInPreview={true}
 								/>
 							</Grid>
 						</Grid>
-						<Typography variant="h6">Personal Info</Typography>
 						<TextField
 							select
 							error={errors.assigned_to && touched.assigned_to}
@@ -283,33 +302,33 @@ let InputForm = ({
 						/>
 					</Grid>
 					{/* start of Contact Details column */}
-					<Grid
-						md={7}
-						lg={7}
-						container
-						justify="flex-start"
-						item
-						direction="column"
-					>
-						<Typography variant="h6">Contact Details</Typography>
-						<Grid item container spacing={2}>
-							{/* start of mobile textfield and types row */}
+					<Grid md={7} lg={7} item>
+						<Box minHeight="70%" style={contactInfoBoxStyles}>
+							<Typography variant="h6">
+								Contact Details
+							</Typography>
+						<Box m={2}> 
+						<Typography variant="subtitle2">
+								Phone Numbers </Typography> 
+						</Box>
+						<Box maxHeight="200px" style={contactInfoBoxStyles}>
+							{/** start of mobile textfield and types columns **/}
 							{values.contactPhoneNumbers.map(
-								(phoneNumber, mobileNumberIndex) => (
+								(phoneNumber, phoneNumberIndex) => (
 									<Grid
-										item
 										container
-										key={mobileNumberIndex}
+										key={phoneNumberIndex}
 										spacing={2}
-										justify="flex-start"
+										justify="center"
+										alignItems="center"
 										direction="row"
 									>
-										<Grid item md={7}>
+										<Grid item sm={12} md={6}>
 											<TextField
 												fullWidth
 												variant="outlined"
-												id={`mobile_number${mobileNumberIndex}`}
-												name={`mobile_number${mobileNumberIndex}`}
+												id={`mobile_number${phoneNumberIndex}`}
+												name={`mobile_number${phoneNumberIndex}`}
 												label="Mobile"
 												value={
 													phoneNumber.phone_number ||
@@ -322,7 +341,7 @@ let InputForm = ({
 															index
 														) =>
 															index ===
-															mobileNumberIndex
+															phoneNumberIndex
 																? Object.assign(
 																		contactPhoneNumber,
 																		{
@@ -343,7 +362,7 @@ let InputForm = ({
 												helperText="Mobile"
 											/>
 										</Grid>
-										<Grid item md={5}>
+										<Grid item sm={12} md={4}>
 											<TextField
 												fullWidth
 												variant="outlined"
@@ -361,7 +380,7 @@ let InputForm = ({
 															index
 														) =>
 															index ===
-															mobileNumberIndex
+															phoneNumberIndex
 																? Object.assign(
 																		phoneNumberObject,
 																		{
@@ -395,21 +414,68 @@ let InputForm = ({
 												)}
 											</TextField>
 										</Grid>
+										<Grid item sm={12} md={1}>
+										<IconButton color="secondary"
+										style={{marginBottom: '14px'}}
+										aria-label="delete item"
+										onClick={() =>{
+
+let valueToRemove = values.contactPhoneNumbers[phoneNumberIndex]
+if(valueToRemove.id){
+	//delete the item from the server
+	handleDelete(valueToRemove.id, 'contact_phone_numbers')
+}
+	if(values.contactPhoneNumbers.length=== 1){
+		setFieldValue('contactPhoneNumbers', [{}])}
+		else
+		{
+			setFieldValue('contactPhoneNumbers', [...values.contactPhoneNumbers.filter((pN, index) => index !== phoneNumberIndex)])
+		}
+
+
+
+										}}>
+										  <DeleteIcon />
+										</IconButton>
+										</Grid>
+										<Grid item sm={12} md={1}>
+										{
+											phoneNumberIndex === 0 ? 
+										<IconButton color="primary"
+										style={{marginBottom: '14px'}}
+										aria-label="add item"
+										onClick={() => {
+											setFieldValue(
+														"contactPhoneNumbers",
+														[...values.contactPhoneNumbers, {}]
+													);
+										}}>
+										  <AddIcon />
+										</IconButton>
+										: null 
+										}
+										</Grid>
 									</Grid>
 								)
 							)}
-							{/* start of contact emails column */}
+						</Box>
+						{/* start of contact emails column */}
+						<Box m={2}> 
+						<Typography variant="subtitle2">
+								Emails </Typography> 
+						</Box>
+						<Box maxHeight="200px" style={contactInfoBoxStyles}>
 							{values.contactEmails.map(
 								(contactEmail, emailIndex) => (
 									<Grid
-										item
 										key={emailIndex}
 										container
 										spacing={2}
-										justify="flex-start"
+										justify="center"
+										alignItems="center"
 										direction="row"
 									>
-										<Grid item md={7}>
+										<Grid item md={6}>
 											<TextField
 												fullWidth
 												type="email"
@@ -444,7 +510,7 @@ let InputForm = ({
 												helperText="Email"
 											/>
 										</Grid>
-										<Grid item md={5}>
+										<Grid item md={4}>
 											<TextField
 												fullWidth
 												variant="outlined"
@@ -493,20 +559,67 @@ let InputForm = ({
 												)}
 											</TextField>
 										</Grid>
+										<Grid item md={1}>
+										<IconButton color="secondary"
+										style={{marginBottom: '14px'}}
+										aria-label="delete item"
+										onClick={() => {
+let valueToRemove = values.contactEmails[emailIndex]
+if(valueToRemove.id){
+	//delete the item from the server
+		handleDelete(valueToRemove.id, 'contact_emails')
+
+}
+if(values.contactEmails.length === 1){
+	setFieldValue('contactEmails', [{}])
+}else
+{
+	setFieldValue('contactEmails', [...values.contactEmails.filter((email, index) => index !== emailIndex)])
+}
+
+
+
+										}}>
+										  <DeleteIcon />
+										</IconButton>
+										</Grid>
+										<Grid item md={1}>
+										{
+											emailIndex === 0 ? 
+											<IconButton color="primary"
+										style={{marginBottom: '14px'}}
+										aria-label="add item"
+										onClick={() => {
+											setFieldValue(
+														"contactEmails",
+														[...values.contactEmails, {}]
+													);
+										}}>
+										  <AddIcon />
+										</IconButton> : null
+										}
+										</Grid>
 									</Grid>
 								)
 							)}
-							{/* Start of contact faxes column */}
+						</Box>
+						{/* Start of contact faxes column */}
+						{/**
+						<Box m={2}> 
+						<Typography variant="subtitle2">
+								Faxes </Typography> 
+						</Box>
+						<Box maxHeight="200px" style={contactInfoBoxStyles}>
 							{values.contactFaxes.map((contactFax, faxIndex) => (
 								<Grid
-									item
 									key={faxIndex}
 									container
 									spacing={2}
-									justify="flex-start"
+									justify="center"
+									alignItems="center"
 									direction="row"
 								>
-									<Grid item md={7}>
+									<Grid item md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -538,7 +651,7 @@ let InputForm = ({
 											helperText="Fax"
 										/>
 									</Grid>
-									<Grid item md={5}>
+									<Grid item md={4}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -582,21 +695,53 @@ let InputForm = ({
 											)}
 										</TextField>
 									</Grid>
+									<Grid item md={1}>
+										<IconButton color="secondary"
+										style={{marginBottom: '14px'}}
+										aria-label="delete item"
+										onClick={() => {
+											
+										}}>
+										  <DeleteIcon />
+										</IconButton>
+									</Grid>
+								</Grid>
+								{
+									faxIndex === 0 ? 
+									<Grid item md={1}>
+										<IconButton color="primary"
+										style={{marginBottom: '14px'}}
+										aria-label="add item"
+										onClick={() => {
+											setFieldValue(
+														"contactFaxes",
+														[...values.contactFaxes, {}]
+													);
+										}}>
+										  <AddIcon />
+										</IconButton>
+									} : null
+								</Grid> 
 								</Grid>
 							))}
-							{/* Start of contact addresses row */}
-
+						</Box>**/}
+						{/* Start of contact addresses row */}
+						<Box m={2}> 
+						<Typography variant="subtitle2">
+								Addresses </Typography> 
+						</Box>
+						<Box maxHeight="200px" style={contactInfoBoxStyles}>
 							{values.contactAddresses.map(
 								(contactAddress, addressIndex) => (
 									<Grid
-										item
 										key={addressIndex}
 										container
 										spacing={2}
-										justify="flex-start"
+										justify="center"
+										alignItems="center"
 										direction="row"
 									>
-										<Grid item md={7}>
+										<Grid item md={6} sm={12}>
 											<TextField
 												fullWidth
 												variant="outlined"
@@ -636,7 +781,7 @@ let InputForm = ({
 												helperText="Address"
 											/>
 										</Grid>
-										<Grid item md={5}>
+										<Grid item md={4} sm={12}>
 											<TextField
 												fullWidth
 												variant="outlined"
@@ -689,11 +834,51 @@ let InputForm = ({
 												)}
 											</TextField>
 										</Grid>
+										<Grid item md={1} sm={12}>
+										<IconButton color="secondary"
+										style={{marginBottom: '14px'}}
+										aria-label="delete item"
+										onClick={() => {
+let valueToRemove = values.contactAddresses[addressIndex]
+if(valueToRemove.id){
+	//delete the item from the server
+	handleDelete(valueToRemove.id, 'contact_addresses')
+}
+if(values.contactAddresses.length === 1){
+	setFieldValue('contactAddresses', [{}])}
+	else
+{
+setFieldValue('contactAddresses', [...values.contactAddresses.filter((address, index) => index !== addressIndex)])
+}
+											
+										}}>
+										  <DeleteIcon />
+										</IconButton>
+										</Grid>
+										<Grid item md={1} sm={12}>
+										{
+											addressIndex === 0 ? 
+											<IconButton color="primary"
+										style={{marginBottom: '14px'}}
+										aria-label="add item"
+										onClick={() => {
+											setFieldValue(
+														"contactAddresses",
+														[...values.contactAddresses, {}]
+													);
+										}}>
+										  <AddIcon />
+										</IconButton>
+										: null 
+										}
+										</Grid>
 									</Grid>
 								)
 							)}
-						</Grid>
-						{/* end of phone textfield and types row */}
+						</Box>
+						{/* end of addresses textfield and types row */}
+						</Box>
+						<Box minHeight="35%">
 						<Typography variant="h6">
 							Social Media Details
 						</Typography>
@@ -733,6 +918,7 @@ let InputForm = ({
 							onBlur={handleBlur}
 							helperText="Skype Link"
 						/>
+						</Box>
 					</Grid>
 				</Grid>
 				{/** end of contact details grid **/}
@@ -742,7 +928,7 @@ let InputForm = ({
 					container
 					justify="center"
 					direction="row"
-					className={styles.buttonBox}
+					className={classes.buttonBox}
 				>
 					<Button
 						color="secondary"
@@ -814,6 +1000,7 @@ let ContactInputForm = withFormik({
 			linkedin_url: contactToEdit.linkedin_url || "",
 			skype_url: contactToEdit.skype_url || "",
 			facebook_url: contactToEdit.facebook_url || "",
+			contact_images: [],
 			contactEmails: contactEmails,
 			contactPhoneNumbers: contactPhoneNumbers,
 			contactFaxes: contactFaxes,
@@ -871,8 +1058,8 @@ let ContactInputForm = withFormik({
 		};
 		console.log("Contact object => ", contact);
 		//first upload the image to firebase
-		if (values.contact_image) {
-			uploadFilesToFirebase(values.contact_image).then(
+		if (values.contact_images.length) {
+			uploadFilesToFirebase(values.contact_images).then(
 				(fileDownloadUrl) => {
 					contact.contact_avatar_url = fileDownloadUrl;
 				}
