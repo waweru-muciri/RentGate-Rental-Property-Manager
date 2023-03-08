@@ -6,14 +6,15 @@ import { connect } from "react-redux";
 import EmailInputForm from "../components/emails/EmailInputForm";
 import { withRouter } from "react-router-dom";
 import queryString from 'query-string';
+import { handleItemFormSubmit } from '../actions/actions'
 
 let EmailPage = (props) => {
-	const { users, currentUser, contacts, emailTemplates } = props
+	const { users, currentUser, contacts, emailTemplates, handleItemSubmit } = props
 	const pageTitle = "Compose Email";
 	const params = queryString.parse(props.location.search)
 	var contactToSendEmailTo = params.contact;
 	var contactSource = params.contactSource;
-	const contactToSendEmailToDetails = users.find(({id}) => id === contactToSendEmailTo)
+	const contactToSendEmailToDetails = users.find(({ id }) => id === contactToSendEmailTo)
 
 	return (
 		<Layout pageTitle="Email Campaign Details">
@@ -30,7 +31,7 @@ let EmailPage = (props) => {
 				>
 					<EmailInputForm contactToSendEmailTo={contactToSendEmailToDetails} contactSource={contactSource}
 						currentUser={currentUser} contacts={contacts} history={props.history}
-						users={users} emailTemplates={emailTemplates} />
+						users={users} emailTemplates={emailTemplates} handleItemSubmit={handleItemSubmit} />
 				</Grid>
 			</Grid>
 		</Layout>
@@ -45,7 +46,13 @@ const mapStateToProps = (state) => {
 		users: state.users,
 	};
 };
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	}
+};
 
-EmailPage = connect(mapStateToProps)(EmailPage);
+
+EmailPage = connect(mapStateToProps, mapDispatchToProps)(EmailPage);
 
 export default withRouter(EmailPage);

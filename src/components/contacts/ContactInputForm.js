@@ -118,7 +118,7 @@ let ContactInputForm = (props) => {
 					}
 					setStatus({ sent: true, msg: "Details saved successfully!" })
 				} catch (error) {
-					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+					setStatus({ sent: false, msg: `Error! ${error}.` })
 				}
 			}}
 		>

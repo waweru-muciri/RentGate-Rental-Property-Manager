@@ -52,7 +52,6 @@ export default function EnhancedTable(props) {
   const {
     rows,
     headCells,
-    deleteUrl,
     handleEditClick,
     handleDelete,
   } = props;
@@ -94,56 +93,31 @@ export default function EnhancedTable(props) {
                           const tableCellData =
                             row[headCell.id];
                           return (
-                            headCell.id === 'edit' ?
+                            headCell.id === 'delete' ?
                               <TableCell
                                 component="th"
                                 scope="row"
                                 sortDirection={false}
-                                key={`edit${tableCellIndex}`}
+                                key={`delete${tableCellIndex}`}
                               >
                                 <Tooltip
-                                  title="Edit"
+                                  title="Delete"
                                   placement="bottom"
                                 >
                                   <IconButton
+                                    onClick={(event) => {
+                                      handleDelete(rowIndex);
+                                    }}
                                     color="primary"
                                     size="small"
-                                    onClick={() => {
-                                      handleEditClick(row.id)
-                                    }}
                                   >
-                                    <EditIcon fontSize="default" />
+                                    <DeleteIcon fontSize="default" />
                                   </IconButton>
                                 </Tooltip>
                               </TableCell>
-                              : headCell.id === 'delete' ?
-                                <TableCell
-                                  component="th"
-                                  scope="row"
-                                  sortDirection={false}
-                                  key={`delete${tableCellIndex}`}
-                                >
-                                  <Tooltip
-                                    title="Delete"
-                                    placement="bottom"
-                                  >
-                                    <IconButton
-                                      onClick={(event) => {
-                                        handleDelete(
-                                          row.id,
-                                          deleteUrl
-                                        );
-                                      }}
-                                      color="primary"
-                                      size="small"
-                                    >
-                                      <DeleteIcon fontSize="default" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </TableCell>
-                                : <StyledTableCell component="th" scope="row" key={`other${tableCellIndex}`}>
-                                  {tableCellData || "-"}
-                                </StyledTableCell>
+                              : <StyledTableCell component="th" scope="row" key={`other${tableCellIndex}`}>
+                                {tableCellData || "-"}
+                              </StyledTableCell>
                           )
                         }
                       )}

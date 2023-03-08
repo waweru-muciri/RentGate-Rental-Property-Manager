@@ -8,7 +8,7 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let MeterReadingPage = (props) => {
-    const { history, meterReadingToEdit, contacts, propertyUnits, properties, handleItemSubmit } = props;
+    const { history, meterReadingToEdit, contacts, unitsWithActiveLeases, properties, handleItemSubmit } = props;
     const pageTitle = "Charge Tenant for Meter Reading";
     return (
         <Layout pageTitle={pageTitle}>
@@ -23,7 +23,7 @@ let MeterReadingPage = (props) => {
                         contacts={contacts}
                         history={history}
                         properties={properties}
-                        propertyUnits={propertyUnits}
+                        unitsWithActiveLeases={unitsWithActiveLeases}
                     />
                 </Grid>
             </Grid>
@@ -42,8 +42,8 @@ const mapStateToProps = (state, ownProps) => {
 
     return {
         properties: state.properties,
-        propertyUnits: unitsWithActiveLeases,
-        meterReadingToEdit: state.meterReadings.find(({ id }) => id === ownProps.match.params.meterReadingId),
+        unitsWithActiveLeases: unitsWithActiveLeases,
+        meterReadingToEdit: state.meterReadings.find(({ id }) => id === ownProps.match.params.meterReadingId) || {},
     };
 };
 const mapDispatchToProps = (dispatch) => {

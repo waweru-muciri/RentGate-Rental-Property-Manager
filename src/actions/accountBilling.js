@@ -14,16 +14,16 @@ export function addAccountBilling(accountBilling) {
     };
 }
 
-export function deleteAccountBilling(acccountBillingId) {
+export function deleteAccountBilling(accountBillingId) {
     return {
         type: actionTypes.DELETE_ACCOUNT_BILLING,
-        acccountBillingId,
+        accountBillingId,
     };
 }
 
-export function acccountBillingsFetchDataSuccess(acccountBillings) {
+export function accountBillingsFetchDataSuccess(accountBillings) {
     return {
         type: actionTypes.ACCOUNT_BILLINGS_FETCH_DATA_SUCCESS,
-        acccountBillings,
+        accountBillings,
     };
 }

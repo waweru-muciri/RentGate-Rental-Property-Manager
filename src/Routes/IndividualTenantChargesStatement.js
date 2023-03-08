@@ -331,7 +331,7 @@ let TenantChargesStatementPage = ({
                         headCells={headCells}
                         noEditCol
                         noDeleteCol
-                        deleteUrl={'unit-charges'}
+                        deleteUrl={'transactions-charges'}
                         handleDelete={handleItemDelete}
                     />
                 </Grid>

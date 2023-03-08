@@ -9,7 +9,6 @@ import AddIcon from "@material-ui/icons/Add";
 import BlockIcon from "@material-ui/icons/Block";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
-import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import { connect } from "react-redux";
 import { handleDelete, updateFirebaseUser } from "../actions/actions";
@@ -18,8 +17,6 @@ import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-
-const STATUS_LIST = [{ disabled: false, displayName: "Active" }, { disabled: true, displayName: "Inactive" }];
 
 const usersTableHeadCells = [
 	{ id: "first_name", numeric: false, disablePadding: true, label: "First Name" },

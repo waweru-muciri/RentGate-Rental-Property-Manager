@@ -20,8 +20,8 @@ let useStyles = makeStyles((theme) => ({
 		},
 	},
 	avatar: {
-		width: theme.spacing(10),
-		height: theme.spacing(10),
+		minHeight: theme.spacing(10),
+		minWidth: theme.spacing(10),
 		backgroundColor: red[500],
 	},
 	buttonBox: {
@@ -35,8 +35,8 @@ let useStyles = makeStyles((theme) => ({
 		display: 'none',
 	},
 	largeAvatar: {
-		width: theme.spacing(20),
-		height: theme.spacing(20),
+		minWidth: theme.spacing(20),
+		minHeight: theme.spacing(20),
 	},
 	quillEditor: {
 		height: theme.spacing(50),

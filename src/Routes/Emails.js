@@ -13,32 +13,9 @@ import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
 
 const emailsTableHeadCells = [
-    {
-        id: "from_user",
-        numeric: false,
-        disablePadding: true,
-        label: "From",
-    },
-    {
-        id: "date_sent",
-        numeric: false,
-        disablePadding: true,
-        label: "Date Sent",
-    },
-    {
-        id: "email_subject",
-        numeric: false,
-        disablePadding: true,
-        label: "Email Subject",
-    },
-    {
-        id: "email_message",
-        numeric: false,
-        disablePadding: true,
-        label: "Email Message",
-    },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "from_user", numeric: false, disablePadding: true, label: "From" },
+    { id: "date_sent", numeric: false, disablePadding: true, label: "Date Sent" },
+	{ id: "email_subject", numeric: false, disablePadding: true, label: "Email Subject" },
 ];
 
 let EmailsPage = ({

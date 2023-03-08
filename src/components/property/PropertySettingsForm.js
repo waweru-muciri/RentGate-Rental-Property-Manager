@@ -84,7 +84,7 @@ let PropertySettingsInputForm = (props) => {
 					resetForm({});
 					setStatus({ sent: true, msg: "Property Settings Saved!" })
 				} catch (error) {
-					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+					setStatus({ sent: false, msg: `Error! ${error}.` })
 				}
 			}}
 		>

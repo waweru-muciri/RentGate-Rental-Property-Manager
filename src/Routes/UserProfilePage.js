@@ -70,12 +70,11 @@ let UserDetailsPage = ({
     properties,
     userDetails,
     managementFees,
-    newRentalAgreeements,
     match,
     handleItemDelete
 }) => {
     const classes = commonStyles()
-    const [tabValue, setTabValue] = React.useState(1);
+    const [tabValue, setTabValue] = React.useState(0);
     const [managementFeesItems, setManagementFeesItems] = useState([])
     const [filteredManagementFeesItems, setFilteredManagementFeesItems] = useState([])
     const [propertyFilter, setPropertyFilter] = useState("all");
@@ -138,12 +137,11 @@ let UserDetailsPage = ({
                         justify="center"
                         spacing={4}
                     >
-                        <Grid container item direction="column" xs={12} md={4} spacing={2} justify="space-between" alignItems="stretch">
-                            <Grid item>
+                        <Grid container item direction="column" xs={12} md={4} spacing={2} justify="center" alignItems="stretch">
+                            <Grid item md>
                                 <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                                     <CardContent>
-                                        <Grid container spacing={2} direction="column" alignItems="center"
-                                            justify="center">
+                                        <Grid container spacing={2} direction="column" alignItems="center" justify="center">
                                             <Grid item>
                                                 <Avatar
                                                     alt="User Image"

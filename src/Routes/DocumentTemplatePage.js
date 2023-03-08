@@ -93,7 +93,7 @@ let DocumentTemplatePage = ({ emailTemplateToEdit, history, handleItemSubmit }) 
 									}
 									setStatus({ sent: true, msg: "Template saved successfully!" })
 								} catch (error) {
-									setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+									setStatus({ sent: false, msg: `Error! ${error}.` })
 								}
 							}}
 						>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
 import ListItem from "@material-ui/core/ListItem";
 import TextField from "@material-ui/core/TextField";
@@ -188,7 +188,6 @@ export default function TransferList(props) {
                     </Button>
             </Grid>
             <Grid item>
-
               <Button
                 variant="outlined"
                 size="small"
@@ -247,7 +246,7 @@ export default function TransferList(props) {
             variant="contained"
             color="primary">
             Send
-                  </Button>
+          </Button>
         </Grid>
       </Grid>
     </Grid>

@@ -9,10 +9,7 @@ import {
 } from "react-router-dom";
 import clsx from "clsx";
 import { useTheme } from "@material-ui/core/styles";
-import Avatar from "@material-ui/core/Avatar";
-import Menu from "@material-ui/core/Menu";
 import Drawer from "@material-ui/core/Drawer";
-import MenuItem from "@material-ui/core/MenuItem";
 import MenuIcon from "@material-ui/icons/Menu";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -43,6 +40,7 @@ import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import NoteIcon from '@material-ui/icons/Note';
+import LockIcon from '@material-ui/icons/Lock';
 import ApartmentIcon from '@material-ui/icons/Apartment';
 import PaymentIcon from '@material-ui/icons/Payment';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
@@ -121,24 +119,12 @@ let AppNavLayout = ({
     setDrawerToggleState,
     handleUserSignOut,
     drawerOpen,
-    currentUser,
     selectedTab,
     setSelectedTab,
     companyProfile,
     classes,
 }) => {
     const theme = useTheme();
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const isProfileMenuOpen = Boolean(anchorEl);
-
-    const handleProfileMenuOpen = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleProfileMenuClose = () => {
-        setAnchorEl(null);
-    };
-    const menuId = "primary-search-account-menu";
 
     const handleDrawerToggle = () => {
         setDrawerToggleState(!drawerOpen);
@@ -169,49 +155,6 @@ let AppNavLayout = ({
                     <Typography variant="h6" noWrap className={classes.title}>
                         {companyProfile.company_name}
                     </Typography>
-                    <IconButton
-                        edge="end"
-                        aria-label="account of current user"
-                        aria-controls="primary-search-account-menu"
-                        aria-haspopup="true"
-                        color="inherit"
-                        onClick={handleProfileMenuOpen}
-                    >
-                        <Avatar
-                            alt="User Image"
-                            src={currentUser ? currentUser.user_avatar_url : ""}
-                        />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                        id={menuId}
-                        keepMounted
-                        transformOrigin={{
-                            vertical: "top",
-                            horizontal: "right",
-                        }}
-                        open={isProfileMenuOpen}
-                        onClose={handleProfileMenuClose}
-                    >
-                        <MenuItem
-                            component={Link}
-                            to={`/app/users/${currentUser.uid}/edit`}
-                            onClick={() => {
-                                handleProfileMenuClose();
-                            }}
-                        >
-                            <ListItemText primary="Edit Profile" />
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => {
-                                handleProfileMenuClose();
-                                handleUserSignOut()
-                            }}
-                        >
-                            <ListItemText primary="Sign Out" />
-                        </MenuItem>
-                    </Menu>
                 </Toolbar>
             </AppBar>
             <Drawer
@@ -491,7 +434,17 @@ let AppNavLayout = ({
                             </React.Fragment>
                         )
                     })}
-
+                    <ListItem
+                        button
+                        key={"sign-out-btn"}
+                        selected={selectedTab.parent === "sign-out-btn"}
+                        onClick={(event) => {
+                            handleUserSignOut();
+                        }}
+                    >
+                        <ListItemIcon><LockIcon/></ListItemIcon>
+                        <ListItemText primary="Sign Out" />
+                    </ListItem>
                 </List>
             </Drawer>
             <div className={classes.drawerHeader} />
@@ -503,7 +456,6 @@ const mapStateToProps = (state) => {
     return {
         companyProfile: state.companyProfile[0] || {},
         drawerOpen: state.drawerOpen,
-        currentUser: state.currentUser,
         selectedTab: state.selectedTab,
     };
 };

@@ -389,11 +389,12 @@ let MeterReadingsPage = ({
 };
 
 const mapStateToProps = (state) => {
+    console.log(state.meterReadings)
     return {
-        meterReadings: state.meterReadings
+        meterReadings: [...state.meterReadings]
             .map(reading => {
                 const tenant = state.contacts.find((contact) => contact.id === reading.tenant_id) || {};
-                const unit = state.propertyUnits.find((unit) => unit.id === reading.property_unit) || {};
+                const unit = state.propertyUnits.find((unit) => unit.id === reading.unit_id) || {};
                 return Object.assign({}, reading, {
                     tenant_name: `${tenant.first_name} ${tenant.last_name}`,
                     tenant_id_number: tenant.id_number,

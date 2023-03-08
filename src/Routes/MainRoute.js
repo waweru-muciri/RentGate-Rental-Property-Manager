@@ -91,6 +91,7 @@ let MainPage = ({
         "transactions-charges",
         "charge-payments",
         "maintenance-requests",
+        "communication_emails",
         "contacts",
         "notices",
         "leases",
@@ -103,6 +104,7 @@ let MainPage = ({
         "property-settings",
         "email-templates",
         "management-fees",
+        "audit-logs",
       ]);
     }
   }, [currentUser]);

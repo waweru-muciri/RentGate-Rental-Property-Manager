@@ -23,25 +23,26 @@ const MeterReadingSchema = Yup.object().shape({
   unit_charge: Yup.number().min(0).required("Unit Charge is Required"),
   base_charge: Yup.number().min(0).default(0),
   reading_date: Yup.date().required("Reading Date Required"),
-  property: Yup.string().trim().required("Property is Required"),
-  property_unit: Yup.string().trim().required("Unit is Required"),
+  property_id: Yup.string().trim().required("Property is Required"),
+  unit_id: Yup.string().trim().required("Unit is Required"),
 });
 
 const METER_OPTIONS = getMeterTypes();
 
-const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadingToEdit, handleItemSubmit }) => {
+const MeterReadingInputForm = ({ properties, unitsWithActiveLeases, history, meterReadingToEdit, handleItemSubmit }) => {
 
   const classes = commonStyles();
-  const meterReadingValues = meterReadingToEdit || {
-    property: '',
-    property_unit: '',
-    reading_date: defaultDate,
-    prior_value: '',
-    current_value: '',
-    base_charge: '',
-    unit_charge: '',
-    meter_type: '',
-    tenant_id: '',
+  const meterReadingValues = {
+    id: meterReadingToEdit.id,
+    property_id: meterReadingToEdit.property_id || '',
+    unit_id: meterReadingToEdit.unit_id || '',
+    reading_date: meterReadingToEdit.reading_date || defaultDate,
+    prior_value: meterReadingToEdit.prior_value || '',
+    current_value: meterReadingToEdit.current_value || '',
+    base_charge: meterReadingToEdit.base_charge || '',
+    unit_charge: meterReadingToEdit.unit_charge || '',
+    meter_type: meterReadingToEdit.meter_type || '',
+    tenant_id: meterReadingToEdit.tenant_id || '',
   }
 
   return (
@@ -58,9 +59,9 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
             current_value: values.current_value,
             base_charge: values.base_charge,
             unit_charge: values.unit_charge,
-            property_unit: values.property_unit,
-            property: values.property,
-            tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
+            unit_id: values.unit_id,
+            property_id: values.property_id,
+            tenant_id: unitsWithActiveLeases.find(unit => unit.id === values.unit_id).tenant_id,
             reading_date: values.reading_date,
           };
           //assign usage values to meter reading
@@ -71,12 +72,12 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
             const newMeterReadingCharge = {
               charge_amount: meterReading.amount,
               charge_date: defaultDate,
-              charge_label: "Utility Income",
+              charge_label: `${values.meter_type} Charge`,
               charge_type: "meter_type",
               due_date: defaultDate,
               tenant_id: meterReading.tenant_id,
-              unit_id: values.property_unit,
-              property: values.property,
+              unit_id: values.unit_id,
+              property_id: values.property_id,
             }
             await handleItemSubmit(newMeterReadingCharge, "transactions-charges")
           }
@@ -86,7 +87,7 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
           }
           setStatus({ sent: true, msg: "Details saved successfully!" })
         } catch (error) {
-          setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+          setStatus({ sent: false, msg: `Error! ${error}.` })
         }
       }}
     >
@@ -128,18 +129,17 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
                     fullWidth
                     select
                     variant="outlined"
-                    name="property"
+                    name="property_id"
                     label="Property"
-                    id="property"
+                    id="property_id"
                     onChange={(event) => {
-                      setFieldValue('property', event.target.value)
-                      setFieldValue('property_unit', '')
+                      setFieldValue('property_id', event.target.value)
+                      setFieldValue('unit_id', '')
                     }
                     }
-                    value={values.property}
-                    error={errors.property && touched.property}
-                    helperText={touched.property && errors.property}
-
+                    value={values.property_id}
+                    error={errors.property_id && touched.property_id}
+                    helperText={touched.property_id && errors.property_id}
                   >
                     {properties.map((property, index) => (
                       <MenuItem key={index} value={property.id}>
@@ -153,18 +153,18 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
                     fullWidth
                     select
                     variant="outlined"
-                    name="property_unit"
+                    name="unit_id"
                     label="Unit"
-                    id="property_unit"
+                    id="unit_id"
                     onChange={handleChange}
-                    value={values.property_unit}
-                    error={errors.property_unit && touched.property_unit}
-                    helperText={touched.property_unit && errors.property_unit}
+                    value={values.unit_id}
+                    error={errors.unit_id && touched.unit_id}
+                    helperText={touched.unit_id && errors.unit_id}
 
                   >
-                    {propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
-                      <MenuItem key={index} value={property_unit.id}>
-                        {property_unit.ref}
+                    {unitsWithActiveLeases.filter(({property_id}) => property_id === values.property_id).map((propertyUnit, index) => (
+                      <MenuItem key={index} value={propertyUnit.id}>
+                        {propertyUnit.ref}
                       </MenuItem>
                     ))}
                   </TextField>

@@ -199,7 +199,7 @@ export function itemsFetchData(collectionsUrls) {
                         break;
 
                     case "account-billing":
-                        dispatch(accountBillingActions.acccountBillingsFetchDataSuccess(fetchedItems));
+                        dispatch(accountBillingActions.accountBillingsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "properties":
@@ -238,7 +238,7 @@ export function itemsFetchData(collectionsUrls) {
                         dispatch(maintenanceRequestsActions.maintenanceRequestsFetchDataSuccess(fetchedItems));
                         break;
 
-                    case "logs":
+                    case "audit-logs":
                         dispatch(logActions.auditLogsFetchDataSuccess(fetchedItems));
                         break;
 
@@ -369,11 +369,6 @@ export function handleDelete(itemId, url) {
                     );
                     break;
 
-                case "logs":
-                    dispatch(logActions.deleteAuditLog(itemId)
-                    );
-                    break;
-
                 case "notices":
                     dispatch(vacatingNoticesActions.deleteNotice(itemId)
                     );
@@ -482,10 +477,6 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(maintenanceRequestsActions.editMaintenanceRequest(modifiedObject));
                                 break;
 
-                            case "logs":
-                                dispatch(logActions.editAuditLog(modifiedObject));
-                                break;
-
                             case "notices":
                                 dispatch(vacatingNoticesActions.editNotice(modifiedObject));
                                 break;
@@ -574,10 +565,6 @@ export function handleItemFormSubmit(data, url) {
 
                             case "maintenance-requests":
                                 dispatch(maintenanceRequestsActions.addMaintenanceRequest(addedItem));
-                                break;
-
-                            case "logs":
-                                dispatch(logActions.addAuditLog(addedItem));
                                 break;
 
                             case "notices":

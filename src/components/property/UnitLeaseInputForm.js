@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ChargesTable from './ChargesTable'
 import ChargeInputModal from './ChargeInputModal'
 import Typography from "@material-ui/core/Typography";
@@ -28,7 +28,6 @@ const recurringChargesTableHeadCells = [
 	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
 	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
 	{ id: "frequency", numeric: false, disablePadding: true, label: "Frequency" },
-	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ]
 
@@ -49,9 +48,7 @@ const UnitLeaseSchema = Yup.object().shape({
 
 let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
-	const { contacts, history, properties, propertyUnits, propertyUnitCharges, handleItemSubmit, handleItemDelete } = props
-	const [propertyUnitChargesItems, setpropertyUnitChargesItems] = useState([])
-
+	const { contacts, history, properties, propertyUnits, leaseUnitCharges, handleItemSubmit, handleItemDelete } = props
 	let leaseToEdit = props.leaseToEdit || {};
 	const unitLeaseValues = {
 		id: leaseToEdit.id,
@@ -65,16 +62,11 @@ let UnitLeaseInputForm = (props) => {
 		security_deposit_due_date: leaseToEdit.security_deposit_due_date || defaultDate,
 		rent_amount: leaseToEdit.rent_amount || '',
 		terminated: leaseToEdit.terminated || false,
-		security_deposit: leaseToEdit.security_deposit || 0,
+		security_deposit: leaseToEdit.security_deposit || '',
 		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
-		unit_charges: propertyUnitChargesItems.filter((unit_charge) => unit_charge.unit_id === leaseToEdit.unit_id)
+		unit_charges: leaseUnitCharges
 	};
-
-	useEffect(() => {
-		setpropertyUnitChargesItems(propertyUnitCharges)
-	}, [propertyUnitCharges])
-
 
 	const defaultChargeValues = {
 		unit_id: leaseToEdit.unit_id,
@@ -82,7 +74,7 @@ let UnitLeaseInputForm = (props) => {
 		amount: '',
 		due_date: defaultDate,
 		account: '',
-		type: 'recurring_charge',
+		type: 'one_time_charge',
 	}
 
 	const [modalOpenState, toggleModalState] = useState(false)
@@ -93,10 +85,6 @@ let UnitLeaseInputForm = (props) => {
 		toggleModalState(!modalOpenState)
 	}
 
-	const handleEditClick = (rowId) => {
-		setChargeToEdit(unitLeaseValues.unit_charges.find(({ id }) => id === rowId) || defaultChargeValues)
-		handleModalStateToggle()
-	}
 	return (
 		<Formik
 			initialValues={unitLeaseValues}
@@ -119,7 +107,17 @@ let UnitLeaseInputForm = (props) => {
 						rent_amount: values.rent_amount,
 						terminated: values.terminated
 					};
-					await handleItemSubmit(propertyUnitLease, "leases")
+					const savedLeaseId = await handleItemSubmit(propertyUnitLease, "leases")
+					//save all unit charges relating to this lease
+					const unitChargesToSave = [...values.unit_charges]
+					unitChargesToSave.forEach(async unitCharge => {
+						const chargeWithLeaseId = Object.assign({}, unitCharge,
+							{
+								lease_id: savedLeaseId, tenant_id: values.tenants.map(tenant => tenant.id),
+								property_id: values.property_id, unit_id: values.unit_id,
+							})
+						await handleItemSubmit(chargeWithLeaseId, 'unit-charges')
+					})
 					if (!values.id) {
 						//post charges for rent and  security deposit 
 						const tenant = values.tenants[0]
@@ -150,9 +148,9 @@ let UnitLeaseInputForm = (props) => {
 					if (values.id) {
 						history.goBack()
 					}
-					setStatus({ sent: true, msg: "Details saved successfully!" })
+					setStatus({ sent: true, msg: "Agreement saved successfully!" })
 				} catch (error) {
-					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+					setStatus({ sent: false, msg: `Error! ${error}.` })
 				}
 			}}
 		>
@@ -224,7 +222,7 @@ let UnitLeaseInputForm = (props) => {
 										value={values.unit_id}
 										onChange={(event) => {
 											setFieldValue('unit_id', event.target.value)
-											setFieldValue('unit_charges', propertyUnitChargesItems.filter(({ unit_id }) => unit_id === event.target.value)
+											setFieldValue('unit_charges', leaseUnitCharges.filter(({ unit_id }) => unit_id === event.target.value)
 											)
 										}}
 										onBlur={handleBlur}
@@ -473,14 +471,25 @@ let UnitLeaseInputForm = (props) => {
 								<ChargesTable
 									rows={values.unit_charges}
 									headCells={recurringChargesTableHeadCells}
-									handleEditClick={handleEditClick}
-									handleItemSubmit={handleItemSubmit}
-									handleDelete={handleItemDelete}
-									deleteUrl={"unit-charges"} />
+									handleEditClick={(rowIndex) => {
+										setChargeToEdit(values.unit_charges[rowIndex])
+										handleModalStateToggle()
+									}}
+									handleDelete={(rowIndex) => {
+										var unitCharges = values.unit_charges.slice()
+										const chargeToDelete = unitCharges.splice(rowIndex, 1)[0] || {}
+										if (chargeToDelete.id) {
+											handleItemDelete(chargeToDelete.id, 'unit-charges')
+										}
+										setFieldValue("unit_charges", unitCharges)
+									}}
+								/>
 								{
 									modalOpenState ? <ChargeInputModal open={modalOpenState}
 										handleClose={handleModalStateToggle} history={history}
-										handleItemSubmit={handleItemSubmit}
+										handleItemSubmit={(submittedUnitCharge) => {
+											setFieldValue("unit_charges", [...values.unit_charges, submittedUnitCharge])
+										}}
 										chargeValues={chargeToEdit} /> : null
 								}
 							</Grid>

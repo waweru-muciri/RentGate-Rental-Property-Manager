@@ -10,22 +10,11 @@ import {
 import UnitLeaseInputForm from "../components/property/UnitLeaseInputForm";
 import { withRouter } from "react-router-dom";
 
-let TransactionPage = ({ leases, match, contacts, history, properties, propertyUnits,
-	propertyUnitCharges, handleItemSubmit, handleItemDelete }) => {
-	const leaseToEditId = match.params.leaseId;
-	const leaseToEdit = leases.find(({ id }) => id === leaseToEditId) || {};
+let TransactionPage = ({ leaseToEdit, tenantsToShow, history, properties, propertyUnitsToShow,
+	leaseUnitCharges, handleItemSubmit, handleItemDelete }) => {
+
 	const pageTitle = leaseToEdit.id ? "Edit Rental Agreement" : "Add Rental Agreement";
-	let activeLeases = leases.filter(({ terminated }) => terminated !== true)
-	if (leaseToEdit.id) {
-		//add unit to units without active leases for it to be selected
-		activeLeases = activeLeases.filter(({id}) => id !== leaseToEditId)
-	}
-	const unitsWithActiveLeases = activeLeases
-		.map(lease => lease.unit_id)
-	const contactsWithActiveLeases = []
-	activeLeases.forEach(lease => contactsWithActiveLeases.push(...lease.tenants))
-	const propertyUnitsToShow = propertyUnits.filter(({ id }) => !unitsWithActiveLeases.includes(id))
-	const tenantsToShow = contacts.filter(({ id }) => !contactsWithActiveLeases.includes(id))
+
 	return (
 		<Layout pageTitle="Rental Agreement Details">
 			<Grid container justify="center" direction="column">
@@ -42,7 +31,7 @@ let TransactionPage = ({ leases, match, contacts, history, properties, propertyU
 					<UnitLeaseInputForm
 						contacts={tenantsToShow} history={history}
 						properties={properties} propertyUnits={propertyUnitsToShow}
-						propertyUnitCharges={propertyUnitCharges}
+						leaseUnitCharges={leaseUnitCharges}
 						handleItemSubmit={handleItemSubmit}
 						handleItemDelete={handleItemDelete}
 						leaseToEdit={leaseToEdit}
@@ -53,13 +42,27 @@ let TransactionPage = ({ leases, match, contacts, history, properties, propertyU
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+	const leaseToEdit = state.leases.find(({ id }) => id === ownProps.match.params.leaseId) || {}
+	//here we are editing this lease so we need to remove it from active leases
+	//add unit to units without active leases for it to be selected
+	const activeLeases = leaseToEdit.id ?
+		state.leases.filter(({ terminated, id }) => terminated !== true && id !== leaseToEdit.id) :
+		state.leases.filter(({ terminated }) => terminated !== true)
+	const unitsWithActiveLeases = activeLeases.map(lease => lease.unit_id)
+	const contactsWithActiveLeases = []
+	activeLeases.forEach(lease => {
+		contactsWithActiveLeases.push(...lease.tenants)
+	});
+	const propertyUnitsToShow = state.propertyUnits.filter(({ id }) => !unitsWithActiveLeases.includes(id))
+	const tenantsToShow = state.contacts.filter(({ id }) => !contactsWithActiveLeases.includes(id))
+
 	return {
-		leases: state.leases,
-		contacts: state.contacts,
+		leaseToEdit: state.leases.find(({ id }) => id === ownProps.match.params.leaseId) || {},
 		properties: state.properties,
-		propertyUnits: state.propertyUnits,
-		propertyUnitCharges: state.propertyUnitCharges,
+		propertyUnitsToShow: propertyUnitsToShow,
+		tenantsToShow: tenantsToShow,
+		leaseUnitCharges: state.propertyUnitCharges.filter(({ lease_id }) => lease_id === leaseToEdit.id),
 	};
 };
 const mapDispatchToProps = (dispatch) => {

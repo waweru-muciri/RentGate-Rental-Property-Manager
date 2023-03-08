@@ -4,107 +4,71 @@ import React, { useEffect, useState } from "react";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import { parse } from "date-fns";
 
-const ENTITIES_LIST = [];
-const USERS_LIST = [];
+const ENTITIES_LIST = ["users", "users", "properties", "property_units"];
+const ACTIONS_LIST = ["Delete", "Create", "Edit"];
 
 const auditLogsTableHeadCells = [
     { id: "log_date", numeric: false, disablePadding: true, label: "Date" },
-    { id: "user", numeric: false, disablePadding: true, label: "User" },
-    {
-        id: "user_email",
-        numeric: false,
-        disablePadding: true,
-        label: "User Email",
-    },
+    { id: "user_name", numeric: false, disablePadding: true, label: "User" },
+    { id: "user_email", numeric: false, disablePadding: true, label: "User Email" },
     { id: "entity", numeric: false, disablePadding: true, label: "Entity" },
+    { id: "entity_id", numeric: false, disablePadding: true, label: "Entity Id" },
     { id: "action", numeric: false, disablePadding: true, label: "Action" },
-    {
-        id: "entity_id",
-        numeric: false,
-        disablePadding: true,
-        label: "Entity Id",
-    },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
-const rows = [
-    {
-        id: 1,
-        user_email: "user@yourdomain.com",
-        action: "create",
-        entity: "property",
-        user: "user001",
-        log_date: "12/12/2012",
-        entity_id: "5ee61c19ed13fc00027af18b",
-    },
-    {
-        id: 2,
-        user_email: "user@yourdomain.com",
-        action: "create",
-        entity: "property",
-        user: "user002",
-        log_date: "12/12/2012",
-        entity_id: "5ee61c19ed13fc00027af18b",
-    },
-    {
-        id: 3,
-        user_email: "user@yourdomain.com",
-        action: "create",
-        entity: "property",
-        user: "user003",
-        log_date: "12/12/2012",
-        entity_id: "5ee61c19ed13fc00027af18b",
-    },
-];
 
 let AuditLogsPage = ({
-    isLoading,
-    contacts,
-    match,
-    error,
-    handleDelete,
-    submitForm,
+    auditLogs,
+    users,
 }) => {
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [auditLogItems, setContactItems] = useState(rows);
-    let [firstNameFilter, setUserEmailFilter] = useState("");
+    let [auditLogItems, setAuditLogItems] = useState([]);
     let [actionFilter, setActionFilter] = useState("");
     let [userFilter, setUserFilter] = useState("");
-    let [entitiesIdsFilter, setEntitiesIdsFilter] = useState([]);
-
+    let [entityFilter, setEntityFilter] = useState("");
     const [selected, setSelected] = useState([]);
+
+    useEffect(() => {
+        setAuditLogItems(auditLogs)
+    }, [auditLogs])
 
     const classes = commonStyles();
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the contacts here according to search criteria
+        //filter the logs here according to search criteria
+        const filteredAuditLogs = auditLogs
+            .filter(({ log_date }) => !fromDateFilter ? true : log_date >= fromDateFilter)
+            .filter(({ log_date }) => !toDateFilter ? true : log_date <= toDateFilter)
+            .filter(({ user_id }) => !userFilter ? true : user_id === userFilter)
+            .filter(({ entity }) => !entityFilter ? true : entity === entityFilter)
+            .filter(({ action }) => !actionFilter ? true : action === actionFilter)
+        setAuditLogItems(filteredAuditLogs)
+
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setContactItems(contacts);
-        setUserEmailFilter("");
+        setFromDateFilter("");
+        setToDateFilter("");
         setActionFilter("");
         setUserFilter("");
-        setEntitiesIdsFilter([]);
+        setEntityFilter("");
+        setAuditLogItems(auditLogs)
     };
 
     return (
         <Layout pageTitle="Audit Logs">
-            <Grid container spacing={3} justify="flex-start" alignItems="start">
+            <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <PageHeading text="Audit Logs" />
                 </Grid>
@@ -134,7 +98,7 @@ let AuditLogsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -142,7 +106,7 @@ let AuditLogsPage = ({
                                         id="from_date_filter"
                                         name="from_date_filter"
                                         label="From Date"
-                                        value={fromDateFilter || ""}
+                                        value={fromDateFilter}
                                         onChange={(event) => {
                                             setFromDateFilter(
                                                 event.target.value
@@ -151,7 +115,7 @@ let AuditLogsPage = ({
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -162,11 +126,11 @@ let AuditLogsPage = ({
                                         onChange={(event) => {
                                             setToDateFilter(event.target.value);
                                         }}
-                                        value={toDateFilter || ""}
+                                        value={toDateFilter}
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={4}>
                                     <TextField
                                         fullWidth
                                         select
@@ -179,30 +143,16 @@ let AuditLogsPage = ({
                                             setUserFilter(event.target.value);
                                         }}
                                     >
-                                        {USERS_LIST.map((user, index) => (
-                                            <MenuItem key={index} value={user}>
-                                                {user}
+                                        {users.map((user, index) => (
+                                            <MenuItem key={user.id} value={user.id}>
+                                                {user.first_name} {user.last_name}
                                             </MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={4}>
                                     <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        id="user_email"
-                                        name="user_email"
-                                        label="User Email"
-                                        value={firstNameFilter || ""}
-                                        onChange={(event) => {
-                                            setUserEmailFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
+                                        select
                                         fullWidth
                                         variant="outlined"
                                         name="action"
@@ -211,10 +161,16 @@ let AuditLogsPage = ({
                                         onChange={(event) => {
                                             setActionFilter(event.target.value);
                                         }}
-                                        value={actionFilter || ""}
-                                    />
+                                        value={actionFilter}
+                                    >
+                                        {ACTIONS_LIST.map((action, index) => (
+                                            <MenuItem key={index} value={action}>
+                                                {action}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={4}>
                                     <TextField
                                         fullWidth
                                         select
@@ -223,17 +179,14 @@ let AuditLogsPage = ({
                                         label="Entities"
                                         id="entities_ids"
                                         onChange={(event) => {
-                                            setEntitiesIdsFilter(
+                                            setEntityFilter(
                                                 event.target.value
                                             );
                                         }}
-                                        value={entitiesIdsFilter}
+                                        value={entityFilter}
                                     >
                                         {ENTITIES_LIST.map((entity, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={entity}
-                                            >
+                                            <MenuItem key={index} value={entity}>
                                                 {entity}
                                             </MenuItem>
                                         ))}
@@ -281,14 +234,6 @@ let AuditLogsPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
@@ -296,29 +241,23 @@ let AuditLogsPage = ({
                         headCells={auditLogsTableHeadCells}
                     />
                 </Grid>
-                
             </Grid>
         </Layout>
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
+        auditLogs: state.auditLogs.map((auditLog) => {
+            const user = state.users.find((user) => user.id === auditLog.user_id) || {};
+            return Object.assign({}, auditLog, { user_name: `${user.first_name} ${user.last_name}`, 
+            user_email: user.primary_email });
+        }).sort((auditLog1, auditLog2) => parse(auditLog2.log_date, 'yyyy-MM-dd', new Date()) -
+            parse(auditLog1.log_date, 'yyyy-MM-dd', new Date())),
+        users: state.users,
     };
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        handleDelete: (id) => {
-            dispatch(handleDelete(id, "contacts"));
-        },
-    };
-};
-
-AuditLogsPage = connect(mapStateToProps, mapDispatchToProps)(AuditLogsPage);
+AuditLogsPage = connect(mapStateToProps, null)(AuditLogsPage);
 
 export default withRouter(AuditLogsPage);

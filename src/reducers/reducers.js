@@ -96,7 +96,7 @@ function reducers(state = {}, action) {
         notices: noticesReducers.notices(state.notices, action),
         accountBillings: accountBillingsReducers.accountBillings(state.accountBillings, action),
         currentUser: setCurrentUser(state.currentUser, action),
-        auditLogs: logsReducers.logs(state.auditLogs, action),
+        auditLogs: logsReducers.auditLogs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),
         error: itemsHasErrored(state.itemsHasErrored, action),
         selectedTab: setPaginationPage(state.selectedTab, action),

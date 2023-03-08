@@ -54,7 +54,7 @@ const ManagmentFeeInputForm = (props) => {
           }
           setStatus({ sent: true, msg: "Fees Generated Successfully!" })
         } catch (error) {
-          setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+          setStatus({ sent: false, msg: `Error! ${error}.` })
         }
       }}
     >

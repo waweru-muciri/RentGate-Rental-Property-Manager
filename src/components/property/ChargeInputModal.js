@@ -1,5 +1,4 @@
 import React from "react";
-import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
@@ -45,12 +44,12 @@ export default function FormDialog(props) {
             onClose={handleClose}
             aria-labelledby="form-dialog-title"
         >
-            <DialogTitle>{chargeValues.id ? 'Edit Charge' : 'Add Charge'}</DialogTitle>
+            <DialogTitle>{chargeValues.account ? 'Edit Charge' : 'Add Charge'}</DialogTitle>
             <DialogContent>
                 <Formik
                     initialValues={chargeValues}
                     validationSchema={UnitChargeSchema}
-                    onSubmit={async (values, { resetForm, setStatus }) => {
+                    onSubmit={(values, { resetForm, setStatus }) => {
                         try {
                             let unitChargeToSave = {
                                 id: values.id,
@@ -61,14 +60,14 @@ export default function FormDialog(props) {
                                 due_date: values.due_date,
                                 frequency: values.frequency,
                             };
-                            await handleItemSubmit(unitChargeToSave, 'unit-charges')
+                            handleItemSubmit(unitChargeToSave)
                             resetForm({});
+                            setStatus({ sent: true, msg: "Charge added successfully!" })
                             if (values.id) {
                                 handleClose()
                             }
-                            setStatus({ sent: true, msg: "Details saved successfully!" })
                         } catch (error) {
-                            setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+                            setStatus({ sent: false, msg: `Error! ${error}.` })
                         }
                     }}>
                     {({

@@ -3,7 +3,7 @@ import { Grid } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
-import AccountSettings from "../components/users/AccountSettings";
+import AccountSettings from "../components/users/AccountSettingsInputForm";
 import { withRouter } from "react-router-dom";
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
@@ -89,7 +89,7 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 						justify="center"
 						item
 					>
-						<AccountSettings userToShow={userToShow} handleItemSubmit={handleItemSubmit}/>
+						<AccountSettings userToShow={userToShow} handleItemSubmit={handleItemSubmit} />
 					</Grid>
 				</Grid>
 			</TabPanel>
@@ -132,138 +132,138 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 								handleSubmit,
 								isSubmitting,
 							}) => (
-									<form
-										className={classes.form}
-										method="post"
-										id="companyInfoForm"
-										noValidate
-										onSubmit={handleSubmit}
+								<form
+									className={classes.form}
+									method="post"
+									id="companyInfoForm"
+									noValidate
+									onSubmit={handleSubmit}
+								>
+									<Grid
+										container
+										justify="center"
+										alignItems="center"
+										direction="column"
 									>
 										<Grid
-											container
 											justify="center"
-											alignItems="center"
+											container
+											item
 											direction="column"
 										>
-											<Grid
-												justify="center"
-												container
-												item
-												direction="column"
-											>
-												<Grid item container direction="row" spacing={2}>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_name"
-															label="Company Name"
-															id="company_name"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_name}
-															error={errors.company_name && touched.company_name}
-															helperText={touched.company_name && errors.company_name}
-														/>
-													</Grid>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_address"
-															label="Company Address"
-															id="company_address"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_address}
-															error={errors.company_address && touched.company_address}
-															helperText={touched.company_address && errors.company_address}
-														/>
-													</Grid>
+											<Grid item container direction="row" spacing={2}>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="company_name"
+														label="Company Name"
+														id="company_name"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_name}
+														error={errors.company_name && touched.company_name}
+														helperText={touched.company_name && errors.company_name}
+													/>
 												</Grid>
-												<Grid item container direction="row" spacing={2}>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_phone_number"
-															label="Company Phone Number"
-															id="company_phone_number"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_phone_number}
-															error={errors.company_phone_number && touched.company_phone_number}
-															helperText={touched.company_phone_number && errors.company_phone_number}
-														/>
-													</Grid>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_other_phone_number"
-															label="Other Phone Number"
-															id="company_other_phone_number"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_other_phone_number}
-															error={errors.company_other_phone_number && touched.company_other_phone_number}
-															helperText={touched.company_other_phone_number && errors.company_other_phone_number}
-														/>
-													</Grid>
-												</Grid>
-												<Grid item container direction="row" spacing={2}>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_primary_email"
-															label="Company Primary Email"
-															id="company_primary_email"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_primary_email}
-															error={errors.company_primary_email && touched.company_primary_email}
-															helperText={touched.company_primary_email && errors.company_primary_email}
-														/>
-													</Grid>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="company_other_email"
-															label="Company Other Email"
-															id="company_other_email"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.company_other_email}
-															error={errors.company_other_email && touched.company_other_email}
-															helperText={touched.company_other_email && errors.company_other_email}
-														/>
-													</Grid>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="company_address"
+														label="Company Address"
+														id="company_address"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_address}
+														error={errors.company_address && touched.company_address}
+														helperText={touched.company_address && errors.company_address}
+													/>
 												</Grid>
 											</Grid>
-											<Grid
-												item
-												container
-												direction="row"
-												className={classes.buttonBox}
-											>
-												<Grid item>
-													<Button
-														type="submit"
+											<Grid item container direction="row" spacing={2}>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
 														variant="outlined"
-														size="medium"
-														startIcon={<SaveIcon />}
-														form="companyInfoForm"
-														disabled={isSubmitting}
-													>
-														Update
-									    			</Button>
+														name="company_phone_number"
+														label="Company Phone Number"
+														id="company_phone_number"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_phone_number}
+														error={errors.company_phone_number && touched.company_phone_number}
+														helperText={touched.company_phone_number && errors.company_phone_number}
+													/>
+												</Grid>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="company_other_phone_number"
+														label="Other Phone Number"
+														id="company_other_phone_number"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_other_phone_number}
+														error={errors.company_other_phone_number && touched.company_other_phone_number}
+														helperText={touched.company_other_phone_number && errors.company_other_phone_number}
+													/>
+												</Grid>
+											</Grid>
+											<Grid item container direction="row" spacing={2}>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="company_primary_email"
+														label="Company Primary Email"
+														id="company_primary_email"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_primary_email}
+														error={errors.company_primary_email && touched.company_primary_email}
+														helperText={touched.company_primary_email && errors.company_primary_email}
+													/>
+												</Grid>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="company_other_email"
+														label="Company Other Email"
+														id="company_other_email"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.company_other_email}
+														error={errors.company_other_email && touched.company_other_email}
+														helperText={touched.company_other_email && errors.company_other_email}
+													/>
 												</Grid>
 											</Grid>
 										</Grid>
-									</form>
-								)}
+										<Grid
+											item
+											container
+											direction="row"
+											className={classes.buttonBox}
+										>
+											<Grid item>
+												<Button
+													type="submit"
+													variant="outlined"
+													size="medium"
+													startIcon={<SaveIcon />}
+													form="companyInfoForm"
+													disabled={isSubmitting}
+												>
+													Update
+									    			</Button>
+											</Grid>
+										</Grid>
+									</Grid>
+								</form>
+							)}
 						</Formik>
 					</Grid>
 				</Grid>
@@ -305,108 +305,108 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 								handleSubmit,
 								isSubmitting,
 							}) => (
-									<form
-										className={classes.form}
-										method="post"
-										id="billingInfoForm"
-										noValidate
-										onSubmit={handleSubmit}
+								<form
+									className={classes.form}
+									method="post"
+									id="billingInfoForm"
+									noValidate
+									onSubmit={handleSubmit}
+								>
+									<Grid
+										container
+										justify="center"
+										alignItems="center"
+										direction="column"
 									>
 										<Grid
-											container
 											justify="center"
-											alignItems="center"
+											container
+											item
 											direction="column"
 										>
-											<Grid
-												justify="center"
-												container
-												item
-												direction="column"
-											>
-												<Grid item container direction="row" spacing={2}>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="billing_address"
-															label="Billing Address"
-															id="billing_address"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.billing_address}
-															error={errors.billing_address && touched.billing_address}
-															helperText={touched.billing_address && errors.billing_address}
-														/>
-													</Grid>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="billing_company"
-															label="Company Name"
-															id="billing_company"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.billing_company}
-															error={errors.billing_company && touched.billing_company}
-															helperText={touched.billing_company && errors.billing_company}
-														/>
-													</Grid>
+											<Grid item container direction="row" spacing={2}>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="billing_address"
+														label="Billing Address"
+														id="billing_address"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.billing_address}
+														error={errors.billing_address && touched.billing_address}
+														helperText={touched.billing_address && errors.billing_address}
+													/>
 												</Grid>
-												<Grid item container direction="row" spacing={2}>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="billing_phone_number"
-															label="Phone Number"
-															id="billing_phone_number"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.billing_phone_number}
-															error={errors.billing_phone_number && touched.billing_phone_number}
-															helperText={touched.billing_phone_number && errors.billing_phone_number}
-														/>
-													</Grid>
-													<Grid item xs={12} sm>
-														<TextField
-															fullWidth
-															variant="outlined"
-															name="billing_email"
-															label="Email Address"
-															id="billing_email"
-															onBlur={handleBlur}
-															onChange={handleChange}
-															value={values.billing_email}
-															error={errors.billing_email && touched.billing_email}
-															helperText={touched.billing_email && errors.billing_email}
-														/>
-													</Grid>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="billing_company"
+														label="Company Name"
+														id="billing_company"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.billing_company}
+														error={errors.billing_company && touched.billing_company}
+														helperText={touched.billing_company && errors.billing_company}
+													/>
 												</Grid>
 											</Grid>
-											<Grid
-												item
-												container
-												direction="row"
-												className={classes.buttonBox}
-											>
-												<Grid item>
-													<Button
-														type="submit"
+											<Grid item container direction="row" spacing={2}>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
 														variant="outlined"
-														size="medium"
-														startIcon={<SaveIcon />}
-														form="billingInfoForm"
-														disabled={isSubmitting}
-													>
-														Update
-									    			</Button>
+														name="billing_phone_number"
+														label="Phone Number"
+														id="billing_phone_number"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.billing_phone_number}
+														error={errors.billing_phone_number && touched.billing_phone_number}
+														helperText={touched.billing_phone_number && errors.billing_phone_number}
+													/>
+												</Grid>
+												<Grid item xs={12} sm>
+													<TextField
+														fullWidth
+														variant="outlined"
+														name="billing_email"
+														label="Email Address"
+														id="billing_email"
+														onBlur={handleBlur}
+														onChange={handleChange}
+														value={values.billing_email}
+														error={errors.billing_email && touched.billing_email}
+														helperText={touched.billing_email && errors.billing_email}
+													/>
 												</Grid>
 											</Grid>
 										</Grid>
-									</form>
-								)}
+										<Grid
+											item
+											container
+											direction="row"
+											className={classes.buttonBox}
+										>
+											<Grid item>
+												<Button
+													type="submit"
+													variant="outlined"
+													size="medium"
+													startIcon={<SaveIcon />}
+													form="billingInfoForm"
+													disabled={isSubmitting}
+												>
+													Update
+									    			</Button>
+											</Grid>
+										</Grid>
+									</Grid>
+								</form>
+							)}
 						</Formik>
 					</Grid>
 					<Grid item>
@@ -430,7 +430,7 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 
 const mapStateToProps = (state) => {
 	return {
-		userToShow: state.users.find(({ id }) => id === state.currentUser.id) || {},
+		userToShow: state.users.find(({ id }) => id === state.currentUser.id) || { id: state.currentUser.id },
 		companyProfile: state.companyProfile[0] || {},
 		accountBillings: state.accountBillings,
 	};
