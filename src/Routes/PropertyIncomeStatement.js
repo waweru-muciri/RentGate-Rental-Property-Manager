@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import exportDataToXSL from "../assets/printToExcel";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -54,7 +53,7 @@ let PropertyIncomeStatement = ({
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
 
-    const getIncomeStatementThreeMonthsBack = () => {
+    useEffect(() => {
         //go back [numMonths] months from current date
         const numberOfMonthsBack = 12;
         const eachPastMonthDate = [...Array(numberOfMonthsBack).keys()].map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
@@ -136,7 +135,7 @@ let PropertyIncomeStatement = ({
         expensesMappedByMonth.push(totalExpensesObject)
         setIncomeStatements(incomeMappedByMonth);
         setExpensesStatements(expensesMappedByMonth);
-    }
+    }, [expensesItems, transactionItems, meterReadingItems])
 
     useEffect(() => {
         setUserItems(users)
@@ -145,6 +144,7 @@ let PropertyIncomeStatement = ({
         setMeterReadingItems(meterReadings)
         setPropertiesItems(properties)
     }, [expenses, transactions, properties, meterReadings, users])
+
 
     const exportTransactionsRecordsToExcel = () => {
         exportDataToXSL(
