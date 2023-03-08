@@ -115,14 +115,15 @@ const useStyles = makeStyles((theme) => ({
     },
     content: {
         flexGrow: 1,
-        padding: theme.spacing(3),
     },
     fullHeightWidthContainer: {
         width: "100%",
         height: "100%",
     },
     toolbarTitle: {
-        flexGrow: 0.4,
+        [theme.breakpoints.up('sm')]: {
+            margin: 'auto'
+        },
     },
     largeAvatar: {
         width: theme.spacing(12),
@@ -362,7 +363,7 @@ export default function HomePage() {
                 </Hidden>
             </nav>
             {/* Hero unit */}
-            <main>
+            <main className={classes.content}>
             <div className={classes.heroContent} id="about">
                 <div className={classes.toolbar} />
                 <Grid container alignItems="center" justify="center">
