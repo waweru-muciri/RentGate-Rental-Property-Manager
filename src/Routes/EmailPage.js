@@ -34,7 +34,7 @@ const mapStateToProps = (state) => {
 	return {
 		contacts: state.contacts,
 		currentUser: state.currentUser,
-		communication_emails : state.communication_emails,
+		communicationEmails : state.communicationEmails,
 		error: state.error,
 		users: state.users,
 	};

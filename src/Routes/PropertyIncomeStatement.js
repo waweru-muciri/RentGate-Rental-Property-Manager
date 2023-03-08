@@ -1,7 +1,6 @@
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import React, { useState, useEffect } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -163,21 +162,6 @@ let PropertyIncomeStatement = ({
         setTransactionItems(transactions)
     }, [transactions])
 
-    const exportTransactionsRecordsToExcel = () => {
-        exportDataToXSL(
-            "Income Statement",
-            "Income Statement",
-            incomeStatements,
-            "Income Statements"
-        );
-        exportDataToXSL(
-            "Expenses Statement",
-            "Expenses Statement",
-            expensesStatements,
-            "Expenses Statement"
-        );
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
@@ -212,11 +196,11 @@ let PropertyIncomeStatement = ({
                     key={1}
                 >
                     <Grid item>
-                        <ExportToExcelBtn
-                            aria-label="Export to Excel"
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                    <ExportToExcelBtn
+                            reportName={'Income Statements Records'}
+                            reportTitle={'Income Statements Records'}
+                            headCells={headCells}
+                            dataToPrint={incomeStatements}
                         />
                     </Grid>
                 </Grid>

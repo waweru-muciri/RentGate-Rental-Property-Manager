@@ -46,7 +46,7 @@ const PropertySettingsSchema = Yup.object().shape({
 
 let PropertySettingsInputForm = (props) => {
 	const { classes, currentUser, history, handleItemSubmit } = props
-	let propertySettingsToEdit = props.propertySettingsToEdit || {};
+	const propertySettingsToEdit = props.propertySettingsToEdit || {};
 	const propertyValues = {
 		id: propertySettingsToEdit.id,
 		property: propertySettingsToEdit.property || "",

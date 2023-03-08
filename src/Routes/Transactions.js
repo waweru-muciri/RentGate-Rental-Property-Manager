@@ -2,7 +2,6 @@ import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
 import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import {
     Box,
     TextField,
@@ -10,7 +9,6 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
-import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
@@ -68,19 +66,19 @@ const headCells = [
         disablePadding: true,
         label: "Deposit Held",
     },
-        {
+    {
         id: "transaction_price",
         numeric: false,
         disablePadding: true,
         label: "Rent",
-    },{
+    }, {
         id: "rent_balance",
         numeric: false,
         disablePadding: true,
         label: "Rent Balance",
     },
-	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let TransactionPage = ({
@@ -134,16 +132,6 @@ let TransactionPage = ({
         setTransactionItems(mappedTransactions);
         setFilteredTransactionItems(mappedTransactions);
     }, [transactions, contacts, properties, users]);
-
-    const exportTransactionsRecordsToExcel = () => {
-        let items = transactionItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Leases  Records",
-            "Leases Data",
-            items,
-            "Leases Data"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -220,27 +208,20 @@ let TransactionPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Rental Transactions Records'}
-							reportTitle = {'Rental Transactions Records'}
+                            reportName={'Leases Records'}
+                            reportTitle={'Leases Data'}
                             headCells={headCells}
                             dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                            reportName={'Leases Records'}
+                            reportTitle={'Leases Data'}
+                            headCells={headCells}
+                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

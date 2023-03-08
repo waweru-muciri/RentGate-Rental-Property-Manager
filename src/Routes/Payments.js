@@ -2,7 +2,6 @@ import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
 import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import {
     Box,
     TextField,
@@ -10,7 +9,6 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
-import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
@@ -139,15 +137,6 @@ let TransactionPage = ({
         setTabValue(newValue);
     };
 
-    const exportTransactionsRecordsToExcel = () => {
-        let items = transactionItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Payments  Records",
-            "Payments Data",
-            items,
-            "Payments Data"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -224,27 +213,20 @@ let TransactionPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
                             reportName={'Rental Payments Records'}
-                            reportTitle={'Rental Payments Records'}
+                            reportTitle={'Rental Payments Data'}
                             headCells={headCells}
                             dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                            reportName={'Rental Payments Records'}
+                            reportTitle={'Rental Payments Data'}
+                            headCells={headCells}
+                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

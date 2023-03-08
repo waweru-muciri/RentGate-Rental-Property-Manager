@@ -6,7 +6,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
+import exportDataToXSL from "../assets/PrintToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
@@ -17,7 +17,6 @@ import { commonStyles } from "../components/commonStyles";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintMaintenanceRequest from "../assets/PrintMaintenanceRequest";
 
 const STATUS_LIST = ["Open", "Closed"];
 
@@ -109,18 +108,6 @@ let MaintenanceRequestsPage = ({
 		setFilteredMaintenanceRequestItems(mappedMaintenanceRequests);
 	}, [maintenanceRequests, contacts, users, propertyUnits]);
 
-	const exportMaintenanceRequestRecordsToExcel = () => {
-		let items = maintenanceRequests.filter(({ id }) =>
-			selected.includes(id)
-		);
-		exportDataToXSL(
-			"MaintenanceRequests  Records",
-			"Contact Data",
-			items,
-			"ContactData"
-		);
-	};
-
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the maintenanceRequests here according to search criteria
@@ -200,18 +187,14 @@ let MaintenanceRequestsPage = ({
 					</Grid>
 					<Grid item>
 						<ExportToExcelBtn
-							aria-label="Export to Excel"
 							disabled={selected.length <= 0}
-							onClick={(event) => {
-								exportMaintenanceRequestRecordsToExcel();
-							}}
+							reportName={'Maintenance Requests Records'}
+							reportTitle={'Maintenance Requests Data'}
+							headCells={maintenanceRequestsTableHeadCells}
+							dataToPrint={maintenanceRequestItems.filter(({ id }) => selected.includes(id))}
 						/>
 					</Grid>
 					<Grid item>
-						<PrintMaintenanceRequest
-							disabled={selected.length <= 0}
-							maintenanceRequestToPrint={maintenanceRequestItems.find(({ id }) => id === selected[0])}
-						/>
 					</Grid>
 				</Grid>
 				<Grid item xs={12} sm={12} md={12} lg={12}>
@@ -400,9 +383,9 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
-    };
+	return {
+		handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+	};
 };
 
 MaintenanceRequestsPage = connect(

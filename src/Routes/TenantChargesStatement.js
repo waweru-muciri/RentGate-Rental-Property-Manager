@@ -1,18 +1,17 @@
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
-import { connect } from "react-redux";
-import { commonStyles } from "../components/commonStyles";
-import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
+import { getTransactionsFilterOptions } from "../assets/commonAssets";
 import moment from "moment";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+
 const headCells = [
     {
         id: "tenant_name",
@@ -21,119 +20,90 @@ const headCells = [
         label: "Tenant",
     },
     {
-        id: "property_ref",
+        id: "unit_ref",
         numeric: false,
         disablePadding: true,
         label: "Unit Ref/Number",
     },
+    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
     {
-        id: "transaction_date",
+        id: "charge_date",
         numeric: false,
         disablePadding: true,
         label: "Transaction Date",
     },
     {
-        id: "transaction_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Charge Type",
-    },
-    {
-        id: "property_price",
+        id: "charge_amount",
         numeric: false,
         disablePadding: true,
         label: "Charge Amount",
     },
+    { id: "payed_status", numeric: false, disablePadding: true, label: "Payment Status" },
+    { id: "payed_amount", numeric: false, disablePadding: true, label: "Paid Amount" },
+    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+
 ];
 
-let TenantStatementsPage = ({
-    transactions,
-    properties,
-    contacts,
-    users
+let TenantChargesStatementPage = ({
+    tenantDetails,
+    tenantTransactionCharges,
+    handleItemDelete,
+    classes,
 }) => {
-    let [statementItems, setStatementItems] = useState([]);
-    let [filteredStatementItems, setFilteredStatementItems] = useState([]);
+    let [chargesItems, setChargeItems] = useState([]);
+    let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = []
+    const CHARGE_TYPES = Array.from(new Set(chargesItems.map((chargeItem) => chargeItem.charge_type)))
+
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {}
-            transactionDetails.tenant_name = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
-            transactionDetails.tenantId = typeof tenant !== 'undefined' ? tenant.id : ''
-            transactionDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            transactionDetails.property_ref = typeof property !== 'undefined' ? property.ref : null
-            transactionDetails.property = typeof property !== 'undefined' ? property.id : null
-            transactionDetails.property_price = typeof property !== 'undefined' ? property.price : null
-            transactionDetails.security_deposit = typeof transaction !== 'undefined' ? transaction.security_deposit : null
-            transactionDetails.water_deposit = typeof transaction !== 'undefined' ? transaction.water_deposit : null
-            transactionDetails.transaction_balance = typeof property !== 'undefined' ? property.price - transaction.transaction_price : null
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setStatementItems(mappedTransactions);
-        setFilteredStatementItems(mappedTransactions);
-    }, [transactions, contacts, users, properties]);
-
-    const classes = commonStyles();
-
-    const exportTransactionsRecordsToExcel = () => {
-        let items = statementItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Tenant Statements Records",
-            "Tenant Statements Data",
-            items,
-            "TenantStatements"
-        );
-    };
+        setChargeItems(tenantTransactionCharges);
+        setFilteredChargeItems(tenantTransactionCharges);
+    }, [tenantTransactionCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactions according to the search criteria here
+        //filter the tenantTransactionCharges according to the search criteria here
+        let filteredStatements = chargesItems
         let startOfPeriod;
         let endOfPeriod;
-        switch (periodFilter) {
-            case 'last-month':
-                startOfPeriod = moment().subtract(1, 'months').startOf('month')
-                endOfPeriod = moment().subtract(1, 'months').endOf('month')
-                break;
-            case 'year-to-date':
-                startOfPeriod = moment().startOf('year')
-                endOfPeriod = moment()
-                break;
-            case 'last-year':
-                startOfPeriod = moment().subtract(1, 'years').startOf('year')
-                endOfPeriod = moment().subtract(1, 'years').endOf('year')
-                break;
-            default:
-                startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
-                endOfPeriod = moment()
-                break;
+        if (periodFilter) {
+            switch (periodFilter) {
+                case 'last-month':
+                    startOfPeriod = moment().subtract(1, 'months').startOf('month')
+                    endOfPeriod = moment().subtract(1, 'months').endOf('month')
+                    break;
+                case 'year-to-date':
+                    startOfPeriod = moment().startOf('year')
+                    endOfPeriod = moment()
+                    break;
+                case 'last-year':
+                    startOfPeriod = moment().subtract(1, 'years').startOf('year')
+                    endOfPeriod = moment().subtract(1, 'years').endOf('year')
+                    break;
+                default:
+                    startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
+                    endOfPeriod = moment()
+                    break;
+            }
+            filteredStatements = filteredStatements.filter((chargeItem) => {
+                const chargeItemDate = moment(chargeItem.charge_date)
+                return chargeItemDate.isSameOrAfter(startOfPeriod) && chargeItemDate.isSameOrBefore(endOfPeriod)
+            })
         }
-
-        const filteredStatements = statementItems.filter((chargeItem) => {
-            const chargeItemDate = moment(chargeItem.charge_date)
-            return chargeItemDate.isSameOrAfter(startOfPeriod) && chargeItemDate.isSameOrBefore(endOfPeriod)
-        }).filter(({ charge_type }) =>
+        filteredStatements = filteredStatements.filter(({ charge_type }) =>
             !chargeType ? true : charge_type === chargeType
         )
-        setFilteredStatementItems(filteredStatements);
+        setFilteredChargeItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredStatementItems(statementItems);
+        setFilteredChargeItems(chargesItems);
         setChargeTypeFilter("");
         setPeriodFilter("");
     };
@@ -157,11 +127,20 @@ let TenantStatementsPage = ({
             >
                 <Grid item>
                     <ExportToExcelBtn
-                        aria-label="Export to Excel"
                         disabled={selected.length <= 0}
-                        onClick={(event) => {
-                            exportTransactionsRecordsToExcel();
-                        }}
+                        reportName={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
+                        reportTitle={'Tenant Charges Data'}
+                        headCells={headCells}
+                        dataToPrint={chargesItems.filter(({ id }) => selected.includes(id))}
+                    />
+                </Grid>
+                <Grid item>
+                    <PrintArrayToPdf
+                        disabled={selected.length <= 0}
+                        reportName={'Tenant Charges Data'}
+                        reportTitle={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
+                        headCells={headCells}
+                        dataToPrint={chargesItems.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
             </Grid>
@@ -279,25 +258,14 @@ let TenantStatementsPage = ({
                 <CommonTable
                     selected={selected}
                     setSelected={setSelected}
-                    rows={filteredStatementItems}
+                    rows={filteredChargeItems}
                     headCells={headCells}
-                    noDetailsCol={true}
-                    noEditCol={true}
-                    noDeleteCol={true}
+                    deleteUrl={'unit-charges'}
+                    handleDelete={handleItemDelete}
                 />
             </Grid>
         </Grid>
     );
 };
 
-const mapStateToProps = (state) => {
-    return {
-        currentUser: state.currentUser,
-        properties: state.properties,
-        transactions: state.transactions,
-        contacts: state.contacts,
-        users: state.users,
-    };
-};
-
-export default connect(mapStateToProps)(TenantStatementsPage);
+export default TenantChargesStatementPage;

@@ -2,10 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
 import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { handleDelete } from "../actions/actions";
@@ -33,8 +31,8 @@ const expensesTableHeadCells = [
         label: "Property/Unit Ref",
     },
     { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
-	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
@@ -70,16 +68,6 @@ let ExpensesPage = ({
         setExpenseItems(mappedExpenses);
         setFilteredExpenseItems(mappedExpenses);
     }, [expenses, properties]);
-
-    const exportVacatingExpensesToExcel = () => {
-        let items = expenseItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Expenses  Records",
-            "Expense Data",
-            items,
-            "ExpenseData"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -155,27 +143,20 @@ let ExpensesPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
                             reportName={'Expenses Records'}
-                            reportTitle={'Expenses Records'}
+                            reportTitle={'Expenses Data'}
                             headCells={expensesTableHeadCells}
                             dataToPrint={expenseItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportVacatingExpensesToExcel();
-                            }}
+                            reportName={'Expenses Records'}
+                            reportTitle={'Expenses Data'}
+                            headCells={expensesTableHeadCells}
+                            dataToPrint={expenseItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

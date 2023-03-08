@@ -1,21 +1,32 @@
 import Button from "@material-ui/core/Button";
 import React from "react";
 import PrintIcon from "@material-ui/icons/Print";
-import { printTenantTransactions } from "./PdfMakePrint";
+import { printTenantTransactions } from "./PdfPrintingHelper";
+import PropTypes from 'prop-types';
 
-export default function (props) {
-    const { reportName, reportTitle, headCells, dataToPrint } = props
+function PrintArrayToPdf (props) {
+    const { disabled, reportName, reportTitle, headCells, dataToPrint } = props
     return (
         <Button
+            type="button"
             aria-label="Print to Pdf"
             variant="contained"
             size="medium"
             color="primary"
-            disabled={props.disabled}
+            disabled={disabled}
             onClick={() => printTenantTransactions(reportName, reportTitle, headCells, dataToPrint)}
             startIcon={<PrintIcon />}
         >
-            pdf
+            Pdf
         </Button>
     );
 }
+
+PrintArrayToPdf.propTypes = {
+    reportName: PropTypes.string.isRequired,
+    reportTitle: PropTypes.string.isRequired,
+    headCells: PropTypes.array.isRequired,
+    dataToPrint: PropTypes.array.isRequired,
+}
+
+export default PrintArrayToPdf;

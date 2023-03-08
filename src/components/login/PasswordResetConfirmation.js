@@ -106,85 +106,89 @@ let PasswordResetConfirmation = (props) => {
                 handleBlur,
                 isSubmitting,
             }) => (
-                    typeof codeVerificationError !== 'undefined' ?
-                        <form
-                            className={classes.form}
-                            method="post"
-                            id="resetPasswordForm"
-                            onSubmit={handleSubmit}
-                        >
-                            <Grid container justify="center" direction="column" spacing={3}>
-                                <Grid item key={2}>
-                                    <PageHeading paddingLeft={2} text={"Reset Password"} />
-                                </Grid>
-                                <Grid item key={3}>
-                                    <FormControl fullWidth>
-                                        {status && (
-                                            <FormHelperText error={true}>
-                                                {status.error}
-                                            </FormHelperText>
-                                        )}
-                                    </FormControl>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        autoFocus
-                                        margin="dense"
-                                        id="email"
-                                        label="Email Address"
-                                        value={values.email}
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        helperText={errors.email}
-                                        error={'email' in errors}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        margin="dense"
-                                        id="password"
-                                        label="Password"
-                                        type="password"
-                                        value={values.password}
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        helperText={touched.password && errors.password}
-                                        error={errors.password && touched.password}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        margin="dense"
-                                        id="confirmPassword"
-                                        label="Confirm Password"
-                                        type="password"
-                                        value={values.confirmPassword}
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        helperText={
-                                            errors.confirmPassword
-                                        }
-                                        error={'confirmPassword' in errors}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        disabled={isSubmitting}
-                                        type="submit"
-                                        variant="outlined"
-                                        color="primary"
-                                        form="resetPasswordForm">
-                                        Reset Password
-                                        </Button>
-                                </Grid>
+                    <form
+                        className={classes.form}
+                        method="post"
+                        id="resetPasswordForm"
+                        onSubmit={handleSubmit}
+                    >
+                        <Grid container justify="center" direction="column" spacing={3}>
+                            <Grid item key={2}>
+                                <PageHeading paddingLeft={2} text={"Reset Password"} />
                             </Grid>
-                        </form>
-                        : <Typography variant="subtitle1" align="center">
-                            Invalid or expired action code. Please try to reset the password again.
-                        </Typography>
+                            <Grid item key={'hhhf'}>
+                                {
+                                codeVerificationError ?
+                                    <Typography variant="subtitle1" align="center">
+                                        Invalid or expired action code. Please try to reset the password again.
+                                    </Typography> : null
+                                }
+                            </Grid>
+                            <Grid item key={3}>
+                                <FormControl fullWidth>
+                                    {status && (
+                                        <FormHelperText error={true}>
+                                            {status.error}
+                                        </FormHelperText>
+                                    )}
+                                </FormControl>
+                                <TextField
+                                    fullWidth
+                                    variant="outlined"
+                                    autoFocus
+                                    margin="dense"
+                                    id="email"
+                                    label="Email Address"
+                                    value={values.email}
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    helperText={errors.email}
+                                    error={'email' in errors}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="outlined"
+                                    margin="dense"
+                                    id="password"
+                                    label="Password"
+                                    type="password"
+                                    value={values.password}
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    helperText={touched.password && errors.password}
+                                    error={errors.password && touched.password}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="outlined"
+                                    margin="dense"
+                                    id="confirmPassword"
+                                    label="Confirm Password"
+                                    type="password"
+                                    value={values.confirmPassword}
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    helperText={
+                                        errors.confirmPassword
+                                    }
+                                    error={'confirmPassword' in errors}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <Button
+                                    disabled={isSubmitting}
+                                    type="submit"
+                                    variant="outlined"
+                                    color="primary"
+                                    form="resetPasswordForm">
+                                    Reset Password
+                                        </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
                 )}
         />
     );

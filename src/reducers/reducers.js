@@ -8,10 +8,8 @@ import * as transactionsReducers from "./transactions";
 import * as logsReducers from "./logs";
 import * as maintenanceRequestsReducers from "./maintenanceRequests";
 import * as usersReducers from "./users";
-import * as emailsReducers from "./emails";
 import * as communicationEmailsReducers from "./CommunicationEmails";
-import * as phoneNumbersReducers from "./phoneNumbers";
-import * as addressesReducers from "./addresses";
+import * as transactionChargesReducers from "./transactionsCharges";
 import * as leaseReducers from "./leases";
 import * as noticesReducers from "./notices";
 import * as expensesReducers from "./expenses";
@@ -65,7 +63,7 @@ export function itemsIsLoading(state = false, action) {
 
 function reducers(state = {}, action) {
     return {
-        communication_emails: communicationEmailsReducers.communicationEmails(state.communication_emails, action),
+        communicationEmails: communicationEmailsReducers.communicationEmails(state.communication_emails, action),
         properties: propertyReducers.properties(state.properties, action),
         propertyUnitCharges: propertyUnitChargesReducers.propertyUnitCharges(state.propertyUnitCharges, action),
         propertyUnits: propertyUnitsReducers.propertyUnits(state.propertyUnits, action),
@@ -74,13 +72,8 @@ function reducers(state = {}, action) {
         expenses: expensesReducers.expenses(state.expenses, action),
         contacts: contactsReducers.contacts(state.contacts, action),
         leases: leaseReducers.leases(state.leases, action),
-        contact_emails: emailsReducers.emails(state.contact_emails, action),
-        contact_addresses: addressesReducers.addresses(
-            state.contact_addresses,
-            action
-        ),
-        contact_phone_numbers: phoneNumbersReducers.phoneNumbers(
-            state.contact_phone_numbers,
+        transactionsCharges: transactionChargesReducers.transactionsCharges(
+            state.transactionsCharges,
             action
         ),
         transactions: transactionsReducers.transactions(

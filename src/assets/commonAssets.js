@@ -113,9 +113,10 @@ export function getTransactionTypes() {
 }
 
 export function getTransactionsFilterOptions() {
-	return [ {id: 1, text: 'Month To Date'}, {id: 3, text: '3 Months To Date'}, 
-	{id: 'year-to-date', text: 'Year To Date'}, {id: 'last-year', text: 'Last Year'}, 
-	{id: 'last-month', text: 'Last Month'} ];
+	return [
+		{ id: 1, text: 'Month To Date' }, { id: 'last-month', text: 'Last Month' },
+		{ id: 3, text: '3 Months To Date' }, { id: 'year-to-date', text: 'Year To Date' },
+		{ id: 'last-year', text: 'Last Year' },];
 }
 
 // Create our number formatter.

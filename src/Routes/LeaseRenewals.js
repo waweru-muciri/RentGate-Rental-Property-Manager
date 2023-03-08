@@ -1,9 +1,7 @@
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
-import PrintIcon from "@material-ui/icons/Print";
 import { Link } from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -99,16 +97,6 @@ let RentRollPage = ({
 
     const classes = commonStyles();
 
-    const exportTransactionsRecordsToExcel = () => {
-        let items = statementItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Rent Roll Records",
-            "Rent Roll Data",
-            items,
-            "RentRoll"
-        );
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
@@ -175,27 +163,20 @@ let RentRollPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-                            reportName={'Lease Renewal Records'}
-                            reportTitle={'Lease Renewal Records'}
+                            reportName={'Rent Roll Records'}
+                            reportTitle={'Rent Roll Data'}
                             headCells={headCells}
                             dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                            reportName={'Rent Roll Records'}
+                            reportTitle={'Rent Roll Data'}
+                            headCells={headCells}
+                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

@@ -5,14 +5,12 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
 import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintTenantVacatingNotice from "../assets/PrintTenantVacatingNotice";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
@@ -45,9 +43,9 @@ const noticesTableHeadCells = [
         numeric: false,
         disablePadding: true,
         label: "Move Out Date",
-    },	
+    },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
@@ -105,16 +103,6 @@ let VacatingNoticesPage = ({
         setNoticeItems(mappedNotices);
         setFilteredNoticeItems(mappedNotices);
     }, [notices, contacts, properties, users]);
-
-    const exportVacatingNoticesToExcel = () => {
-        let items = noticeItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Contacts  Records",
-            "Contact Data",
-            items,
-            "ContactData"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -192,22 +180,14 @@ let VacatingNoticesPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportVacatingNoticesToExcel();
-                            }}
+                            reportName={'Notices Records'}
+                            reportTitle={'Notices Data'}
+                            headCells={noticesTableHeadCells}
+                            dataToPrint={noticeItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
-                        <PrintTenantVacatingNotice
-                            disabled={selected.length <= 0}
-                            noticeToPrint={
-                                noticeItems.find(({ id }) => id === selected[0])
-                            }
-                        >
-                            pdf
-                        </PrintTenantVacatingNotice>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12}>

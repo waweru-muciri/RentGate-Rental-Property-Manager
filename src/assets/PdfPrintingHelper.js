@@ -84,12 +84,13 @@ export const printDocument = (reportName, reportTitle, documentContent) => {
 
 // -- Generate the Underlying Transactions Summary report.
 export function printTenantTransactions(reportName, reportTitle, headCells, dataToPrint) {
+    const headCellsToPrint = headCells.filter(({id}) => id !== 'edit' && id !== 'delete' && id !== 'details')
 
     const fontSize = 9;
 
     // -- Generate the body of the document table, with headings
     const tableBody = (dataRows) => {
-        const tableHeadRow = headCells.map((headCell) => thl(`${headCell.label}`, -1, { rowSpan: 1, fontSize: fontSize }))
+        const tableHeadRow = headCellsToPrint.map((headCell) => thl(`${headCell.label}`, -1, { rowSpan: 1, fontSize: fontSize }))
 
         const body = [
             tableHeadRow,
@@ -97,7 +98,7 @@ export function printTenantTransactions(reportName, reportTitle, headCells, data
 
         dataRows.forEach((row, index) => {
             const tableRow = [];
-            headCells.forEach((headCell) => {
+            headCellsToPrint.forEach((headCell) => {
                 tableRow.push(tdl(row[headCell.id], index, { fontSize: fontSize }));
             });
             body.push(tableRow);
@@ -105,7 +106,7 @@ export function printTenantTransactions(reportName, reportTitle, headCells, data
         return body;
     }
 
-    const tableColumnWidths = headCells.map((headCell) => 'auto');
+    const tableColumnWidths = headCellsToPrint.map((headCell) => 'auto');
 
     // -- The main report table, with the table body.
     const tableData = {

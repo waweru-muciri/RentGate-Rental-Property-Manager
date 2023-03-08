@@ -1,6 +1,5 @@
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -117,16 +116,6 @@ let TenantStatementsPage = ({
 
     const classes = commonStyles();
 
-    const exportTransactionsRecordsToExcel = () => {
-        let items = statementItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Tenant Statements Records",
-            "Tenant Statements Data",
-            items,
-            "TenantStatements"
-        );
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
@@ -178,12 +167,12 @@ let TenantStatementsPage = ({
                     key={1}
                 >
                     <Grid item>
-                        <ExportToExcelBtn
-                            aria-label="Export to Excel"
+                    <ExportToExcelBtn
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                            reportName={'Tenant Statements Records'}
+                            reportTitle={'Tenant Statements Records'}
+                            headCells={headCells}
+                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

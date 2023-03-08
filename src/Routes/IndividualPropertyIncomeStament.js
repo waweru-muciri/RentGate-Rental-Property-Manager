@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -39,7 +38,7 @@ let PropertyIncomeStatement = ({
                 eachPastMonthDate = [moment().subtract(1, 'months').format('YYYY-MM-DD')]
                 break;
             case 'year-to-date':
-                eachPastMonthDate = [...Array((moment().month() +1)).keys()].map((value) => moment().startOf('year').add(value, 'months').format('YYYY-MM-DD'))
+                eachPastMonthDate = [...Array((moment().month() + 1)).keys()].map((value) => moment().startOf('year').add(value, 'months').format('YYYY-MM-DD'))
                 break;
             case 'last-year':
                 eachPastMonthDate = [...Array(12).keys()].map((value) => moment().subtract(1, 'years').startOf('year').add(value, 'months').format('YYYY-MM-DD'))
@@ -48,7 +47,7 @@ let PropertyIncomeStatement = ({
                 eachPastMonthDate = [...Array(fromFilter).keys()].reverse().map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
                 break;
         }
-        setHeadCells([...eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')), `Total as of ${moment(eachPastMonthDate[eachPastMonthDate.length -1]).format('DD/MM/YYYY')}`])
+        setHeadCells([...eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')), `Total as of ${moment(eachPastMonthDate[eachPastMonthDate.length - 1]).format('DD/MM/YYYY')}`])
         const incomeMappedByMonth = []
         const expensesMappedByMonth = []
         const totalIncomeObject = { income_type: 'Total Income' }
@@ -142,21 +141,6 @@ let PropertyIncomeStatement = ({
     }, [expenses, transactions, propertyUnits, meterReadings])
 
 
-    const exportTransactionsRecordsToExcel = () => {
-        exportDataToXSL(
-            "Income Statement",
-            "Income Statement",
-            incomeStatements,
-            "Income Statements"
-        );
-        exportDataToXSL(
-            "Expenses Statement",
-            "Expenses Statement",
-            expensesStatements,
-            "Expenses Statement"
-        );
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
@@ -191,10 +175,10 @@ let PropertyIncomeStatement = ({
             >
                 <Grid item>
                     <ExportToExcelBtn
-                        aria-label="Export to Excel"
-                        onClick={(event) => {
-                            exportTransactionsRecordsToExcel();
-                        }}
+                        reportName={'Income Statements Records'}
+                        reportTitle={'Income Statements Data'}
+                        headCells={headCells}
+                        dataToPrint={incomeStatements}
                     />
                 </Grid>
             </Grid>

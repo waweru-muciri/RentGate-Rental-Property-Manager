@@ -8,9 +8,7 @@ import * as contactsActions from "./contacts";
 import * as transactionsActions from "./transactions";
 import * as logActions from "./logs";
 import * as usersActions from "./users";
-import * as addressesActions from "./addresses";
-import * as phoneNumbersActions from "./phoneNumbers";
-import * as emailsActions from "./emails";
+import * as transactionChargesActions from "./transactionsCharges";
 import * as communicationEmailsActions from "./CommunicationEmails";
 import * as leaseActions from "./leases";
 import * as toDoActions from "./to-dos";
@@ -58,7 +56,7 @@ export const getFirebaseUserDetails = (userToken) => {
         uid: userToken.uid,
         id: userToken.uid,
         tenant: 'wPEY7XfSReuoOEOa22aX',
-        phoneNumber: userToken.phoneNumber,
+        transactionCharge: userToken.transactionCharge,
         providerData: userToken.providerData,
     };
     userToken.getIdTokenResult().then((idTokenResult) => {
@@ -243,28 +241,14 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
-                    case "contact_emails":
+                    case "transactions-charges":
                         dispatch(
-                            emailsActions.emailsFetchDataSuccess(fetchedItems)
-                        );
-                        break;
-
-                    case "contact_phone_numbers":
-                        dispatch(
-                            phoneNumbersActions.phoneNumbersFetchDataSuccess(
+                            transactionChargesActions.transactionChargesFetchDataSuccess(
                                 fetchedItems
                             )
                         );
                         break;
-
-                    case "contact_addresses":
-                        dispatch(
-                            addressesActions.addressesFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
-                        break;
-
+                
                     case "transactions":
                         dispatch(
                             transactionsActions.transactionsFetchDataSuccess(
@@ -398,15 +382,9 @@ export function handleDelete(user, itemId, url) {
                     );
                     break;
 
-                case "contact_emails":
+                case "transactions-charges":
                     dispatch(
-                        emailsActions.deleteEmail(itemId)
-                    );
-                    break;
-
-                case "contact_phone_numbers":
-                    dispatch(
-                        phoneNumbersActions.deletePhoneNumber(
+                        transactionChargesActions.deleteTransactionCharge(
                             itemId
                         )
                     );
@@ -414,14 +392,6 @@ export function handleDelete(user, itemId, url) {
 
                 case "leases":
                     dispatch(leaseActions.deleteLease(itemId));
-                    break;
-
-                case "contact_addresses":
-                    dispatch(
-                        addressesActions.deleteAddress(
-                            itemId
-                        )
-                    );
                     break;
 
                 case "transactions":
@@ -540,15 +510,9 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
-                            case "contact_emails":
+                            case "transactions-charges":
                                 dispatch(
-                                    emailsActions.editEmail(modifiedObject)
-                                );
-                                break;
-
-                            case "contact_phone_numbers":
-                                dispatch(
-                                    phoneNumbersActions.editPhoneNumber(
+                                    transactionChargesActions.editTransactionCharge(
                                         modifiedObject
                                     )
                                 );
@@ -556,12 +520,6 @@ export function handleItemFormSubmit(user, data, url) {
 
                             case "leases":
                                 dispatch(leaseActions.editLease(modifiedObject));
-                                break;
-
-                            case "contact_addresses":
-                                dispatch(
-                                    addressesActions.editAddress(modifiedObject)
-                                );
                                 break;
 
                             case "transactions":
@@ -662,13 +620,9 @@ export function handleItemFormSubmit(user, data, url) {
                                 dispatch(contactsActions.addContact(addedItem));
                                 break;
 
-                            case "contact_emails":
-                                dispatch(emailsActions.addEmail(addedItem));
-                                break;
-
-                            case "contact_phone_numbers":
+                            case "transactions-charges":
                                 dispatch(
-                                    phoneNumbersActions.addPhoneNumber(
+                                    transactionChargesActions.addTransactionCharge(
                                         addedItem
                                     )
                                 );
@@ -676,12 +630,6 @@ export function handleItemFormSubmit(user, data, url) {
 
                             case "leases":
                                 dispatch(leaseActions.addLease(addedItem));
-                                break;
-
-                            case "contact_addresses":
-                                dispatch(
-                                    addressesActions.addAddress(addedItem)
-                                );
                                 break;
 
                             case "transactions":

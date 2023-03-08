@@ -1,11 +1,9 @@
 import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/CustomSnackbar";
@@ -84,20 +82,6 @@ let PropertyPage = ({
         setFilteredPropertiesItems(mappedProperties)
     }, [properties, users])
 
-    const exportPropertyRecordsToExcel = () => {
-        let items = propertyUnitsItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Rental Properties Records",
-            "Rental Properties Data",
-            items,
-            "Rental Properties Data"
-        );
-    };
-    
-    const tableRowOnClickHandler = (propertyId) => {
-        history.push(`properties/${propertyId}/details`)
-    }
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
@@ -163,27 +147,20 @@ let PropertyPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
                             reportName={'Rental Records'}
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
                             dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportPropertyRecordsToExcel();
-                            }}
+                            reportName={'Rental Records'}
+                            reportTitle={'Rentals Records'}
+                            headCells={headCells}
+                            dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -298,7 +275,6 @@ let PropertyPage = ({
                         </div>
                     )}
                     <CommonTable
-                        tableRowOnClickHandler={tableRowOnClickHandler}
                         selected={selected}
                         setSelected={setSelected}
                         rows={filteredPropertyItems}

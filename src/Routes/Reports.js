@@ -2,7 +2,6 @@ import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import exportDataToXSL from "../assets/printToExcel";
 import {
     Box,
     TextField,
@@ -138,16 +137,6 @@ let ReportsPage = ({
         setFilteredTransactionItems(mappedTransactions);
     }, [transactions, contacts, users, properties]);
 
-    const exportTransactionsRecordsToExcel = () => {
-        let items = transactionItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Transactions  Records",
-            "Transactions Data",
-            items,
-            "TansactionsData"
-        );
-    };
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
@@ -224,11 +213,11 @@ let ReportsPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportTransactionsRecordsToExcel();
-                            }}
+                            reportName={'Transactions Records'}
+                            reportTitle={'Transactions Data'}
+                            headCells={headCells}
+                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

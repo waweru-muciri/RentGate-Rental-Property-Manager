@@ -7,6 +7,9 @@ import CancelIcon from "@material-ui/icons/Cancel"; import {
   getMeterTypes,
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
+import moment from "moment";
+
+const defaultDate = moment().format("YYYY-MM-DD");
 
 
 const MeterReadingSchema = Yup.object().shape({
@@ -22,15 +25,26 @@ const MeterReadingSchema = Yup.object().shape({
 
 const METER_OPTIONS = getMeterTypes();
 
-const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadingToEdit, currentUser, handleItemSubmit }) => {
+const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, meterReadingToEdit, currentUser, handleItemSubmit }) => {
+
   const classes = commonStyles();
+  const meterReadingValues = meterReadingToEdit || {
+    property: '',
+    property_unit: '',
+    reading_date: defaultDate,
+    prior_value: '',
+    current_value: '',
+    base_charge: '',
+    unit_charge: '',
+    meter_type: '',
+  }
 
   return (
     <Formik
-      initialValues={meterReadingToEdit}
+      initialValues={meterReadingValues}
       enableReinitialize
       validationSchema={MeterReadingSchema}
-      onSubmit={(values, { resetForm }) => {
+      onSubmit={async (values, { resetForm }) => {
         const meterReading = {
           id: values.id,
           meter_type: values.meter_type,
@@ -42,12 +56,23 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
           property: values.property,
           reading_date: values.reading_date,
         };
-        handleItemSubmit(currentUser, meterReading, "meter_readings").then((response) => {
-          resetForm({});
-          if (values.id) {
-            history.goBack();
-          }
-        });
+        //assign tenant details to meter reading
+        const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.property_unit) || {}
+        const tenant = contacts.find(
+          (contact) => propertyUnitSelected.tenants.length ? contact.id === propertyUnitSelected.tenants[0] || propertyUnitSelected.tenants[1] : false) || {};
+        meterReading.property_ref = propertyUnitSelected.ref
+        meterReading.tenant = tenant.id
+        meterReading.tenant_id_number = tenant.id_number
+        meterReading.tenant_name = `${tenant.first_name} ${tenant.last_name}`
+        //assign usage values to meter reading
+        const usage = parseFloat(values.current_value) - parseFloat(values.prior_value)
+        meterReading.usage = usage
+        meterReading.amount = (usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
+        await handleItemSubmit(currentUser, meterReading, "meter_readings")
+        resetForm({})
+        if (values.id) {
+          history.goBack();
+        }
       }}
     >
       {({
@@ -73,7 +98,7 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
               direction="column"
             >
               <Grid item container direction="row" spacing={2}>
-                <Grid item sm={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     select
@@ -94,7 +119,7 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
                     ))}
                   </TextField>
                 </Grid>
-                <Grid item sm={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     select

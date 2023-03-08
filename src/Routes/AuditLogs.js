@@ -3,7 +3,6 @@ import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
@@ -18,7 +17,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 const ENTITIES_LIST = [];
 const USERS_LIST = [];
 
-const contactsTableHeadCells = [
+const auditLogsTableHeadCells = [
     { id: "log_date", numeric: false, disablePadding: true, label: "Date" },
     { id: "user", numeric: false, disablePadding: true, label: "User" },
     {
@@ -36,7 +35,7 @@ const contactsTableHeadCells = [
         label: "Entity Id",
     },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 const rows = [
@@ -79,7 +78,7 @@ let AuditLogsPage = ({
 }) => {
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    let [contactItems, setContactItems] = useState(rows);
+    let [auditLogItems, setContactItems] = useState(rows);
     let [firstNameFilter, setUserEmailFilter] = useState("");
     let [actionFilter, setActionFilter] = useState("");
     let [userFilter, setUserFilter] = useState("");
@@ -88,16 +87,6 @@ let AuditLogsPage = ({
     const [selected, setSelected] = useState([]);
 
     const classes = commonStyles();
-
-    const exportContactRecordsToExcel = () => {
-        let items = contacts.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Audit Logs  Records",
-            "Contact Data",
-            items,
-            "ContactData"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -121,11 +110,11 @@ let AuditLogsPage = ({
                 </Grid>
                 <Grid item>
                     <ExportToExcelBtn
-                        aria-label="Export to Excel"
                         disabled={selected.length <= 0}
-                        onClick={(event) => {
-                            exportContactRecordsToExcel();
-                        }}
+                        reportName={'Audit Log Records'}
+                        reportTitle={'Audit Log Data'}
+                        headCells={auditLogsTableHeadCells}
+                        dataToPrint={auditLogItems.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -303,8 +292,8 @@ let AuditLogsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={contactItems}
-                        headCells={contactsTableHeadCells}
+                        rows={auditLogItems}
+                        headCells={auditLogsTableHeadCells}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}

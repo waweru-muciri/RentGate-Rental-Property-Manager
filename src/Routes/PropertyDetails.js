@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Layout from "../components/myLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import exportDataToXSL from "../assets/printToExcel";
 import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
@@ -12,7 +11,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Button from '@material-ui/core/Button';
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/CustomSnackbar";
@@ -105,15 +103,6 @@ let PropertyDetailsPage = ({
         setFilteredPropertyUnitsItems(mappedPropertyUnits)
     }, [propertyUnits, contacts])
 
-    const exportPropertyRecordsToExcel = () => {
-        let items = propertyUnitsItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Rental Properties Records",
-            "Rental Properties Data",
-            items,
-            "Rental Properties Data"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -143,15 +132,15 @@ let PropertyDetailsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={3}>
-                <PropertySettingsForm classes={classes}/>
+                <PropertySettingsForm classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
                 <PropertySummaryPage propertyToShowDetails={propertyToShowDetails}
-                    propertyUnits={propertyUnitsItems} users={users} classes={classes}/>
+                    propertyUnits={propertyUnitsItems} users={users} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits} 
-                transactions={transactions} expenses={expenses} meterReadings={meterReadings}  classes={classes}/>
+                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits}
+                    transactions={transactions} expenses={expenses} meterReadings={meterReadings} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
                 <Grid
@@ -200,26 +189,20 @@ let PropertyDetailsPage = ({
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
-                                type="button"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                startIcon={<PrintIcon />}
                                 disabled={selected.length <= 0}
-                                reportName={'Rental Records'}
-                                reportTitle={'Rentals Records'}
+                                reportName={'Rental Units Records'}
+                                reportTitle={'Rental Units Data'}
                                 headCells={headCells}
-                                dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}>
-                                Pdf
-                            </PrintArrayToPdf>
+                                dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
+                            />
                         </Grid>
                         <Grid item>
                             <ExportToExcelBtn
-                                aria-label="Export to Excel"
                                 disabled={selected.length <= 0}
-                                onClick={(event) => {
-                                    exportPropertyRecordsToExcel();
-                                }}
+                                reportName={'Rental Units Records'}
+                                reportTitle={'Rental Units Data'}
+                                headCells={headCells}
+                                dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
                             />
                         </Grid>
                     </Grid>

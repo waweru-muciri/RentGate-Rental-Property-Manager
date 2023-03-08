@@ -4,10 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
 import {
     Grid,
     TextField,
@@ -58,9 +56,9 @@ const contactsTableHeadCells = [
     },
     { id: "personal_mobile_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
-	{ id: "details", numeric: false, disablePadding: true, label: "Details" },
-	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "details", numeric: false, disablePadding: true, label: "Details" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 
@@ -94,15 +92,6 @@ let ContactsPage = ({
         setFilteredContactItems(mappedContacts);
     }, [contacts, users]);
 
-    const exportContactRecordsToExcel = () => {
-        let items = contactItems.filter(({ id }) => selected.includes(id));
-        exportDataToXSL(
-            "Contacts  Records",
-            "Contact Data",
-            items,
-            "ContactData"
-        );
-    };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -139,7 +128,8 @@ let ContactsPage = ({
                 container
                 spacing={3}
                 alignItems="center"
-            ><Grid item key={2}>
+            >
+                <Grid item key={2}>
                     <PageHeading paddingLeft={2} text={'Tenants'} />
                 </Grid>
                 <Grid
@@ -177,29 +167,22 @@ let ContactsPage = ({
                             Edit
                             </Button>
                     </Grid>
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Tenant Records'}
-							reportTitle = {'Tenant Records'}
+                            reportName={'Tenant Records'}
+                            reportTitle={'Tenant Records'}
                             headCells={contactsTableHeadCells}
                             dataToPrint={contactItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
+                        />
                     </Grid>
-               <Grid item>
+                    <Grid item>
                         <ExportToExcelBtn
-                            aria-label="Export to Excel"
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportContactRecordsToExcel();
-                            }}
+                            reportName={"Contacts  Records"}
+                            reportTitle={"Contact Data"}
+                            headCells={contactsTableHeadCells}
+                            dataToPrint={contactItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>

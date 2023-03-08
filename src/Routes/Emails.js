@@ -4,9 +4,7 @@ import { Link } from "react-router-dom";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
 import { Grid, TextField, Button, Box } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
@@ -16,7 +14,7 @@ import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PageHeading from "../components/PageHeading";
 
-const contactsTableHeadCells = [
+const emailsTableHeadCells = [
     {
         id: "from_user",
         numeric: false,
@@ -47,7 +45,7 @@ const contactsTableHeadCells = [
 
 let EmailsPage = ({
     isLoading,
-    communication_emails,
+    communicationEmails,
     users,
     currentUser,
     match,
@@ -60,18 +58,13 @@ let EmailsPage = ({
     const classes = commonStyles();
 
     useEffect(() => {
-        setEmailItems(communication_emails);
-    }, [communication_emails]);
-
-    const exportContactRecordsToExcel = () => {
-        let items = communication_emails.filter(({ id }) => selected.includes(id));
-        exportDataToXSL("Emails  Records", "Emails Data", items, "EmailsData");
-    };
+        setEmailItems(communicationEmails);
+    }, [communicationEmails]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the communication_emails here according to search criteria
-        let filteredEmailCommunications = communication_emails
+        //filter the communicationEmails here according to search criteria
+        let filteredEmailCommunications = communicationEmails
             .filter(({ date_sent }) =>
                 !fromDateFilter ? true : date_sent >= fromDateFilter
             )
@@ -84,7 +77,7 @@ let EmailsPage = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setEmailItems(communication_emails);
+        setEmailItems(communicationEmails);
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -122,12 +115,12 @@ let EmailsPage = ({
                         </Button>
                     </Grid>
                     <Grid item>
-                        <ExportToExcelBtn
-                            aria-label="Export to Excel"
+                    <ExportToExcelBtn
                             disabled={selected.length <= 0}
-                            onClick={(event) => {
-                                exportContactRecordsToExcel();
-                            }}
+                            reportName={'Emails Records'}
+                            reportTitle={'Emails Records'}
+                            headCells={emailsTableHeadCells}
+                            dataToPrint={emailItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -229,9 +222,9 @@ let EmailsPage = ({
                         selected={selected}
                         setSelected={setSelected}
                         rows={emailItems}
-                        headCells={contactsTableHeadCells}
+                        headCells={emailsTableHeadCells}
                         handleDelete={handleDelete}
-                        deleteUrl={"communication_emails"}
+                        deleteUrl={"communicationEmails"}
                         noDetailsCol
                         noEditCol
                         noDeleteCol
@@ -247,7 +240,7 @@ const mapStateToProps = (state, ownProps) => {
     return {
         users: state.users,
         currentUser: state.currentUser,
-        communication_emails: state.communication_emails,
+        communicationEmails: state.communicationEmails,
         isLoading: state.isLoading,
         match: ownProps.match,
     };

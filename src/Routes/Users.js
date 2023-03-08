@@ -7,7 +7,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import BlockIcon from '@material-ui/icons/Block';
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
@@ -19,7 +18,7 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 
-const STATUS_LIST = [{disabled : false, displayName: "Active" } , {disabled : true, displayName: "Inactive"}];
+const STATUS_LIST = [{ disabled: false, displayName: "Active" }, { disabled: true, displayName: "Inactive" }];
 const ROLES_LIST = [];
 
 const usersTableHeadCells = [
@@ -74,26 +73,21 @@ let UsersPage = ({
 
 	const classes = commonStyles();
 
-	const exportUserRecordsToExcel = () => {
-		let items = users.filter(({ id }) => selected.includes(id));
-		exportDataToXSL("Users  Records", "Contact Data", items, "ContactData");
-	};
-
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the users here according to search criteria
-        let filteredUsers = userItems
-            .filter(({ first_name }) =>
-                !firstNameFilter ? true : first_name.toLowerCase().includes(firstNameFilter.toLowerCase())
-            )
-            .filter(({ last_name }) =>
-                !lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
-            )
-            .filter((user) =>
-                !statusFilter ? true : user.disabled === statusFilter
-            )
+		let filteredUsers = userItems
+			.filter(({ first_name }) =>
+				!firstNameFilter ? true : first_name.toLowerCase().includes(firstNameFilter.toLowerCase())
+			)
+			.filter(({ last_name }) =>
+				!lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
+			)
+			.filter((user) =>
+				!statusFilter ? true : user.disabled === statusFilter
+			)
 
-        setUserItems(filteredUsers);
+		setUserItems(filteredUsers);
 	};
 
 	const resetSearchForm = (event) => {
@@ -160,16 +154,16 @@ let UsersPage = ({
 							startIcon={<BlockIcon />}
 							disabled={selected.length <= 0}
 						>
-						{selected.length <=0 ? "Disable" :  selected.length[0].disabled ? "Enable" : "Disable" }	
+							{selected.length <= 0 ? "Disable" : selected.length[0].disabled ? "Enable" : "Disable"}
 						</Button>
 					</Grid>
 					<Grid item>
 						<ExportToExcelBtn
-							aria-label="Export to Excel"
 							disabled={selected.length <= 0}
-							onClick={(event) => {
-								exportUserRecordsToExcel();
-							}}
+							reportName={'Users Records'}
+							reportTitle={'Users Data'}
+							headCells={usersTableHeadCells}
+							dataToPrint={userItems.filter(({ id }) => selected.includes(id))}
 						/>
 					</Grid>
 				</Grid>
@@ -347,7 +341,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+		handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
 	};
 };
 
