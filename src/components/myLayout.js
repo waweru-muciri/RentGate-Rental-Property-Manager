@@ -1,7 +1,6 @@
 import Container from "@material-ui/core/Container";
 import Head from "./Head";
 import Paper from "@material-ui/core/Paper";
-import PersistentDrawerLeft from "./AppNav";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import "../App.css";
 import { makeStyles } from "@material-ui/core/styles";
