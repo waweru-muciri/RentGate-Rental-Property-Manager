@@ -23,6 +23,7 @@ import { stableSort, getSorting } from "./tablesSortingFunctions";
 function CommonTable(props) {
     const {
         rows,
+        tableRowOnClickHandler,
         headCells,
         selected,
         setSelected,
@@ -116,6 +117,7 @@ function CommonTable(props) {
 
                                 return (
                                     <TableRow
+                                        onClick={() => {if(typeof tableRowOnClickHandler === 'function') tableRowOnClickHandler(row.id) }}
                                         hover
                                         role="checkbox"
                                         aria-checked={isItemSelected}

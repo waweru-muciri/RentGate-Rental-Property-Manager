@@ -16,6 +16,7 @@ import {
 import TenantStatementsPage from "./ContactStatements";
 import PropertyIncomeStatement from "./PropertyIncomeStatement";
 import PropertiesPage from "./Properties";
+import PropertyUnitsPage from "./PropertyUnits";
 import MaintenancesPage from "./Maintenances";
 import ReportsPage from "./Reports";
 import UsersPage from "./Users";
@@ -30,6 +31,9 @@ import ToDosPage from "./ToDos";
 import LeaseRenewalsPage from "./LeaseRenewals";
 import AuditLogsPage from "./AuditLogs";
 import TransactionsPage from "./Transactions";
+import TransactionPage from "./TransactionPage";
+import PaymentsPage from "./Payments";
+import PaymentPage from "./PaymentPage";
 import PropertyPage from "./PropertyPage";
 import ContactPage from "./ContactPage";
 import ContactsPage from "./Contacts";
@@ -38,7 +42,6 @@ import RentRollPage from "./RentRoll";
 import NoticePage from "./NoticePage";
 import MeterReadingsPage from "./MeterReadingsPage";
 import MeterReadingPage from "./MeterReadingPage";
-import TransactionPage from "./TransactionPage";
 import DashBoard from "./DashBoard";
 import AppNav from "../components/AppNav";
 import app from '../firebase'
@@ -152,8 +155,18 @@ let MainPage = ({
             />
             <Route
               exact
+              path={`${match.path}payments/new`}
+              component={PaymentPage}
+            />
+            <Route
+              exact
               path={`${match.path}properties/:propertyId/edit`}
               component={PropertyPage}
+            />
+            <Route
+              exact
+              path={`${match.path}properties/:propertyId/details`}
+              component={PropertyUnitsPage}
             />
             <Route
               exact
@@ -164,6 +177,11 @@ let MainPage = ({
               exact
               path={`${match.path}transactions/:transactionId/edit`}
               component={TransactionPage}
+            />
+            <Route
+              exact
+              path={`${match.path}payments/:paymentId/edit`}
+              component={PaymentPage}
             />
             <Route
               exact
@@ -216,11 +234,8 @@ let MainPage = ({
             <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
             <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
             <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
-            <Route
-              exact
-              path={`${match.path}transactions`}
-              component={TransactionsPage}
-            />
+            <Route exact path={`${match.path}transactions`} component={TransactionsPage}/>
+            <Route exact path={`${match.path}payments`} component={PaymentsPage}/>
           </Switch>
         </Router>
         : null}

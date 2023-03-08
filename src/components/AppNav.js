@@ -161,6 +161,7 @@ const reportLinkNestedLinks = [
 const accountsLinkNestedLinks = [
     { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
     { text: "Meter Readings", to: "/properties/meter-reading", icon: <AccountBalanceIcon /> },
+    { text: "Payments", to: "/payments", icon: <AttachMoneyIcon /> },
     {
         text: "Property Expenses",
         to: "/property_expenditure",

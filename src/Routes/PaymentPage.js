@@ -3,23 +3,17 @@ import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/myLayout";
 import { connect } from "react-redux";
-import UnitLeaseInputForm from "../components/property/UnitLeaseInputForm";
+import PaymentInputForm from "../components/transactions/PaymentInputForm";
 import { withRouter } from "react-router-dom";
-import queryString from 'query-string';
 
 let TransactionPage = (props) => {
-	let params = queryString.parse(props.location.search)
 	// Get the action to complete.
-	var leaseToRenew = params.leaseToRenew;
 	let transactionToEditId = props.match.params.transactionId;
-	let transactionToEdit = props.transactions.find(
+	let paymentToEdit = props.transactions.find(
 		({ id }) => id === transactionToEditId
 	);
-	transactionToEdit = typeof transactionToEdit !== 'undefined' ? transactionToEdit : {}
-	if (leaseToRenew) {
-		transactionToEdit = Object.assign({}, transactionToEdit, { id: undefined });	
-	}
-	let pageTitle = leaseToRenew ? "Renew Lease" : transactionToEditId ? "Edit Lease" : "New Lease";
+	paymentToEdit = typeof paymentToEdit !== 'undefined' ? paymentToEdit : {}
+	let pageTitle = transactionToEditId ? "Edit Payment" : "New Payment";
 
 	return (
 		<Layout pageTitle="Lease Details">
@@ -34,8 +28,8 @@ let TransactionPage = (props) => {
 					item
 					key={3}
 				>
-					<UnitLeaseInputForm
-						transactionToEdit={transactionToEdit} leaseToRenew={leaseToRenew}
+					<PaymentInputForm
+						paymentToEdit={paymentToEdit} 
 					/>
 				</Grid>
 			</Grid>

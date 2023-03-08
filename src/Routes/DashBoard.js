@@ -37,7 +37,7 @@ const FilterYearSchema = Yup.object().shape({
 let DashBoardPage = (props) => {
   const classes = commonStyles();
   const [transactionItems, setTransactionItems] = useState([]);
-  const { properties, contacts, transactions, notices } = props;
+  const { propertyUnits, contacts, transactions, notices } = props;
 
   useEffect(() => {
     setTransactionItems(transactions);
@@ -52,14 +52,14 @@ let DashBoardPage = (props) => {
     );
   };
 
-  const totalProperties = properties.length;
+  const totalProperties = propertyUnits.length;
   //get the number of the different units by category
-  const bedSitterUnits = properties.filter((property) => property.property_type === 'Bedsitter').length;
-  const oneBedUnits = properties.filter((property) => property.property_type === 'One Bedroom').length;
-  const twoBedUnits = properties.filter((property) => property.property_type === 'Two Bedroom').length;
-  const singleRoomUnits = properties.filter((property) => property.property_type === 'Single Room').length;
-  const doubleRoomUnits = properties.filter((property) => property.property_type === 'Double Room').length;
-  const shopUnits = properties.filter((property) => property.property_type === 'Shop').length;
+  const bedSitterUnits = propertyUnits.filter((property) => property.unit_type === 'Bedsitter').length;
+  const oneBedUnits = propertyUnits.filter((property) => property.unit_type === 'One Bedroom').length;
+  const twoBedUnits = propertyUnits.filter((property) => property.unit_type === 'Two Bedroom').length;
+  const singleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Single Room').length;
+  const doubleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Double Room').length;
+  const shopUnits = propertyUnits.filter((property) => property.unit_type === 'Shop').length;
   //get the current number of occupied houses
   const occupiedHouses = transactionItems.filter(({ transaction_date }) => moment(transaction_date).month() === moment().month())
     .length;
@@ -257,7 +257,7 @@ let DashBoardPage = (props) => {
 const mapStateToProps = (state, ownProps) => {
   return {
     notices: state.notices,
-    properties: state.properties,
+    propertyUnits: state.propertyUnits,
     transactions: state.transactions,
     users: state.users,
     currentUser: state.currentUser,

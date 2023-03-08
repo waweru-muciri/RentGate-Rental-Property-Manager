@@ -21,9 +21,9 @@ import * as Yup from "yup";
 import moment from "moment";
 
 
+const defaultDate = moment().format("YYYY-MM-DD");
 const LEASE_OPTIONS = getLeaseOptions();
 const PAYMENT_OPTIONS = getPaymentOptions();
-const defaultDate = moment().format("YYYY-MM-DD");
 
 const TransactionSchema = Yup.object().shape({
 	payment_term: Yup.string().trim().required("Payment Term is Required"),

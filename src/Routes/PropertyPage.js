@@ -3,7 +3,7 @@ import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/myLayout";
 import { connect } from "react-redux";
-import UnitLeaseInputForm from "../components/property/UnitLeaseInputForm";
+import PropertyInputForm from "../components/property/PropertyInputForm";
 import { withRouter } from "react-router-dom";
 
 let PropertyPage = (props) => {
@@ -32,7 +32,7 @@ let PropertyPage = (props) => {
 					item
 					key={3}
 				>
-					<UnitLeaseInputForm propertyToEdit={propertyToEdit} />
+					<PropertyInputForm propertyToEdit={propertyToEdit} />
 				</Grid>
 			</Grid>
 		</Layout>

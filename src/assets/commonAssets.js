@@ -93,7 +93,6 @@ export function getLeaseOptions() {
 	let lease_options = [
 		"Fixed",
 		"Fixed w/rollover",
-		"At Will"
 	];
 	return lease_options;
 }
@@ -107,4 +106,10 @@ export function getFurnishedOptions() {
 
 export function getTransactionTypes() {
 	return ["Rental", "Sale", "Not Specified"];
+}
+
+export function getTransactionsFilterOptions() {
+	return [ {id: 1, text: 'Month To Date'}, {id: 3, text: '3 Months To Date'}, 
+	{id: 'year-to-date', text: 'Year To Date'}, {id: 'last-year', text: 'Last Year'}, 
+	{id: 'last-month', text: 'Last Month'} ];
 }

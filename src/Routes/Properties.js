@@ -18,42 +18,29 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import { getPropertyTypes } from "../assets/commonAssets.js";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
-const PROPERTY_TYPES = getPropertyTypes();
 
 const headCells = [
-    {
-        id: "property_type",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Type",
-    },
-    { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
-    { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
-    { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
-    { id: "is_fully_furnished", numeric: false, disablePadding: true, label: "Fitted" },
     {
         id: "address",
         numeric: false,
         disablePadding: true,
-        label: "Unit Adddress",
+        label: "Property",
     },
-    {
-        id: "square_footage",
-        numeric: false,
-        disablePadding: true,
-        label: "Square Footage",
-    },
-    { id: "price", numeric: false, disablePadding: true, label: "Rent" },
-    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
-    { id: "owner_name", numeric: false, disablePadding: true, label: "Owner" },
+    { id: "property_location", numeric: false, disablePadding: true, label: "Location" },
+    { id: "owner_details", numeric: false, disablePadding: true, label: "Rental Owner" },
     {
         id: "landlord_name",
         numeric: false,
         disablePadding: true,
-        label: "Assigned To",
+        label: "Rental Manager",
+    },
+    {
+        id: "property_type",
+        numeric: false,
+        disablePadding: true,
+        label: "Type",
     },
 ];
 
@@ -61,46 +48,41 @@ let PropertyPage = ({
     isLoading,
     properties,
     currentUser,
-    contacts,
+    history,
     users,
     match,
     error, handleItemDelete
 }) => {
     const classes = commonStyles();
-    let [propertyItems, setPropertyItems] = useState([])
-    let [filteredPropertyItems, setFilteredPropertyItems] = useState([])
+    let [propertyUnitsItems, setPropertyUnitItems] = useState([])
+    let [filteredPropertyItems, setFilteredPropertiesItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
-    let [propertyAddressFilter, setPropertyAddressFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState('');
-    let [propertyTypeFilter, setPropertyTypeFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
         const mappedProperties = properties.map(
             (property) => {
-                const tenant = contacts.find(
-                    (contact) => property.tenants ? contact.id === property.tenants[0] : ''
+                const landlord = users.find(
+                    (user) => user.id === property.assigned_to
                 );
                 const owner = users.find(
                     (user) => user.id === property.owner
                 );
-                const landlord = users.find(
-                    (user) => user.id === property.assigned_to
-                );
                 const propertyDetails = {}
-                propertyDetails.owner_name = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
+                propertyDetails.property_location = `${property.city}, ${property.county}`
                 propertyDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-                propertyDetails.tenant_name = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
+                propertyDetails.owner_details = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
                 return Object.assign({}, property, propertyDetails);
             }
         );
 
-        setPropertyItems(mappedProperties)
-        setFilteredPropertyItems(mappedProperties)
-    }, [properties, contacts, users])
+        setPropertyUnitItems(mappedProperties)
+        setFilteredPropertiesItems(mappedProperties)
+    }, [properties, users])
 
     const exportPropertyRecordsToExcel = () => {
-        let items = propertyItems.filter(({ id }) => selected.includes(id));
+        let items = propertyUnitsItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
             "Rental Properties Records",
             "Rental Properties Data",
@@ -108,31 +90,30 @@ let PropertyPage = ({
             "Rental Properties Data"
         );
     };
+    
+    const tableRowOnClickHandler = (propertyId) => {
+        history.push(`properties/${propertyId}/details`)
+    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
-        let filteredProperties = propertyItems
-            .filter(({ ref }) => !propertyRefFilter ? true : ref === propertyRefFilter)
-            .filter(({ property_type }) => !propertyTypeFilter ? true : property_type === propertyTypeFilter)
-            .filter((property) => !propertyAddressFilter ? true : typeof property.address !== 'undefined' ? property.address.toLowerCase().includes(propertyAddressFilter.toLowerCase()) : false)
-
+        let filteredProperties = propertyUnitsItems
+            .filter(({ id }) => !propertyRefFilter ? true : id === propertyRefFilter)
             .filter((property) => !assignedToFilter ? true : property.assigned_to === assignedToFilter)
 
-        setFilteredPropertyItems(filteredProperties);
+        setFilteredPropertiesItems(filteredProperties);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredPropertyItems(propertyItems);
+        setFilteredPropertiesItems(propertyUnitsItems);
         setPropertyRefFilter("");
-        setPropertyAddressFilter("");
         setAssignedToFilter("");
-        setPropertyTypeFilter("");
     };
 
     return (
-        <Layout pageTitle="Rental Units">
+        <Layout pageTitle="Properties">
             <Grid
                 container
                 spacing={3}
@@ -140,7 +121,7 @@ let PropertyPage = ({
                 alignItems="center"
             >
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <PageHeading text="Rental Units" />
+                    <PageHeading text="Properties" />
                 </Grid>
                 <Grid
                     container
@@ -177,7 +158,7 @@ let PropertyPage = ({
                             Edit
                         </Button>
                     </Grid>
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
                             type="button"
                             color="primary"
@@ -185,10 +166,10 @@ let PropertyPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Rental Records'}
-							reportTitle = {'Rentals Records'}
+                            reportName={'Rental Records'}
+                            reportTitle={'Rentals Records'}
                             headCells={headCells}
-                            dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
                         >
                             Pdf
                         </PrintArrayToPdf>
@@ -220,41 +201,14 @@ let PropertyPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        name="property_type"
-                                        label="Unit Type"
-                                        id="property_type"
-                                        onChange={(event) => {
-                                            setPropertyTypeFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        value={propertyTypeFilter}
-                                    >
-                                        {PROPERTY_TYPES.map(
-                                            (property_type, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={property_type}
-                                                >
-                                                    {property_type}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                    </TextField>
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item sm>
                                     <TextField
                                         fullWidth
                                         select
                                         variant="outlined"
                                         id="assigned_to"
                                         name="assigned_to"
-                                        label="Assigned To"
+                                        label="Rental Manager"
                                         value={assignedToFilter}
                                         onChange={(event) => {
                                             setAssignedToFilter(
@@ -269,42 +223,26 @@ let PropertyPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                            </Grid>
-                            <Grid
-                                container
-                                spacing={2}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item sm>
                                     <TextField
                                         fullWidth
+                                        select
                                         variant="outlined"
-                                        id="property_ref"
-                                        name="property_ref"
-                                        label="Unit Ref"
-                                        value={propertyRefFilter}
+                                        name="property"
+                                        label="Property"
+                                        id="property"
                                         onChange={(event) => {
                                             setPropertyRefFilter(
                                                 event.target.value
                                             );
                                         }}
-                                    />
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        name="property_address"
-                                        label="Unit Address"
-                                        id="property_address"
-                                        onChange={(event) => {
-                                            setPropertyAddressFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        value={propertyAddressFilter}
-                                    />
+                                        value={propertyRefFilter}>
+                                        {properties.map((property, propertyIndex) => (
+                                            <MenuItem key={propertyIndex} value={property.id}>
+                                                {property.address || property.ref}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                                 </Grid>
                             </Grid>
                             <Grid
@@ -357,11 +295,12 @@ let PropertyPage = ({
                         </div>
                     )}
                     <CommonTable
+                        tableRowOnClickHandler={tableRowOnClickHandler}
                         selected={selected}
                         setSelected={setSelected}
                         rows={filteredPropertyItems}
                         headCells={headCells}
-                        deleteUrl={'properties'}
+                        deleteUrl={'property_units'}
                         tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
                     />
@@ -376,7 +315,6 @@ const mapStateToProps = (state, ownProps) => {
     return {
         properties: state.properties,
         currentUser: state.currentUser,
-        contacts: state.contacts,
         users: state.users,
         isLoading: state.isLoading,
         error: state.error,

@@ -20,7 +20,7 @@ import {
 	getPropertyBaths, getUnitTypes
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import  IconButton from "@material-ui/core/IconButton";
+import IconButton from "@material-ui/core/IconButton";
 
 const PropertySchema = Yup.object().shape({
 	property_type: Yup.string().trim().required("Type is Required"),
@@ -30,6 +30,7 @@ const PropertySchema = Yup.object().shape({
 	city: Yup.string().default(''),
 	property_units: Yup.array().of(Yup.object().shape({
 		unit_type: Yup.string().trim().required("Unit Type is required"),
+		address: Yup.string().trim().default(''),
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().required("Beds is required").default(''),
@@ -75,6 +76,19 @@ let PropertyInputForm = (props) => {
 						onBlur={handleBlur}
 					/>
 				</Grid>
+				<Grid xs item key={`property_units[${propertyUnitIndex}].address`}>
+					<TextField
+						label="Unit Address"
+						variant="outlined"
+						type="text"
+						value={property_unit.address}
+						name={`property_units.${propertyUnitIndex}.address`}
+						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['address'] !== 'undefined'}
+						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].address}
+						onChange={handleChange}
+						onBlur={handleBlur}
+					/>
+				</Grid>
 				<Grid xs item key={`property_units[${propertyUnitIndex}].unit_type`}>
 					<TextField
 						fullWidth
@@ -88,7 +102,7 @@ let PropertyInputForm = (props) => {
 						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].unit_type}
 						onChange={handleChange}
 						onBlur={handleBlur}>
-					{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
+						{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
 							<MenuItem key={unitTypeIndex} value={unit_type}>
 								{unit_type}
 							</MenuItem>
@@ -148,15 +162,6 @@ let PropertyInputForm = (props) => {
 						onBlur={handleBlur}
 					/>
 				</Grid>
-				<Grid item key={`property_units[${propertyUnitIndex}].add_lease`}>
-					<Button
-						variant="outlined"
-						size="medium"
-						onClick={() => {}}
-						disableElevation>
-						Add Lease
-			</Button>
-				</Grid>
 				<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
 					<IconButton aria-label="delete"
 						onClick={() => { remove(propertyUnitIndex) }}
@@ -172,7 +177,7 @@ let PropertyInputForm = (props) => {
 			<Button
 				variant="outlined"
 				size="medium"
-				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '' })}
+				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: ''})}
 				disableElevation>
 				Add Unit
 			</Button>
@@ -184,7 +189,7 @@ let PropertyInputForm = (props) => {
 		<Formik
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertySchema}
-			onSubmit={(values, { resetForm }) => {
+			onSubmit={async (values, { resetForm }) => {
 				let property = {
 					id: values.id,
 					assigned_to: values.assigned_to,
@@ -195,13 +200,16 @@ let PropertyInputForm = (props) => {
 					property_type: values.property_type,
 					owner: values.owner,
 				};
-				handleItemSubmit(currentUser, property, "properties").then((propertyId) => {
-					values.property_units.forEach((property_unit) => {
-						const propertyUnitToSave = Object.assign({}, property_unit, { property_id: propertyId })
-						handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
-					})
-					resetForm({});
-				});
+				const propertyId = await handleItemSubmit(currentUser, property, "properties")
+				values.property_units.forEach(async (property_unit) => {
+					if (!property_unit.address) {
+						property_unit.address = values.address + ' - ' + property_unit.ref
+					}
+					const propertyUnitToSave = Object.assign({}, property_unit, { property_id: propertyId,
+						 tenants: [], assigned_to: values.assigned_to })
+					await handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
+				})
+				resetForm({});
 			}}
 		>
 			{({

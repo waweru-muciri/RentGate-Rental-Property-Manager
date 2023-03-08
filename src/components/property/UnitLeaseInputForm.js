@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import FormControl from "@material-ui/core/FormControl";
@@ -25,12 +25,15 @@ import {
 	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
+import moment from "moment";
 
 const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
+const defaultDate = moment().format("YYYY-MM-DD");
 
-const PropertySchema = Yup.object().shape({
+const UnitLeaseSchema = Yup.object().shape({
 	lease_type: Yup.string().trim().required("Lease Type is Required"),
+	rent_account: Yup.string().trim().required("Rent account is Required"),
 	rent_cycle: Yup.string().trim().required("Rent Cycle is Required"),
 	tenant: Yup.string().trim().required("Unit Tenant is Required"),
 	start_date: Yup.date().required('Start Date is Required'),
@@ -72,19 +75,20 @@ let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
 	const { currentUser, contacts, propertyAccounts, history, properties, propertyUnits, handleItemSubmit } = props
 	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
-	const propertyValues = {
+	const unitLeaseValues = {
 		id: propertyToEdit.id,
-		account: propertyToEdit.account || "",
+		rent_account: propertyToEdit.rent_account || "",
 		tenants: propertyToEdit.tenants || [],
 		cosigner: propertyToEdit.cosigner || "",
-		end_date: propertyToEdit.end_date || "",
-		next_due_date: propertyToEdit.next_due_date || "",
-		security_deposit_due_date: propertyToEdit.security_deposit_due_date || "",
+		start_date: propertyToEdit.start_date || defaultDate,
+		end_date: propertyToEdit.end_date || moment().add(1, 'M').format('YYYY-MM-DD'),
+		next_due_date: propertyToEdit.next_due_date || moment().add(1, 'M').format('YYYY-MM-DD'),
+		security_deposit_due_date: propertyToEdit.security_deposit_due_date || defaultDate,
 		property: propertyToEdit.property || "",
-		start_date: propertyToEdit.start_date || "",
 		transaction_price: propertyToEdit.transaction_price || 0,
-		lease_type: propertyToEdit.lease_type || "",
-		rent_cycle: propertyToEdit.rent_cycle || "",
+		security_deposit: propertyToEdit.security_deposit || 0,
+		lease_type: propertyToEdit.lease_type || LEASE_TYPES[1],
+		rent_cycle: propertyToEdit.rent_cycle || "Monthly",
 		one_time_charges: propertyToEdit.one_time_charges || [],
 		recurring_charges: propertyToEdit.recurring_charges || [],
 		property_unit: propertyToEdit.property_unit || "",
@@ -107,7 +111,7 @@ let UnitLeaseInputForm = (props) => {
 						helperText={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].account || "Account to record the charge"}
 						onChange={handleChange}
 						onBlur={handleBlur}>
-							{propertyAccounts.map((account, index) => (
+						{propertyAccounts.map((account, index) => (
 							<MenuItem key={index} value={account.id}>
 								{account.name}
 							</MenuItem>
@@ -149,7 +153,6 @@ let UnitLeaseInputForm = (props) => {
 						variant="outlined"
 						select
 						name={`recurring_charges.${unitChargeIndex}.frequency`}
-						defaultValue='Monthly'
 						label="Frequency"
 						onBlur={handleBlur}
 						onChange={handleChange}
@@ -181,7 +184,7 @@ let UnitLeaseInputForm = (props) => {
 					className={classes.oneMarginTopBottom}
 					variant="outlined"
 					size="medium"
-					onClick={() => push({ type: 'recurring_charge', due_date: '', account: '', amount: '' })}
+					onClick={() => push({ type: 'recurring_charge', due_date: moment().add(1, 'M').format('YYYY-MM-DD'), account: '', amount: '', frequency: "Monthly" })}
 					disableElevation>
 					Add Recurring Charge
 				</Button>
@@ -206,7 +209,7 @@ let UnitLeaseInputForm = (props) => {
 						helperText={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].account || 'Account to record charge'}
 						onChange={handleChange}
 						onBlur={handleBlur}>
-							{propertyAccounts.map((account, index) => (
+						{propertyAccounts.map((account, index) => (
 							<MenuItem key={index} value={account.id}>
 								{account.name}
 							</MenuItem>
@@ -260,7 +263,7 @@ let UnitLeaseInputForm = (props) => {
 					className={classes.oneMarginTopBottom}
 					variant="outlined"
 					size="medium"
-					onClick={() => push({ type: 'one_time_charge', due_date: '', account: '', amount: '' })}
+					onClick={() => push({ type: 'one_time_charge', due_date: moment().add(1, 'M').format('YYYY-MM-DD'), account: '', amount: '' })}
 					disableElevation>
 					Add One Time Charge
 				</Button>
@@ -271,16 +274,19 @@ let UnitLeaseInputForm = (props) => {
 
 	return (
 		<Formik
-			initialValues={propertyValues}
-			enableReinitialize validationSchema={PropertySchema}
-			onSubmit={(values, { resetForm }) => {
-				let property = {
+			initialValues={unitLeaseValues}
+			enableReinitialize validationSchema={UnitLeaseSchema}
+			onSubmit={async (values, { resetForm }) => {
+				const unit_charges = []
+				unit_charges.push([...values.one_time_charges, ...values.recurring_charges])
+				let propertyUnitLease = {
 					id: values.id,
 					tenant: values.tenant,
 					cosigner: values.cosigner,
-					account: values.account,
+					rent_account: values.rent_account,
 					end_date: values.end_date,
 					next_due_date: values.next_due_date,
+					security_deposit: values.security_deposit,
 					security_deposit_due_date: values.security_deposit_due_date,
 					property: values.property,
 					start_date: values.start_date,
@@ -289,13 +295,12 @@ let UnitLeaseInputForm = (props) => {
 					rent_cycle: values.rent_cycle,
 					property_unit: values.property_unit,
 				};
-				handleItemSubmit(currentUser, property, "properties").then((propertyId) => {
-					values.unit_charges.forEach((property_unit) => {
-						const propertyUnitToSave = Object.assign({}, property_unit, { property_id: propertyId })
-						handleItemSubmit(currentUser, propertyUnitToSave, 'unit_charges')
-					})
-					resetForm({});
-				});
+				await handleItemSubmit(currentUser, propertyUnitLease, "leases")
+				unit_charges.forEach(async (unitCharge) => {
+					const unitChargeToSave = Object.assign({}, unitCharge, { unit_id: values.property_unit })
+					await handleItemSubmit(currentUser, unitChargeToSave, 'unit_charges')
+				})
+				resetForm({});
 			}}
 		>
 			{({
@@ -363,7 +368,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item sm>
+								<Grid item sm={4}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -386,7 +391,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item container md direction="row" alignItems="center" spacing={2}>
+								<Grid item container sm={8} direction="row" alignItems="center" spacing={2}>
 									<Grid item sm>
 										<TextField
 											fullWidth
@@ -495,6 +500,29 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										select
+										name="rent_account"
+										label="Account"
+										id="rent_account"
+										onBlur={handleBlur}
+										onChange={handleChange}
+										value={values.rent_account}
+										error={'rent_account' in errors}
+										helperText={
+											errors.rent_account || 'Account to Record Rent Collection'
+										}
+									>
+										{propertyAccounts.map((rent_account, index) => (
+											<MenuItem key={index} value={rent_account}>
+												{rent_account}
+											</MenuItem>
+										))}
+									</TextField>
+								</Grid>
+								<Grid item sm>
+									<TextField
+										fullWidth
+										variant="outlined"
+										select
 										name="rent_cycle"
 										label="Rent Cycle"
 										id="rent_cycle"
@@ -583,11 +611,11 @@ let UnitLeaseInputForm = (props) => {
 									/>
 								</Grid>
 								<Grid item xs>
-								 <Typography variant='body' color="textSecondary">Don't forget to record the payment once you have collected the deposit.</Typography>
+									<Typography variant='body1' color="textSecondary">Don't forget to record the payment once you have collected the deposit.</Typography>
 								</Grid>
 							</Grid>
 							<Grid item>
-								<Typography variant="subtitle1" paragraph>
+								<Typography variant="subtitle1">
 									Charges
 								</Typography>
 							</Grid>
@@ -627,7 +655,7 @@ let UnitLeaseInputForm = (props) => {
 									variant="contained"
 									size="medium"
 									startIcon={<CancelIcon />}
-									onClick={() => history.goBack()}
+									onClick={() => { history.goBack() }}
 									disableElevation
 								>
 									Cancel
