@@ -28,7 +28,7 @@ const expensesTableHeadCells = [
         id: "property_ref",
         numeric: false,
         disablePadding: true,
-        label: "Property Ref",
+        label: "Property/Unit Ref",
     },
     { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount" },
 ];
@@ -103,15 +103,15 @@ let ExpensesPage = ({
     };
 
     return (
-                <Layout pageTitle="Property Expenses">
+        <Layout pageTitle="Property Expenses">
 
             <Grid
                 container
                 spacing={3}
                 justify="space-evenly"
                 alignItems="center"
-            > 
-            <Grid item lg={12}>
+            >
+                <Grid item lg={12}>
                     <PageHeading text="Property Expenses" />
                 </Grid>
                 <Grid
@@ -176,47 +176,47 @@ let ExpensesPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                            <Grid
-                                container
-                                item
-                                lg={6} md={12} xs={12}
-                                spacing={1}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        id="from_date_filter"
-                                        name="from_date_filter"
-                                        label="From Date"
-                                        value={fromDateFilter}
-                                        onChange={(event) => {
-                                            setFromDateFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
+                                <Grid
+                                    container
+                                    item
+                                    lg={6} md={12} xs={12}
+                                    spacing={1}
+                                    justify="center"
+                                    direction="row"
+                                >
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            id="from_date_filter"
+                                            name="from_date_filter"
+                                            label="From Date"
+                                            value={fromDateFilter}
+                                            onChange={(event) => {
+                                                setFromDateFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            name="to_date_filter"
+                                            label="To Date"
+                                            id="to_date_filter"
+                                            onChange={(event) => {
+                                                setToDateFilter(event.target.value);
+                                            }}
+                                            value={toDateFilter}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        name="to_date_filter"
-                                        label="To Date"
-                                        id="to_date_filter"
-                                        onChange={(event) => {
-                                            setToDateFilter(event.target.value);
-                                        }}
-                                        value={toDateFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                            </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
@@ -269,7 +269,7 @@ let ExpensesPage = ({
                                 </Grid>
                                 <Grid item>
                                     <Button
-                                        onClick={(event) => 
+                                        onClick={(event) =>
                                             resetSearchForm(event)
                                         }
                                         type="reset"

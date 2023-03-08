@@ -61,14 +61,12 @@ import {
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
-import AccountBoxIcon from "@material-ui/icons/AccountBox";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import GroupIcon from "@material-ui/icons/Group";
 import TimelineIcon from "@material-ui/icons/Timeline";
 import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ContactMailIcon from "@material-ui/icons/ContactMail";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import HistoryIcon from "@material-ui/icons/History";
 import MoneyIcon from "@material-ui/icons/Money";
 import ContactsIcon from "@material-ui/icons/Contacts";
@@ -348,14 +346,12 @@ let MainPage = ({
               onClose={handleProfileMenuClose}
             >
               <MenuItem
+				component={Link}
+				to={`${match.path}users/${currentUser.id}/edit`}
                 onClick={() => {
                   handleProfileMenuClose();
-                  history.push("/profile");
                 }}
               >
-                <ListItemIcon>
-                  <AccountBoxIcon fontSize="small" />
-                </ListItemIcon>
                 <ListItemText primary="Edit Profile" />
               </MenuItem>
               <MenuItem
@@ -373,9 +369,6 @@ let MainPage = ({
                     });
                 }}
               >
-                <ListItemIcon>
-                  <ExitToAppIcon fontSize="small" />
-                </ListItemIcon>
                 <ListItemText primary="Sign Out" />
               </MenuItem>
             </Menu>
@@ -643,6 +636,7 @@ let MainPage = ({
 
   return (
     <React.Fragment>
+		  { currentUser ?
       <Router>
         <AppNavLayout
           selectedTab={selectedTab}
@@ -774,6 +768,7 @@ let MainPage = ({
           />
         </Switch>
       </Router>
+		: null }
     </React.Fragment>
   );
 };

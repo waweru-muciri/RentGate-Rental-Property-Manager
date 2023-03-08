@@ -16,7 +16,6 @@ import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";

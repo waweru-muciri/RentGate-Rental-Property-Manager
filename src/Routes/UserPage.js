@@ -5,15 +5,12 @@ import Layout from "../components/myLayout";
 import { connect } from "react-redux";
 import UserInputForm from "../components/users/UserInputForm";
 import { withRouter } from "react-router-dom";
-import { handleItemFormSubmit, handleDelete } from '../actions/actions'
+import { handleItemFormSubmit} from '../actions/actions'
 
 let UserPage = (props) => {
-	const { match, users, handleItemDelete, handleItemSubmit } = props
+	const { match, users, handleItemSubmit } = props
 	let userToEditId = props.match.params.userId;
 	let userToEdit = users.find(({ id }) => id === userToEditId);
-	userToEdit = typeof userToEdit !== 'undefined' ? userToEdit : {
-		contact_images: []
-	}
 	let pageTitle = userToEditId ? "Edit User" : "New User(s)";
 
 	return (
@@ -29,7 +26,7 @@ let UserPage = (props) => {
 					item
 					key={3}
 				>
-					<UserInputForm match={match} userToEdit={userToEdit} handleItemSubmit={handleItemSubmit} handleItemDelete={handleItemDelete} />
+					<UserInputForm match={match} userToEdit={userToEdit} handleItemSubmit={handleItemSubmit} />
 				</Grid>
 			</Grid>
 		</Layout>
@@ -44,7 +41,6 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };

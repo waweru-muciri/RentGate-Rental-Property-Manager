@@ -55,7 +55,7 @@ let RentRollPage = ({
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState("");
-    let [fromDateFilter, setFromDateFilter] = useState("");
+    let [fromDateFilter, setFromDateFilter] = useState(moment().format('YYYY-MM-DD'));
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -66,7 +66,7 @@ let RentRollPage = ({
     const classes = commonStyles();
 
     const getMappedStatements = () => {
-        const mappedTransactions = transactions.map((transaction) => {
+        const mappedTransactions = transactions.filter((transaction) => moment(transaction.transaction_date).month() === moment().month()).map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );

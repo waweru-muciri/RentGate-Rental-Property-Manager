@@ -13,23 +13,29 @@ import {
 import { Formik } from "formik";
 
 const UserSchema = Yup.object().shape({
-	email: Yup.string().email("Invalid email").required("Email is required"),
-	first_name: Yup.string().required("First Name is required"),
-	last_name: Yup.date().required("Last Name is Required"),
-	phone_number: Yup.date().required("Phone Number is Required"),
+	primary_email: Yup.string().trim().email("Invalid Email").required("Email is required"),
+	other_email: Yup.string().trim().email("Invalid Email"),
+	first_name: Yup.string().trim().required("First Name is required"),
+	last_name: Yup.string().trim().required("Last Name is Required"),
+	phone_number: Yup.string().trim().min(8).required("Phone Number is Required"),
+	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
 });
 
 let UserInputForm = (props) => {
-	let { userToEdit, handleItemSubmit } = props;
-	const userValues = {};
-	if (userToEdit !== null) {
-		userValues.id = userToEdit.uid;
-		userValues.first_name = userToEdit.displayName;
-		userValues.email = userToEdit.email;
-		userValues.phone_number = userToEdit.phoneNumber;
-		userValues.user_avatar_url = userToEdit.photoURL;
+	let { handleItemSubmit } = props;
+	const userToEdit = typeof props.userToEdit !== 'undefined' ? props.userToEdit : {};
+	const userValues = {
+		id : userToEdit.uid || '',
+		first_name : userToEdit.first_name || '',
+		last_name : userToEdit.last_name || '',
+		primary_email : userToEdit.primary_email || '',
+		other_email: userToEdit.other_email|| '',
+		phone_number : userToEdit.phone_number || '',
+		id_number : userToEdit.id_number || '',
+		user_avatar_url : userToEdit.user_avatar_url || '',
+		user_roles : userToEdit.user_roles || [],
 	}
-	userValues.contact_images = [];
+	userValues.contact_image = [];
 	const history = useHistory();
 	let classes = commonStyles();
 
@@ -48,14 +54,16 @@ let UserInputForm = (props) => {
 			onSubmit={(values, { resetForm }) => {
 				const user = {
 					id: values.id,
-					email: values.email,
+					id_number: values.id_number,
+					primary_email: values.primary_email,
+					other_email: values.other_email,
 					first_name: values.first_name,
 					last_name: values.last_name,
 					phone_number: values.phone_number,
 					user_roles: values.user_roles,
 				};
 				//first upload the image to firebase
-				if (values.contact_images.length) {
+				if (values.contact_image.length) {
 					//if the user had previously had a file avatar uploaded
 					// then delete it here
 					if (values.user_avatar_url) {
@@ -63,11 +71,8 @@ let UserInputForm = (props) => {
 						deleteUploadedFileByUrl(values.user_avatar_url);
 					}
 					//upload the first and only image in the contact images array
-					uploadFilesToFirebase([values.contact_images[0]]).then(
-						(fileDownloadUrl) => {
-							user.user_avatar_url = fileDownloadUrl;
-						}
-					);
+					var fileDownloadUrl = uploadFilesToFirebase([values.contact_image[0]])	
+					user.user_avatar_url = fileDownloadUrl;
 				}
 				handleItemSubmit(user, "users").then((response) => {
 					resetForm({});
@@ -114,9 +119,9 @@ let UserInputForm = (props) => {
 										<Avatar
 											alt="User Image"
 											src={
-												typeof values.contact_images[0] !==
+												typeof values.contact_image[0] !==
 													"undefined"
-													? values.contact_images[0].data
+													? values.contact_image[0].data
 													: values.user_avatar_url
 											}
 											className={classes.largeAvatar}
@@ -128,11 +133,11 @@ let UserInputForm = (props) => {
 											color="primary"
 											onClick={() => toggleImageDialog()}
 										>
-											{values.user_avatar_url || values.contact_images[0] ? "Change Photo" : "Add Photo"}
+											{values.user_avatar_url || values.contact_image[0] ? "Change Photo" : "Add Photo"}
 										</Button>
 										<DropzoneDialogBase
 											filesLimit={1}
-											fileObjects={values.contact_images}
+											fileObjects={values.contact_image}
 											acceptedFiles={["image/*"]}
 											cancelButtonText={"cancel"}
 											submitButtonText={"submit"}
@@ -140,18 +145,18 @@ let UserInputForm = (props) => {
 											open={imageDialogState}
 											onClose={() => toggleImageDialog()}
 											onDelete={() => {
-												setFieldValue("contact_images", []);
+												setFieldValue("contact_image", []);
 											}}
 											onSave={(files) => {
 												setFieldValue(
-													"contact_images",
+													"contact_image",
 													files
 												);
 												toggleImageDialog();
 											}}
 											onAdd={(files) => {
 												setFieldValue(
-													"contact_images",
+													"contact_image",
 													files
 												);
 												toggleImageDialog();
@@ -188,6 +193,21 @@ let UserInputForm = (props) => {
 								/>
 								<TextField
 									variant="outlined"
+									id="id_number"
+									name="id_number"
+									label="Id Number"
+									value={values.id_number}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={
+										'id_number' in errors
+									}
+									helperText={
+										errors.id_number
+									}
+								/>
+								<TextField
+									variant="outlined"
 									id="phone_number"
 									name="phone_number"
 									label="Phone Number"
@@ -203,24 +223,36 @@ let UserInputForm = (props) => {
 								/>
 								<TextField
 									variant="outlined"
-									name="email"
-									label="Email"
-									id="email"
+									name="primary_email"
+									label="Primary Email"
+									id="primary_email"
 									onBlur={handleBlur}
 									onChange={handleChange}
-									value={values.email}
-									error={'email' in errors}
-									helperText={errors.email}
+									value={values.primary_email}
+									error={'primary_email' in errors}
+									helperText={errors.primary_email}
+								/>
+								<TextField
+									variant="outlined"
+									name="other_email"
+									label="Other Email"
+									id="other_email"
+									onBlur={handleBlur}
+									onChange={handleChange}
+									value={values.other_email}
+									error={'other_email' in errors}
+									helperText={errors.other_email}
 								/>
 								<TextField
 									variant="outlined"
 									select
+									multiple
 									name="user_roles"
 									label="User Roles"
 									id="user_roles"
 									onBlur={handleBlur}
 									onChange={handleChange}
-									value={values.user_roles || []}
+									value={values.user_roles }
 									error={'user_roles' in errors}
 									helperText={
 										errors.user_roles

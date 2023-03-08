@@ -5,7 +5,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Yup from "yup";
-import firebase from "firebase/app";
 import { Formik } from "formik";
 
 
@@ -13,10 +12,28 @@ const ResetPasswordSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is Required"),
 });
 
-const resetUserEmail = (email) => {
-  return firebase
-    .auth().sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://www.propertymanager.herokuapp.com/' }).catch((error) => {
-      // Handle Errors here.
+export default function FormDialog(props) {
+  const { auth, open, handleClose } = props
+ 
+const resetUserPasswordByEmail = (email) => {
+  return auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/' })}
+
+ const emailValues = { email: '' }
+  return (
+    <div>
+      <Formik
+        initialValues={emailValues}
+        validationSchema={ResetPasswordSchema}
+        onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
+          var email = values.email;
+          try {
+           	await resetUserPasswordByEmail(email)
+            resetForm({});
+            setSubmitting(false);
+            setStatus({ success: 'Password Reset Email Sent Successfully' });
+          } catch (error) {
+            setSubmitting(false);
+				  // Handle Errors here.
       var errorCode = error.code;
       var errorMessage =
         errorCode === "auth/missing-continue-uri"
@@ -30,29 +47,9 @@ const resetUserEmail = (email) => {
                 : errorCode === "auth/user-not-found"
                   ? "No user found with email"
                   : "May God help Us";
-      return errorMessage
-    });
-}
 
-
-export default function FormDialog(props) {
-  const { open, handleClose } = props
-  const emailValues = { email: '' }
-  return (
-    <div>
-      <Formik
-        initialValues={emailValues}
-        validationSchema={ResetPasswordSchema}
-        onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
-          var email = values.email;
-          try {
-            await resetUserEmail(email)
-            resetForm({});
-            handleClose()
-          } catch (errorMessage) {
-            setSubmitting(false);
             setStatus({ error: errorMessage });
-            console.log("Error message => ", errorMessage);
+		// console.log('Error sending password reset email => ', error);
           };
         }}
         render={({
@@ -78,15 +75,22 @@ export default function FormDialog(props) {
                 <DialogContent>
                   <DialogContentText>
                     To reset your password, please enter your email address here. We
-                    will reset link to your email.
+                    will send the reset link to your email.
                   </DialogContentText>
+                    {status &&  status.success && (
                   <FormControl fullWidth>
-                    {status && (
+                      <FormHelperText>
+                        {status.success}
+                      </FormHelperText>
+                  </FormControl>
+                    )}
+                    {status && status.error && (
+                  <FormControl fullWidth>
                       <FormHelperText error={true}>
                         {status.error}
                       </FormHelperText>
-                    )}
                   </FormControl>
+                    )}
                   <TextField
                     fullWidth
                     variant="outlined"
@@ -109,7 +113,6 @@ export default function FormDialog(props) {
                   <Button color="primary" disabled={isSubmitting}
                     type="submit"
                     variant="outlined"
-                    color="primary"
                     form="resetPasswordForm">
                     Send Reset Link
           </Button>

@@ -57,13 +57,13 @@ const headCells = [
         id: "transaction_price",
         numeric: false,
         disablePadding: true,
-        label: "Transaction Price",
+        label: "Rent",
     },
     {
         id: "transaction_balance",
         numeric: false,
         disablePadding: true,
-        label: "Transaction Balance",
+        label: "Rent Balance",
     }, {
         id: "security_deposit",
         numeric: false,

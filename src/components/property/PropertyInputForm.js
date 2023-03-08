@@ -794,13 +794,11 @@ let PropertyInputForm = withFormik({
 		};
 		values.handleItemSubmit(property, "properties").then((propertyId) => {
 			if (propertyFilesToSave.length) {
-				let fileDownloadUrlsPromises = uploadFilesToFirebase(
+				let fileDownloadUrls = uploadFilesToFirebase(
 					propertyFilesToSave
 				);
-				Promise.all(fileDownloadUrlsPromises).then(
-					(fileDownloadUrls) => {
-						//here is the fileDownloadUrls array
-						fileDownloadUrls.forEach((fileDownloadUrl) => {
+				//here is the fileDownloadUrls array
+				fileDownloadUrls.filter((fileDownloadUrl) => typeof fileDownloadUrl !== 'undefined').forEach((fileDownloadUrl) => {
 							let fileDownloadUrlObject = {
 								url: fileDownloadUrl,
 								property: propertyId,
@@ -810,14 +808,12 @@ let PropertyInputForm = withFormik({
 								"property_media"
 							);
 						});
-					}
-				);
 			}
-		});
 		resetForm({});
 		if (values.id) {
 			values.history.goBack();
 		}
+		});
 	},
 	enableReinitialize: true,
 	displayName: "Property Input Form", // helps with React DevTools

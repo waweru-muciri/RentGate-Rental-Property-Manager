@@ -1,5 +1,5 @@
 import React from "react";
-import firebase from "firebase/app";
+import firebase from "../firebase";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import {
@@ -30,6 +30,8 @@ const SignInSchema = Yup.object().shape({
 let SignInLayout = ({ setUser }) => {
   const history = useHistory();
 
+  const auth = firebase.auth()
+
   const classes = commonStyles();
 
   let loginValues = { email: "", password: "" };
@@ -44,9 +46,7 @@ let SignInLayout = ({ setUser }) => {
   };
 
   const signInWithEmailAndPassword = (email, password) => {
-    return firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
+    return auth.signInWithEmailAndPassword(email, password)
       .then((authCredential) => {
         const user = authCredential.user;
         const userDetails = {
@@ -106,6 +106,8 @@ let SignInLayout = ({ setUser }) => {
             handleBlur,
             isSubmitting,
           }) => (
+				  <div>
+                  <PasswordResetDialog auth={auth} open={open} handleClose={handleClose} />
               <form
                 className={classes.form}
                 method="post"
@@ -116,7 +118,6 @@ let SignInLayout = ({ setUser }) => {
                   <Grid item key={2}>
                     <PageHeading paddingLeft={2} text={"Sign In"} />
                   </Grid>
-                  <PasswordResetDialog open={open} handleClose={handleClose} />
                   <Grid item key={3}>
                     <FormControl fullWidth>
                       {status && (
@@ -180,6 +181,7 @@ let SignInLayout = ({ setUser }) => {
                   </Grid>
                 </Grid>
               </form>
+				  </div>
             )}
         />
       </Box>

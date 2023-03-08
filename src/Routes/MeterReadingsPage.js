@@ -42,7 +42,7 @@ let MeterReadingsPage = ({
     meterReadings,
     handleItemDelete,
     properties,
-	contacts,
+    contacts,
     match,
     error,
 }) => {
@@ -74,17 +74,16 @@ let MeterReadingsPage = ({
                 (property) => property.id === meterReading.property
             );
             const meterReadingDetails = {};
-				if (typeof property !== 'undefined') {
-				const tenant = contacts.find(
-					(contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
-				);
-				console.log(tenant)
-				if (typeof tenant !== 'undefined') {
-					meterReadingDetails.tenant_id_number = tenant.id_number
-					meterReadingDetails.tenant_name = tenant.first_name + " " + tenant.last_name
-				}
-				}
-            const usage = parseFloat(meterReading.current_value) - parseFloat(meterReading.prior_value )
+            if (typeof property !== 'undefined') {
+                const tenant = contacts.find(
+                    (contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
+                );
+                if (typeof tenant !== 'undefined') {
+                    meterReadingDetails.tenant_id_number = tenant.id_number
+                    meterReadingDetails.tenant_name = tenant.first_name + " " + tenant.last_name
+                }
+            }
+            const usage = parseFloat(meterReading.current_value) - parseFloat(meterReading.prior_value)
             meterReadingDetails.usage = usage
             meterReadingDetails.amount = (usage * parseFloat(meterReading.unit_charge)) + parseFloat(meterReading.base_charge)
             meterReadingDetails.property_ref =
@@ -329,7 +328,7 @@ const mapStateToProps = (state, ownProps) => {
     return {
         meterReadings: state.meterReadings,
         properties: state.properties,
-		contacts: state.contacts,
+        contacts: state.contacts,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,

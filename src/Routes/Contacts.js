@@ -53,6 +53,9 @@ const contactsTableHeadCells = [
         disablePadding: true,
         label: "Date of Birth",
     },
+    { id: "personal_phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
+    { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
+
 ];
 
 function TabPanel(props) {
@@ -88,12 +91,12 @@ let ContactsPage = ({
     const classes = commonStyles();
 
     useEffect(() => {
-		const mappedContacts = contacts.map((contact) => {
-			const landlord = users.find((user) => user.id === contact.assigned_to)	
-			const landlordDetails = {}
-			landlordDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-			return Object.assign({}, contact, landlordDetails);
-		});
+        const mappedContacts = contacts.map((contact) => {
+            const landlord = users.find((user) => user.id === contact.assigned_to)
+            const landlordDetails = {}
+            landlordDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
+            return Object.assign({}, contact, landlordDetails);
+        });
         setContactItems(mappedContacts);
     }, [contacts, users]);
 

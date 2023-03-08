@@ -7,15 +7,11 @@ import EmailInputForm from "../components/emails/EmailInputForm";
 import { withRouter } from "react-router-dom";
 
 let EmailPage = (props) => {
-	const {currentUser, contacts} = props
+	const { users, currentUser, contacts } = props
 	let emailToEditId = props.match.params.emailId;
 
-	let emailToEdit;
-
-	if (typeof emailToEditId != "undefined") {
-		emailToEdit = props.emailCampaigns.find(({ id }) => id === emailToEditId);
-	}
-	let pageTitle = emailToEditId ? "Edit Email campaign" : "New Email Campaign";
+	let emailToEdit = props.communication_emails.find(({ id }) => id === emailToEditId);
+	let pageTitle = typeof emailToEdit !== 'undefined' ? "Edit Email campaign" : "New Email Campaign";
 
 	return (
 		<Layout pageTitle="Email Campaign Details">
@@ -30,7 +26,7 @@ let EmailPage = (props) => {
 					item
 					key={3}
 				>
-					<EmailInputForm currentUser={currentUser} emailToEdit={emailToEdit} contacts={contacts} history={props.history} />
+					<EmailInputForm currentUser={currentUser} emailToEdit={emailToEdit} contacts={contacts} history={props.history} users={users}/>
 				</Grid>
 			</Grid>
 		</Layout>
@@ -41,8 +37,9 @@ const mapStateToProps = (state) => {
 	return {
 		contacts: state.contacts,
 		currentUser: state.currentUser,
-		emailCampaigns: state.emailCampaigns,
+		communication_emails : state.communication_emails,
 		error: state.error,
+		users: state.users,
 	};
 };
 

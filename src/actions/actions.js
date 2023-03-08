@@ -92,6 +92,8 @@ export function uploadFilesToFirebase(filesArray) {
                             "Unknown error occurred, inspect the server response"
                         );
                         break;
+					default: 
+						console.log('Unknown error');
                 }
             }
         }

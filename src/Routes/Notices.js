@@ -53,8 +53,6 @@ let VacatingNoticesPage = ({
     users,
     properties,
     contacts,
-    contact_phone_numbers,
-    contact_emails,
     handleItemDelete,
     match,
     error,
@@ -93,20 +91,12 @@ let VacatingNoticesPage = ({
             const property = properties.find(
                 (property) => property.id === notice.property
             );
-            const tenantPhoneNumber = contact_phone_numbers.find(
-                (phoneNumber) => phoneNumber.contact === notice.tenant
-            );
-            const tenantEmail = contact_emails.find(
-                (contactEmail) => contactEmail.contact === notice.tenant
-            );
             const noticeDetails = {};
             if (typeof tenant !== 'undefined') {
                 noticeDetails.tenant_id_number = tenant.id_number
                 noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name
             }
             noticeDetails.days_left = moment(notice.vacating_date).diff(moment().format('YYYY-MM-DD'), 'days') + ' Days'
-            noticeDetails.tenant_email = typeof tenantEmail !== 'undefined' ? tenantEmail.email : ''
-            noticeDetails.tenant_phone_number = typeof tenantPhoneNumber !== 'undefined' ? tenantPhoneNumber.phone_number : ''
             if (typeof landlord !== "undefined") {
                 noticeDetails.landlord_name = landlord.first_name + " " + landlord.last_name
                 noticeDetails.landlord_email = landlord.email
@@ -395,8 +385,6 @@ const mapStateToProps = (state) => {
         users: state.users,
         contacts: state.contacts,
         properties: state.properties,
-        contact_phone_numbers: state.contact_phone_numbers,
-        contact_emails: state.contact_emails,
         error: state.error
     };
 };

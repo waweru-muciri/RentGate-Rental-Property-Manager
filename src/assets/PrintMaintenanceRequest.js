@@ -7,8 +7,8 @@ export default function (props) {
     const maintenanceRequest = typeof props.maintenanceRequestToPrint !== 'undefined' ? props.maintenanceRequestToPrint : {}
     const maintenanceRequestDetails = {
         tenant_name: maintenanceRequest.tenant_name,
-        tenant_email: maintenanceRequest.tenant_email,
-        tenant_phone_number: maintenanceRequest.tenant_phone_number,
+        tenant_email: maintenanceRequest.contact_email,
+        tenant_phone_number: maintenanceRequest.personal_phone_number,
         landlord_name: maintenanceRequest.landlord_name || 'Landlord Name',
         landlord_phone_number: maintenanceRequest.landlord_phone_number || 'Landlord Phone Number',
         landlord_email: maintenanceRequest.landlord_email || 'landlordemail@email.com',
@@ -22,31 +22,31 @@ export default function (props) {
         company_address: maintenanceRequest.company_address || '123 Company Address',
     }
     var docDefinition = [{
-            columns: [
+        columns: [
             [
-                maintenanceRequestDetails.company_name, 
-                maintenanceRequestDetails.company_phone_number, 
-                maintenanceRequestDetails.company_address, 
-            ], 
-            [
-                {text: maintenanceRequestDetails.tenant_name, alignment: 'center'}, 
-                {text: maintenanceRequestDetails.tenant_phone_number, alignment: 'center'}, 
-                {text: maintenanceRequestDetails.tenant_email, alignment: 'center'}, 
-                {text: maintenanceRequestDetails.property_ref, alignment: 'center'}, 
-            ], 
+                maintenanceRequestDetails.company_name,
+                maintenanceRequestDetails.company_phone_number,
+                maintenanceRequestDetails.company_address,
             ],
-            columnGap: 10,
-            
-        }, 
-        {text: `OBJECT: MAINTENANCE REQUEST ON ${maintenanceRequestDetails.date_created}`, bold: true, fontSize: 14, decoration: "underline", margin: [ 0, 6, 0, 6 ] }, 
-        {text: `Unit:  ${maintenanceRequestDetails.property_ref}, ${maintenanceRequestDetails.property_address}`, bold: true, fontSize: 12, },
-        [{text: `Request Details : `, fontSize: 12,  bold: true, margin: [ 0, 5, 0, 0 ]},
-        {text: `${maintenanceRequestDetails.maintenance_details}`,fontSize: 12, margin: [ 0, 5, 0, 10 ]},
-        {text: 'Sincerely,', }],
-        {text: maintenanceRequestDetails.landlord_name, fontSize: 12 },
-        {text: `${maintenanceRequestDetails.landlord_phone_number}, ${maintenanceRequestDetails.landlord_email},` ,fontSize: 12},
-        {text: 'Landlord', fontSize: 14},
-        ]
+            [
+                { text: maintenanceRequestDetails.tenant_name, alignment: 'center' },
+                { text: maintenanceRequestDetails.tenant_phone_number, alignment: 'center' },
+                { text: maintenanceRequestDetails.tenant_email, alignment: 'center' },
+                { text: maintenanceRequestDetails.property_ref, alignment: 'center' },
+            ],
+        ],
+        columnGap: 10,
+
+    },
+    { text: `OBJECT: MAINTENANCE REQUEST ON ${maintenanceRequestDetails.date_created}`, bold: true, fontSize: 14, decoration: "underline", margin: [0, 6, 0, 6] },
+    { text: `Unit:  ${maintenanceRequestDetails.property_ref}, ${maintenanceRequestDetails.property_address}`, bold: true, fontSize: 12, },
+    [{ text: `Request Details : `, fontSize: 12, bold: true, margin: [0, 5, 0, 0] },
+    { text: `${maintenanceRequestDetails.maintenance_details}`, fontSize: 12, margin: [0, 5, 0, 10] },
+    { text: 'Sincerely,', }],
+    { text: maintenanceRequestDetails.landlord_name, fontSize: 12 },
+    { text: `${maintenanceRequestDetails.landlord_phone_number}, ${maintenanceRequestDetails.landlord_email},`, fontSize: 12 },
+    { text: 'Landlord', fontSize: 14 },
+    ]
 
     return (
         <Button

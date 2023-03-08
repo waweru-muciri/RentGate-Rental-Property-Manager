@@ -54,8 +54,6 @@ let MaintenanceRequestsPage = ({
 	maintenanceRequests,
 	users,
 	contacts,
-	contact_phone_numbers,
-	contact_emails,
 	properties,
 	match,
 	error,
@@ -95,14 +93,6 @@ let MaintenanceRequestsPage = ({
 						maintenanceRequestDetails.landlord_email = landlord.email
 						maintenanceRequestDetails.landlord_phone_number = landlord.phone_number
 					}
-					const tenantPhoneNumber = contact_phone_numbers.find(
-						(phoneNumber) => phoneNumber.contact === contactWithRequest.id
-					);
-					const tenantEmail = contact_emails.find(
-						(contactEmail) => contactEmail.contact === contactWithRequest.id
-					);
-					maintenanceRequestDetails.tenant_email = typeof tenantEmail !== 'undefined' ? tenantEmail.email : ''
-					maintenanceRequestDetails.tenant_phone_number = typeof tenantPhoneNumber !== 'undefined' ? tenantPhoneNumber.phone_number : ''
 				}
 				return Object.assign(
 					{},
@@ -187,7 +177,7 @@ let MaintenanceRequestsPage = ({
 							component={Link}
 							to={`${match.url}/new`}
 						>
-							{" "}
+
 							NEW
 						</Button>
 					</Grid>
@@ -202,7 +192,7 @@ let MaintenanceRequestsPage = ({
 							component={Link}
 							to={`${match.url}/${selected[0]}/edit`}
 						>
-							{" "}
+
 							Edit
 						</Button>
 					</Grid>
@@ -347,7 +337,7 @@ let MaintenanceRequestsPage = ({
 										size="medium"
 										startIcon={<SearchIcon />}
 									>
-										SEARCH{" "}
+										SEARCH
 									</Button>
 								</Grid>
 								<Grid item>
@@ -362,7 +352,7 @@ let MaintenanceRequestsPage = ({
 										size="medium"
 										startIcon={<UndoIcon />}
 									>
-										RESET{" "}
+										RESET
 									</Button>
 								</Grid>
 							</Grid>
@@ -395,8 +385,6 @@ let MaintenanceRequestsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
 	return {
-		contact_phone_numbers: state.contact_phone_numbers,
-		contact_emails: state.contact_emails,
 		maintenanceRequests: state.maintenanceRequests,
 		properties: state.properties,
 		users: state.users,

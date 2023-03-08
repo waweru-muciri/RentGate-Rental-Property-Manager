@@ -126,11 +126,8 @@ let ContactInputForm = (props) => {
 						deleteUploadedFileByUrl(values.contact_avatar_url);
 					}
 					//upload the first and only image in the contact images array
-					uploadFilesToFirebase([values.contact_images[0]]).then(
-						(fileDownloadUrl) => {
-							contact.contact_avatar_url = fileDownloadUrl;
-						}
-					);
+					var fileDownloadUrl  = uploadFilesToFirebase([values.contact_images[0]])
+					contact.contact_avatar_url = fileDownloadUrl;
 				}
 
 				handleItemSubmit(contact, "contacts").then((contactId) => {
@@ -421,6 +418,7 @@ let ContactInputForm = (props) => {
 											helperText={
 												errors.personal_mobile_number
 											}
+										value={values.personal_mobile_number}
 										/>
 									</Grid>
 									<Grid item >
@@ -433,6 +431,7 @@ let ContactInputForm = (props) => {
 											onChange={handleChange}
 											onBlur={handleBlur}
 											helperText="Work Mobile Number"
+										value={values.work_mobile_number}
 										/>
 									</Grid>
 									<Grid item >
@@ -445,6 +444,7 @@ let ContactInputForm = (props) => {
 											onChange={handleChange}
 											onBlur={handleBlur}
 											helperText="Custom Mobile Number"
+										value={values.custom_mobile_number}
 										/>
 									</Grid>
 									{/* start of contact emails column */}

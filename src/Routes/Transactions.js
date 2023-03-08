@@ -60,13 +60,13 @@ const headCells = [
         disablePadding: true,
         label: "Lease End",
     },
-	{
+    {
         id: "security_deposit",
         numeric: false,
         disablePadding: true,
         label: "Deposit Held",
     },
-	{
+    {
         id: "rent_balance",
         numeric: false,
         disablePadding: true,
@@ -81,25 +81,24 @@ const headCells = [
 ];
 
 function TabPanel(props) {
-        const { children, value, index, ...other } = props;
+    const { children, value, index, ...other } = props;
 
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && <Box m={2}>{children}</Box>}
-            </div>
-        );
-    }
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && <Box m={2}>{children}</Box>}
+        </div>
+    );
+}
 
 let TransactionPage = ({
     isLoading,
     transactions,
-	expenses,
     properties,
     contacts,
     match,
@@ -140,13 +139,13 @@ let TransactionPage = ({
                     ? tenant.first_name + " " + tenant.last_name
                     : "";
             transactionDetails.landlord =
-            typeof landlord !== "undefined"
+                typeof landlord !== "undefined"
                     ? landlord.first_name + " " + landlord.last_name
-							: "";
-			if(typeof property !== "undefined" ){
-					transactionDetails.property_ref = property.ref
-					transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
-			}
+                    : "";
+            if (typeof property !== "undefined") {
+                transactionDetails.property_ref = property.ref
+                transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
+            }
             transactionDetails.property =
                 typeof property !== "undefined" ? property.id : null;
             return Object.assign({}, transaction, transactionDetails);
@@ -178,7 +177,7 @@ let TransactionPage = ({
                 !propertyFilter ? true : property === propertyFilter
             )
             .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord  === assignedToFilter
+                !assignedToFilter ? true : landlord === assignedToFilter
             );
         setTransactionItems(filteredTransactions);
     };
@@ -199,7 +198,7 @@ let TransactionPage = ({
                 spacing={3}
                 alignItems="center"
             >
-			<Grid item key={2}>
+                <Grid item key={2}>
                     <PageHeading paddingLeft={2} text={'Leases'} />
                 </Grid>
                 <Grid

@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import { Typography, List } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
+import TextField from "@material-ui/core/TextField";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,21 +37,17 @@ function intersection(a, b) {
 export default function TransferList(props) {
   const classes = useStyles();
   const {
-    contacts,
     checked,
     setChecked,
     left,
     setLeft,
-    right,
+    right, selectedEmailsSource, setEmailsSource, 
     setRight,
+	emailsSources,
   } = props;
 
   const leftChecked = intersection(checked, left);
   const rightChecked = intersection(checked, right);
-
-  useEffect(() => {
-    setLeft(contacts);
-  }, [contacts]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -88,12 +87,11 @@ export default function TransferList(props) {
   const customList = (items) => (
     <Paper className={classes.paper}>
       <List dense component="div" role="list">
-        {items.map((value) => {
-          const labelId = `transfer-list-item-${value}-label`;
-
+        {items.map((value, index) => {
+          const labelId = `transfer-list-item-${index}-label`;
           return (
             <ListItem
-              key={value}
+              key={index}
               role="listitem"
               button
               onClick={handleToggle(value)}
@@ -106,7 +104,7 @@ export default function TransferList(props) {
                   inputProps={{ "aria-labelledby": labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={`List item ${value + 1}`} />
+              <ListItemText id={labelId} primary={`${value.first_name} ${value.last_name}`} />
             </ListItem>
           );
         })}
@@ -123,13 +121,41 @@ export default function TransferList(props) {
       alignItems="center"
       className={classes.root}
     >
-      <Grid item>
+		  <Grid
+		  item
+      container
+      justify="center"
+      alignItems="center"
+		  direction="column"
+      spacing={2}
+    >
+
+      <Grid item md={12}>
         <Typography variant="subtitle1">
-          {right.length
-            ? `${right.length} contacts selected`
-            : "Please select contacts to send email"}
-        </Typography>
+          {right.length >= 1  ? `${right.length} contacts selected`
+            : "Select contacts to send email"}
+        </Typography>		
       </Grid>
+        <Grid item md={12}>
+                              <TextField
+		  						fullWidth
+		  						select
+								onChange={(event) => setEmailsSource(event.target.value)}
+                                variant="outlined"
+                                label="Select Emails Source"
+                                value={selectedEmailsSource}>
+		  {
+		  					emailsSources.map((source, index) => {
+						return (
+		  					<MenuItem key={index} value={source}>
+		  						{source}
+		  					</MenuItem> );
+})
+}
+		  				</TextField>
+
+		</Grid>
+		</Grid>
       <Grid
         item
         container

@@ -43,7 +43,7 @@ let DashBoardPage = (props) => {
     setTransactionItems(
       transactions.filter(
         ({ transaction_date }) =>
-          moment(transaction_date).get("year") === filterYear
+          moment(transaction_date).year() === filterYear
       )
     );
   };
