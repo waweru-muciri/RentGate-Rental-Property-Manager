@@ -2,10 +2,11 @@ import * as actionTypes from "../assets/actionTypes";
 import * as propertyReducers from "./propertyReducers";
 import * as propertyUnitChargesReducers from "./propertyUnitCharges";
 import * as propertyUnitsReducers from "./propertyUnits";
-import * as mediaFilesReducers from "./mediaFilesReducers";
+import * as managementFeesReducers from "./managementFees";
 import * as contactsReducers from "./contacts";
 import * as transactionsReducers from "./transactions";
 import * as logsReducers from "./logs";
+import * as propertySettingsReducers from "./propertySettings";
 import * as maintenanceRequestsReducers from "./maintenanceRequests";
 import * as usersReducers from "./users";
 import * as communicationEmailsReducers from "./CommunicationEmails";
@@ -71,8 +72,9 @@ function reducers(state = {}, action) {
         propertyUnitCharges: propertyUnitChargesReducers.propertyUnitCharges(state.propertyUnitCharges, action),
         propertyUnits: propertyUnitsReducers.propertyUnits(state.propertyUnits, action),
         companyProfile: companyProfileReducers.companyProfiles(state.companyProfile, action),
-        mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
+        managementFees: managementFeesReducers.managementFees(state.managementFees, action),
         users: usersReducers.users(state.users, action),
+        propertySettings: propertySettingsReducers.propertySettings(state.propertySettings, action),
         expenses: expensesReducers.expenses(state.expenses, action),
         contacts: contactsReducers.contacts(state.contacts, action),
         leases: leaseReducers.leases(state.leases, action),

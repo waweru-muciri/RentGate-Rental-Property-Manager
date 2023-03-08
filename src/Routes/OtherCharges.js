@@ -19,8 +19,10 @@ import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { currencyFormatter } from "../assets/commonAssets";
-import { parse, startOfToday, format } from "date-fns";
+import { getTransactionsFilterOptions, currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getYearToDateFromToDates } from "../assets/commonAssets";
+import { parse, isWithinInterval, format, startOfToday } from "date-fns";
+const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 
@@ -52,6 +54,7 @@ let TenantChargesStatementPage = ({
     let [chargeType, setChargeTypeFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState('');
     let [toDateFilter, setToDateFilter] = useState("");
+    let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [contactFilter, setContactFilter] = useState(null);
     let [propertyFilter, setPropertyFilter] = useState("all");
 
@@ -62,8 +65,15 @@ let TenantChargesStatementPage = ({
         .map(chargeType => JSON.parse(chargeType))
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setTenantChargesItems(transactionsCharges);
-        setFilteredChargeItems(transactionsCharges);
+        setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
     const totalNumOfCharges = filteredChargeItems.length
@@ -84,6 +94,43 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
         let filteredStatements = tenantChargesItems
+        let dateRange = []
+        let startOfPeriod;
+        let endOfPeriod;
+        if (periodFilter) {
+            switch (periodFilter) {
+                case 'last-month':
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case 'year-to-date':
+                    dateRange = getYearToDateFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case 'last-year':
+                    dateRange = getLastYearFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case 'month-to-date':
+                    dateRange = getCurrentMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+                case '3-months-to-date':
+                    dateRange = getLastThreeMonthsFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
+                    break;
+            }
+            filteredStatements = filteredStatements.filter((chargeItem) => {
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+            })
+        }
+        filteredStatements = filteredStatements
             .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
             .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
             .filter(({ charge_type }) => !chargeType ? true : charge_type === chargeType.value)
@@ -137,6 +184,7 @@ let TenantChargesStatementPage = ({
         setFromDateFilter("");
         setToDateFilter("");
         setContactFilter(null)
+        setPeriodFilter("month-to-date");
         setPropertyFilter("all")
     };
 
@@ -273,23 +321,34 @@ let TenantChargesStatementPage = ({
                                                 </Grid>
                                             </Grid>
                                             <Grid item md={6} xs={12}>
-                                                <Autocomplete
-                                                    id="charge_type_filter"
-                                                    options={CHARGE_TYPES}
-                                                    getOptionSelected={(option, value) => option.value === value.value}
-                                                    name="charge_type_filter"
-                                                    onChange={(event, newValue) => {
-                                                        setChargeTypeFilter(newValue);
+                                                <TextField
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    select
+                                                    id="period_filter"
+                                                    name="period_filter"
+                                                    label="Period"
+                                                    value={periodFilter}
+                                                    onChange={(event) => {
+                                                        setPeriodFilter(
+                                                            event.target.value
+                                                        );
                                                     }}
-                                                    value={chargeType}
-                                                    getOptionLabel={(charge_type) => charge_type ? charge_type.label : ''}
-                                                    style={{ width: "100%" }}
-                                                    renderInput={(params) => <TextField {...params} label="Charge Type" variant="outlined" />}
-                                                />
+                                                    InputLabelProps={{ shrink: true }}
+                                                >
+                                                    {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
+                                                        <MenuItem
+                                                            key={index}
+                                                            value={filterOption.id}
+                                                        >
+                                                            {filterOption.text}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
                                             </Grid>
                                         </Grid>
                                         <Grid item container direction="row" spacing={2}>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item xs={12} md={4}>
                                                 <TextField
                                                     fullWidth
                                                     select
@@ -317,7 +376,7 @@ let TenantChargesStatementPage = ({
                                                     )}
                                                 </TextField>
                                             </Grid>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item xs={12} md={4}>
                                                 <Autocomplete
                                                     id="contact_filter"
                                                     options={contacts}
@@ -331,6 +390,21 @@ let TenantChargesStatementPage = ({
                                                     getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
                                                     style={{ width: "100%" }}
                                                     renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={4}>
+                                                <Autocomplete
+                                                    id="charge_type_filter"
+                                                    options={CHARGE_TYPES}
+                                                    getOptionSelected={(option, value) => option.value === value.value}
+                                                    name="charge_type_filter"
+                                                    onChange={(event, newValue) => {
+                                                        setChargeTypeFilter(newValue);
+                                                    }}
+                                                    value={chargeType}
+                                                    getOptionLabel={(charge_type) => charge_type ? charge_type.label : ''}
+                                                    style={{ width: "100%" }}
+                                                    renderInput={(params) => <TextField {...params} label="Charge Type" variant="outlined" />}
                                                 />
                                             </Grid>
                                         </Grid>

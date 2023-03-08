@@ -1,161 +1,416 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/PrivateLayout";
-import PageHeading from "../components/PageHeading";
 import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
 import Grid from "@material-ui/core/Grid";
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import DataGridTable from '../components/DataGridTable'
+import DataGridTable from '../components/DataGridTable';
+import Tab from '@material-ui/core/Tab';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
 import InfoDisplayPaper from "../components/InfoDisplayPaper";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import { Bar } from 'react-chartjs-2';
-import { getMonthsInYear } from "../assets/commonAssets";
-import { format } from "date-fns";
+import TabPanel from "../components/TabPanel";
+import Button from '@material-ui/core/Button';
+import EditIcon from "@material-ui/icons/Edit";
+import SearchIcon from "@material-ui/icons/Search";
+import { Link } from "react-router-dom";
+import AddIcon from "@material-ui/icons/Add";
+import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import CommonTable from "../components/table/commonTable";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
+import { handleDelete } from "../actions/actions";
+import { Doughnut } from 'react-chartjs-2';
+import TEAL from '@material-ui/core/colors/teal';
+import RED from '@material-ui/core/colors/red';
+import GREY from "@material-ui/core/colors/grey";
 
-const options = {
-    responsive: true,
-    tooltips: {
-        mode: 'label'
-    },
-    elements: {
-        line: {
-            fill: false
-        }
-    },
+
+const legendOpts = {
+    display: true,
+    position: 'top',
+    fullWidth: true,
+    reverse: false,
+    labels: {
+        fontColor: GREY[800],
+        fontSize: 14,
+    }
 };
+
+const headCells = [
+    { id: "from_date", numeric: false, disablePadding: true, label: "From Date" },
+    { id: "to_date", numeric: false, disablePadding: true, label: "To Date" },
+    { id: "property_ref", numeric: false, disablePadding: true, label: "Property" },
+    { id: "date_collected", numeric: false, disablePadding: true, label: "Date Collected" },
+    { id: "fees_amount", numeric: false, disablePadding: true, label: "Amount Collected" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+];
 
 const propertiesColumns = [
     { field: 'ref', headerName: 'Property Name/Ref' },
     { field: "address", headerName: "Property Address" },
     { field: "city", headerName: "Location" },
     { field: "units", headerName: "Number of Units" },
+    { field: "floorArea", headerName: "Floor Area" },
 ];
-
-const monthsInYear = getMonthsInYear()
 
 
 let UserDetailsPage = ({
-    activeLeases,
-    totalPropertyUnits,
+    totalPortfolioFloorArea,
+    totalAssetsRentValue,
+    activeLeasesNumber,
+    propertyUnits,
     properties,
     userDetails,
+    managementFees,
+    newRentalAgreeements,
+    match,
+    handleItemDelete
 }) => {
     const classes = commonStyles()
-    const managementRevenueGraphData = { datasets: [] }
-    //get months in an year in short format
-    managementRevenueGraphData.labels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
+    const [tabValue, setTabValue] = React.useState(1);
+    const [managementFeesItems, setManagementFeesItems] = useState([])
+    const [filteredManagementFeesItems, setFilteredManagementFeesItems] = useState([])
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [selected, setSelected] = useState([]);
+
+    useEffect(() => {
+        setManagementFeesItems(managementFees)
+        setFilteredManagementFeesItems(managementFees)
+    }, [managementFees])
+
+    const totalPropertyUnits = propertyUnits.length
+
+    //get occupancy graph data
+    const rentalUnitsOccupancyData = { datasets: [] }
+    rentalUnitsOccupancyData.labels = ['Occupied Units', 'Vacant Units']
+    rentalUnitsOccupancyData.datasets.push(
+        {
+            data: [activeLeasesNumber, (propertyUnits.length - activeLeasesNumber)],
+            backgroundColor: [RED[800], RED[200]]
+        })
+    //get the number of the different units by category
+    const rentalUnitsDistributionData = { datasets: [] }
+    const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)))
+    rentalUnitsDistributionData.labels = unitTypes
+    rentalUnitsDistributionData.datasets.push({
+        data: unitTypes
+            .map(unit_type => {
+                return propertyUnits.filter((property) => property.unit_type === unit_type).length
+            }),
+        backgroundColor: unitTypes.map((_unit_type, key) => TEAL[(key + 1) * 100])
+    })
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
+    const handleSearchFormSubmit = (event) => {
+        event.preventDefault();
+        //filter the management fees according to the search criteria here
+
+    };
+
     return (
         <Layout pageTitle="User Profile">
-            <Grid container justify="center" direction="column" spacing={2}>
-                <Grid item xs={12} >
-                    <PageHeading text="User Details" />
+            <AppBar position="static">
+                <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
+                    <Tab label="User Profile" />
+                    <Tab label="Management Revenue" />
+                </Tabs>
+            </AppBar>
+            <TabPanel value={tabValue} index={0}>
+                <Grid container justify="center" direction="column" spacing={2}>
+                    <Grid item xs={12} >
+                        <Typography variant="h6">User Details</Typography>
+                    </Grid>
+                    <Grid
+                        container
+                        direction="row"
+                        item
+                        justify="center"
+                        spacing={4}
+                    >
+                        <Grid container item direction="column" xs={12} md={4} spacing={2} justify="space-between" alignItems="stretch">
+                            <Grid item>
+                                <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
+                                    <CardContent>
+                                        <Grid container spacing={2} direction="column" alignItems="center"
+                                            justify="center">
+                                            <Grid item>
+                                                <Avatar
+                                                    alt="User Image"
+                                                    src={userDetails.user_avatar_url}
+                                                    className={classes.largeAvatar}
+                                                />
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                                    {userDetails.title} {userDetails.first_name} {userDetails.last_name}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item>
+                                <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
+                                    <CardContent>
+                                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                            Contact Info
+                                    </Typography>
+                                        <Typography variant="body2" component="p">
+                                            ID Number: {userDetails.id_number || '-'}
+                                        </Typography>
+                                        <Typography variant="body2" component="p">
+                                            Personal Phone Number: {userDetails.phone_number || '-'}
+                                        </Typography>
+                                        <Typography variant="body2" component="p">
+                                            Work Phone Number: {userDetails.work_mobile_number || '-'}
+                                        </Typography>
+                                        <Typography variant="body2" component="p">
+                                            Home Phone Number: {userDetails.home_phone_number || '-'}
+                                        </Typography>
+                                        <Typography variant="body2" component="p">
+                                            Email: {userDetails.primary_email || '-'}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                        <Grid item container xs={12} md={8}>
+                            <Grid item xs={12}>
+                                <Card variant="outlined" elevation={1}>
+                                    <CardContent>
+                                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                            Property Portfolio
+                                    </Typography>
+                                        <DataGridTable rows={properties} headCells={propertiesColumns} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid container direction="row" item alignItems="stretch" justify="center" spacing={4}>
+                        <Grid item xs={12} md={4} container spacing={2} direction="column" alignItems="center" justify="center">
+                            <InfoDisplayPaper xs={12} title={"Total Rental Units"} value={totalPropertyUnits} />
+                            <InfoDisplayPaper xs={12} title={"Total Floor Area"} value={totalPortfolioFloorArea} />
+                            <InfoDisplayPaper xs={12} title={"Total Units Rent Value"} value={totalAssetsRentValue} />
+                            <InfoDisplayPaper xs={12} title={"Total Active Rental Agreements"} value={activeLeasesNumber} />
+                        </Grid>
+                        <Grid container item xs={12} md={8} spacing={2} direction="row" alignItems="stretch" justify="center">
+                            <Grid item xs={12} md>
+                                <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
+                                    <CardContent>
+                                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                            Current Unit Occupancy
+                                        </Typography>
+                                        <Doughnut height={300} data={rentalUnitsOccupancyData} legend={legendOpts} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} md>
+                                <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
+                                    <CardContent>
+                                        <Typography gutterBottom align="center" variant="subtitle1" component="h2">
+                                            Unit Types Distribution
+                                        </Typography>
+                                        <Doughnut height={300} data={rentalUnitsDistributionData} legend={legendOpts} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
                 <Grid
                     container
-                    direction="row"
-                    item
-                    spacing={4}
+                    spacing={3}
+                    justify="space-evenly"
+                    alignItems="center"
                 >
-                    <Grid container item direction="column" xs={12} md={4} spacing={2} justify="space-between" alignItems="stretch">
+                    <Grid item xs={12}>
+                        <Typography variant="h6">Management Fees</Typography>
+                    </Grid>
+                    <Grid
+                        container
+                        spacing={2}
+                        item
+                        alignItems="center"
+                        direction="row"
+                        key={1}
+                    >
                         <Grid item>
-                            <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
-                                <CardContent>
-                                    <Grid container spacing={2} direction="column" alignItems="center"
-                                        justify="center">
-                                        <Grid item>
-                                            <Avatar
-                                                alt="User Image"
-                                                src={userDetails.user_avatar_url}
-                                                className={classes.largeAvatar}
-                                            />
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                                {userDetails.title} {userDetails.first_name} {userDetails.last_name}
-                                            </Typography>
-                                        </Grid>
+                            <Button
+                                type="button"
+                                color="primary"
+                                variant="contained"
+                                size="medium"
+                                startIcon={<AddIcon />}
+                                component={Link}
+                                to={`${match.url}/management-fees/new`}
+                            >
+                                Collect Fees
+                        </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                type="button"
+                                color="primary"
+                                variant="contained"
+                                size="medium"
+                                startIcon={<EditIcon />}
+                                disabled={selected.length <= 0}
+                                component={Link}
+                                to={`${match.url}/management-fees/${selected[0]}/edit`}
+                            >
+                                Edit
+                        </Button>
+                        </Grid>
+                        <Grid item>
+                            <PrintArrayToPdf
+                                disabled={selected.length <= 0}
+                                reportName={'Rental Units Records'}
+                                reportTitle={'Rental Units Data'}
+                                headCells={headCells}
+                                dataToPrint={managementFeesItems.filter(({ id }) => selected.includes(id))}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <ExportToExcelBtn
+                                disabled={selected.length <= 0}
+                                reportName={'Rental Units Records'}
+                                reportTitle={'Rental Units Data'}
+                                headCells={headCells}
+                                dataToPrint={managementFeesItems.filter(({ id }) => selected.includes(id))}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box
+                            border={1}
+                            borderRadius="borderRadius"
+                            borderColor="grey.400"
+                        >
+                            <form
+                                className={classes.form}
+                                id="managementFeesSearchForm"
+                                onSubmit={handleSearchFormSubmit}
+                            >
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    justify="center"
+                                    alignItems="center"
+                                    direction="row"
+                                >
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            variant="outlined"
+                                            name="property_filter"
+                                            label="Property"
+                                            id="property_filter"
+                                            onChange={(event) => {
+                                                setPropertyFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            value={propertyFilter}
+                                        >
+                                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                            {properties.map(
+                                                (property, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={property.id}
+                                                    >
+                                                        {property.ref}
+                                                    </MenuItem>
+                                                )
+                                            )}
+                                        </TextField>
                                     </Grid>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                        <Grid item>
-                            <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
-                                <CardContent>
-                                    <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                        Contact Info
-                                    </Typography>
-                                    <Typography variant="body2" component="p">
-                                        ID Number: {userDetails.id_number || '-'}
-                                    </Typography>
-                                    <Typography variant="body2" component="p">
-                                        Personal Phone Number: {userDetails.phone_number || '-'}
-                                    </Typography>
-                                    <Typography variant="body2" component="p">
-                                        Work Phone Number: {userDetails.work_mobile_number || '-'}
-                                    </Typography>
-                                    <Typography variant="body2" component="p">
-                                        Home Phone Number: {userDetails.home_phone_number || '-'}
-                                    </Typography>
-                                    <Typography variant="body2" component="p">
-                                        Email: {userDetails.primary_email || '-'}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                                    <Grid item>
+                                        <Button
+                                            type="submit"
+                                            form="managementFeesSearchForm"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<SearchIcon />}
+                                        >
+                                            SEARCH
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </form>
+                        </Box>
                     </Grid>
-                    <Grid item container xs={12} md={8}>
-                        <Grid item xs={12}>
-                            <Card variant="outlined" elevation={1}>
-                                <CardContent>
-                                    <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                        Properties Under Management
-                                    </Typography>
-                                    <DataGridTable rows={properties} headCells={propertiesColumns} />
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                    <Grid item xs={12}>
+                        <CommonTable
+                            selected={selected}
+                            setSelected={setSelected}
+                            rows={filteredManagementFeesItems}
+                            headCells={headCells}
+                            deleteUrl={'management-fees'}
+                            handleDelete={handleItemDelete}
+                        />
                     </Grid>
                 </Grid>
-                <Grid container direction="row" item alignItems="stretch" spacing={4}>
-                    <Grid item xs={12} md={4} container spacing={2} direction="column" alignItems="center" justify="center">
-                        <InfoDisplayPaper xs={12} title={"Total Rental Units"} value={totalPropertyUnits} />
-                        <InfoDisplayPaper xs={12} title={"Total Active Rental Agreements"} value={activeLeases} />
-                        <InfoDisplayPaper xs={12} title={"Total Unoccupied Units"} value={totalPropertyUnits - activeLeases} />
-                    </Grid>
-                    <Grid item xs={12} md={8}>
-                        <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
-                            <CardContent>
-                                <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                    Management Revenue
-                                </Typography>
-                                <Bar
-                                    data={managementRevenueGraphData}
-                                    options={options}>
-                                </Bar>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-            </Grid>
+            </TabPanel>
         </Layout>
     );
 };
 
 const mapStateToProps = (state, ownProps) => {
+    const propertiesAssignedToUser = state.properties
+        .filter(({ assigned_to }) => assigned_to === ownProps.match.params.userId)
+        .map(property => Object.assign(
+            property,
+            {
+                units: state.propertyUnits.filter(({ property_id }) => property_id === property.id).length,
+                floorArea: state.propertyUnits.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue.sqft) || 0
+                }, 0)
+            }));
+    const totalPropertiesFloorArea = propertiesAssignedToUser
+        .reduce((total, currentValue) => total + parseFloat(currentValue.floorArea) || 0, 0)
+    //map ids of properties assigned to user to enable for a quick search
+    const idsOfPropertiesAssignedToUser = propertiesAssignedToUser.map(({ id }) => id)
+    //get all active leases assigned to user's properties
+    const totalActiveLeases = state.leases
+        .filter(({ property_id }) => idsOfPropertiesAssignedToUser.includes(property_id))
+        .filter(({ terminated }) => terminated !== true);
     return {
-        properties: state.properties
-            .filter(({ assigned_to }) => assigned_to === ownProps.match.params.userId)
-            .map(property => Object.assign(property, { units: state.propertyUnits.filter(({ property_id }) => property_id === property.id).length })),
-        activeLeases: state.leases.filter(({ terminated }) => terminated !== true).length,
-        totalPropertyUnits: state.propertyUnits.length,
+        totalPortfolioFloorArea: totalPropertiesFloorArea,
+        managementFees: state.managementFees
+            .filter(({ user_id }) => user_id === ownProps.match.params.userId),
+        properties: propertiesAssignedToUser,
+        activeLeasesNumber: totalActiveLeases.length,
+        totalAssetsRentValue: totalActiveLeases
+            .reduce((total, currentValue) => total + parseFloat(currentValue.rent_amount) || 0, 0),
+        propertyUnits: state.propertyUnits
+            .filter(({ property_id }) => idsOfPropertiesAssignedToUser.includes(property_id)),
         userDetails: state.users.find(({ id }) => id === ownProps.match.params.userId) || {}
     }
 };
 
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+    };
+};
 
-UserDetailsPage = connect(mapStateToProps)(UserDetailsPage);
+UserDetailsPage = connect(mapStateToProps, mapDispatchToProps)(UserDetailsPage);
 
 export default withRouter(UserDetailsPage);

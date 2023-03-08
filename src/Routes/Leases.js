@@ -13,12 +13,13 @@ import BlockIcon from "@material-ui/icons/Block";
 import AddIcon from "@material-ui/icons/Add";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, handleItemFormSubmit } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
+import RentAdjustModal from "./RentAdjustModal";
 import { parse } from "date-fns";
 
 const headCells = [
@@ -36,22 +37,23 @@ const headCells = [
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
-const LEASE_TERMINATED_STATUS_TYPES = [{ id: false, name: "Active" }, { id: true, name: "In-Active" }]
-
 let TransactionPage = ({
     leases,
     properties,
     match,
+    history,
+    handleItemSubmit,
     handleItemDelete,
 }) => {
     const classes = commonStyles();
     let [leaseItems, setLeaseItems] = useState([]);
     let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
-    let [activeStatusFilter, setActiveStatusFilter] = useState('');
+    let [activeStatusFilter, setActiveStatusFilter] = useState("all");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
+    const [adjustRentModalState, setAdjustRentModalState] = useState(false);
 
     useEffect(() => {
         setLeaseItems(leases);
@@ -70,16 +72,20 @@ let TransactionPage = ({
             )
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ terminated }) =>
-                activeStatusFilter === '' ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter
+                activeStatusFilter === "all" ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter
             );
         setFilteredLeaseItems(filteredLeases);
     };
+
+    const handleModalStateToggle = () => {
+        setAdjustRentModalState(!adjustRentModalState)
+    }
 
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredLeaseItems(leaseItems);
         setPropertyFilter("all");
-        setActiveStatusFilter('');
+        setActiveStatusFilter("all");
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -127,6 +133,18 @@ let TransactionPage = ({
                             to={`${match.url}/${selected[0]}/edit`}
                         >
                             Edit
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            onClick={handleModalStateToggle}
+                        >
+                            Adjust Rent Amounts
                         </Button>
                     </Grid>
                     <Grid item>
@@ -194,14 +212,9 @@ let TransactionPage = ({
                                             );
                                         }}
                                     >
-                                        {LEASE_TERMINATED_STATUS_TYPES.map((leaseStatus, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={leaseStatus.id}
-                                            >
-                                                {leaseStatus.name}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem key="all" value={"all"}>All</MenuItem>
+                                        <MenuItem key="active" value={false}>Active</MenuItem>
+                                        <MenuItem key="in-active" value={true}>In-Active</MenuItem>
                                     </TextField>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
@@ -309,6 +322,13 @@ let TransactionPage = ({
                         </form>
                     </Box>
                 </Grid>
+                {
+                    adjustRentModalState ?
+                        <RentAdjustModal open={adjustRentModalState}
+                            leasesToAdjustRentAmounts={leaseItems.filter(({ id }) => selected.includes(id))}
+                            handleClose={handleModalStateToggle} history={history}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
                 <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
@@ -330,11 +350,13 @@ const mapStateToProps = (state) => {
             .map((lease) => {
                 const tenant = state.contacts.find((contact) => contact.id === lease.tenants[0]) || {};
                 const property = state.properties.find(({ id }) => id === lease.property_id) || {};
+                const unitWithLease = state.propertyUnits.find(({ id }) => id === lease.unit_id) || {};
                 return Object.assign({}, lease,
                     {
                         tenant_name: tenant.first_name + " " + tenant.last_name,
                         tenant_id_number: tenant.id_number,
                         property_ref: property.ref,
+                        unit_ref: unitWithLease.ref,
                     });
             })
             .sort((lease1, lease2) => parse(lease2.start_date, 'yyyy-MM-dd', new Date()) -
@@ -345,6 +367,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
         handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };

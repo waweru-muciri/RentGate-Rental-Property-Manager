@@ -26,7 +26,8 @@ import {
 } from "../../assets/commonAssets.js";
 import ImageCropper from '../ImageCropper';
 import * as Yup from "yup";
-import { format, startOfToday } from "date-fns";
+import LoadingBackdrop from "../LoadingBackdrop";
+
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -43,8 +44,6 @@ const ContactSchema = Yup.object().shape({
 	present_address: Yup.string().trim().default(''),
 	personal_phone_number: Yup.string().trim().required('Phone Number is Required'),
 });
-
-const currentDate = format(startOfToday(), 'yyyy-MM-dd')
 
 
 let ContactInputForm = (props) => {
@@ -149,6 +148,9 @@ let ContactInputForm = (props) => {
 										message={status.msg}
 									/>
 								)
+							}
+							{
+								isSubmitting && (<LoadingBackdrop open={true}/>)
 							}
 							<Grid container spacing={4} direction="row">
 								<Grid

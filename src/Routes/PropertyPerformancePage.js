@@ -10,7 +10,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
-import { Bar } from 'react-chartjs-2';
+import { Bar, HorizontalBar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 import * as Yup from "yup";
@@ -27,6 +27,22 @@ const options = {
             fill: false
         }
     },
+    scales: {
+        yAxes: [
+            {
+                ticks: {
+                    min: 0,
+                }
+            }
+        ],
+        xAxes: [
+            {
+                ticks: {
+                    min: 0,
+                }
+            }
+        ]
+    }
 };
 
 const FilterYearSchema = Yup.object().shape({
@@ -41,10 +57,11 @@ const FilterYearSchema = Yup.object().shape({
 
 const monthsInYear = getMonthsInYear()
 
-let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
+let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) => {
     const classes = commonStyles()
     let [propertyFilter, setPropertyFilter] = useState("all");
     const [chargesItems, setChargesItems] = useState([]);
+    const [expensesItems, setExpensesItems] = useState(expenses);
 
     useEffect(() => {
         setChargesItems(transactionsCharges
@@ -52,13 +69,56 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
         );
     }, [transactionsCharges]);
 
+    useEffect(() => {
+        setExpensesItems(expenses
+            .filter(({ expense_date }) => getYear(parse(expense_date, 'yyyy-MM-dd', new Date())) === getYear(new Date()))
+        );
+    }, [expenses]);
+
     const setFilteredTransactionItemsByYear = (filterYear) => {
-            setChargesItems(
-                transactionsCharges
+        setChargesItems(
+            transactionsCharges
                 .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
                 .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         );
+        setExpensesItems(
+            expenses
+                .filter(({ expense_date }) => getYear(parse(expense_date, 'yyyy-MM-dd', new Date())) === filterYear)
+                .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        );
     };
+    //get the different charges types as a set
+    const paymentsTypes = [...new Set(chargesItems.filter(chargeItem => chargeItem.payed_status)
+        .map(charge => charge.charge_type))]
+    //get totals payments for each payment type
+    const paymentTotalsForPaymentType = paymentsTypes.map(paymentType => {
+        return chargesItems.filter(charge => charge.charge_type === paymentType && charge.payed_status)
+            .reduce((total, currentValue) => {
+                return total + parseFloat(currentValue.payed_amount) || 0
+            }, 0)
+    })
+
+    const paymentsTypesForDisplay = paymentsTypes.map(paymentType => {
+        let result;
+        switch (paymentType) {
+            case 'security_deposit':
+                result = "Security Deposit"
+                break;
+            case 'rent':
+                result = "Rent"
+                break;
+            case 'recurring_charge':
+                result = "Recurring Charges"
+                break;
+            case 'one_time_charge':
+                result = "Recurring Charges"
+                break;
+            default:
+                result = "Others"
+                break;
+        }
+        return result;
+    })
 
     //get the total values of the various charges and payments 
     const totalRentCharges = chargesItems.filter(charge => charge.charge_type === 'rent')
@@ -82,10 +142,29 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
         }, 0)
     const totalRentChargesBalances = totalRentCharges - totalRentPayments
     const totalOtherChargesBalances = totalOtherCharges - totalOtherChargesPayments
-    //get charges and payments graph data from previous values
-    const chargesAndPaymentsGraphData = { datasets: [] }
     //get months in an year in short format
-    chargesAndPaymentsGraphData.labels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
+    const monthsOfYearLabels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
+    //get charges and payments graph data from previous values
+    const chargesAndPaymentsGraphData = {
+        labels: monthsOfYearLabels,
+        datasets: []
+    }
+
+    //get income categories graph data from previous values
+    const incomeCategoriesGraphData = {
+        labels: paymentsTypesForDisplay,
+        datasets: [
+            {
+                label: 'Income Categories',
+                backgroundColor: 'rgba(130, 224, 170,0.6)',
+                borderColor: 'rgba(130, 224, 170,1)',
+                borderWidth: 1,
+                hoverBackgroundColor: 'rgba(130, 224, 170,1)',
+                hoverBorderColor: 'rgba(130, 224, 170,1)',
+                data: paymentTotalsForPaymentType
+            }
+        ]
+    }
     const totalEachMonthPayments = monthsInYear.map((monthDate) => {
         //get transactions recorded in the same month and year as monthDate
         return chargesItems
@@ -94,13 +173,13 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
                 return getMonth(monthDate) === getMonth(chargeDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payed_amount) || 0), 0)
     })
-    chargesAndPaymentsGraphData.datasets.push({
-        data: totalEachMonthPayments, label: 'Monthly Payments Collection', type: 'bar',
-        fill: false,
-        backgroundColor: '#71B37C',
-        borderColor: '#71B37C',
-        hoverBackgroundColor: '#71B37C',
-        hoverBorderColor: '#71B37C',
+    const totalEachMonthExpenses = monthsInYear.map((monthDate) => {
+        //get transactions recorded in the same month and year as monthDate
+        return expensesItems
+            .filter((expense) => {
+                const expenseDate = parse(expense.expense_date, 'yyyy-MM-dd', new Date())
+                return getMonth(monthDate) === getMonth(expenseDate)
+            }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.amount) || 0), 0)
     })
 
     const totalEachMonthCharges = monthsInYear.map((monthDate) => {
@@ -111,6 +190,33 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
                 return getMonth(monthDate) === getMonth(chargeDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
     })
+
+    //get expenses categories graph data from previous values
+    const expensesCategoriesGraphData = {
+        labels: monthsOfYearLabels,
+        datasets: [
+            {
+                label: 'Expenses',
+                backgroundColor: "rgba(174, 182, 191,0.6)",
+                borderColor: 'rgba(174, 182, 191,1)',
+                borderWidth: 1,
+                hoverBackgroundColor: 'rgba(174, 182, 191, 1)',
+                hoverBorderColor: 'rgba(174, 182, 191,1)',
+                data: totalEachMonthExpenses
+            }
+        ]
+    }
+
+    chargesAndPaymentsGraphData.datasets.push({
+        data: totalEachMonthPayments,
+        label: 'Monthly Payments Collection', type: 'bar',
+        fill: false,
+        backgroundColor: '#71B37C',
+        borderColor: '#71B37C',
+        hoverBackgroundColor: '#71B37C',
+        hoverBorderColor: '#71B37C',
+    })
+
     chargesAndPaymentsGraphData.datasets.push({
         data: totalEachMonthCharges,
         label: 'Monthly Charges', type: 'line', borderColor: '#EC932F', fill: false,
@@ -149,76 +255,76 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
                                     handleChange,
                                     handleBlur,
                                 }) => (
-                                        <form
-                                            className={classes.form}
-                                            id="yearFilterForm"
-                                            onSubmit={handleSubmit}
+                                    <form
+                                        className={classes.form}
+                                        id="yearFilterForm"
+                                        onSubmit={handleSubmit}
+                                    >
+                                        <Grid
+                                            container
+                                            spacing={2}
+                                            alignItems="center"
+                                            justify="center"
+                                            direction="row"
                                         >
-                                            <Grid
-                                                container
-                                                spacing={2}
-                                                alignItems="center"
-                                                justify="center"
-                                                direction="row"
-                                            >
-                                                <Grid item sm={3}>
-                                                    <TextField
-                                                        fullWidth
-                                                        select
-                                                        variant="outlined"
-                                                        name="property_filter"
-                                                        label="Property"
-                                                        id="property_filter"
-                                                        onChange={(event) => {
-                                                            setPropertyFilter(
-                                                                event.target.value
-                                                            );
-                                                        }}
-                                                        value={propertyFilter}
-                                                    >
-                                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
-                                                        {properties.map(
-                                                            (property, index) => (
-                                                                <MenuItem
-                                                                    key={index}
-                                                                    value={property.id}
-                                                                >
-                                                                    {property.ref}
-                                                                </MenuItem>
-                                                            )
-                                                        )}
-                                                    </TextField>
-                                                </Grid>
-                                                <Grid item>
-                                                    <TextField
-                                                        variant="outlined"
-                                                        id="filter_year"
-                                                        name="filter_year"
-                                                        label="Year"
-                                                        value={values.filter_year}
-                                                        onChange={handleChange}
-                                                        onBlur={handleBlur}
-                                                        error={errors.filter_year && touched.filter_year}
-                                                        helperText={
-                                                            touched.filter_year && errors.filter_year
-                                                        }
-                                                    />
-                                                </Grid>
-                                                <Grid item>
-                                                    <Button
-                                                        type="submit"
-                                                        form="yearFilterForm"
-                                                        color="primary"
-                                                        variant="contained"
-                                                        size="medium"
-                                                        startIcon={<SearchIcon />}
-                                                    >
-                                                        SEARCH
-                            </Button>
-                                                </Grid>
+                                            <Grid item sm={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    variant="outlined"
+                                                    name="property_filter"
+                                                    label="Property"
+                                                    id="property_filter"
+                                                    onChange={(event) => {
+                                                        setPropertyFilter(
+                                                            event.target.value
+                                                        );
+                                                    }}
+                                                    value={propertyFilter}
+                                                >
+                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                                    {properties.map(
+                                                        (property, index) => (
+                                                            <MenuItem
+                                                                key={index}
+                                                                value={property.id}
+                                                            >
+                                                                {property.ref}
+                                                            </MenuItem>
+                                                        )
+                                                    )}
+                                                </TextField>
                                             </Grid>
-                                        </form>
-                                    )}
+                                            <Grid item>
+                                                <TextField
+                                                    variant="outlined"
+                                                    id="filter_year"
+                                                    name="filter_year"
+                                                    label="Year"
+                                                    value={values.filter_year}
+                                                    onChange={handleChange}
+                                                    onBlur={handleBlur}
+                                                    error={errors.filter_year && touched.filter_year}
+                                                    helperText={
+                                                        touched.filter_year && errors.filter_year
+                                                    }
+                                                />
+                                            </Grid>
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    form="yearFilterForm"
+                                                    color="primary"
+                                                    variant="contained"
+                                                    size="medium"
+                                                    startIcon={<SearchIcon />}
+                                                >
+                                                    SEARCH
+                            </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </form>
+                                )}
                             </Formik>
                         </Box>
                     </Grid>
@@ -251,11 +357,33 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
                 <Grid item>
                     <Typography variant="h6" align="center" gutterBottom>
                         Monthly Charges &amp; Payments
-          </Typography>
+                    </Typography>
                     <Bar
                         data={chargesAndPaymentsGraphData}
                         options={options}>
                     </Bar>
+                </Grid>
+                <Grid item container direction="row" spacing={4}>
+                    <Grid item xs>
+                        <Typography variant="h6" align="center" gutterBottom>
+                            Income Categories
+                    </Typography>
+                        <HorizontalBar
+                            height={250}
+                            data={incomeCategoriesGraphData}
+                            options={options}>
+                        </HorizontalBar>
+                    </Grid>
+                    <Grid item xs>
+                        <Typography variant="h6" align="center" gutterBottom>
+                            Expenses
+                    </Typography>
+                        <HorizontalBar
+                            height={250}
+                            data={expensesCategoriesGraphData}
+                            options={options}>
+                        </HorizontalBar>
+                    </Grid>
                 </Grid>
             </Grid>
         </Layout>
@@ -277,6 +405,7 @@ const mapStateToProps = (state) => {
             chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
             return Object.assign({}, charge, chargeDetails);
         }),
+        expenses: state.expenses,
     };
 };
 

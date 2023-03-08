@@ -15,7 +15,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, handleItemFormSubmit } from "../actions/actions";
 import IndividualPropertyIncomeStatement from "./IndividualPropertyIncomeStament";
 import TabPanel from "../components/TabPanel";
 import CommonTable from "../components/table/commonTable";
@@ -44,21 +44,22 @@ const headCells = [
 
 let PropertyDetailsPage = ({
     propertyUnits,
-    propertyActiveLeases,
+    propertyActiveLeasesNumber,
+    propertySettings,
     transactions,
     expenses,
-    meterReadings,
     propertyToShowDetails,
-    history,
     users,
     match,
+    handleItemSubmit,
     handleItemDelete
 }) => {
     const classes = commonStyles()
     const [propertyUnitsItems, setPropertyUnitItems] = useState([])
     const [filteredPropertyItems, setFilteredPropertyUnitsItems] = useState([])
     const [propertyRefFilter, setPropertyRefFilter] = useState("");
-    const [propertyTypeFilter, setPropertyTypeFilter] = useState("");
+    const [unitTypeFilter, setPropertyTypeFilter] = useState("");
+    const [occupiedStatusFilter, setOccupiedStatusFilter] = useState("all");
     const [selected, setSelected] = useState([]);
     const [tabValue, setTabValue] = React.useState(0);
 
@@ -79,7 +80,9 @@ let PropertyDetailsPage = ({
         //filter the propertyUnits according to the search criteria here
         let filteredPropertyUnits = propertyUnitsItems
             .filter(({ ref }) => !propertyRefFilter ? true : ref === propertyRefFilter)
-            .filter(({ unit_type }) => !propertyTypeFilter ? true : unit_type === propertyTypeFilter)
+            .filter(({ unit_type }) => !unitTypeFilter ? true : unit_type === unitTypeFilter)
+            .filter(({ lease_id }) => occupiedStatusFilter === "all" ? true :
+                occupiedStatusFilter === "occupied" ? lease_id : !lease_id)
 
         setFilteredPropertyUnitsItems(filteredPropertyUnits);
     };
@@ -89,30 +92,32 @@ let PropertyDetailsPage = ({
         setFilteredPropertyUnitsItems(propertyUnitsItems);
         setPropertyRefFilter("");
         setPropertyTypeFilter("");
+        setOccupiedStatusFilter("all");
     };
 
     return (
-        <Layout pageTitle="Rental Units">
+        <Layout pageTitle="Property Details">
             <AppBar position="static">
                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
                     <Tab label="Summary" />
-                    <Tab label="Financials" />
                     <Tab label="Rental Units" />
+                    <Tab label="Financials" />
                     <Tab label="Payment Settings" />
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={3}>
-                <PropertySettingsForm classes={classes} />
+                <PropertySettingsForm classes={classes} propertySettings={propertySettings} propertyToShowDetails={propertyToShowDetails}
+                    handleItemSubmit={handleItemSubmit} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
                 <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} transactions={transactions}
-                    propertyUnits={propertyUnitsItems} users={users} propertyActiveLeases={propertyActiveLeases} classes={classes} />
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits}
-                    transactions={transactions} expenses={expenses} meterReadings={meterReadings} classes={classes} />
+                    propertyUnits={propertyUnitsItems} users={users} propertyActiveLeasesNumber={propertyActiveLeasesNumber} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
+                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits}
+                    transactions={transactions} expenses={expenses} classes={classes} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
                 <Grid
                     container
                     spacing={3}
@@ -141,7 +146,7 @@ let PropertyDetailsPage = ({
                                 to={`${match.url}/new`}
                             >
                                 NEW
-                        </Button>
+                            </Button>
                         </Grid>
                         <Grid item>
                             <Button
@@ -155,7 +160,7 @@ let PropertyDetailsPage = ({
                                 to={`${match.url}/${selected[0]}/edit`}
                             >
                                 Edit
-                        </Button>
+                            </Button>
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
@@ -193,7 +198,7 @@ let PropertyDetailsPage = ({
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item xs={12} md={6}>
+                                    <Grid item xs={12} md>
                                         <TextField
                                             fullWidth
                                             select
@@ -206,21 +211,18 @@ let PropertyDetailsPage = ({
                                                     event.target.value
                                                 );
                                             }}
-                                            value={propertyTypeFilter}
+                                            value={unitTypeFilter}
                                         >
                                             {PROPERTY_TYPES.map(
                                                 (unit_type, index) => (
-                                                    <MenuItem
-                                                        key={index}
-                                                        value={unit_type}
-                                                    >
+                                                    <MenuItem key={index} value={unit_type}>
                                                         {unit_type}
                                                     </MenuItem>
                                                 )
                                             )}
                                         </TextField>
                                     </Grid>
-                                    <Grid item xs={12} md={6}>
+                                    <Grid item xs={12} md>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -234,6 +236,25 @@ let PropertyDetailsPage = ({
                                                 );
                                             }}
                                         />
+                                    </Grid>
+                                    <Grid item xs={12} md>
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            variant="outlined"
+                                            id="occupied_status"
+                                            name="occupied_status"
+                                            label="Occupied Status"
+                                            value={occupiedStatusFilter}
+                                            onChange={(event) => {
+                                                setOccupiedStatusFilter(
+                                                    event.target.value
+                                                );
+                                            }}>
+                                            <MenuItem key={1} value="all">All</MenuItem>
+                                            <MenuItem key={2} value="occupied">Occupied</MenuItem>
+                                            <MenuItem key={3} value="vacant">Vacant</MenuItem>
+                                        </TextField>
                                     </Grid>
                                 </Grid>
                                 <Grid
@@ -286,7 +307,6 @@ let PropertyDetailsPage = ({
                             handleDelete={handleItemDelete}
                         />
                     </Grid>
-
                 </Grid>
             </TabPanel>
         </Layout>
@@ -297,14 +317,16 @@ const mapStateToProps = (state, ownProps) => {
     const unitsInProperty = state.propertyUnits
         .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
         .map(({ id }) => id)
+    const propertyActiveLeases = state.leases
+        .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
+        .filter(({ terminated }) => terminated !== true)
     return {
         transactions: state.transactions.filter(({ unit_id }) => unitsInProperty.includes(unit_id)),
-        meterReadings: state.meterReadings,
-        expenses: state.expenses,
+        expenses: state.expenses.filter(({ property_id }) => property_id === ownProps.match.params.propertyId),
         propertyToShowDetails: state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
         propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id))
             .map((property_unit) => {
-                const latestUnitLease = state.leases.filter(({ terminated }) => terminated !== true)
+                const latestUnitLease = propertyActiveLeases
                     .find(({ unit_id }) => unit_id === property_unit.id) || {}
                 const tenant = state.contacts.find(
                     ({ id }) => Array.isArray(latestUnitLease.tenants) ? latestUnitLease.tenants.includes(id) : false)
@@ -314,19 +336,20 @@ const mapStateToProps = (state, ownProps) => {
                     {
                         tenant_name: tenant ? `${tenant.first_name} ${tenant.last_name}` : '-',
                         tenant_id_number: tenant ? tenant.id_number : '-',
-                        rent_amount: latestUnitLease.rent_amount
+                        lease_id: latestUnitLease.id,
+                        rent_amount: latestUnitLease.rent_amount,
                     });
             }
             ),
-        propertyActiveLeases: state.leases
-            .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
-            .filter(({ terminated }) => terminated !== true),
+        propertyActiveLeasesNumber: propertyActiveLeases.length,
+        propertySettings: state.propertySettings.find(({ property_id }) => property_id === ownProps.match.params.propertyId) || {},
         users: state.users,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
         handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };

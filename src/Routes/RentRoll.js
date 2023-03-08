@@ -26,6 +26,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getTransactionsFilterOptions, currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval, format, startOfToday } from "date-fns";
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+
+
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const headCells = [
@@ -53,7 +55,7 @@ let RentRollPage = ({
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
     let [contactFilter, setContactFilter] = useState(null);
-    let [periodFilter, setPeriodFilter] = useState("all");
+    let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [fromDateFilter, setFromDateFilter] = useState('');
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -78,8 +80,15 @@ let RentRollPage = ({
         }, 0)
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setChargeItems(transactionsCharges);
-        setFilteredChargeItems(transactionsCharges);
+        setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
     const handleSearchFormSubmit = (event) => {
@@ -91,10 +100,6 @@ let RentRollPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
-                case 'all':
-                    startOfPeriod = new Date(1990, 1, 1)
-                    endOfPeriod = new Date(2100, 1, 1)
-                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -139,7 +144,7 @@ let RentRollPage = ({
         setFilteredChargeItems(rentCharges);
         setPropertyFilter("all");
         setContactFilter(null);
-        setPeriodFilter("all");
+        setPeriodFilter("month-to-date");
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -339,7 +344,6 @@ let RentRollPage = ({
                                                     }}
                                                     InputLabelProps={{ shrink: true }}
                                                 >
-                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                         <MenuItem
                                                             key={index}
@@ -505,7 +509,7 @@ const mapStateToProps = (state) => {
                 chargeDetails.unit_details = `${property.ref} - ${unitWithCharge.ref}`;
                 return Object.assign({}, charge, chargeDetails);
             }).sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
-            parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
+                parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
         leases: state.leases,
     };

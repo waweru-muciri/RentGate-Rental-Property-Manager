@@ -18,7 +18,7 @@ import { printInvoice } from "../assets/PrintingHelper";
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
+    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Type" },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
     { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
     { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
@@ -36,9 +36,9 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState("all");
+    let [periodFilter, setPeriodFilter] = useState("month-to-date");
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges
+    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
         .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
         .map(chargeType => JSON.parse(chargeType))
 
@@ -63,8 +63,15 @@ let TenantChargesStatementPage = ({
         }, 0)
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const chargesForCurrentMonth = tenantTransactionCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setTenantChargesItems(tenantTransactionCharges);
-        setFilteredChargeItems(tenantTransactionCharges);
+        setFilteredChargeItems(chargesForCurrentMonth);
     }, [tenantTransactionCharges]);
 
     const handleSearchFormSubmit = (event) => {
@@ -76,10 +83,6 @@ let TenantChargesStatementPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
-                case 'all':
-                    startOfPeriod = new Date(1990, 1, 1)
-                    endOfPeriod = new Date(2100, 1, 1)
-                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -121,7 +124,7 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("all");
+        setPeriodFilter("month-to-date");
     };
 
     return (
@@ -159,7 +162,7 @@ let TenantChargesStatementPage = ({
                             printInvoice(
                                 tenantDetails,
                                 tenantChargesItems.filter(({ id }) => selected.includes(id))
-                                )
+                            )
                         }}
                         startIcon={<PrintIcon />}>
                         Print Invoice
@@ -196,7 +199,6 @@ let TenantChargesStatementPage = ({
                                             }}
                                             InputLabelProps={{ shrink: true }}
                                         >
-                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                 <MenuItem
                                                     key={index}

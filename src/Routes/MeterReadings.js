@@ -47,7 +47,7 @@ let MeterReadingsPage = ({
     let [meterReadingItems, setMeterReadingItems] = useState([]);
     let [filteredMeterReadingItems, setFilteredMeterReadingItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState("");
+    let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [toDateFilter, setToDateFilter] = useState("");
     let [meterTypeFilter, setMeterTypeFilter] = useState("");
     let [propertyFilter, setPropertyFilter] = useState("all");
@@ -56,8 +56,15 @@ let MeterReadingsPage = ({
     const METER_TYPE_OPTIONS = Array.from(new Set(meterReadingItems.map((meterReading) => meterReading.meter_type)))
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const currentMonthMeterReadings = meterReadings.filter((meterReading) => {
+            const readingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(readingDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setMeterReadingItems(meterReadings);
-        setFilteredMeterReadingItems(meterReadings);
+        setFilteredMeterReadingItems(currentMonthMeterReadings);
     }, [meterReadings]);
 
     const handleSearchFormSubmit = (event) => {
@@ -114,7 +121,7 @@ let MeterReadingsPage = ({
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFromDateFilter("");
-        setPeriodFilter("");
+        setPeriodFilter("month-to-date");
         setToDateFilter("");
         setMeterTypeFilter("");
         setPropertyFilter("all");

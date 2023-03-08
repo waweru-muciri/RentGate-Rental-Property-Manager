@@ -2,9 +2,10 @@ import * as actionTypes from "../assets/actionTypes";
 import * as vacatingNoticesActions from "./notices";
 import * as emailTemplatesActions from "./emailTemplates";
 import * as propertyActions from "./property";
+import * as propertySettingsActions from "./propertySettings";
 import * as propertyUnitChargeActions from "./propertyUnitCharges";
 import * as propertyUnitActions from "./propertyUnits";
-import * as mediaFilesActions from "./mediaFiles";
+import * as managementFeesActions from "./managementFees";
 import * as contactsActions from "./contacts";
 import * as transactionsActions from "./transactions";
 import * as logActions from "./logs";
@@ -77,25 +78,15 @@ export const resetUserPasswordByEmail = async (email) => {
     return await auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/account-actions/' })
 }
 
-export const signUpWithEmailAndPassword = async (email, password) => {
+export const signUpWithEmailAndPassword = async (userDetails) => {
     try {
-        const user = await auth.createUserWithEmailAndPassword(email, password)
-        await auth.updateCurrentUser(user)
-        await setAdminCustomClaim(getFirebaseUserDetails(user))
-        user.getIdToken(true)
+        const returnValue = await createFirebaseUser(userDetails)
+        const createdUser = returnValue.data
+        await setAdminCustomClaim({ userId: createdUser.uid, userProfile: userDetails })
     } catch (error) {
         // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = errorCode === "auth/email-already-in-use"
-            ? "Email is already in use"
-            : errorCode === "auth/invalid-email"
-                ? "Email is invalid"
-                : errorCode === "auth/operation-not-allowed"
-                    ? "Operation is not allowed"
-                    : errorCode === "auth/weak-password"
-                        ? "Password is not strong enough"
-                        : "Failed to connect to resource. Check your internet connection";
-        throw new Error(errorMessage);
+        console.log("Actions error => ", error.message)
+        throw new Error(error);
     }
 };
 
@@ -199,6 +190,10 @@ export function itemsFetchData(collectionsUrls) {
                     fetchedItems.push(fetchedObject)
                 });
                 switch (url) {
+                    case "property-settings":
+                        dispatch(propertySettingsActions.propertySettingsFetchDataSuccess(fetchedItems));
+                        break;
+
                     case "company_profile":
                         dispatch(companyProfileActions.companyProfilesFetchDataSuccess(fetchedItems));
                         break;
@@ -255,8 +250,8 @@ export function itemsFetchData(collectionsUrls) {
                         dispatch(emailTemplatesActions.emailTemplatesFetchDataSuccess(fetchedItems));
                         break;
 
-                    case "property_media":
-                        dispatch(mediaFilesActions.mediaFilesFetchDataSuccess(fetchedItems));
+                    case "management-fees":
+                        dispatch(managementFeesActions.managementFeesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "expenses":
@@ -324,6 +319,9 @@ export function handleDelete(itemId, url) {
                 .doc(itemId)
                 .delete();
             switch (url) {
+                case "property-settings":
+                    dispatch(propertySettingsActions.deletePropertySetting(itemId));
+                    break;
                 case "company_profile":
                     dispatch(companyProfileActions.deleteCompanyProfile(itemId)
                     );
@@ -386,8 +384,8 @@ export function handleDelete(itemId, url) {
                     );
                     break;
 
-                case "property_media":
-                    dispatch(mediaFilesActions.deleteMediaFile(itemId)
+                case "management-fees":
+                    dispatch(managementFeesActions.deleteManagementFee(itemId)
                     );
                     break;
 
@@ -441,6 +439,9 @@ export function handleItemFormSubmit(data, url) {
                             data,
                         );
                         switch (url) {
+                            case "property-settings":
+                                dispatch(propertySettingsActions.editPropertySetting(modifiedObject));
+                                break;
                             case "company_profile":
                                 dispatch(companyProfileActions.editCompanyProfile(modifiedObject));
                                 break;
@@ -493,8 +494,8 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(emailTemplatesActions.editEmailTemplate(modifiedObject));
                                 break;
 
-                            case "property_media":
-                                dispatch(mediaFilesActions.editMediaFile(modifiedObject));
+                            case "management-fees":
+                                dispatch(managementFeesActions.editManagementFee(modifiedObject));
                                 break;
 
                             case "expenses":
@@ -533,6 +534,9 @@ export function handleItemFormSubmit(data, url) {
                             id: docRef.id,
                         });
                         switch (url) {
+                            case "property-settings":
+                                dispatch(propertySettingsActions.addPropertySetting(addedItem));
+                                break;
                             case "company_profile":
                                 dispatch(companyProfileActions.addCompanyProfile(addedItem));
                                 break;
@@ -584,8 +588,8 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(emailTemplatesActions.addEmailTemplate(addedItem));
                                 break;
 
-                            case "property_media":
-                                dispatch(mediaFilesActions.addMediaFile(addedItem));
+                            case "management-fees":
+                                dispatch(managementFeesActions.addManagementFee(addedItem));
                                 break;
 
                             case "expenses":

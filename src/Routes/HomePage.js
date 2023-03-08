@@ -36,6 +36,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { makeStyles, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import Alert from "@material-ui/lab/Alert"
 import Box from '@material-ui/core/Box';
 import { Formik } from "formik";
 import 'typeface-lato';
@@ -43,8 +44,8 @@ import * as Yup from "yup";
 
 const messageSchema = Yup.object().shape({
     email: Yup.string().trim().email("Invalid email"),
-    first_name: Yup.string().trim().min(2, "Too Short!").required("First Name is Required"),
-    last_name: Yup.string().trim().min(2, "Too Short!").required("Last Name is Required"),
+    first_name: Yup.string().trim().min(4, "Too Short!").required("First Name is Required"),
+    last_name: Yup.string().trim().min(4, "Too Short!").required("Last Name is Required"),
     subject: Yup.string().trim().min(6, "Too Short!").required("Subject is Required"),
     phone_number: Yup.string().trim().min(10, "Too Short!").required("Phone Number is Required"),
     message: Yup.string().trim().min(6, "Too Short!").required("Message is Required"),
@@ -334,7 +335,7 @@ export default function HomePage() {
                                 Support
                         </Link>
                             <Button color="primary" variant="outlined" className={classes.link} component={ReactRouterLink}
-                            to={"/login"}>
+                                to={"/login"}>
                                 Login
                             </Button>
                             <Button href="#contact" color="primary" variant="outlined" className={classes.link}>
@@ -671,7 +672,7 @@ export default function HomePage() {
                         <Grid item>
                             <Typography component="h5" variant="h4" align="center" className={classes.boldFont}>
                                 Get in touch with Us
-                        </Typography>
+                            </Typography>
                         </Grid>
                         <Grid item>
                             <Formik
@@ -693,12 +694,10 @@ export default function HomePage() {
                                         },
                                         body: JSON.stringify(data)
                                     }).then(response => {
-                                        setStatus({ success: "Message sent successfully!" })
-                                        console.log("Success => ", response.json())
-                                        resetForm({})
+                                        resetForm({});
+                                        setStatus({ success: "Message sent successfully! We will get back to you soonest." });
                                     }).catch(error => {
-                                        setStatus({ error: "Message sending failed!" })
-                                        console.error("Error => ", error)
+                                        setStatus({ error: "Message sending failed!" });
                                     })
                                 }}>
                                 {({
@@ -711,146 +710,141 @@ export default function HomePage() {
                                     handleBlur,
                                     isSubmitting,
                                 }) => (
-                                        <form
-                                            method="post"
-                                            id="sendMessageForm"
-                                            onSubmit={handleSubmit}
-                                        >
-                                            <Grid container justify="center" direction="column" spacing={4}>
-                                                <Grid item container justify="center" direction="column" spacing={2}>
+                                    <form
+                                        method="post"
+                                        id="sendMessageForm"
+                                        onSubmit={handleSubmit}
+                                    >
+                                        <Grid container justify="center" direction="column" spacing={4}>
+                                            <Grid item container justify="center" direction="column" spacing={2}>
+                                                {status && status.error && (
                                                     <Grid item>
-                                                        <FormControl fullWidth>
-                                                            {status && (
-                                                                <FormHelperText error={true}>{status.error}</FormHelperText>
-                                                            )}
-                                                        </FormControl>
+                                                        <Alert severity="error">{status.error}</Alert>
                                                     </Grid>
+                                                )}
+                                                {status && status.success && (
                                                     <Grid item>
-                                                        <FormControl fullWidth>
-                                                            {status && (
-                                                                <FormHelperText>{status.success}</FormHelperText>
-                                                            )}
-                                                        </FormControl>
+                                                        <Alert severity="success">{status.success}</Alert>
                                                     </Grid>
-                                                    <Grid item container justify="center" direction="row" spacing={2}>
-                                                        <Grid item xs={12} md={6}>
-                                                            <TextField
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                id="first_name"
-                                                                label="First Name"
-                                                                type="first_name"
-                                                                value={values.first_name}
-                                                                onBlur={handleBlur}
-                                                                onChange={handleChange}
-                                                                helperText={touched.first_name && errors.first_name}
-                                                                error={errors.first_name && touched.first_name}
-                                                                InputLabelProps={{ shrink: true }}
-                                                            />
-                                                        </Grid>
-                                                        <Grid item xs={12} md={6}>
-                                                            <TextField
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                id="last_name"
-                                                                label="Last Name"
-                                                                type="last_name"
-                                                                value={values.last_name}
-                                                                onBlur={handleBlur}
-                                                                onChange={handleChange}
-                                                                helperText={touched.last_name && errors.last_name}
-                                                                error={errors.last_name && touched.last_name}
-                                                                InputLabelProps={{ shrink: true }}
-                                                            />
-                                                        </Grid>
-                                                    </Grid>
-                                                    <Grid item container justify="center" direction="row" spacing={2}>
-                                                        <Grid item xs={12} md={6}>
-                                                            <TextField
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                id="phone_number"
-                                                                label="Phone Number"
-                                                                type="text"
-                                                                value={values.phone_number}
-                                                                onBlur={handleBlur}
-                                                                onChange={handleChange}
-                                                                helperText={
-                                                                    touched.phone_number && errors.phone_number
-                                                                }
-                                                                error={errors.phone_number && touched.phone_number}
-                                                                InputLabelProps={{ shrink: true }}
-                                                            />
-                                                        </Grid>
-
-                                                        <Grid item xs={12} md={6}>
-                                                            <TextField
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                id="email"
-                                                                label="Email"
-                                                                value={values.email}
-                                                                onBlur={handleBlur}
-                                                                onChange={handleChange}
-                                                                helperText={touched.email && errors.email}
-                                                                error={errors.email && touched.email}
-                                                                type="email"
-                                                                InputLabelProps={{ shrink: true }}
-                                                            />
-                                                        </Grid>
-                                                    </Grid>
-                                                    <Grid item xs={12}>
+                                                )}
+                                                <Grid item container justify="center" direction="row" spacing={2}>
+                                                    <Grid item xs={12} md={6}>
                                                         <TextField
                                                             fullWidth
                                                             variant="outlined"
-                                                            id="subject"
-                                                            label="Subject"
-                                                            type="text"
-                                                            value={values.subject}
+                                                            id="first_name"
+                                                            label="First Name"
+                                                            type="first_name"
+                                                            value={values.first_name}
                                                             onBlur={handleBlur}
                                                             onChange={handleChange}
-                                                            helperText={
-                                                                touched.subject && errors.subject
-                                                            }
-                                                            error={errors.subject && touched.subject}
+                                                            helperText={touched.first_name && errors.first_name}
+                                                            error={errors.first_name && touched.first_name}
                                                             InputLabelProps={{ shrink: true }}
                                                         />
                                                     </Grid>
-
-                                                    <Grid item xs={12}>
+                                                    <Grid item xs={12} md={6}>
                                                         <TextField
                                                             fullWidth
                                                             variant="outlined"
-                                                            id="message"
-                                                            label="Message"
-                                                            type="text"
-                                                            value={values.message}
+                                                            id="last_name"
+                                                            label="Last Name"
+                                                            type="last_name"
+                                                            value={values.last_name}
                                                             onBlur={handleBlur}
                                                             onChange={handleChange}
-                                                            helperText={
-                                                                touched.message && errors.message
-                                                            }
-                                                            error={errors.message && touched.message}
+                                                            helperText={touched.last_name && errors.last_name}
+                                                            error={errors.last_name && touched.last_name}
                                                             InputLabelProps={{ shrink: true }}
                                                         />
                                                     </Grid>
                                                 </Grid>
-                                                <Grid item container>
-                                                    <Grid item>
-                                                        <Button
-                                                            disabled={isSubmitting}
-                                                            type="submit"
-                                                            variant="contained"
-                                                            color="primary"
-                                                            form="sendMessageForm"
-                                                        >
-                                                            Send Message
-                                                        </Button>
+                                                <Grid item container justify="center" direction="row" spacing={2}>
+                                                    <Grid item xs={12} md={6}>
+                                                        <TextField
+                                                            fullWidth
+                                                            variant="outlined"
+                                                            id="phone_number"
+                                                            label="Phone Number"
+                                                            type="text"
+                                                            value={values.phone_number}
+                                                            onBlur={handleBlur}
+                                                            onChange={handleChange}
+                                                            helperText={
+                                                                touched.phone_number && errors.phone_number
+                                                            }
+                                                            error={errors.phone_number && touched.phone_number}
+                                                            InputLabelProps={{ shrink: true }}
+                                                        />
                                                     </Grid>
+                                                    <Grid item xs={12} md={6}>
+                                                        <TextField
+                                                            fullWidth
+                                                            variant="outlined"
+                                                            id="email"
+                                                            label="Email"
+                                                            value={values.email}
+                                                            onBlur={handleBlur}
+                                                            onChange={handleChange}
+                                                            helperText={touched.email && errors.email}
+                                                            error={errors.email && touched.email}
+                                                            type="email"
+                                                            InputLabelProps={{ shrink: true }}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        id="subject"
+                                                        label="Subject"
+                                                        type="text"
+                                                        value={values.subject}
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                        helperText={
+                                                            touched.subject && errors.subject
+                                                        }
+                                                        error={errors.subject && touched.subject}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
+                                                </Grid>
+
+                                                <Grid item xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        id="message"
+                                                        label="Message"
+                                                        type="text"
+                                                        value={values.message}
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                        helperText={
+                                                            touched.message && errors.message
+                                                        }
+                                                        error={errors.message && touched.message}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
                                                 </Grid>
                                             </Grid>
-                                        </form>
-                                    )}
+                                            <Grid item container>
+                                                <Grid item>
+                                                    <Button
+                                                        disabled={isSubmitting}
+                                                        type="submit"
+                                                        variant="contained"
+                                                        color="primary"
+                                                        form="sendMessageForm"
+                                                    >
+                                                        Send Message
+                                                        </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </form>
+                                )}
                             </Formik>
                         </Grid>
                     </Grid>

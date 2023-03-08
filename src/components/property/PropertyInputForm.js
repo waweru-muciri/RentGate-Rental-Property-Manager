@@ -233,6 +233,9 @@ let PropertyInputForm = (props) => {
 						property.property_image_url = fileDownloadUrl;
 					}
 					const propertyId = await handleItemSubmit(property, "properties")
+					if (!values.id) {
+						await handleItemSubmit({ property_id: propertyId }, "property-settings")
+					}
 					values.property_units.forEach(async (property_unit) => {
 						//check if the unit has an image to upload
 						if (property_unit.image && property_unit.image.data) {

@@ -9,7 +9,7 @@ import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import { handleDelete } from "../actions/actions";
-import TenantChargesStatement from "./TenantChargesStatement";
+import IndividualTenantChargesStatement from "./IndividualTenantChargesStatement";
 import TabPanel from "../components/TabPanel";
 import DataGridTable from '../components/DataGridTable'
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
@@ -68,7 +68,7 @@ let TenantDetailsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={1}>
-                <TenantChargesStatement tenantTransactionCharges={transactionsCharges}
+                <IndividualTenantChargesStatement tenantTransactionCharges={transactionsCharges}
                     tenantDetails={tenantDetails} handleItemDelete={handleItemDelete} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>

@@ -15,8 +15,8 @@ import { isWithinInterval, startOfMonth, startOfToday, endOfMonth, parse } from 
 
 const legendOpts = {
     display: true,
-    position: 'right',
-    fullWidth: false,
+    position: 'top',
+    fullWidth: true,
     reverse: false,
     labels: {
         fontColor: GREY[800],
@@ -25,8 +25,7 @@ const legendOpts = {
 };
 
 let PropertySummaryPage = (props) => {
-    let { classes, propertyActiveLeases, propertyToShowDetails, propertyUnits, transactions, users } = props
-    const occupiedUnitsNumber = propertyActiveLeases.length
+    let { classes, propertyActiveLeasesNumber, propertyToShowDetails, propertyUnits, transactions, users } = props
     //get current month income data
     const curentMonthIncomeData = { datasets: [] }
     const totalPaymentsByType = []
@@ -53,7 +52,7 @@ let PropertySummaryPage = (props) => {
     rentalUnitsOccupancyData.labels = ['Occupied Units', 'Vacant Units']
     rentalUnitsOccupancyData.datasets.push(
         {
-            data: [occupiedUnitsNumber, (propertyUnits.length - occupiedUnitsNumber)],
+            data: [propertyActiveLeasesNumber, (propertyUnits.length - propertyActiveLeasesNumber)],
             backgroundColor: [RED[800], RED[200]]
         })
     //get the number of the different units by category
@@ -146,7 +145,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Rental Units Distribution
                             </Typography>
-                            <Doughnut data={rentalUnitsDistributionData} />
+                            <Doughnut height={200} data={rentalUnitsDistributionData} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -156,7 +155,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Current Occupancy
                             </Typography>
-                            <Doughnut data={rentalUnitsOccupancyData} legend={legendOpts} />
+                            <Doughnut height={200} data={rentalUnitsOccupancyData} legend={legendOpts} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -166,7 +165,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Current Month Income
                             </Typography>
-                            <Doughnut data={curentMonthIncomeData} />
+                            <Doughnut height={200} data={curentMonthIncomeData} />
                         </CardContent>
                     </Card>
                 </Grid>

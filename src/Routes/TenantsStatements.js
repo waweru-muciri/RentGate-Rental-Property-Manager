@@ -7,8 +7,8 @@ import TabPanel from "../components/TabPanel";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import ContactsChargesStatement from "./ContactsChargesStatement";
-import ContactsPaymentsStatement from "./ContactsPaymentsStatement";
+import TenantsChargesStatement from "./TenantsChargesStatement";
+import TenantsPaymentsStatement from "./TenantsPaymentsStatement";
 import { parse } from "date-fns";
 
 let TenantStatementsPage = ({
@@ -33,10 +33,10 @@ let TenantStatementsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
-                <ContactsChargesStatement contacts={contacts} transactionsCharges={transactionsCharges} properties={properties} classes={classes} />
+                <TenantsChargesStatement contacts={contacts} transactionsCharges={transactionsCharges} properties={properties} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <ContactsPaymentsStatement contacts={contacts} transactions={transactions} properties={properties} classes={classes} />
+                <TenantsPaymentsStatement contacts={contacts} transactions={transactions} properties={properties} classes={classes} />
             </TabPanel>
         </Layout>
     );

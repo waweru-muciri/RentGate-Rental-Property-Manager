@@ -32,15 +32,22 @@ let TenantStatementsPage = ({
     const [tenantChargesItems, setTenantChargesItems] = useState([]);
     const [filteredChargeItems, setFilteredChargeItems] = useState([]);
     const [contactFilter, setContactFilter] = useState(null);
-    const [periodFilter, setPeriodFilter] = useState("all");
+    const [periodFilter, setPeriodFilter] = useState("month-to-date");
     const [fromDateFilter, setFromDateFilter] = useState("");
     const [toDateFilter, setToDateFilter] = useState("");
     const [propertyFilter, setPropertyFilter] = useState("all");
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setTenantChargesItems(transactionsCharges);
-        setFilteredChargeItems(transactionsCharges);
+        setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
     const handleSearchFormSubmit = (event) => {
@@ -52,10 +59,6 @@ let TenantStatementsPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
-                case 'all':
-                    startOfPeriod = new Date(1990, 1, 1)
-                    endOfPeriod = new Date(2100, 1, 1)
-                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -93,7 +96,7 @@ let TenantStatementsPage = ({
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
             .sort((charge1, charge2) => (parse(charge1.charge_date, 'yyyy-MM-dd', new Date()) <
-            parse(charge2.charge_date, 'yyyy-MM-dd', new Date())))
+                parse(charge2.charge_date, 'yyyy-MM-dd', new Date())))
 
 
         setFilteredChargeItems(filteredStatements);
@@ -103,7 +106,7 @@ let TenantStatementsPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setPropertyFilter("all");
-        setPeriodFilter("all");
+        setPeriodFilter("month-to-date");
         setContactFilter(null);
         setFromDateFilter("");
         setToDateFilter("");
@@ -254,7 +257,6 @@ let TenantStatementsPage = ({
                                     }}
                                     InputLabelProps={{ shrink: true }}
                                 >
-                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                     {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                         <MenuItem
                                             key={index}

@@ -46,7 +46,7 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState('all');
+    let [periodFilter, setPeriodFilter] = useState('month-to-date');
     let [contactFilter, setContactFilter] = useState(null);
     let [propertyFilter, setPropertyFilter] = useState("all");
 
@@ -57,8 +57,15 @@ let TenantChargesStatementPage = ({
         .map(chargeType => JSON.parse(chargeType))
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setTenantChargesItems(transactionsCharges);
-        setFilteredChargeItems(transactionsCharges);
+        setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
     const totalNumOfCharges = filteredChargeItems.length
@@ -84,10 +91,6 @@ let TenantChargesStatementPage = ({
         let endOfPeriod;
         if (periodFilter) {
             switch (periodFilter) {
-                case 'all':
-                    startOfPeriod = new Date(1990, 1, 1)
-                    endOfPeriod = new Date(2100, 1, 1)
-                    break;
                 case 'last-month':
                     dateRange = getLastMonthFromToDates()
                     startOfPeriod = dateRange[0]
@@ -131,7 +134,7 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("all");
+        setPeriodFilter("month-to-date");
         setContactFilter(null)
         setPropertyFilter("all")
     };
@@ -226,7 +229,6 @@ let TenantChargesStatementPage = ({
                                                         );
                                                     }}
                                                 >
-                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
                                                         <MenuItem
                                                             key={index}

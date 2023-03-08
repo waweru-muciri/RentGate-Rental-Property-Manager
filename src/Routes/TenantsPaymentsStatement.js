@@ -39,7 +39,7 @@ let TenantsPaymentsPage = ({
     let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
-    let [periodFilter, setPeriodFilter] = useState("all");
+    let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
@@ -47,8 +47,15 @@ let TenantsPaymentsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
+        const dateRange = getCurrentMonthFromToDates()
+        const startOfPeriod = dateRange[0]
+        const endOfPeriod = dateRange[1]
+        const paymentsForCurrentMonth = transactions.filter((payment) => {
+            const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         setPaymentsItems(transactions);
-        setFilteredPaymentsItems(transactions);
+        setFilteredPaymentsItems(paymentsForCurrentMonth);
     }, [transactions]);
 
     const handleSearchFormSubmit = (event) => {
@@ -109,7 +116,7 @@ let TenantsPaymentsPage = ({
         event.preventDefault();
         setFilteredPaymentsItems(paymentsItems);
         setPropertyFilter("all");
-        setPeriodFilter("all");
+        setPeriodFilter("month-to-date");
         setFromDateFilter("");
         setToDateFilter("");
         setContactFilter("");
@@ -219,7 +226,6 @@ let TenantsPaymentsPage = ({
                                             }}
                                             InputLabelProps={{ shrink: true }}
                                         >
-                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
                                                 <MenuItem
                                                     key={index}

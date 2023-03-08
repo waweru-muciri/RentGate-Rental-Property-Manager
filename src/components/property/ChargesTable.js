@@ -64,7 +64,7 @@ export default function EnhancedTable(props) {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(10);
     setPage(0);
   };
 
@@ -159,7 +159,7 @@ export default function EnhancedTable(props) {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 30]}
+        rowsPerPageOptions={[5]}
         component="div"
         count={rows.length}
         rowsPerPage={rowsPerPage}

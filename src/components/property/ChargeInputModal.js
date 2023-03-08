@@ -13,6 +13,7 @@ import * as Yup from "yup";
 import { Formik } from "formik";
 import { getPaymentOptions } from "../../assets/commonAssets.js";
 import { commonStyles } from "../commonStyles.js";
+import { DialogTitle } from "@material-ui/core";
 
 const RENT_CYCLES = getPaymentOptions();
 const CHARGE_TYPES = [
@@ -39,11 +40,12 @@ export default function FormDialog(props) {
     return (
         <Dialog
             fullWidth
-            maxWidth="md"
+            maxWidth="sm"
             open={open}
             onClose={handleClose}
             aria-labelledby="form-dialog-title"
         >
+            <DialogTitle>{chargeValues.id ? 'Edit Charge' : 'Add Charge'}</DialogTitle>
             <DialogContent>
                 <Formik
                     initialValues={chargeValues}
@@ -79,152 +81,149 @@ export default function FormDialog(props) {
                         handleBlur,
                         isSubmitting,
                     }) => (
-                            <form
-                                className={classes.form}
-                                method="post"
-                                id="chargeInputForm"
-                                onSubmit={handleSubmit}
+                        <form
+                            className={classes.form}
+                            method="post"
+                            id="chargeInputForm"
+                            onSubmit={handleSubmit}
+                        >
+                            <Grid
+                                container
+                                direction="column"
+                                spacing={2}
                             >
-                                <Grid
-                                    container
-                                    direction="column"
-                                    spacing={2}
-                                >
-                                    {
-                                        status && status.msg && (
-                                            <CustomSnackbar
-                                                variant={status.sent ? "success" : "error"}
-                                                message={status.msg}
-                                            />
-                                        )
-                                    }
-                                    <Grid key={'kjjh'} container item direction="column" spacing={2}>
-                                        <Grid item xs={12} md key={'35hse'}>
-                                            <Typography variant="h5">{values.id ? 'Edit Charge' : 'Add Charge'}</Typography>
-                                        </Grid>
-                                        <Grid item xs={12} md key={'yi67'}>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                select
-                                                name='type'
-                                                label="Charge Type"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                value={values.type}
-                                                error={errors.type && touched.type}
-                                                helperText={touched.type && errors.type}
-                                            >
-                                                {CHARGE_TYPES.map((type, index) => (
-                                                    <MenuItem key={index} value={type.id}>
-                                                        {type.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </Grid>
-                                        <Grid item xs={12} md key={1}>
-                                            <TextField
-                                                fullWidth
-                                                label="Charge Name"
-                                                variant="outlined"
-                                                type="text"
-                                                value={values.account}
-                                                name='account'
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                error={errors.account && touched.account}
-                                                helperText={touched.account && errors.account}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md key={'hhfvg'}>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id="due_date"
-                                                type="date"
-                                                name='due_date'
-                                                label="Next Due Date"
-                                                value={values.due_date}
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                InputLabelProps={{ shrink: true }}
-                                                error={errors.due_date && touched.due_date}
-                                                helperText={touched.due_date && errors.due_date}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md key={'ffds'}>
-                                            <TextField
-                                                fullWidth
-                                                label="Amount"
-                                                variant="outlined"
-                                                type="text"
-                                                value={values.amount}
-                                                name='amount'
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                error={errors.amount && touched.amount}
-                                                helperText={touched.amount && errors.amount}
-                                            />
-                                        </Grid>
-                                        {
-                                            values.type === 'recurring_charge' ?
-                                                <Grid item xs={12} md key={'te44'}>
-                                                    <TextField
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        select
-                                                        name='frequency'
-                                                        label="Frequency"
-                                                        onBlur={handleBlur}
-                                                        onChange={handleChange}
-                                                        value={values.frequency}
-                                                        error={errors.frequency && touched.frequency}
-                                                        helperText={touched.frequency && errors.frequency}
-                                                    >
-                                                        {RENT_CYCLES.map((frequency, index) => (
-                                                            <MenuItem key={index} value={frequency}>
-                                                                {frequency}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                </Grid>
-                                                : null}
+                                {
+                                    status && status.msg && (
+                                        <CustomSnackbar
+                                            variant={status.sent ? "success" : "error"}
+                                            message={status.msg}
+                                        />
+                                    )
+                                }
+                                <Grid container item direction="column" spacing={2}>
+                                    <Grid item xs={12} md>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            select
+                                            name='type'
+                                            label="Charge Type"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.type}
+                                            error={errors.type && touched.type}
+                                            helperText={touched.type && errors.type}
+                                        >
+                                            {CHARGE_TYPES.map((type, index) => (
+                                                <MenuItem key={index} value={type.id}>
+                                                    {type.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
-                                    <Grid
-                                        item
-                                        container
-                                        direction="row"
-                                        className={classes.buttonBox}
-                                    >
-                                        <Grid item>
-                                            <Button
-                                                color="secondary"
-                                                variant="contained"
-                                                size="medium"
-                                                startIcon={<CancelIcon />}
-                                                onClick={() => { handleClose() }}
-                                                disableElevation
-                                            >
-                                                Cancel
+                                    <Grid item xs={12} md>
+                                        <TextField
+                                            fullWidth
+                                            label="Charge Name"
+                                            variant="outlined"
+                                            type="text"
+                                            value={values.account}
+                                            name='account'
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={errors.account && touched.account}
+                                            helperText={touched.account && errors.account}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            id="due_date"
+                                            type="date"
+                                            name='due_date'
+                                            label="Next Due Date"
+                                            value={values.due_date}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            InputLabelProps={{ shrink: true }}
+                                            error={errors.due_date && touched.due_date}
+                                            helperText={touched.due_date && errors.due_date}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md>
+                                        <TextField
+                                            fullWidth
+                                            label="Amount"
+                                            variant="outlined"
+                                            type="text"
+                                            value={values.amount}
+                                            name='amount'
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={errors.amount && touched.amount}
+                                            helperText={touched.amount && errors.amount}
+                                        />
+                                    </Grid>
+                                    {
+                                        values.type === 'recurring_charge' ?
+                                            <Grid item xs={12} md>
+                                                <TextField
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    select
+                                                    name='frequency'
+                                                    label="Frequency"
+                                                    onBlur={handleBlur}
+                                                    onChange={handleChange}
+                                                    value={values.frequency}
+                                                    error={errors.frequency && touched.frequency}
+                                                    helperText={touched.frequency && errors.frequency}
+                                                >
+                                                    {RENT_CYCLES.map((frequency, index) => (
+                                                        <MenuItem key={index} value={frequency}>
+                                                            {frequency}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </Grid>
+                                            : null}
+                                </Grid>
+                                <Grid
+                                    item
+                                    container
+                                    direction="row"
+                                    className={classes.buttonBox}
+                                >
+                                    <Grid item>
+                                        <Button
+                                            color="secondary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<CancelIcon />}
+                                            onClick={() => { handleClose() }}
+                                            disableElevation
+                                        >
+                                            Cancel
 									        </Button>
-                                        </Grid>
-                                        <Grid item>
-                                            <Button
-                                                type="submit"
-                                                color="primary"
-                                                variant="contained"
-                                                size="medium"
-                                                startIcon={<SaveIcon />}
-                                                form="chargeInputForm"
-                                                disabled={isSubmitting}
-                                            >
-                                                Save
+                                    </Grid>
+                                    <Grid item>
+                                        <Button
+                                            type="submit"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<SaveIcon />}
+                                            form="chargeInputForm"
+                                            disabled={isSubmitting}
+                                        >
+                                            Save
 								        </Button>
-                                        </Grid>
                                     </Grid>
                                 </Grid>
-                            </form>
-                        )}
+                            </Grid>
+                        </form>
+                    )}
                 </Formik>
             </DialogContent>
         </Dialog >

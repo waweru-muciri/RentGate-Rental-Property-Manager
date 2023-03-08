@@ -167,28 +167,29 @@ let UnitLeaseInputForm = (props) => {
 				handleBlur,
 				isSubmitting,
 			}) => (
-					<form
-						className={classes.form}
-						method="post"
-						id="unitLeaseInputForm"
-						onSubmit={handleSubmit}
-					>
-						<Grid container spacing={1} direction="column">
-							{
-								status && status.msg && (
-									<CustomSnackbar
-										variant={status.sent ? "success" : "error"}
-										message={status.msg}
-									/>
-								)
-							}
-							<Grid item>
-								<Typography variant="subtitle1" component="h2">
-									Agreement Details
-								</Typography>
-							</Grid>
-							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} sm>
+				<form
+					className={classes.form}
+					method="post"
+					id="unitLeaseInputForm"
+					onSubmit={handleSubmit}
+				>
+					<Grid container spacing={2} direction="column">
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
+								/>
+							)
+						}
+						<Grid container spacing={4} direction="row" alignItems="flex-start">
+							<Grid item container md={6} direction="column" spacing={2}>
+								<Grid item>
+									<Typography variant="subtitle1">
+										Property &amp; Unit With Agreement
+									</Typography>
+								</Grid>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										label="Property"
@@ -212,7 +213,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item xs={12} sm>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										select
@@ -238,9 +239,12 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-							</Grid>
-							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} md={4}>
+								<Grid item>
+									<Typography variant="subtitle1" >
+										Rental Agreement Type
+									</Typography>
+								</Grid>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -261,48 +265,49 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item container xs={12} md={8} direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											label="Start Date"
-											error={'start_date' in errors}
-											helperText={errors.start_date}
-											id="start_date"
-											type="date"
-											name="start_date"
-											value={values.start_date}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											InputLabelProps={{ shrink: true }}
-										/>
-									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id="end_date"
-											type="date"
-											name="end_date"
-											label="End Date"
-											value={values.end_date}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											InputLabelProps={{ shrink: true }}
-											error={errors.end_date && touched.end_date}
-											helperText={touched.end_date && errors.end_date}
-										/>
-									</Grid>
+								<Grid item>
+									<Typography variant="subtitle1" >
+										Agreement Start &amp; End Dates
+									</Typography>
 								</Grid>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1" component="h2">
-									Rent
+								<Grid item xs={12}>
+									<TextField
+										fullWidth
+										variant="outlined"
+										label="Start Date"
+										error={'start_date' in errors}
+										helperText={errors.start_date}
+										id="start_date"
+										type="date"
+										name="start_date"
+										value={values.start_date}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										InputLabelProps={{ shrink: true }}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										fullWidth
+										variant="outlined"
+										id="end_date"
+										type="date"
+										name="end_date"
+										label="End Date"
+										value={values.end_date}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										InputLabelProps={{ shrink: true }}
+										error={errors.end_date && touched.end_date}
+										helperText={touched.end_date && errors.end_date}
+									/>
+								</Grid>
+								<Grid item>
+									<Typography variant="subtitle1" >
+										Rent
 								</Typography>
-							</Grid>
-							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} sm>
+								</Grid>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -323,7 +328,9 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item xs={12} sm>
+							</Grid>
+							<Grid item container md={6} direction="column" justify="center" spacing={2}>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -334,12 +341,11 @@ let UnitLeaseInputForm = (props) => {
 										value={values.rent_amount}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
 										error={errors.rent_amount && touched.rent_amount}
 										helperText={touched.rent_amount && errors.rent_amount}
 									/>
 								</Grid>
-								<Grid item xs={12} sm>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -355,14 +361,12 @@ let UnitLeaseInputForm = (props) => {
 										InputLabelProps={{ shrink: true }}
 									/>
 								</Grid>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1" component="h2" paragraph>
-									Security Deposit
-								</Typography>
-							</Grid>
-							<Grid item container direction="row" alignItems="center" spacing={2}>
-								<Grid item xs={12} sm>
+								<Grid item>
+									<Typography variant="subtitle1" paragraph>
+										Security Deposit
+									</Typography>
+								</Grid>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -376,7 +380,7 @@ let UnitLeaseInputForm = (props) => {
 										InputLabelProps={{ shrink: true }}
 									/>
 								</Grid>
-								<Grid item xs={12} sm>
+								<Grid item xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -390,17 +394,15 @@ let UnitLeaseInputForm = (props) => {
 										helperText={touched.security_deposit && errors.security_deposit}
 									/>
 								</Grid>
-								<Grid item xs>
+								<Grid item>
 									<Typography variant='body1' color="textSecondary">Don't forget to record the payment once you have collected the deposit.</Typography>
 								</Grid>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1" component="h2">
-									Tenants and Cosigner
-								</Typography>
-							</Grid>
-							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} md={6}>
+								<Grid item>
+									<Typography variant="subtitle1" >
+										Tenants &amp; Cosigner
+									</Typography>
+								</Grid>
+								<Grid item xs={12}>
 									<Autocomplete
 										id="tenants-select"
 										multiple
@@ -431,7 +433,7 @@ let UnitLeaseInputForm = (props) => {
 										)}
 									/>
 								</Grid>
-								<Grid item xs={12} md={6}>
+								<Grid item xs={12}>
 									<Autocomplete
 										id="cosigner-select"
 										value={values.cosigner}
@@ -462,78 +464,80 @@ let UnitLeaseInputForm = (props) => {
 									/>
 								</Grid>
 							</Grid>
-							<Grid item container direction="column" spacing={1} xs={12}>
-								<Grid item xs={12}>
-									<Typography variant="subtitle1">Unit Charges</Typography>
-								</Grid>
-								<Grid item xs={12}>
-									<ChargesTable
-										rows={values.unit_charges}
-										headCells={recurringChargesTableHeadCells}
-										handleEditClick={handleEditClick}
-										handleItemSubmit={handleItemSubmit}
-										handleDelete={handleItemDelete}
-										deleteUrl={"unit-charges"} />
-									{
-										modalOpenState ? <ChargeInputModal open={modalOpenState}
-											handleClose={handleModalStateToggle} history={history}
-											handleItemSubmit={handleItemSubmit}
-											chargeValues={chargeToEdit} /> : null
-									}
-								</Grid>
-								<Grid item xs={12}>
-									<Button
-										className={classes.oneMarginTopBottom}
-										variant="outlined"
-										size="medium"
-										startIcon={<AddIcon />}
-										onClick={() => {
-											setChargeToEdit({ ...defaultChargeValues, unit_id: values.unit_id })
-											if (values.unit_id) {
-												handleModalStateToggle()
-											}
-										}}
-										disableElevation>
-										Add Charge
-									</Button>
-								</Grid>
+						</Grid>
+						<Grid item container direction="column" spacing={1} xs={12}>
+							<Grid item xs={12}>
+								<Typography variant="subtitle1">Unit Charges</Typography>
 							</Grid>
-							<Grid
-								item
-								container
-								direction="row"
-								className={classes.buttonBox}
-							>
-								<Grid item>
-									<Button
-										color="secondary"
-										variant="contained"
-										size="medium"
-										startIcon={<CancelIcon />}
-										onClick={() => { history.goBack() }}
-										disableElevation
-									>
-										Cancel
+							<Grid item xs={12}>
+								<ChargesTable
+									rows={values.unit_charges}
+									headCells={recurringChargesTableHeadCells}
+									handleEditClick={handleEditClick}
+									handleItemSubmit={handleItemSubmit}
+									handleDelete={handleItemDelete}
+									deleteUrl={"unit-charges"} />
+								{
+									modalOpenState ? <ChargeInputModal open={modalOpenState}
+										handleClose={handleModalStateToggle} history={history}
+										handleItemSubmit={handleItemSubmit}
+										chargeValues={chargeToEdit} /> : null
+								}
+							</Grid>
+							<Grid item xs={12}>
+								<Button
+									className={classes.oneMarginTopBottom}
+									variant="outlined"
+									size="medium"
+									startIcon={<AddIcon />}
+									onClick={() => {
+										setChargeToEdit({ ...defaultChargeValues, unit_id: values.unit_id })
+										if (values.unit_id) {
+											handleModalStateToggle()
+										}
+									}}
+									disableElevation>
+									Add Charge
 									</Button>
-								</Grid>
-								<Grid item>
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										size="medium"
-										startIcon={<SaveIcon />}
-										form="unitLeaseInputForm"
-										disabled={isSubmitting}
-									>
-										{values.id ? "Edit Agreement" : "Add Agreement"}
-									</Button>
-								</Grid>
 							</Grid>
 						</Grid>
-					</form>
-				)}
-		</Formik>
+						<Grid
+							item
+							container
+							direction="row"
+							className={classes.buttonBox}
+						>
+							<Grid item>
+								<Button
+									color="secondary"
+									variant="contained"
+									size="medium"
+									startIcon={<CancelIcon />}
+									onClick={() => { history.goBack() }}
+									disableElevation
+								>
+									Cancel
+									</Button>
+							</Grid>
+							<Grid item>
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									size="medium"
+									startIcon={<SaveIcon />}
+									form="unitLeaseInputForm"
+									disabled={isSubmitting}
+								>
+									{values.id ? "Edit Agreement" : "Add Agreement"}
+								</Button>
+							</Grid>
+						</Grid>
+					</Grid>
+				</form>
+			)
+			}
+		</Formik >
 	);
 };
 

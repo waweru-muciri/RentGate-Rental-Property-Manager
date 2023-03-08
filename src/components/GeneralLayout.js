@@ -9,7 +9,7 @@ const Layout = (props) => {
 		<React.Fragment>
 			<CssBaseline />
 			<Head title={props.pageTitle} />
-			<Container maxWidth={"xs"} component="main">
+			<Container maxWidth={props.maxWidth || "xs"} component="main">
 				{props.children}
 			</Container>
 		</React.Fragment>

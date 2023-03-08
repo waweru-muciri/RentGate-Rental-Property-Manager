@@ -34,9 +34,9 @@ const PaymentPage = lazy(() => import('./PaymentPage'));
 const PaymentsPage = lazy(() => import('./Payments'));
 const MaintenancesPage = lazy(() => import('./Maintenances'));
 const PropertyDetailsPage = lazy(() => import('./PropertyDetails'));
-const AdminUserProfilePage = lazy(() => import('./AdminUserProfilePage'));
 const UserPage = lazy(() => import('./UserPage'));
 const UserProfilePage = lazy(() => import('./UserProfilePage'));
+const ManagementFeePage = lazy(() => import('./ManagementFeePage'));
 const MaintenanceRequestPage = lazy(() => import('./MaintenanceRequestPage'));
 const ToDosPage = lazy(() => import('./ToDos'));
 const DocumentsTemplatesPage = lazy(() => import('./DocumentsTemplates'));
@@ -79,6 +79,7 @@ let MainPage = ({
         function (error) {
           setUser(null);
           setError(error.message);
+          history.push("/login");
           console.log('An error during onauthstatechanged =>', error);
         });
     }
@@ -99,7 +100,9 @@ let MainPage = ({
         "company_profile",
         "account-billing",
         "meter_readings",
+        "property-settings",
         "email-templates",
+        "management-fees",
       ]);
     }
   }, [currentUser]);
@@ -147,14 +150,7 @@ let MainPage = ({
                   component={PropertyPage}
                 />
                 <Route exact path={`${match.path}users/new`} component={UserPage} />
-                <Route
-                  exact
-                  path={`/admin/profile`}
-                  component={AdminUserProfilePage}
-                />
-                <Route
-                  exact
-                  path={`${match.path}users/:userId/edit`}
+                <Route exact path={`${match.path}users/:userId/edit`}
                   component={UserPage}
                 />
                 <Route exact path={`${match.path}users`} component={UsersPage} />
@@ -187,6 +183,16 @@ let MainPage = ({
                   exact
                   path={`${match.path}users/:userId/details`}
                   component={UserProfilePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}users/:userId/details/management-fees/new`}
+                  component={ManagementFeePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}users/:userId/details/management-fees/managementFeeId/edit`}
+                  component={ManagementFeePage}
                 />
                 <Route
                   exact
