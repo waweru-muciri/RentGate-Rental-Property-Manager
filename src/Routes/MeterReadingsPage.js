@@ -43,6 +43,7 @@ const meterReadingsTableHeadCells = [
 ];
 
 let MeterReadingsPage = ({
+    currentUser,
     meterReadings,
     handleItemDelete,
     properties,
@@ -333,6 +334,7 @@ let MeterReadingsPage = ({
                         setSelected={setSelected}
                         rows={filteredMeterReadingItems}
                         headCells={meterReadingsTableHeadCells}
+                        tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
                         deleteUrl={"meter_readings"}
                     />
@@ -344,6 +346,7 @@ let MeterReadingsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        currentUser: state.currentUser,
         meterReadings: state.meterReadings,
         properties: state.properties,
         contacts: state.contacts,
@@ -354,7 +357,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
     };
 };
 

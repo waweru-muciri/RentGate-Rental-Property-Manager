@@ -31,6 +31,7 @@ const ToDoSchema = Yup.object().shape({
 let ToDoInputForm = (props) => {
 	let styles = commonStyles();
 	const {
+		currentUser,
 		handleItemSubmit,
 		handleItemDelete,
 		open,
@@ -58,7 +59,7 @@ let ToDoInputForm = (props) => {
 					reminder_date: values.reminder_date,
 					complete_status: values.complete_status,
 				};
-				handleItemSubmit(todo, "to-dos").then((response) => {
+				handleItemSubmit(currentUser, todo, "to-dos").then((response) => {
 					setEventToShow({});
 					resetForm({});
 				});
@@ -230,7 +231,7 @@ let ToDoInputForm = (props) => {
 									startIcon={<DeleteIcon />}
 									disabled={!values.id}
 									onClick={() => {
-										handleItemDelete(values.id, "to-dos");
+										handleItemDelete(currentUser.tenant, values.id, "to-dos");
 										handleClose();
 									}}
 									disableElevation

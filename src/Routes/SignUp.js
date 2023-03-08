@@ -1,5 +1,4 @@
 import React from "react";
-import firebase from "firebase/app";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import { useHistory, Link } from "react-router-dom";
@@ -14,50 +13,13 @@ import {
 } from "@material-ui/core";
 import { connect } from "react-redux";
 import { Formik } from "formik";
-import { setCurrentUser, handleItemFormSubmit } from "../actions/actions";
+import {
+  setCurrentUser,
+  signUpWithEmailAndPassword,
+  handleItemFormSubmit,
+} from "../actions/actions";
 import { commonStyles } from "../components/commonStyles";
 import * as Yup from "yup";
-
-const db = firebase.firestore().collection("tenant");
-
-const signUpWithEmailAndPassword = (email, password) => {
-  return firebase
-    .auth()
-    .createUserWithEmailAndPassword(email, password)
-    .then((authCredential) => {
-      //get user details from autheCredential
-      const user = authCredential.user;
-      //create a new tenant with user details for the profile page
-      db.doc(user.uid)
-        .set({
-          first_name: user.displayName,
-          last_name: user.displayName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-        })
-        .then(function () {
-          console.log("Document successfully written!");
-        })
-        .catch(function (error) {
-          console.error("Error writing document: ", error);
-        });
-      //call api to set custom claims on user 
-      // Set admin privilege on the user corresponding to uid.
-      const userDetails = {
-        displayName: user.displayName,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        photoURL: user.photoURL,
-        uid: user.uid,
-        phoneNumber: user.phoneNumber,
-        providerData: user.providerData,
-      };
-      user.getIdToken().then(function (accessToken) {
-        userDetails.accessToken = accessToken;
-      });
-      setCurrentUser(userDetails);
-    });
-};
 
 const SignUpSchema = Yup.object().shape({
   password: Yup.string()
@@ -85,32 +47,21 @@ const SignUpLayout = ({ setUser }) => {
         <Formik
           initialValues={loginValues}
           validationSchema={SignUpSchema}
-          onSubmit={(values, { resetForm, setStatus, setSubmitting }) => {
+          onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
             var email = values.email;
             var password = values.password;
-            signUpWithEmailAndPassword(email, password)
-              .then(() => history.push("/"))
-              .catch(function (error) {
-                // Handle Errors here.
-                var errorCode = error.code;
-                var errorMessage =
-                  errorCode === "auth/weak-password"
-                    ? "The password is too weak."
-                    : errorCode === "auth/operation-not-allowed"
-                    ? "Operation Not Allowed"
-                    : errorCode === "auth/invalid-email"
-                    ? "Email is Invalid"
-                    : errorCode === "auth/email-already-in-use"
-                    ? "Email is already in Use"
-                    : "May God help Us";
-                setSubmitting(false);
-                setStatus({ error: errorMessage });
-                console.log("Error code => ", errorCode);
-                console.log("Error message => ", errorMessage);
-              });
-            resetForm({});
-          }}
-          render={({
+            try {
+              const createdUser = await signUpWithEmailAndPassword(email, password);
+              setUser(createdUser)
+              resetForm({});
+              history.push("/");
+            } catch (error) {
+              setSubmitting(false);
+              setStatus({ error: error.message });
+              console.log("Error message => ", error);
+            }
+          }}>
+          {({
             values,
             handleSubmit,
             touched,
@@ -209,7 +160,7 @@ const SignUpLayout = ({ setUser }) => {
               </Grid>
             </form>
           )}
-        />
+        </Formik>
       </Box>
     </Layout>
   );
@@ -217,12 +168,8 @@ const SignUpLayout = ({ setUser }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    submitForm: (contact) => {
-      dispatch(handleItemFormSubmit(contact, "user"));
-    },
-    setUser: (user) => {
-      dispatch(setCurrentUser(user));
-    },
+    submitForm: (currentUser, userDetails) => dispatch(handleItemFormSubmit(currentUser, userDetails, "users")),
+    setUser: (user) => dispatch(setCurrentUser(user)),
   };
 };
 

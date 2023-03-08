@@ -11,7 +11,7 @@ import moment from "moment";
 const defaultDate = moment().format("YYYY-MM-DD");
 
 let MeterReadingPage = (props) => {
-    const { meterReadings, users, contacts, properties, handleItemSubmit } = props;
+    const { currentUser, meterReadings, users, contacts, properties, handleItemSubmit } = props;
     let meterReadingToEditId = props.match.params.meterReadingId;
     let meterReadingToEdit = meterReadings.find(({ id }) => id === meterReadingToEditId);
     meterReadingToEdit =
@@ -38,6 +38,7 @@ let MeterReadingPage = (props) => {
                         meterReadingToEdit={meterReadingToEdit}
                         handleItemSubmit={handleItemSubmit}
                         users={users}
+                        currentUser={currentUser}
                         contacts={contacts}
                         properties={properties}
                     />
@@ -57,7 +58,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
     }
 };
 

@@ -8,7 +8,7 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit} from '../actions/actions'
 
 let UserPage = (props) => {
-	const { match, users, handleItemSubmit } = props
+	const { currentUser, match, users, handleItemSubmit } = props
 	let userToEditId = props.match.params.userId;
 	let userToEdit = users.find(({ id }) => id === userToEditId);
 	let pageTitle = userToEditId ? "Edit User" : "New User(s)";
@@ -26,7 +26,7 @@ let UserPage = (props) => {
 					item
 					key={3}
 				>
-					<UserInputForm match={match} userToEdit={userToEdit} handleItemSubmit={handleItemSubmit} />
+					<UserInputForm currentUser={currentUser} match={match} userToEdit={userToEdit} handleItemSubmit={handleItemSubmit} />
 				</Grid>
 			</Grid>
 		</Layout>
@@ -35,13 +35,14 @@ let UserPage = (props) => {
 
 const mapStateToProps = (state) => {
 	return {
+		currentUser: state.currentUser,
 		users: state.users,
 		error: state.error,
 	};
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
 	};
 };
 

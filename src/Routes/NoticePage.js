@@ -8,7 +8,7 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let NoticePage = (props) => {
-    const { notices, users, contacts, submitForm } = props;
+    const {currentUser, notices, users, contacts, submitForm } = props;
     let noticeToEditId = props.match.params.noticeId;
     let noticeToEdit = notices.find(({ id }) => id === noticeToEditId);
 
@@ -25,6 +25,7 @@ let NoticePage = (props) => {
                         submitForm={submitForm}
                         noticeToEdit={noticeToEdit}
                         users={users}
+                        currentUser={currentUser}
                         contacts={contacts}
                     />
                 </Grid>
@@ -35,6 +36,7 @@ let NoticePage = (props) => {
 
 const mapStateToProps = (state) => {
     return {
+        currentUser: state.currentUser,
         notices: state.notices,
         users: state.users,
         contacts: state.contacts,
@@ -43,8 +45,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        submitForm: (item, itemUrl) =>
-            dispatch(handleItemFormSubmit(item, itemUrl)),
+        submitForm: (user, item, itemUrl) =>
+            dispatch(handleItemFormSubmit(user, item, itemUrl)),
     };
 };
 

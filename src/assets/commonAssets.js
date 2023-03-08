@@ -27,8 +27,18 @@ export function getExpensesCategories() {
 	]
 }
 
-//general property values
+//general property types
 export function getPropertyTypes() {
+	return [
+		"Residential",
+		"Condo/Townhouse",
+		"Multi-family",
+		"Single-family",
+	];
+}
+
+//general unit types
+export function getUnitTypes() {
 	return [
 		"Bedsitter",
 		"One Bedroom",

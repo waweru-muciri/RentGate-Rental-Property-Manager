@@ -8,7 +8,7 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let ExpensePage = (props) => {
-    const { expenses, users, contacts, properties, handleItemSubmit } = props;
+    const { expenses, users, contacts, properties, handleItemSubmit, currentUser } = props;
     let expenseToEditId = props.match.params.expenseId;
     let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId);
     let pageTitle = expenseToEditId ? "Edit Expense" : "New Expense";
@@ -34,6 +34,7 @@ let ExpensePage = (props) => {
 
 const mapStateToProps = (state) => {
     return {
+        currentUser: state.currentUser,
         properties: state.properties,
         expenses: state.expenses,
         users: state.users,
@@ -42,7 +43,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
     }
 };
 

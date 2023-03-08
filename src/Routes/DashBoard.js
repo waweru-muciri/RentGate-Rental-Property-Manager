@@ -120,7 +120,7 @@ let DashBoardPage = (props) => {
           <InfoDisplayPaper xs={12} title={"Total Rentals"} value={totalProperties} />
           <InfoDisplayPaper xs={12} title={"Currently Occupied Rentals"} value={occupiedHouses} />
           <InfoDisplayPaper xs={12} title={"Currently Unoccupied Rentals"} value={totalProperties - occupiedHouses} />
-          <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={(occupiedHouses / totalProperties) * 100} />
+          <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={((occupiedHouses / totalProperties) * 100) | 0} />
         </Grid>
         <Grid item>
           <Box

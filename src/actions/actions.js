@@ -16,18 +16,109 @@ import * as expensesActions from "./expenses";
 import * as meterReadingsActions from "./meterReadings";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import app from "../firebase";
+import { getDatabaseRef } from "./firebaseHelpers";
 
 
 // Initialize Cloud Functions through Firebase
 var functions = app.functions();
+const auth = app.auth()
 const storageRef = app.storage().ref();
-const db = app.firestore().collection("tenant").doc("wPEY7XfSReuoOEOa22aX");
 
 export function setCurrentUser(user) {
     return {
         type: actionTypes.SET_CURRENT_USER,
         user,
     };
+}
+
+export const firebaseSignOutUser = () => {
+    return (dispatch) => {
+        app
+        .auth()
+        .signOut()
+        .then(function () {
+           
+        })
+        .catch(function (error) {
+            // An error happened.
+        }).finally(() => {
+            dispatch(setCurrentUser(null)) 
+        })
+    }
+}
+
+export const getFirebaseUserDetails = (userToken) => {
+    const userDetails = {
+        displayName: userToken.displayName,
+        email: userToken.email,
+        emailVerified: userToken.emailVerified,
+        photoURL: userToken.photoURL,
+        uid: userToken.uid,
+        id: userToken.uid,
+        tenant: 'wPEY7XfSReuoOEOa22aX',
+        phoneNumber: userToken.phoneNumber,
+        providerData: userToken.providerData,
+    };
+    userToken.getIdTokenResult().then((idTokenResult) => {
+        // Confirm the user is an Admin.
+        if (!!idTokenResult.claims.isAdmin) {
+            userDetails.isAdmin = true
+        } else {
+            userDetails.isAdmin = false
+        }
+    });
+    return userDetails;
+}
+
+export const signUpWithEmailAndPassword = async (email, password) => {
+
+    try {
+        const authCredential = await app.auth().createUserWithEmailAndPassword(email, password);
+        //get user details from autheCredential
+        const user = authCredential.user;
+        //   //call api to set custom claims on user 
+        const userDetails = getFirebaseUserDetails(user)
+        return userDetails;
+    } catch (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage =
+            errorCode === "auth/weak-password"
+                ? "The password is too weak."
+                : errorCode === "auth/operation-not-allowed"
+                    ? "Operation Not Allowed"
+                    : errorCode === "auth/invalid-email"
+                        ? "Email is Invalid"
+                        : errorCode === "auth/email-already-in-use"
+                            ? "Email is already in Use"
+                            : "May God help Us";
+        throw new Error(errorMessage)
+    }
+};
+
+export const signInUserWithEmailAndPassword = async (email, password) => {
+
+    try {
+        const authCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = authCredential.user;
+        const userDetails = getFirebaseUserDetails(user)
+        return userDetails;
+    }
+    catch (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = errorCode === "auth/wrong-password"
+            ? "Wrong password."
+            : errorCode === "auth/user-disabled"
+                ? "User account disabled"
+                : errorCode === "auth/invalid-email"
+                    ? "Email is Invalid"
+                    : errorCode === "auth/user-not-found"
+                        ? "No user found with email"
+                        : "May God help Us";
+        throw new Error(errorMessage);
+    }
+
 }
 
 export function sendEmails(email, recipients) {
@@ -92,8 +183,8 @@ export function uploadFilesToFirebase(filesArray) {
                             "Unknown error occurred, inspect the server response"
                         );
                         break;
-					default: 
-						console.log('Unknown error');
+                    default:
+                        console.log('Unknown error');
                 }
             }
         }
@@ -107,7 +198,7 @@ export function itemsFetchData(collectionsUrls) {
     return (dispatch) => {
         dispatch(itemsIsLoading(true));
         collectionsUrls.forEach((url) => {
-            db.collection(url).get().then((snapshot) => {
+            getDatabaseRef().collection(url).get().then((snapshot) => {
                 let fetchedItems = []
                 snapshot.forEach((doc) => {
                     let fetchedObject = Object.assign(
@@ -233,6 +324,7 @@ export function setPaginationPage(index) {
         index,
     };
 }
+
 export function toggleDrawer(toggleValue) {
     return {
         type: actionTypes.TOGGLE_DRAWER,
@@ -246,17 +338,19 @@ export function itemsHasErrored(error) {
         error,
     };
 }
+
 export function itemsIsLoading(bool) {
     return {
         type: actionTypes.ITEMS_IS_LOADING,
         isLoading: bool,
     };
 }
-export function handleDelete(itemId, url) {
+
+export function handleDelete(user, itemId, url) {
     //send request to server to delete selected item
     return async (dispatch) => {
         try {
-            await db
+            await getDatabaseRef()
                 .collection(url)
                 .doc(itemId)
                 .delete();
@@ -374,7 +468,7 @@ export function handleDelete(itemId, url) {
     }
 }
 
-export function handleItemFormSubmit(data, url) {
+export function handleItemFormSubmit(user, data, url) {
     if (typeof data.id === "undefined") {
         delete data.id;
     }
@@ -382,7 +476,7 @@ export function handleItemFormSubmit(data, url) {
         return new Promise(function (resolve, reject) {
             typeof data.id !== "undefined"
                 ? //send post request to edit the item
-                db
+                getDatabaseRef()
                     .collection(url)
                     .doc(data.id)
                     .update(data)
@@ -494,7 +588,7 @@ export function handleItemFormSubmit(data, url) {
                         reject(error)
                     })
                 : //send post to create item
-                db
+                getDatabaseRef()
                     .collection(url)
                     .add(data)
                     .then((docRef) => {

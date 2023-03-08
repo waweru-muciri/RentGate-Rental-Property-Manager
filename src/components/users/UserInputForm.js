@@ -22,7 +22,7 @@ const UserSchema = Yup.object().shape({
 });
 
 let UserInputForm = (props) => {
-	let { handleItemSubmit } = props;
+	let { handleItemSubmit, currentUser } = props;
 	const userToEdit = typeof props.userToEdit !== 'undefined' ? props.userToEdit : {};
 	const userValues = {
 		id : userToEdit.uid || '',
@@ -74,7 +74,7 @@ let UserInputForm = (props) => {
 					var fileDownloadUrl = uploadFilesToFirebase([values.contact_image[0]])	
 					user.user_avatar_url = fileDownloadUrl;
 				}
-				handleItemSubmit(user, "users").then((response) => {
+				handleItemSubmit(currentUser, user, "users").then((response) => {
 					resetForm({});
 				});
 			}}

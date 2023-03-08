@@ -50,13 +50,14 @@ const maintenanceRequestsTableHeadCells = [
 ];
 
 let MaintenanceRequestsPage = ({
+	currentUser,
 	isLoading,
 	maintenanceRequests,
 	users,
 	contacts,
 	properties,
 	match,
-	error,
+	error, handleItemDelete
 }) => {
 	let [maintenanceRequestItems, setMaintenanceRequestItems] = useState([]);
 	let [filteredMaintenanceRequestItems, setFilteredMaintenanceRequestItems] = useState([]);
@@ -371,7 +372,8 @@ let MaintenanceRequestsPage = ({
 						setSelected={setSelected}
 						rows={filteredMaintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
-						handleDelete={handleDelete}
+						tenantId={currentUser.tenant}
+						handleDelete={handleItemDelete}
 						deleteUrl={"maintenance-requests"}
 					/>
 				</Grid>
@@ -383,6 +385,7 @@ let MaintenanceRequestsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
 	return {
+		currentUser: state.currentUser,
 		maintenanceRequests: state.maintenanceRequests,
 		properties: state.properties,
 		users: state.users,
@@ -393,8 +396,14 @@ const mapStateToProps = (state, ownProps) => {
 	};
 };
 
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+    };
+};
+
 MaintenanceRequestsPage = connect(
-	mapStateToProps,
+	mapStateToProps, mapDispatchToProps
 )(MaintenanceRequestsPage);
 
 export default withRouter(MaintenanceRequestsPage);

@@ -36,6 +36,7 @@ const expensesTableHeadCells = [
 ];
 
 let ExpensesPage = ({
+    currentUser,
     expenses,
     handleItemDelete,
     properties,
@@ -316,6 +317,7 @@ let ExpensesPage = ({
                         setSelected={setSelected}
                         rows={filteredExpenseItems}
                         headCells={expensesTableHeadCells}
+                        tenant={currentUser.tenant}
                         handleDelete={handleItemDelete}
                         deleteUrl={"expenses"}
                     />
@@ -327,6 +329,7 @@ let ExpensesPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        currentUser: state.currentUser,
         expenses: state.expenses,
         properties: state.properties,
         isLoading: state.isLoading,
@@ -334,9 +337,10 @@ const mapStateToProps = (state, ownProps) => {
         match: ownProps.match,
     };
 };
+
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
     };
 };
 

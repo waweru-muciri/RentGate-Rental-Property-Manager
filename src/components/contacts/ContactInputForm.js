@@ -39,9 +39,6 @@ const ContactSchema = Yup.object().shape({
 	contact_email: Yup.string().trim().email().required('Contact Email is Required'),
 	present_address: Yup.string().trim().required('Contact Address is Required'),
 	personal_mobile_number: Yup.string().trim().required('Contact Phone Number is Required'),
-	skype_url: Yup.string().trim().url(),
-	facebook_url: Yup.string().trim().url(),
-	linkedin_url: Yup.string().trim().url(),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 const currentDate = moment().format("YYYY-MM-DD");
@@ -59,7 +56,7 @@ let ContactInputForm = (props) => {
 	let contactToEdit = typeof props.contactToEdit !== 'undefined' ? props.contactToEdit : {};
 	const contactValues = {
 		id: contactToEdit.id,
-		assigned_to: contactToEdit.assigned_to || currentUser.id,
+		assigned_to: contactToEdit.assigned_to || '',
 		contact_avatar_url: contactToEdit.contact_avatar_url || "",
 		id_number: contactToEdit.id_number || "",
 		present_address: contactToEdit.present_address || "",
@@ -76,9 +73,6 @@ let ContactInputForm = (props) => {
 		first_name: contactToEdit.first_name || "",
 		last_name: contactToEdit.last_name || "",
 		company_name: contactToEdit.company_name || "",
-		linkedin_url: contactToEdit.linkedin_url || "",
-		skype_url: contactToEdit.skype_url || "",
-		facebook_url: contactToEdit.facebook_url || "",
 		contact_images: [],
 	};
 
@@ -122,7 +116,7 @@ let ContactInputForm = (props) => {
 					contact.contact_avatar_url = fileDownloadUrl;
 				}
 
-				handleItemSubmit(contact, "contacts").then((contactId) => {
+				handleItemSubmit(currentUser, contact, "contacts").then((contactId) => {
 					resetForm({});
 					if (values.id) {
 						history.goBack();
@@ -523,7 +517,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
 	}
 };
 

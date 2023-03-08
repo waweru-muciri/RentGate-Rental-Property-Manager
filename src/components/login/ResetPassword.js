@@ -51,8 +51,8 @@ const resetUserPasswordByEmail = (email) => {
             setStatus({ error: errorMessage });
 		// console.log('Error sending password reset email => ', error);
           };
-        }}
-        render={({
+        }}>
+        {({
           values,
           handleSubmit,
           status,
@@ -120,7 +120,7 @@ const resetUserPasswordByEmail = (email) => {
               </Dialog>
             </form>
           )}
-      />
+      </Formik>
     </div>
   );
 }

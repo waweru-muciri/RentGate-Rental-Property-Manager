@@ -17,7 +17,7 @@ let PropertyPage = (props) => {
 		);
 	}
 
-	let pageTitle = propertyToEditId ? "Edit Rental" : "Add Rental";
+	let pageTitle = propertyToEditId ? "Edit Property" : "Add Property";
 
 	return (
 		<Layout pageTitle={pageTitle}>

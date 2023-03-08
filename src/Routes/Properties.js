@@ -28,9 +28,9 @@ const headCells = [
         id: "property_type",
         numeric: false,
         disablePadding: true,
-        label: "Property Type",
+        label: "Unit Type",
     },
-    { id: "ref", numeric: false, disablePadding: true, label: "Property/Unit Ref" },
+    { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
     { id: "is_fully_furnished", numeric: false, disablePadding: true, label: "Fitted" },
@@ -38,7 +38,7 @@ const headCells = [
         id: "address",
         numeric: false,
         disablePadding: true,
-        label: "Property Adddress",
+        label: "Unit Adddress",
     },
     {
         id: "square_footage",
@@ -64,14 +64,14 @@ let PropertyPage = ({
     contacts,
     users,
     match,
-    error,
+    error, handleItemDelete
 }) => {
     const classes = commonStyles();
     let [propertyItems, setPropertyItems] = useState([])
     let [filteredPropertyItems, setFilteredPropertyItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
     let [propertyAddressFilter, setPropertyAddressFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState('');
     let [propertyTypeFilter, setPropertyTypeFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -79,7 +79,7 @@ let PropertyPage = ({
         const mappedProperties = properties.map(
             (property) => {
                 const tenant = contacts.find(
-                    (contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
+                    (contact) => property.tenants ? contact.id === property.tenants[0] : ''
                 );
                 const owner = users.find(
                     (user) => user.id === property.owner
@@ -132,7 +132,7 @@ let PropertyPage = ({
     };
 
     return (
-        <Layout pageTitle="Rental Properties">
+        <Layout pageTitle="Rental Units">
             <Grid
                 container
                 spacing={3}
@@ -140,7 +140,7 @@ let PropertyPage = ({
                 alignItems="center"
             >
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <PageHeading text="Rental Properties" />
+                    <PageHeading text="Rental Units" />
                 </Grid>
                 <Grid
                     container
@@ -226,7 +226,7 @@ let PropertyPage = ({
                                         select
                                         variant="outlined"
                                         name="property_type"
-                                        label="Property Type"
+                                        label="Unit Type"
                                         id="property_type"
                                         onChange={(event) => {
                                             setPropertyTypeFilter(
@@ -282,7 +282,7 @@ let PropertyPage = ({
                                         variant="outlined"
                                         id="property_ref"
                                         name="property_ref"
-                                        label="Property Ref"
+                                        label="Unit Ref"
                                         value={propertyRefFilter}
                                         onChange={(event) => {
                                             setPropertyRefFilter(
@@ -296,7 +296,7 @@ let PropertyPage = ({
                                         fullWidth
                                         variant="outlined"
                                         name="property_address"
-                                        label="Property Address"
+                                        label="Unit Address"
                                         id="property_address"
                                         onChange={(event) => {
                                             setPropertyAddressFilter(
@@ -362,7 +362,8 @@ let PropertyPage = ({
                         rows={filteredPropertyItems}
                         headCells={headCells}
                         deleteUrl={'properties'}
-                        handleDelete={handleDelete}
+                        tenantId={currentUser.tenant}
+                        handleDelete={handleItemDelete}
                     />
                 </Grid>
                 {isLoading && <LoadingBackdrop open={isLoading} />}
@@ -383,7 +384,12 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+    };
+};
 
-PropertyPage = connect(mapStateToProps, null)(PropertyPage);
+PropertyPage = connect(mapStateToProps, mapDispatchToProps)(PropertyPage);
 
 export default withRouter(PropertyPage);

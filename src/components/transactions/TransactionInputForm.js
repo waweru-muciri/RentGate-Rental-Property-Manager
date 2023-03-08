@@ -81,7 +81,7 @@ let TransactionInputForm = (props) => {
 					lease_type: values.lease_type,
 					transaction_price: values.transaction_price,
 				};
-				handleItemSubmit(transaction, "transactions").then((response) => {
+				handleItemSubmit(currentUser, transaction, "transactions").then((response) => {
 					console.log('Saved transaction successfully => ', response)
 				});
 				resetForm({});
@@ -380,7 +380,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
 	};
 };
 

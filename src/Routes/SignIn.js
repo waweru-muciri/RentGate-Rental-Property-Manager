@@ -1,5 +1,4 @@
 import React from "react";
-import firebase from "../firebase";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import {
@@ -13,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { connect } from "react-redux";
 import { Formik } from "formik";
-import { setCurrentUser, handleItemFormSubmit } from "../actions/actions";
+import { signInUserWithEmailAndPassword, setCurrentUser } from "../actions/actions";
 import PasswordResetDialog from "../components/login/ResetPassword";
 import { commonStyles } from "../components/commonStyles";
 import * as Yup from "yup";
@@ -28,12 +27,9 @@ const SignInSchema = Yup.object().shape({
 });
 
 let SignInLayout = ({ setUser }) => {
+
   const history = useHistory();
-
-  const auth = firebase.auth()
-
   const classes = commonStyles();
-
   let loginValues = { email: "", password: "" };
   const [open, setOpen] = React.useState(false);
 
@@ -43,38 +39,6 @@ let SignInLayout = ({ setUser }) => {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const signInWithEmailAndPassword = (email, password) => {
-    return auth.signInWithEmailAndPassword(email, password)
-      .then((authCredential) => {
-        const user = authCredential.user;
-        const userDetails = {
-          displayName: user.displayName,
-          email: user.email,
-          emailVerified: user.emailVerified,
-          photoURL: user.photoURL,
-          uid: user.uid,
-          phoneNumber: user.phoneNumber,
-          providerData: user.providerData,
-        };
-        setUser(userDetails);
-      })
-      .catch(function (error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage =
-          errorCode === "auth/wrong-password"
-            ? "Wrong password."
-            : errorCode === "auth/user-disabled"
-              ? "User account disabled"
-              : errorCode === "auth/invalid-email"
-                ? "Email is Invalid"
-                : errorCode === "auth/user-not-found"
-                  ? "No user found with email"
-                  : "May God help Us";
-        return errorMessage;
-      });
   };
 
   return (
@@ -87,16 +51,16 @@ let SignInLayout = ({ setUser }) => {
             var email = values.email;
             var password = values.password;
             try {
-              await signInWithEmailAndPassword(email, password)
+              const signedInUser = await signInUserWithEmailAndPassword(email, password)
+              setUser(signedInUser)
               resetForm({});
               history.push("/")
-            } catch (errorMessage) {
+            } catch (error) {
               setSubmitting(false);
-              setStatus({ error: errorMessage });
-              console.log("Error message => ", errorMessage);
+              setStatus({ error: error.message });
             }
-          }}
-          render={({
+          }}>
+          {({
             values,
             handleSubmit,
             touched,
@@ -107,7 +71,7 @@ let SignInLayout = ({ setUser }) => {
             isSubmitting,
           }) => (
 				  <div>
-                  <PasswordResetDialog auth={auth} open={open} handleClose={handleClose} />
+                  <PasswordResetDialog open={open} handleClose={handleClose} />
               <form
                 className={classes.form}
                 method="post"
@@ -183,7 +147,7 @@ let SignInLayout = ({ setUser }) => {
               </form>
 				  </div>
             )}
-        />
+        </Formik>
       </Box>
     </Layout>
   );
@@ -191,12 +155,7 @@ let SignInLayout = ({ setUser }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    submitForm: (contact) => {
-      dispatch(handleItemFormSubmit(contact, "user"));
-    },
-    setUser: (user) => {
-      dispatch(setCurrentUser(user));
-    },
+    setUser: (user) => dispatch(setCurrentUser(user)),
   };
 };
 

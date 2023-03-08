@@ -31,7 +31,7 @@ const defaultDate = moment().format("YYYY-MM-DD");
 
 let MaintenanceRequestInputForm = (props) => {
 	let classes = commonStyles();
-	const { handleItemSubmit, history, contacts } = props
+	const {currentUser, handleItemSubmit, history, contacts } = props
 	let maintenanceRequest = typeof props.maintenanceRequestToEdit !== 'undefined' ? props.maintenanceRequestToEdit : {};
 	let maintenanceRequestValues = {
 		id: maintenanceRequest.id,
@@ -66,7 +66,7 @@ let MaintenanceRequestInputForm = (props) => {
 					issue_urgency: values.issue_urgency,
 					status: values.status,
 				};
-				handleItemSubmit(maintenanceRequest, "maintenance-requests").then(
+				handleItemSubmit(currentUser, maintenanceRequest, "maintenance-requests").then(
 					(response) => {
 				resetForm({});
 				if (values.id) {
@@ -293,12 +293,13 @@ let MaintenanceRequestInputForm = (props) => {
 
 const mapStateToProps = (state, ownProps) => {
 	return {
+		currentUser: state.currentUser,
 		contacts: state.contacts,
 	};
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
 	};
 };
 

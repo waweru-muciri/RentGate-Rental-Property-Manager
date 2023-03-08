@@ -20,7 +20,7 @@ const VacatingNoticeSchema = Yup.object().shape({
 });
 
 const ExpenseInputForm = (props) => {
-  const { properties, handleItemSubmit } = props
+  const { properties, handleItemSubmit, currentUser } = props
   const history = useHistory();
   const classes = commonStyles();
   const expenseCategories = getExpensesCategories();
@@ -48,7 +48,7 @@ const ExpenseInputForm = (props) => {
           expense_date: values.expense_date,
           expense_notes: values.expense_notes,
         };
-        handleItemSubmit(expense, "expenses").then((response) => {
+        handleItemSubmit(currentUser, expense, "expenses").then((response) => {
           resetForm({});
           if (values.id) {
             history.goBack();

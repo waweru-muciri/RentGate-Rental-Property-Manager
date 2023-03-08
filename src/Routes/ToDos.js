@@ -15,7 +15,7 @@ import "@fullcalendar/timegrid/main.css";
 import moment from "moment";
 import { handleItemFormSubmit, handleDelete } from "../actions/actions";
 
-let ToDosPage = ({ toDos, users, handleItemDelete, handleItemSubmit }) => {
+let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit }) => {
 	const [open, toggleOpen] = React.useState(false);
 
 	const [eventToShow, setEventToShow] = React.useState({});
@@ -34,7 +34,7 @@ let ToDosPage = ({ toDos, users, handleItemDelete, handleItemSubmit }) => {
 			id: info.event.id,
 			title: info.event.title,
 		};
-		handleItemSubmit(updatedEvent, "to-dos").then((response) => {
+		handleItemSubmit(currentUser, updatedEvent, "to-dos").then((response) => {
 			console.log("Updated event successfully!", updatedEvent);
 		});
 	};
@@ -112,6 +112,7 @@ let ToDosPage = ({ toDos, users, handleItemDelete, handleItemSubmit }) => {
 					/>
 					<ToDoInputForm
 						handleItemDelete={handleItemDelete}
+						currentUser={currentUser}
 						handleItemSubmit={handleItemSubmit}
 						users={users}
 						eventToShow={eventToShow}
@@ -127,6 +128,7 @@ let ToDosPage = ({ toDos, users, handleItemDelete, handleItemSubmit }) => {
 
 const mapStateToProps = (state) => {
 	return {
+		currentUser: state.currentUser,
 		toDos: state.toDos,
 		error: state.error,
 		users: state.users,
@@ -134,8 +136,8 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
 	};
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ToDosPage);

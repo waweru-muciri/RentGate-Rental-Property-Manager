@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import firebase from "../../firebase";
 import PageHeading from "../PageHeading";
 import {
     Grid,
@@ -26,9 +27,10 @@ const ResetPasswordSchema = Yup.object().shape({
 });
 
 let PasswordResetConfirmation = (props) => {
-    const { auth, actionCode, setUser, history } = props
+    const auth = firebase.auth();
+    const { actionCode, setUser, history } = props
 
-    const [codeVerificationError, setCodeVerificationError] = useState()
+    const [codeVerificationError, setCodeVerificationError] = useState(undefined)
 
     const classes = commonStyles();
 
@@ -41,6 +43,7 @@ let PasswordResetConfirmation = (props) => {
             loginValues.email = accountEmail
         } catch (error) {
             setCodeVerificationError(error)
+            console.log("Error verifying code => ", error)
         }
     }
 
@@ -57,6 +60,7 @@ let PasswordResetConfirmation = (props) => {
                     emailVerified: user.emailVerified,
                     photoURL: user.photoURL,
                     uid: user.uid,
+                    id: user.uid,
                     phoneNumber: user.phoneNumber,
                     providerData: user.providerData,
                 };
@@ -87,6 +91,7 @@ let PasswordResetConfirmation = (props) => {
                     }
                 } catch (error) {
                     setStatus({ error: "Error occurred during confirmation. The code might have expired or the password is too weak." });
+                    console.log('Error confirming password reset => ', error)
                 }
                 setSubmitting(false)
                 resetForm({});

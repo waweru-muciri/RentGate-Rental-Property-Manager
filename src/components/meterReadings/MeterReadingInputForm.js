@@ -23,7 +23,7 @@ const MeterReadingSchema = Yup.object().shape({
 
 const METER_OPTIONS = getMeterTypes();
 
-const MeterReadingInputForm = ({ properties, meterReadingToEdit, handleItemSubmit }) => {
+const MeterReadingInputForm = ({ properties, meterReadingToEdit, currentUser, handleItemSubmit }) => {
   const history = useHistory();
   const classes = commonStyles();
 
@@ -43,7 +43,7 @@ const MeterReadingInputForm = ({ properties, meterReadingToEdit, handleItemSubmi
           property: values.property,
           reading_date: values.reading_date,
         };
-        handleItemSubmit(meterReading, "meter_readings").then((response) => {
+        handleItemSubmit(currentUser, meterReading, "meter_readings").then((response) => {
           resetForm({});
           if (values.id) {
             history.goBack();

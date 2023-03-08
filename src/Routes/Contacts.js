@@ -83,12 +83,13 @@ let ContactsPage = ({
     users,
     match,
     error,
+    handleItemDelete
 }) => {
     let [contactItems, setContactItems] = useState([]);
     let [filteredContactItems, setFilteredContactItems] = useState([]);
     let [firstNameFilter, setFirstNameFilter] = useState("");
     let [lastNameFilter, setLastNameFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState('');
     let [genderFilter, setGenderFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -375,7 +376,8 @@ let ContactsPage = ({
                         setSelected={setSelected}
                         rows={filteredContactItems}
                         headCells={contactsTableHeadCells}
-                        handleDelete={handleDelete}
+                        tenantId={currentUser.tenant}
+                        handleDelete={handleItemDelete}
                         deleteUrl={"contacts"}
                     />
                 </Grid>
@@ -396,6 +398,12 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
-ContactsPage = connect(mapStateToProps)(ContactsPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+    };
+};
+
+ContactsPage = connect(mapStateToProps, mapDispatchToProps)(ContactsPage);
 
 export default withRouter(ContactsPage);

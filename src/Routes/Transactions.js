@@ -106,6 +106,7 @@ let TransactionPage = ({
     contacts,
     match,
     users,
+    handleItemDelete,
     error,
 }) => {
     const classes = commonStyles();
@@ -424,7 +425,8 @@ let TransactionPage = ({
                         setSelected={setSelected}
                         rows={filteredTransactionItems}
                         headCells={headCells}
-                        handleDelete={handleDelete}
+                        tenantId={currentUser.tenant}
+                        handleDelete={handleItemDelete}
                         deleteUrl={"transactions"}
                     />
                 </Grid>
@@ -448,6 +450,12 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
-TransactionPage = connect(mapStateToProps)(TransactionPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+    };
+};
+
+TransactionPage = connect(mapStateToProps, mapDispatchToProps)(TransactionPage);
 
 export default withRouter(TransactionPage);

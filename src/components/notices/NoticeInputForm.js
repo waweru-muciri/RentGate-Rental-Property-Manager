@@ -49,7 +49,7 @@ const quillEditorFormats = [
 
 const NoticeInputForm = (props) => {
   const history = useHistory();
-  const { contacts, users, submitForm } = props;
+  const { currentUser, contacts, users, submitForm } = props;
   const classes = commonStyles();
   const noticeToEdit = typeof props.noticeToEdit !== 'undefined' ? props.noticeToEdit : {}
 
@@ -77,7 +77,7 @@ const NoticeInputForm = (props) => {
           actual_vacated_date: values.actual_vacated_date,
           notification_date: values.notification_date,
         };
-        submitForm(vacatingNotice, "notices").then(
+        submitForm(currentUser, vacatingNotice, "notices").then(
           (response) => {
             resetForm({});
             if (values.id) {
