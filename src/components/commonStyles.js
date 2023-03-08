@@ -20,6 +20,9 @@ let useStyles = makeStyles((theme) => ({
 			margin: theme.spacing(1),
 		},
 	},
+	fileInputDisplayNone: {
+		display: 'none',
+	},
 	largeAvatar: {
 		width: theme.spacing(16),
 		height: theme.spacing(16),
@@ -63,15 +66,15 @@ let useStyles = makeStyles((theme) => ({
 		marginBottom: theme.spacing(1),
 	},
 	selectFormControl: {
-		  margin: theme.spacing(1),
-		  minWidth: 120,
+		margin: theme.spacing(1),
+		minWidth: 120,
 	},
 	selectChips: {
-		  display: 'flex',
-		  flexWrap: 'wrap',
+		display: 'flex',
+		flexWrap: 'wrap',
 	},
 	selectChip: {
-		  margin: 2,
+		margin: 2,
 	},
 }));
 

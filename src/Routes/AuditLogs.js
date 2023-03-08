@@ -5,7 +5,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
-import CustomizedSnackbar from "../components/customizedSnackbar";
+import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { itemsFetchData, handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";

@@ -7,11 +7,14 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DeleteIcon from "@material-ui/icons/Delete";
+import IconButton from "@material-ui/core/IconButton";
+import Box from "@material-ui/core/Box";
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import { connect } from "react-redux";
 import { Formik, FieldArray } from "formik";
 import {
 	handleItemFormSubmit,
-	handleDelete,
+	handleDelete, uploadFilesToFirebase
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
 import { withRouter } from "react-router-dom";
@@ -20,7 +23,6 @@ import {
 	getPropertyBaths, getUnitTypes
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import IconButton from "@material-ui/core/IconButton";
 
 const PropertySchema = Yup.object().shape({
 	property_type: Yup.string().trim().required("Type is Required"),
@@ -30,7 +32,7 @@ const PropertySchema = Yup.object().shape({
 	city: Yup.string().default(''),
 	property_units: Yup.array().of(Yup.object().shape({
 		unit_type: Yup.string().trim().required("Unit Type is required"),
-		address: Yup.string().trim().default(''),
+		image: Yup.string().trim().default(''),
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().required("Beds is required").default(''),
@@ -58,7 +60,7 @@ let PropertyInputForm = (props) => {
 		property_units: [],
 		owner: propertyToEdit.owner || "",
 	};
-	const CustomInputComponent = ({ remove, push, form }) => {
+	const CustomInputComponent = ({ remove, push, replace, form }) => {
 		const { errors, touched, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['property_units']
 		const propertyUnitTouched = touched['property_units']
@@ -78,18 +80,6 @@ let PropertyInputForm = (props) => {
 							onBlur={handleBlur}
 							error={(indexInErrors && 'ref' in indexInErrors) && (indexInTouched && indexInTouched.ref)}
 							helperText={(indexInTouched && indexInTouched.ref) && (indexInErrors && indexInErrors.ref)}
-						/>
-					</Grid>
-					<Grid xs item key={`property_units[${propertyUnitIndex}].address`}>
-						<TextField
-							label="Unit Address"
-							variant="outlined"
-							type="text"
-							value={property_unit.address}
-							name={`property_units.${propertyUnitIndex}.address`}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							helperText={"Unit Address For Reference"}
 						/>
 					</Grid>
 					<Grid xs item key={`property_units[${propertyUnitIndex}].unit_type`}>
@@ -155,6 +145,26 @@ let PropertyInputForm = (props) => {
 							))}
 						</TextField>
 					</Grid>
+					<Grid item key={`property_units[${propertyUnitIndex}].image`}>
+						<Box>
+							<input onChange={(event) => {
+								const selectedFile = event.currentTarget.files[0]
+								let reader = new FileReader();
+								reader.onloadend = () => {
+									selectedFile.data = reader.result
+								};
+								reader.readAsDataURL(selectedFile);
+								//remove the object then push a copy of it with added image object
+								replace(propertyUnitIndex, Object.assign({}, property_unit, { image: selectedFile }));
+							}} accept="image/*" className={classes.fileInputDisplayNone} id={`icon-button-file-${propertyUnitIndex}`} type="file" />
+							<label htmlFor={`icon-button-file-${propertyUnitIndex}`}>
+								<IconButton color="primary" aria-label="upload picture" component="span">
+									<PhotoCamera />
+								</IconButton>
+							</label>
+							<Box>{property_unit.image ? property_unit.image.name : "No Image"}</Box>
+						</Box>
+					</Grid>
 					<Grid xs item key={`property_units[${propertyUnitIndex}].sqft`}>
 						<TextField
 							label="Sqft"
@@ -178,15 +188,17 @@ let PropertyInputForm = (props) => {
 				</Grid>)
 
 		})
-		return <Grid>
+		return <Grid item container spacing={4} direction="column">
 			{layout}
-			<Button
-				variant="outlined"
-				size="medium"
-				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: '' })}
-				disableElevation>
-				Add Unit
+			<Grid item>
+				<Button
+					variant="outlined"
+					size="medium"
+					onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: '', image: '' })}
+					disableElevation>
+					Add Unit
 			</Button>
+			</Grid>
 		</Grid>
 	}
 
@@ -208,12 +220,19 @@ let PropertyInputForm = (props) => {
 				};
 				const propertyId = await handleItemSubmit(currentUser, property, "properties")
 				values.property_units.forEach(async (property_unit) => {
-					if (!property_unit.address) {
-						property_unit.address = values.address + ' - ' + property_unit.ref
+					//assign a default address to each property unit
+					property_unit.address = values.address + ' - ' + property_unit.ref
+					//check if the unit has an image to upload
+					if (property_unit.image && property_unit.image.data) {
+						//upload the file to the database and assign the resulting file 
+						// upload path to property_unit
+						const fileUploadPath = await uploadFilesToFirebase([property_unit.image])
+						property_unit.image = fileUploadPath
 					}
 					const propertyUnitToSave = Object.assign({}, property_unit, {
 						property_id: propertyId,
-						tenants: [], assigned_to: values.assigned_to
+						tenants: [],
+						assigned_to: values.assigned_to
 					})
 					await handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
 				})
@@ -235,7 +254,7 @@ let PropertyInputForm = (props) => {
 						id="propertyInputForm"
 						onSubmit={handleSubmit}
 					>
-						<Grid container spacing={1} direction="column">
+						<Grid container spacing={2} direction="column">
 							<Grid sm={12} item>
 								<Typography variant="h5">
 									{values.address}
@@ -354,16 +373,14 @@ let PropertyInputForm = (props) => {
 							<Grid item>
 								<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
 							</Grid>
-							<Grid item container direction="column">
-								<FieldArray
-									name="property_units"
-									component={CustomInputComponent}
-								/>
-							</Grid>
+							<FieldArray
+								name="property_units"
+								component={CustomInputComponent}
+							/>
 							<Grid
 								item
 								container
-								justify="center"
+								justify="flex-start"
 								direction="row"
 								className={classes.buttonBox}
 							>
@@ -389,7 +406,7 @@ let PropertyInputForm = (props) => {
 										form="propertyInputForm"
 										disabled={isSubmitting}
 									>
-										Add Property
+										Create Property
 									</Button>
 								</Grid>
 							</Grid>

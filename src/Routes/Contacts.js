@@ -15,7 +15,7 @@ import {
     MenuItem,
     Box,
 } from "@material-ui/core";
-import CustomizedSnackbar from "../components/customizedSnackbar";
+import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";

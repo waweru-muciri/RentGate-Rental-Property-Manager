@@ -4,6 +4,7 @@ import IconButton from "@material-ui/core/IconButton";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import Grid from "@material-ui/core/Grid";
 import Chip from "@material-ui/core/Chip";
 import Input from "@material-ui/core/Input";
@@ -445,7 +446,7 @@ let UnitLeaseInputForm = (props) => {
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item sm>
+								{/* <Grid item sm>
 									<FormControl fullWidth className={classes.selectFormControl}>
 										<InputLabel id="demo-mutiple-chip-label">Tenants</InputLabel>
 										<Select
@@ -453,22 +454,21 @@ let UnitLeaseInputForm = (props) => {
 											id="demo-mutiple-chip"
 											multiple
 											value={values.tenants}
-											onChange={(event) => { setFieldValue("tenants", event.target.value) }}
 											input={<Input id="select-multiple-chip" />}
-											renderValue={(selected) => {
-												const contactsWithDetails = contacts.filter(
-													({ id }) =>
-														selected.includes(id)
-												);
-												return (
-													<div className={classes.selectChips}>
-														{contactsWithDetails.map((value) => (
-															<Chip key={value.id} label={value.first_name + ' ' + value.last_name}
-																className={classes.selectChip} />
-														))}
-													</div>
-												)
-											}}
+											// renderValue={(selected) => {
+											// 	const contactsWithDetails = contacts.filter(
+											// 		({ id }) =>
+											// 			selected.includes(id)
+											// 	);
+											// 	return (
+											// 		<div className={classes.selectChips}>
+											// 			{contactsWithDetails.map((value) => (
+											// 				<Chip key={value.id} label={value.first_name + ' ' + value.last_name}
+											// 					className={classes.selectChip} />
+											// 			))}
+											// 		</div>
+											// 	)
+											// }}
 											MenuProps={MenuProps}
 										>
 											{contacts.map((contact, index) => (
@@ -478,6 +478,23 @@ let UnitLeaseInputForm = (props) => {
 											))}
 										</Select>
 									</FormControl>
+								</Grid> */}
+								<Grid item sm>
+									<Autocomplete
+										id="combo-box-tenants-select"
+										filterSelectedOptions
+										options={contacts}
+										value={values.tenants}
+										onChange={(event, newInputValues) => { setFieldValue("tenants", newInputValues) }}
+										getOptionLabel={(option) => option.first_name + ' ' + option.last_name}
+										style={{ width: '100%' }}
+										renderTags={(value, getTagProps) =>
+											value.map((option, index) => (
+											  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+											))
+										  }
+										renderInput={(params) => <TextField {...params} label="Tenants" variant="outlined" />}
+									/>
 								</Grid>
 								<Grid item sm>
 									<TextField

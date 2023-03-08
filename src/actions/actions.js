@@ -36,16 +36,16 @@ export function setCurrentUser(user) {
 export const firebaseSignOutUser = () => {
     return (dispatch) => {
         app
-        .auth()
-        .signOut()
-        .then(function () {
-           
-        })
-        .catch(function (error) {
-            // An error happened.
-        }).finally(() => {
-            dispatch(setCurrentUser(null)) 
-        })
+            .auth()
+            .signOut()
+            .then(function () {
+
+            })
+            .catch(function (error) {
+                // An error happened.
+            }).finally(() => {
+                dispatch(setCurrentUser(null))
+            })
     }
 }
 
@@ -161,7 +161,7 @@ export function uploadFilesToFirebase(filesArray) {
         try {
             const snapshot = await fileRef
                 .putString(file.data, "data_url");
-            console.log("Uploaded files successfully!");
+            // console.log("Uploaded files successfully!");
             try {
                 const url = await snapshot.ref
                     .getDownloadURL();
@@ -330,6 +330,9 @@ export function itemsFetchData(collectionsUrls) {
                     default:
                         break;
                 }
+            }).catch((error) => {
+                dispatch(itemsHasErrored(error.message))
+                dispatch(itemsIsLoading(false));
             });
         })
         dispatch(itemsIsLoading(false));
@@ -372,7 +375,6 @@ export function handleDelete(user, itemId, url) {
                 .collection(url)
                 .doc(itemId)
                 .delete();
-            console.log("Document successfully deleted!");
             switch (url) {
                 case "properties":
                     dispatch(
@@ -489,6 +491,8 @@ export function handleDelete(user, itemId, url) {
             }
         }
         catch (error) {
+            dispatch(itemsHasErrored(error.message))
+            dispatch(itemsIsLoading(false));
             console.log("Failed to Delete Document!", error);
         }
     }
@@ -622,8 +626,10 @@ export function handleItemFormSubmit(user, data, url) {
                         resolve(data.id);
                     })
                     .catch((error) => {
-                        console.log("Error => ", error.response);
                         reject(error)
+                        dispatch(itemsHasErrored(error.message))
+                        dispatch(itemsIsLoading(false));
+                        console.log("Error => ", error.response);
                     })
                 : //send post to create item
                 getDatabaseRef()
@@ -734,6 +740,8 @@ export function handleItemFormSubmit(user, data, url) {
                         resolve(docRef.id);
                     })
                     .catch((error) => {
+                        dispatch(itemsHasErrored(error.message))
+                        dispatch(itemsIsLoading(false));
                         console.log("Error => ", error.response);
                     });
         })

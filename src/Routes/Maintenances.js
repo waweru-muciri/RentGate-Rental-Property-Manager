@@ -8,7 +8,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
-import CustomizedSnackbar from "../components/customizedSnackbar";
+import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";

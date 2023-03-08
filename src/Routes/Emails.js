@@ -6,7 +6,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
 import { Grid, TextField, Button, Box } from "@material-ui/core";
-import CustomizedSnackbar from "../components/customizedSnackbar";
+import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";

@@ -248,7 +248,7 @@ let PaymentInputForm = (props) => {
 							<Grid
 								item
 								container
-								justify="center"
+								justify="flex-start"
 								direction="row"
 								className={classes.buttonBox}
 							>

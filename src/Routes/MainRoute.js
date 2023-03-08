@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import {
   itemsFetchData,
   setCurrentUser,
-  setPaginationPage, toggleDrawer, getFirebaseUserDetails
+  itemsHasErrored, getFirebaseUserDetails
 } from "../actions/actions";
 import {
   BrowserRouter as Router,
@@ -49,7 +49,7 @@ import app from '../firebase'
 let MainPage = ({
   currentUser,
   match,
-  fetchData, setUser
+  fetchData, setUser, setError
 }) => {
   const history = useHistory();
 
@@ -70,7 +70,9 @@ let MainPage = ({
           }
         },
         function (error) {
-          console.log(error);
+          setUser(null);
+          setError(error.message);
+          console.log('An error during onauthstatechanged =>', error);
         });
     }
     else {
@@ -254,6 +256,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (tenant, url) => dispatch(itemsFetchData(tenant, url)),
     setUser: (user) => dispatch(setCurrentUser(user)),
+    setError: (error) => dispatch(itemsHasErrored(error)),
   };
 };
 

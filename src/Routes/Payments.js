@@ -14,7 +14,7 @@ import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/customizedSnackbar";
+import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";

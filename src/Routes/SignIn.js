@@ -7,8 +7,6 @@ import {
   TextField,
   Box,
   Typography,
-  FormControl,
-  FormHelperText,
 } from "@material-ui/core";
 import { connect } from "react-redux";
 import { Formik } from "formik";
@@ -69,7 +67,9 @@ let SignInLayout = ({ setUser }) => {
             handleChange,
             handleBlur,
             isSubmitting,
-          }) => (
+          }) => {
+            const passwordOrOtherError = (touched.password && errors.password) ||  (status && status.error)
+            return (
 				  <div>
                   <PasswordResetDialog open={open} handleClose={handleClose} />
               <form
@@ -108,8 +108,8 @@ let SignInLayout = ({ setUser }) => {
                       value={values.password}
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      helperText={touched.password && errors.password ||   (status && status.error) }
-                      error={(errors.password && touched.password) || (status && status.error ? true : false)}
+                      helperText={ passwordOrOtherError }
+                      error={( passwordOrOtherError ? true : false)}
                       InputLabelProps={{ shrink: true }}
                     />
                   </Grid>
@@ -139,7 +139,7 @@ let SignInLayout = ({ setUser }) => {
                 </Grid>
               </form>
 				  </div>
-            )}
+            )}}
         </Formik>
       </Box>
     </Layout>
