@@ -74,6 +74,8 @@ let MainPage = ({
     else {
       fetchData([
         "properties",
+        "property_units",
+        "property_accounts",
         "transactions",
         "maintenance-requests",
         "property_media",

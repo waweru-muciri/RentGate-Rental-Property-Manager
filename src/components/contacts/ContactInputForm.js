@@ -36,9 +36,10 @@ const ContactSchema = Yup.object().shape({
 	gender: Yup.string().trim().required("Gender is required"),
 	id_number: Yup.string().trim().required("ID Number is required"),
 	assigned_to: Yup.string().trim().required("Assigned To is required"),
-	contact_email: Yup.string().trim().email().required('Contact Email is Required'),
-	present_address: Yup.string().trim().required('Contact Address is Required'),
-	personal_mobile_number: Yup.string().trim().required('Contact Phone Number is Required'),
+	contact_email: Yup.string().trim().email(),
+	alternate_email: Yup.string().trim().email(),
+	present_address: Yup.string().trim().default(''),
+	personal_mobile_number: Yup.string().trim(),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 const currentDate = moment().format("YYYY-MM-DD");
@@ -60,16 +61,22 @@ let ContactInputForm = (props) => {
 		contact_avatar_url: contactToEdit.contact_avatar_url || "",
 		id_number: contactToEdit.id_number || "",
 		present_address: contactToEdit.present_address || "",
-		permanent_address: contactToEdit.permanent_address || "",
+		alternate_address: contactToEdit.alternate_address || "",
 		contact_email: contactToEdit.contact_email || "",
+		alternate_email: contactToEdit.alternate_email || "",
 		personal_mobile_number: contactToEdit.personal_mobile_number || "",
 		work_mobile_number: contactToEdit.work_mobile_number || "",
+		home_phone_number: contactToEdit.home_phone_number || "",
 		custom_mobile_number: contactToEdit.custom_mobile_number || "",
 		id_issue_date: contactToEdit.id_issue_date || currentDate,
 		id_issue_place: contactToEdit.id_issue_place || "",
 		title: contactToEdit.title || "",
 		date_of_birth: contactToEdit.date_of_birth || currentDate,
 		gender: contactToEdit.gender || "",
+		emergency_contact_email: contactToEdit.emergency_contact_email || "",
+		emergency_contact_name: contactToEdit.emergency_contact_name || "",
+		emergency_contact_phone_number: contactToEdit.emergency_contact_phone_number || "",
+		emergency_contact_relationship: contactToEdit.emergency_contact_relationship || "",
 		first_name: contactToEdit.first_name || "",
 		last_name: contactToEdit.last_name || "",
 		company_name: contactToEdit.company_name || "",
@@ -90,18 +97,21 @@ let ContactInputForm = (props) => {
 					title: values.title,
 					date_of_birth: values.date_of_birth,
 					present_address: values.present_address,
-					permanent_address: values.permanent_address,
+					alternate_address: values.alternate_address,
 					contact_email: values.contact_email,
+					alternate_email: values.alternate_email,
 					personal_mobile_number: values.personal_mobile_number,
 					work_mobile_number: values.work_mobile_number,
+					home_phone_number: values.home_phone_number,
 					custom_mobile_number: values.custom_mobile_number,
 					gender: values.gender,
 					first_name: values.first_name,
 					last_name: values.last_name,
 					company_name: values.company_name,
-					linkedin_url: values.linkedin_url,
-					skype_url: values.skype_url,
-					facebook_url: values.facebook_url,
+					emergency_contact_name: values.emergency_contact_name,
+					emergency_contact_relationship: values.emergency_contact_relationship,
+					emergency_contact_phone_number: values.emergency_contact_phone_number,
+					emergency_contact_email: values.emergency_contact_email,
 				};
 				//first upload the image to firebase
 				if (values.contact_images.length) {
@@ -360,49 +370,64 @@ let ContactInputForm = (props) => {
 										<Typography variant="subtitle2"> Phone Numbers </Typography>
 									</Grid>
 									{/** start of mobile textfield and types columns **/}
-									<Grid item>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={"personal_mobile_number"}
-											name={"personal_mobile_number"}
-											label="Personal Mobile Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={
-												'personal_mobile_number' in errors
-											}
-											helperText={
-												errors.personal_mobile_number
-											}
-											value={values.personal_mobile_number}
-										/>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={"personal_mobile_number"}
+												name={"personal_mobile_number"}
+												label="Personal Mobile Number"
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'personal_mobile_number' in errors
+												}
+												helperText="Mobile Phone Number"
+												value={values.personal_mobile_number}
+											/>
+										</Grid>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={"home_phone_number"}
+												name={"home_phone_number"}
+												label="Home Phone Number"
+												onChange={handleChange}
+												onBlur={handleBlur}
+												helperText="Home Phone Number"
+												value={values.home_phone_number}
+											/>
+										</Grid>
 									</Grid>
-									<Grid item >
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={"work_mobile_number"}
-											name={"work_mobile_number"}
-											label="Work Mobile Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Work Mobile Number"
-											value={values.work_mobile_number}
-										/>
-									</Grid>
-									<Grid item >
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={"custom_mobile_number"}
-											name={"custom_mobile_number"}
-											label="Custom Mobile Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Custom Mobile Number"
-											value={values.custom_mobile_number}
-										/>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={"work_mobile_number"}
+												name={"work_mobile_number"}
+												label="Work Mobile Number"
+												onChange={handleChange}
+												onBlur={handleBlur}
+												helperText="Work Mobile Number"
+												value={values.work_mobile_number}
+											/>
+										</Grid>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={"custom_mobile_number"}
+												name={"custom_mobile_number"}
+												label="Custom Mobile Number"
+												onChange={handleChange}
+												onBlur={handleBlur}
+												helperText="Custom Mobile Number"
+												value={values.custom_mobile_number}
+											/>
+										</Grid>
 									</Grid>
 									{/* start of contact emails column */}
 									<Grid item>
@@ -410,30 +435,51 @@ let ContactInputForm = (props) => {
 											Emails
 								</Typography>
 									</Grid>
-									<Grid item >
-										<TextField
-											fullWidth
-											type="email"
-											variant="outlined"
-											id={'contact_email'}
-											name={'contact_email'}
-											label="Contact Email"
-											value={values.contact_email}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={
-												'contact_email' in errors
-											}
-											helperText={
-												errors.contact_email
-											}
-										/>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="email"
+												variant="outlined"
+												id={'contact_email'}
+												name={'contact_email'}
+												label="Email"
+												value={values.contact_email}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'contact_email' in errors
+												}
+												helperText={
+													errors.contact_email
+												}
+											/>
+										</Grid>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="email"
+												variant="outlined"
+												id={'alternate_email'}
+												name={'alternate_email'}
+												label="Alternate Email"
+												value={values.alternate_email}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'alternate_email' in errors
+												}
+												helperText={
+													errors.alternate_email
+												}
+											/>
+										</Grid>
 									</Grid>
 									{/* Start of contact addresses row */}
 									<Grid item>
 										<Typography variant="subtitle2">
 											Addresses
-								</Typography>
+										</Typography>
 									</Grid>
 									<Grid item>
 										<TextField
@@ -457,16 +503,101 @@ let ContactInputForm = (props) => {
 										<TextField
 											fullWidth
 											variant="outlined"
-											id={"permanent_address"}
-											name={"permanent_address"}
-											label="Permanent Address"
+											id={"alternate_address"}
+											name={"alternate_address"}
+											label="Alternate Address"
 											value={
-												values.permanent_address
+												values.alternate_address
 											}
 											onChange={handleChange}
 											onBlur={handleBlur}
-											helperText="Permanent Address"
+											helperText="Alternate Address"
 										/>
+									</Grid>
+									<Grid item>
+										<Typography variant="subtitle2">
+											Emergency Contact
+										</Typography>
+									</Grid>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="text"
+												variant="outlined"
+												id={'emergency_contact_name'}
+												name={'emergency_contact_name'}
+												label="Contact Name"
+												value={values.emergency_contact_name}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'emergency_contact_name' in errors
+												}
+												helperText={
+													errors.emergency_contact_name
+												}
+											/>
+										</Grid>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="text"
+												variant="outlined"
+												id={'emergency_contact_relationship'}
+												name={'emergency_contact_relationship'}
+												label="Relationship to Tenant"
+												value={values.emergency_contact_relationship}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'emergency_contact_relationship' in errors
+												}
+												helperText={
+													errors.emergency_contact_relationship
+												}
+											/>
+										</Grid>
+									</Grid>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="text"
+												variant="outlined"
+												id={'emergency_contact_phone_number'}
+												name={'emergency_contact_phone_number'}
+												label="Phone Number"
+												value={values.emergency_contact_phone_number}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'emergency_contact_phone_number' in errors
+												}
+												helperText={
+													errors.emergency_contact_phone_number
+												}
+											/>
+										</Grid>
+										<Grid item sm>
+											<TextField
+												fullWidth
+												type="email"
+												variant="outlined"
+												id={'emergency_contact_email'}
+												name={'emergency_contact_email'}
+												label="Contact Email"
+												value={values.emergency_contact_email}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={
+													'emergency_contact_email' in errors
+												}
+												helperText={
+													errors.emergency_contact_email
+												}
+											/>
+										</Grid>
 									</Grid>
 								</Grid>
 							</Grid >

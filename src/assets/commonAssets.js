@@ -99,7 +99,7 @@ export function getLeaseOptions() {
 }
 
 export function getPaymentOptions() {
-	return ["Per Day", "Week", "Month", "Quarter", "Half Year", "Yearly"];
+	return ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"];
 }
 export function getFurnishedOptions() {
 	return ["Yes", "No", "Partially"];

@@ -12,18 +12,15 @@ import { Formik, FieldArray } from "formik";
 import {
 	handleItemFormSubmit,
 	handleDelete,
-	uploadFilesToFirebase,
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
 import { withRouter } from "react-router-dom";
 import {
 	getPropertyTypes, getPropertyBeds,
-	getPropertyBaths,
+	getPropertyBaths, getUnitTypes
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import { IconButton } from "@material-ui/core";
-
-const PROPERTY_TYPES = getPropertyTypes();
+import  IconButton from "@material-ui/core/IconButton";
 
 const PropertySchema = Yup.object().shape({
 	property_type: Yup.string().trim().required("Type is Required"),
@@ -32,7 +29,7 @@ const PropertySchema = Yup.object().shape({
 	postal_code: Yup.string().trim().default(''),
 	city: Yup.string().default(''),
 	property_units: Yup.array().of(Yup.object().shape({
-		address: Yup.string().trim().required("Address is required"),
+		unit_type: Yup.string().trim().required("Unit Type is required"),
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().required("Beds is required").default(''),
@@ -40,8 +37,9 @@ const PropertySchema = Yup.object().shape({
 	})).required()
 });
 
+const PROPERTY_TYPES = getPropertyTypes();
+const UNIT_TYPES = getUnitTypes();
 const PROPERTY_BEDS = getPropertyBeds();
-
 const PROPERTY_BATHS = getPropertyBaths();
 
 let PropertyInputForm = (props) => {
@@ -77,18 +75,25 @@ let PropertyInputForm = (props) => {
 						onBlur={handleBlur}
 					/>
 				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].address`}>
+				<Grid xs item key={`property_units[${propertyUnitIndex}].unit_type`}>
 					<TextField
-						label="Unit Address"
+						fullWidth
+						label="Unit Type"
+						defaultValue=""
 						variant="outlined"
-						type="text"
-						value={property_unit.address}
-						name={`property_units.${propertyUnitIndex}.address`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['address'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].address}
+						select
+						value={property_unit.unit_type}
+						name={`property_units.${propertyUnitIndex}.unit_type`}
+						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['unit_type'] !== 'undefined'}
+						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].unit_type}
 						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
+						onBlur={handleBlur}>
+					{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
+							<MenuItem key={unitTypeIndex} value={unit_type}>
+								{unit_type}
+							</MenuItem>
+						))}
+					</TextField>
 				</Grid>
 				<Grid xs item key={`property_units[${propertyUnitIndex}].beds`}>
 					<TextField
@@ -143,9 +148,18 @@ let PropertyInputForm = (props) => {
 						onBlur={handleBlur}
 					/>
 				</Grid>
+				<Grid item key={`property_units[${propertyUnitIndex}].add_lease`}>
+					<Button
+						variant="outlined"
+						size="medium"
+						onClick={() => {}}
+						disableElevation>
+						Add Lease
+			</Button>
+				</Grid>
 				<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
 					<IconButton aria-label="delete"
-						onClick={ () => { remove(propertyUnitIndex)}}
+						onClick={() => { remove(propertyUnitIndex) }}
 						size="medium">
 						<DeleteIcon />
 					</IconButton>
@@ -158,7 +172,7 @@ let PropertyInputForm = (props) => {
 			<Button
 				variant="outlined"
 				size="medium"
-				onClick={() => push({ref: '', address: '', beds: '', baths: ''})}
+				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '' })}
 				disableElevation>
 				Add Unit
 			</Button>

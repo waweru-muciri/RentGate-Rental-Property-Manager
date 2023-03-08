@@ -10,8 +10,8 @@ let useStyles = makeStyles((theme) => ({
 		paddingBottom: theme.spacing(2),
 		paddingTop: theme.spacing(2),
 		"& .MuiTextField-root": {
-			marginTop: theme.spacing(2),
-			marginBottom: theme.spacing(2),
+			marginTop: theme.spacing(1),
+			marginBottom: theme.spacing(1),
 		},
 	},
 	buttonBox: {
@@ -61,6 +61,17 @@ let useStyles = makeStyles((theme) => ({
 	oneMarginTopBottom: {
 		marginTop: theme.spacing(1),
 		marginBottom: theme.spacing(1),
+	},
+	selectFormControl: {
+		  margin: theme.spacing(1),
+		  minWidth: 120,
+	},
+	selectChips: {
+		  display: 'flex',
+		  flexWrap: 'wrap',
+	},
+	selectChip: {
+		  margin: 2,
 	},
 }));
 

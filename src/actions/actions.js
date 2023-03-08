@@ -1,6 +1,8 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as vacatingNoticesActions from "./notices";
 import * as propertyActions from "./property";
+import * as propertyAccountActions from "./propertyAccounts";
+import * as propertyUnitActions from "./propertyUnits";
 import * as mediaFilesActions from "./mediaFiles";
 import * as contactsActions from "./contacts";
 import * as transactionsActions from "./transactions";
@@ -219,6 +221,22 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
+                    case "property_units":
+                        dispatch(
+                            propertyUnitActions.propertyUnitsFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
+                    case "property_accounts":
+                        dispatch(
+                            propertyAccountActions.propertyAccountsFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
                     case "contacts":
                         dispatch(
                             contactsActions.contactsFetchDataSuccess(fetchedItems)
@@ -364,6 +382,14 @@ export function handleDelete(user, itemId, url) {
                     );
                     break;
 
+                case "property_units":
+                    dispatch(
+                        propertyUnitActions.deletePropertyUnit(
+                            itemId
+                        )
+                    );
+                    break;
+
                 case "contacts":
                     dispatch(
                         contactsActions.deleteContact(itemId)
@@ -492,6 +518,18 @@ export function handleItemFormSubmit(user, data, url) {
                                 );
                                 break;
 
+                            case "property_units":
+                                dispatch(
+                                    propertyUnitActions.editPropertyUnit(modifiedObject)
+                                );
+                                break;
+
+                            case "property_accounts":
+                                dispatch(
+                                    propertyAccountActions.editPropertyAccount(modifiedObject)
+                                );
+                                break;
+
                             case "contacts":
                                 dispatch(
                                     contactsActions.editContact(modifiedObject)
@@ -599,6 +637,18 @@ export function handleItemFormSubmit(user, data, url) {
                             case "properties":
                                 dispatch(
                                     propertyActions.addProperty(addedItem)
+                                );
+                                break;
+
+                            case "property_units":
+                                dispatch(
+                                    propertyUnitActions.addPropertyUnit(addedItem)
+                                );
+                                break;
+
+                            case "property_accounts":
+                                dispatch(
+                                    propertyAccountActions.addPropertyAccount(addedItem)
                                 );
                                 break;
 

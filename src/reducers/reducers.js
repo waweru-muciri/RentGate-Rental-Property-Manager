@@ -1,5 +1,7 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as propertyReducers from "./propertyReducers";
+import * as propertyAccountsReducers from "./propertyAccounts";
+import * as propertyUnitsReducers from "./propertyUnits";
 import * as mediaFilesReducers from "./mediaFilesReducers";
 import * as contactsReducers from "./contacts";
 import * as transactionsReducers from "./transactions";
@@ -65,6 +67,8 @@ function reducers(state = {}, action) {
     return {
         communication_emails: communicationEmailsReducers.communicationEmails(state.communication_emails, action),
         properties: propertyReducers.properties(state.properties, action),
+        propertyAccounts: propertyAccountsReducers.propertyAccounts(state.propertyAccounts, action),
+        propertyUnits: propertyUnitsReducers.propertyUnits(state.propertyUnits, action),
         mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
         users: usersReducers.users(state.users, action),
         expenses: expensesReducers.expenses(state.expenses, action),
