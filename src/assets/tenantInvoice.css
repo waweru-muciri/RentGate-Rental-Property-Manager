@@ -1,0 +1,89 @@
+.invoice-box {
+width: 600pt;
+max-width: 600pt;
+margin: auto;
+font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+color: rgb(24, 24, 24);
+}
+p{
+  overflow: visible;
+  word-wrap: break-word;
+}
+.invoice-box table {
+width: 600pt;
+line-height: inherit;
+text-align: left;
+}
+
+.invoice-box table td {
+padding: 3.75pt;
+vertical-align: top;
+}
+
+.invoice-box table tr td:nth-child(2) {
+    text-align: left;
+}
+
+.invoice-box table tr.top table td {
+    padding-bottom: 15pt;
+}
+.center{
+    text-align: center;
+}
+.invoice-box table tr.top table td.title {
+line-height: 33.75pt;
+color: #333;
+}
+
+.invoice-box table tr.information table td {
+    padding-bottom: 10pt;
+}
+
+.invoice-box table tr.heading td {
+                background: #eee;
+border-bottom: 0.75pt solid #ddd;
+font-weight: bold;
+}
+
+.invoice-box table tr.details td {
+                padding-bottom: 15pt;
+}
+
+.invoice-box table tr.item td {
+    border-bottom: 0.75pt solid #eee;
+}
+
+.invoice-box table tr.item.last td {
+                border-bottom: none;
+}
+
+.invoice-box table tr.total td:nth-child(2) {
+border-top: 1.5pt solid #eee;
+font-weight: bold;
+}
+
+@media only screen and (max-width: 600pt) {
+.invoice-box table tr.top table td {
+                width: 600pt;
+    display: block;
+    text-align: center;
+}
+
+.invoice-box table tr.information table td {
+                width: 600pt;
+    display: block;
+    text-align: center;
+}
+}
+.rtl {
+                direction: rtl;
+font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+}
+
+.rtl table {
+                text-align: right;
+}
+
+.rtl table tr td:nth-child(2) {
+                text-align: left;
+}

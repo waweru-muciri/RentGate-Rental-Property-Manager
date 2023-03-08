@@ -39,14 +39,12 @@ const contactsTableHeadCells = [
 
 let EmailsPage = ({
     isLoading,
-    contacts,
+    communication_emails,
     users,
     currentUser,
-    contact_emails,
     match,
-    error,
 }) => {
-    let [contactItems, setContactItems] = useState([]);
+    let [emailItems, setEmailItems] = useState([]);
     let [selected, setSelected] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
@@ -54,18 +52,18 @@ let EmailsPage = ({
     const classes = commonStyles();
 
     useEffect(() => {
-        setContactItems(contacts);
-    }, [contacts]);
+        setEmailItems(communication_emails);
+    }, [communication_emails]);
 
     const exportContactRecordsToExcel = () => {
-        let items = contacts.filter(({ id }) => selected.includes(id));
+        let items = communication_emails.filter(({ id }) => selected.includes(id));
         exportDataToXSL("Emails  Records", "Emails Data", items, "EmailsData");
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the contacts here according to search criteria
-        let filteredContacts = contacts
+        //filter the communication_emails here according to search criteria
+        let filteredContacts = communication_emails
             .filter(({ date_sent }) =>
                 !fromDateFilter ? true : date_sent >= fromDateFilter
             )
@@ -73,12 +71,12 @@ let EmailsPage = ({
                 !toDateFilter ? true : date_sent <= toDateFilter
             );
 
-        setContactItems(filteredContacts);
+        setEmailItems(filteredContacts);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setContactItems(contacts);
+        setEmailItems(communication_emails);
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -219,21 +217,13 @@ let EmailsPage = ({
                     </Box>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={contactItems}
+                        rows={emailItems}
                         headCells={contactsTableHeadCells}
                         handleDelete={handleDelete}
-                        deleteUrl={"contacts"}
+                        deleteUrl={"communication_emails"}
                         noDetailsCol
                         noEditCol
                         noDeleteCol
@@ -249,10 +239,8 @@ const mapStateToProps = (state, ownProps) => {
     return {
         users: state.users,
         currentUser: state.currentUser,
-        contacts: state.contacts,
-        contact_emails: state.contact_emails,
+        communication_emails: state.communication_emails,
         isLoading: state.isLoading,
-        error: state.error,
         match: ownProps.match,
     };
 };

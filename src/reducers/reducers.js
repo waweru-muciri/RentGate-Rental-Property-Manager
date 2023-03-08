@@ -7,6 +7,7 @@ import * as logsReducers from "./logs";
 import * as maintenanceRequestsReducers from "./maintenanceRequests";
 import * as usersReducers from "./users";
 import * as emailsReducers from "./emails";
+import * as communicationEmailsReducers from "./CommunicationEmails";
 import * as phoneNumbersReducers from "./phoneNumbers";
 import * as addressesReducers from "./addresses";
 import * as faxesReducers from "./faxes";
@@ -23,10 +24,19 @@ export function itemsHasErrored(state = null, action) {
     }
 }
 
-export function setPaginationPage(state = { parent: 0 , nestedLink: -1 , drawerOpen: false}, action) {
+export function setPaginationPage(state = { parent: 0, nestedLink: -1, drawerOpen: false }, action) {
     switch (action.type) {
         case actionTypes.SET_PAGINATION_PAGE:
             return action.index;
+        default:
+            return state;
+    }
+}
+
+export function toggleDrawer(state = false, action) {
+    switch (action.type) {
+        case actionTypes.TOGGLE_DRAWER:
+            return action.toggleValue;
         default:
             return state;
     }
@@ -52,6 +62,7 @@ export function itemsIsLoading(state = false, action) {
 
 function reducers(state = {}, action) {
     return {
+        communication_emails: communicationEmailsReducers.communicationEmails(state.communication_emails, action),
         properties: propertyReducers.properties(state.properties, action),
         mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
         users: usersReducers.users(state.users, action),
@@ -75,13 +86,14 @@ function reducers(state = {}, action) {
             state.maintenanceRequests,
             action
         ),
-        toDos : toDosReducers.toDos(state.toDos, action),
-        notices : noticesReducers.notices(state.notices, action),
-        currentUser : setCurrentUser(state.currentUser, action),
+        toDos: toDosReducers.toDos(state.toDos, action),
+        notices: noticesReducers.notices(state.notices, action),
+        currentUser: setCurrentUser(state.currentUser, action),
         auditLogs: logsReducers.logs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),
         error: itemsHasErrored(state.itemsHasErrored, action),
         selectedTab: setPaginationPage(state.selectedTab, action),
+        drawerOpen: toggleDrawer(state.drawerOpen, action),
     };
 }
 

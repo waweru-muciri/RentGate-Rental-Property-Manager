@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import {
   itemsFetchData,
   setCurrentUser,
-  setPaginationPage,
+  setPaginationPage, toggleDrawer
 } from "../actions/actions";
 //here are all the subroutes
 import {
@@ -167,11 +167,11 @@ const othersLinkNestedLinks = [
 const reportLinkNestedLinks = [
   {
     text: "Property Performance",
-    to: "/property-performance",
+    to: "/reports/property-performance",
     icon: <AssessmentIcon />,
   }, {
     text: "Tenant Statements",
-    to: "/tenant-statements",
+    to: "/reports/tenant-statements",
     icon: <PaymentIcon />,
   },
 ];
@@ -185,6 +185,8 @@ const accountsLinkNestedLinks = [
 ];
 
 let MainPage = ({
+  setDrawerToggleState,
+  drawerOpen,
   currentUser,
   properties,
   selectedTab,
@@ -257,8 +259,7 @@ let MainPage = ({
     let { currentUser, pageTitle } = props;
     const classes = useStyles();
     const theme = useTheme();
-    const { selectedTab, setSelectedTab } = props;
-    const { drawerOpen } = selectedTab;
+    const { selectedTab, setSelectedTab, drawerOpen, setDrawerToggleState } = props;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isProfileMenuOpen = Boolean(anchorEl);
 
@@ -272,7 +273,7 @@ let MainPage = ({
     const menuId = "primary-search-account-menu";
 
     const handleDrawerToggle = () => {
-      handleListItemClick({ drawerOpen: !drawerOpen });
+      setDrawerToggleState(!drawerOpen);
     };
 
     const handleListItemClick = (indexObject) => {
@@ -391,8 +392,8 @@ let MainPage = ({
                   onClick={(event) => {
                     handleListItemClick({
                       parent: parentIndex,
-                      drawerOpen: false,
                     });
+                    handleDrawerToggle();
                   }}
                 >
                   <ListItemIcon>{linkItem.icon}</ListItemIcon>
@@ -442,7 +443,6 @@ let MainPage = ({
                         handleListItemClick({
                           parent: 10,
                           nestedLink: 'other' + innerLinkItemIndex,
-                          drawerOpen: false,
                         });
                       }}
                     >
@@ -496,7 +496,6 @@ let MainPage = ({
                         handleListItemClick({
                           parent: 20,
                           nestedLink: 'account' + innerLinkItemIndex,
-                          drawerOpen: false,
                         });
                       }}
                     >
@@ -550,8 +549,8 @@ let MainPage = ({
                         handleListItemClick({
                           parent: 30,
                           nestedLink: 'report' + innerLinkItemIndex,
-                          drawerOpen: false,
                         });
+                        handleDrawerToggle();
                       }}
                     >
                       <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
@@ -573,13 +572,15 @@ let MainPage = ({
       <Router>
         <AppNavLayout
           selectedTab={selectedTab}
+          setDrawerToggleState={setDrawerToggleState}
+          drawerOpen={drawerOpen}
           setSelectedTab={setSelectedTab}
           currentUser={currentUser}
           pageTitle={"Yarra Property Management"}
         />
         <Switch>
           <Route exact path={`${match.path}`} component={DashBoard} />
-          <Route exact path={`${match.path}property-performance`} component={ReportsPage} />
+          <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
           <Route exact path={`${match.path}emails`} component={EmailsPage} />
           <Route
             exact
@@ -682,7 +683,7 @@ let MainPage = ({
             component={NoticePage}
           />
           <Route path={`${match.path}properties`} component={PropertiesPage} />
-          <Route exact path={`${match.path}tenant-statements`} component={TenantStatementsPage} />
+          <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
           <Route
             exact
             path={`${match.path}transactions`}
@@ -696,24 +697,19 @@ let MainPage = ({
 
 const mapStateToProps = (state) => {
   return {
+    drawerOpen: state.drawerOpen,
     properties: state.properties,
     currentUser: state.currentUser,
     selectedTab: state.selectedTab,
-    setSelectedTab: state.setSelectedTab,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    fetchData: (url) => {
-      dispatch(itemsFetchData(url));
-    },
-    setUser: (user) => {
-      dispatch(setCurrentUser(user));
-    },
-    setSelectedTab: (index) => {
-      dispatch(setPaginationPage(index));
-    },
+    fetchData: (url) => dispatch(itemsFetchData(url)),
+    setUser: (user) => dispatch(setCurrentUser(user)),
+    setSelectedTab: (index) => dispatch(setPaginationPage(index)),
+    setDrawerToggleState: (toggleValue) => dispatch(toggleDrawer(toggleValue)),
   };
 };
 

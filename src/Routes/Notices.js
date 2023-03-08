@@ -2,7 +2,6 @@ import Layout from "../components/myLayout";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
-import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
@@ -13,6 +12,7 @@ import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import PrintTenantVacatingNotice from "../assets/PrintTenantVacatingNotice";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
@@ -52,6 +52,7 @@ let VacatingNoticesPage = ({
     users,
     properties,
     contacts,
+    contact_phone_numbers,
     contact_emails,
     handleItemDelete,
     match,
@@ -91,20 +92,29 @@ let VacatingNoticesPage = ({
             const property = properties.find(
                 (property) => property.id === notice.property
             );
+            const tenantPhoneNumber = contact_phone_numbers.find(
+                (phoneNumber) => phoneNumber.contact === notice.tenant
+            );
+            const tenantEmail = contact_emails.find(
+                (contactEmail) => contactEmail.contact === notice.tenant
+            );
             const noticeDetails = {};
-            noticeDetails.tenant_id_number = typeof tenant !== 'undefined' ? tenant.id_number : '';
-            noticeDetails.tenant_name =
-                typeof tenant !== "undefined"
-                    ? tenant.first_name + " " + tenant.last_name
-                    : "";
-            noticeDetails.landlord_name =
-                typeof landlord !== "undefined"
-                    ? landlord.first_name + " " + landlord.last_name
-                    : "";
-            noticeDetails.property_ref =
-                typeof property !== "undefined" ? property.ref : null;
-            noticeDetails.property =
-                typeof property !== "undefined" ? property.id : null;
+            if (typeof tenant !== 'undefined') {
+                noticeDetails.tenant_id_number = tenant.id_number
+                noticeDetails.tenant_name = tenant.first_name + " " + tenant.last_name
+            }
+            noticeDetails.tenant_email = typeof tenantEmail !== 'undefined' ? tenantEmail.email : ''
+            noticeDetails.tenant_phone_number = typeof tenantPhoneNumber !== 'undefined' ? tenantPhoneNumber.phone_number : ''
+            if (typeof landlord !== "undefined") {
+                noticeDetails.landlord_name = landlord.first_name + " " + landlord.last_name
+                noticeDetails.landlord_email = landlord.email
+                noticeDetails.landlord_phone_number = landlord.phone_number
+            }
+            if (typeof property !== "undefined") {
+                noticeDetails.property_ref = property.ref;
+                noticeDetails.property_address = property.address;
+                noticeDetails.property = property.id;
+            }
             return Object.assign({}, notice, noticeDetails);
         });
         return mappedNotices;
@@ -194,16 +204,14 @@ let VacatingNoticesPage = ({
                         />
                     </Grid>
                     <Grid item>
-                        <Button
+                        <PrintTenantVacatingNotice
                             disabled={selected.length <= 0}
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
+                            noticeToPrint={
+                                noticeItems.find(({ id }) => id === selected[0])
+                            }
                         >
                             print
-                        </Button>
+                        </PrintTenantVacatingNotice>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -385,6 +393,7 @@ const mapStateToProps = (state) => {
         users: state.users,
         contacts: state.contacts,
         properties: state.properties,
+        contact_phone_numbers: state.contact_phone_numbers,
         contact_emails: state.contact_emails,
         error: state.error
     };

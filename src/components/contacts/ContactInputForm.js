@@ -57,7 +57,7 @@ let InputForm = ({
 	isSubmitting,
 }) => {
 	let classes = commonStyles();
-
+	const { handleItemDelete } = values
 	const [imageDialogState, toggleImageDialogState] = React.useState(false);
 
 	const toggleImageDialog = () => {
@@ -101,7 +101,7 @@ let InputForm = ({
 									alt="Contact Image"
 									src={
 										typeof values.contact_images[0] !==
-										"undefined"
+											"undefined"
 											? values.contact_images[0].data
 											: values.contact_avatar_url
 									}
@@ -346,16 +346,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																phoneNumberIndex
+																	phoneNumberIndex
 																	? Object.assign(
-																			contactPhoneNumber,
-																			{
-																				phone_number:
-																					event
-																						.target
-																						.value,
-																			}
-																	  )
+																		contactPhoneNumber,
+																		{
+																			phone_number:
+																				event
+																					.target
+																					.value,
+																		}
+																	)
 																	: contactPhoneNumber
 														);
 														setFieldValue(
@@ -385,16 +385,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																phoneNumberIndex
+																	phoneNumberIndex
 																	? Object.assign(
-																			phoneNumberObject,
-																			{
-																				phone_type:
-																					mobileTypeChangeEvent
-																						.target
-																						.value,
-																			}
-																	  )
+																		phoneNumberObject,
+																		{
+																			phone_type:
+																				mobileTypeChangeEvent
+																					.target
+																					.value,
+																		}
+																	)
 																	: phoneNumberObject
 														);
 														setFieldValue(
@@ -433,11 +433,11 @@ let InputForm = ({
 														let valueToRemove =
 															values
 																.contactPhoneNumbers[
-																phoneNumberIndex
+															phoneNumberIndex
 															];
 														if (valueToRemove.id) {
 															//delete the item from the server
-															handleDelete(
+															handleItemDelete(
 																valueToRemove.id,
 																"contact_phone_numbers"
 															);
@@ -533,16 +533,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																emailIndex
+																	emailIndex
 																	? Object.assign(
-																			emailObject,
-																			{
-																				email:
-																					emailValueChangeEvent
-																						.target
-																						.value,
-																			}
-																	  )
+																		emailObject,
+																		{
+																			email:
+																				emailValueChangeEvent
+																					.target
+																					.value,
+																		}
+																	)
 																	: emailObject
 														);
 														setFieldValue(
@@ -572,16 +572,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																emailIndex
+																	emailIndex
 																	? Object.assign(
-																			emailObject,
-																			{
-																				email_type:
-																					emailTypeChangeEvent
-																						.target
-																						.value,
-																			}
-																	  )
+																		emailObject,
+																		{
+																			email_type:
+																				emailTypeChangeEvent
+																					.target
+																					.value,
+																		}
+																	)
 																	: emailObject
 														);
 														setFieldValue(
@@ -620,11 +620,11 @@ let InputForm = ({
 														let valueToRemove =
 															values
 																.contactEmails[
-																emailIndex
+															emailIndex
 															];
 														if (valueToRemove.id) {
 															//delete the item from the server
-															handleDelete(
+															handleItemDelete(
 																valueToRemove.id,
 																"contact_emails"
 															);
@@ -721,16 +721,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																addressIndex
+																	addressIndex
 																	? Object.assign(
-																			addressObject,
-																			{
-																				address:
-																					addressChangeEvent
-																						.target
-																						.value,
-																			}
-																	  )
+																		addressObject,
+																		{
+																			address:
+																				addressChangeEvent
+																					.target
+																					.value,
+																		}
+																	)
 																	: addressObject
 														);
 														setFieldValue(
@@ -760,16 +760,16 @@ let InputForm = ({
 																index
 															) =>
 																index ===
-																addressIndex
+																	addressIndex
 																	? Object.assign(
-																			addressObject,
-																			{
-																				address_type:
-																					addressChangeEvent
-																						.target
-																						.value,
-																			}
-																	  )
+																		addressObject,
+																		{
+																			address_type:
+																				addressChangeEvent
+																					.target
+																					.value,
+																		}
+																	)
 																	: addressObject
 														);
 														setFieldValue(
@@ -808,11 +808,11 @@ let InputForm = ({
 														let valueToRemove =
 															values
 																.contactAddresses[
-																addressIndex
+															addressIndex
 															];
 														if (valueToRemove.id) {
 															//delete the item from the server
-															handleDelete(
+															handleItemDelete(
 																valueToRemove.id,
 																"contact_addresses"
 															);
@@ -997,12 +997,13 @@ let ContactInputForm = withFormik({
 			contactEmails: contactEmails,
 			contactPhoneNumbers: contactPhoneNumbers,
 			contactAddresses: contactAddresses,
-			currentUser: props.currentUser, 
+			currentUser: props.currentUser,
 			users: props.users,
 			history: props.history,
 			match: props.match,
 			error: props.error,
-			submitForm: props.submitForm,
+			handleItemSubmit: props.handleItemSubmit,
+			handleItemDelete: props.handleItemDelete,
 		};
 	},
 
@@ -1067,23 +1068,23 @@ let ContactInputForm = withFormik({
 			);
 		}
 
-		handleItemFormSubmit(contact, "contacts").then((contactId) => {
-			values.contactPhoneNumbers.forEach((contactPhoneNumber) => {
+		values.handleItemSubmit(contact, "contacts").then((contactId) => {
+			values.contactPhoneNumbers.forEach(async (contactPhoneNumber) => {
 				if (contactPhoneNumber.phone_number) {
 					contactPhoneNumber.contact = contactId;
-					handleItemFormSubmit(contactPhoneNumber, "contact_phone_numbers").catch((error) => console.log('Error occurred saving phone number ',error));
+					await values.handleItemSubmit(contactPhoneNumber, "contact_phone_numbers")
 				}
 			});
-			values.contactEmails.forEach((contactEmail) => {
+			values.contactEmails.forEach(async (contactEmail) => {
 				if (contactEmail.email) {
 					contactEmail.contact = contactId;
-					handleItemFormSubmit(contactEmail, "contact_emails").catch((error) => console.log('Error occurred saving email ',error));;
+					await values.handleItemSubmit(contactEmail, "contact_emails")
 				}
 			});
-			values.contactAddresses.forEach((contactAddress) => {
+			values.contactAddresses.forEach(async (contactAddress) => {
 				if (contactAddress.address) {
 					contactAddress.contact = contactId;
-					handleItemFormSubmit(contactAddress, "contact_addresses").catch((error) => console.log('Error occurred saving address ',error));;
+					await values.handleItemSubmit(contactAddress, "contact_addresses")
 				}
 			});
 		});
@@ -1102,10 +1103,17 @@ const mapStateToProps = (state) => {
 		contact_phone_numbers: state.contact_phone_numbers,
 		contact_addresses: state.contact_addresses,
 		currentUser: state.currentUser,
-		users: state.users, 
+		users: state.users,
 	};
 };
 
-ContactInputForm = connect(mapStateToProps)(ContactInputForm);
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemDelete: (itemId, itemUrl) => dispatch(handleDelete(itemId, itemUrl)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	}
+};
+
+ContactInputForm = connect(mapStateToProps, mapDispatchToProps)(ContactInputForm);
 
 export default withRouter(ContactInputForm);

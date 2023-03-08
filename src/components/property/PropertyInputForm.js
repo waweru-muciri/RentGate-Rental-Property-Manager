@@ -217,8 +217,8 @@ let InputForm = ({
 						id="postal_code"
 						type="text"
 						name="postal_code"
-						error={errors.postal_code && touched.postal_code}
-						helperText={touched.postal_code && errors.postal_code}
+						error={'postal_code' in errors}
+						helperText={errors.postal_code}
 						value={values.postal_code}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -226,25 +226,15 @@ let InputForm = ({
 					<TextField
 						fullWidth
 						variant="outlined"
-						label="Address 1"
-						id="address_1"
+						label="Address"
+						error={'address' in errors}
+						helperText={errors.address}
+						id="address"
 						type="text"
-						name="address_1"
-						value={values.address_1}
+						name="address"
+						value={values.address}
 						onChange={handleChange}
 						onBlur={handleBlur}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
-						name="address_2"
-						id="address_2"
-						label="Address 2"
-						value={values.address_2}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						error={errors.address_2 && touched.address_2}
-						helperText={touched.address_2 && errors.address_2}
 					/>
 					<TextField
 						fullWidth
@@ -283,8 +273,8 @@ let InputForm = ({
 						value={values.view}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						error={errors.view && touched.view}
-						helperText={touched.view && errors.view}
+						error={'view' in errors}
+						helperText={errors.view}
 					/>
 					<TextField
 						fullWidth
@@ -296,8 +286,8 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.furnished}
-						error={errors.furnished && touched.furnished}
-						helperText={touched.furnished && errors.furnished}
+						error={'furnished' in errors}
+						helperText={errors.furnished}
 					>
 						{FURNISHED_OPTIONS.map((furnished_option, index) => (
 							<MenuItem key={index} value={furnished_option}>
@@ -315,8 +305,8 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.currency}
-						error={errors.currency && touched.currency}
-						helperText={touched.currency && errors.currency}
+						error={'currency' in errors}
+						helperText={errors.currency}
 					>
 						{CURRENCY_OPTIONS.map((furnished_option, index) => (
 							<MenuItem key={index} value={furnished_option}>
@@ -334,8 +324,8 @@ let InputForm = ({
 						value={values.price}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						error={errors.price && touched.price}
-						helperText={touched.price && errors.price}
+						error={'price' in errors}
+						helperText={errors.price}
 					/>
 					<TextField
 						fullWidth
@@ -347,8 +337,6 @@ let InputForm = ({
 						value={values.sqm_price}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						error={errors.sqm_price && touched.sqm_price}
-						helperText={touched.price && errors.price}
 					/>
 					<TextField
 						fullWidth
@@ -360,8 +348,8 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.frequency}
-						error={errors.frequency && touched.frequency}
-						helperText={touched.frequency && errors.frequency}
+						error={'frequency' in errors}
+						helperText={errors.frequency}
 					>
 						{FREQUENCY_OPTIONS.map((frequency_option, index) => (
 							<MenuItem key={index} value={frequency_option}>
@@ -379,8 +367,8 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.checks}
-						error={errors.checks && touched.checks}
-						helperText={touched.checks && errors.checks}
+						error={'checks' in errors}
+						helperText={errors.checks}
 					>
 						{CHECKS_OPTIONS.map((check_option, index) => (
 							<MenuItem key={index} value={check_option}>
@@ -398,12 +386,9 @@ let InputForm = ({
 						value={values.company_commission}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						error={
-							errors.company_commission &&
-							touched.company_commission
+						error={'company_commission' in errors
 						}
 						helperText={
-							touched.company_commission &&
 							errors.company_commission
 						}
 					/>
@@ -417,8 +402,8 @@ let InputForm = ({
 						value={values.deposit}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						error={errors.deposit && touched.deposit}
-						helperText={touched.deposit && errors.deposit}
+						error={'deposit' in errors}
+						helperText={errors.deposit}
 					/>
 					<TextField
 						fullWidth
@@ -430,8 +415,8 @@ let InputForm = ({
 						onBlur={handleBlur}
 						onChange={handleChange}
 						value={values.lease_type}
-						error={errors.lease_type && touched.lease_type}
-						helperText={touched.lease_type && errors.lease_type}
+						error={'lease_type' in errors}
+						helperText={errors.lease_type}
 					>
 						{LEASE_OPTIONS.map((lease_option, index) => (
 							<MenuItem key={index} value={lease_option}>
@@ -500,9 +485,9 @@ let InputForm = ({
 										(propertyMediaFile, imageIndex) => {
 											const fileName =
 												typeof propertyMediaFile.file !=
-												"undefined"
+													"undefined"
 													? propertyMediaFile.file
-															.name
+														.name
 													: "File " + imageIndex;
 											return (
 												<GridListTile key={imageIndex}>
@@ -533,7 +518,7 @@ let InputForm = ({
 																	if (
 																		removedFile.id
 																	) {
-																		handleDelete(
+																		values.handleItemDelete(
 																			removedFile.id,
 																			"property_media"
 																		);
@@ -816,7 +801,7 @@ let PropertyInputForm = withFormik({
 			assigned_to: propertyToEdit.assigned_to || "",
 			city: propertyToEdit.city || "",
 			postal_code: propertyToEdit.postal_code || "",
-			address_1: propertyToEdit.address_1 || "",
+			address: propertyToEdit.address || "",
 			floor: propertyToEdit.floor || 0,
 			property_type: propertyToEdit.property_type || "",
 			beds: propertyToEdit.beds || "",
@@ -844,6 +829,8 @@ let PropertyInputForm = withFormik({
 			owner: propertyToEdit.owner || "",
 			contacts: props.contacts,
 			history: props.history,
+			handleItemDelete: props.handleItemDelete,
+			handleItemSubmit: props.handleItemSubmit,
 			match: props.match,
 			error: props.error,
 			submitForm: props.submitForm,
@@ -881,7 +868,7 @@ let PropertyInputForm = withFormik({
 			region: values.region,
 			city: values.city,
 			postal_code: values.postal_code,
-			address_1: values.address_1,
+			address: values.address,
 			floor: values.floor,
 			property_type: values.property_type,
 			beds: values.beds,
@@ -907,7 +894,7 @@ let PropertyInputForm = withFormik({
 			tenants: values.tenants,
 			owner: values.owner,
 		};
-		handleItemFormSubmit(property, "properties").then((propertyId) => {
+		values.handleItemSubmit(property, "properties").then((propertyId) => {
 			if (propertyFilesToSave.length) {
 				let fileDownloadUrlsPromises = uploadFilesToFirebase(
 					propertyFilesToSave
@@ -939,7 +926,6 @@ let PropertyInputForm = withFormik({
 })(InputForm);
 
 const mapStateToProps = (state) => {
-	console.log(state)
 	return {
 		properties: state.properties,
 		propertiesMediaFiles: state.mediaFiles,
@@ -947,7 +933,13 @@ const mapStateToProps = (state) => {
 		contacts: state.contacts,
 	};
 };
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	};
+};
 
-PropertyInputForm = connect(mapStateToProps)(PropertyInputForm);
+PropertyInputForm = connect(mapStateToProps, mapDispatchToProps)(PropertyInputForm);
 
 export default withRouter(PropertyInputForm);

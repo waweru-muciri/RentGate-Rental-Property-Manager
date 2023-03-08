@@ -5,22 +5,23 @@ import Layout from "../components/myLayout";
 import { connect } from "react-redux";
 import ExpenseInputForm from "../components/expenses/ExpenseInputForm";
 import { withRouter } from "react-router-dom";
+import { handleItemFormSubmit } from '../actions/actions'
 import moment from "moment";
 
 const defaultDate = moment().format("YYYY-MM-DD");
 
 let ExpensePage = (props) => {
-    const { expenses, users, contacts, properties } = props;
+    const { expenses, users, contacts, properties, handleItemSubmit } = props;
     let expenseToEditId = props.match.params.expenseId;
     let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId);
     expenseToEdit =
         typeof expenseToEdit === "undefined"
             ? {
-                  expense_date: defaultDate,
-                  amount: '',
-                  property: '',
-                  type: '',
-              }
+                expense_date: defaultDate,
+                amount: '',
+                property: '',
+                type: '',
+            }
             : expenseToEdit;
     let pageTitle = expenseToEditId ? "Edit Expense" : "New Expense";
     return (
@@ -32,6 +33,7 @@ let ExpensePage = (props) => {
                 <Grid item key={2}>
                     <ExpenseInputForm
                         expenseToEdit={expenseToEdit}
+                        handleItemSubmit={handleItemSubmit}
                         users={users}
                         contacts={contacts}
                         properties={properties}
@@ -50,7 +52,12 @@ const mapStateToProps = (state) => {
         contacts: state.contacts,
     };
 };
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+    }
+};
 
-ExpensePage = connect(mapStateToProps)(ExpensePage);
+ExpensePage = connect(mapStateToProps, mapDispatchToProps)(ExpensePage);
 
 export default withRouter(ExpensePage);

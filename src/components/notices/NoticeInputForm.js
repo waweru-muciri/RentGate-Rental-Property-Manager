@@ -12,6 +12,7 @@ const VacatingNoticeSchema = Yup.object().shape({
   landlord: Yup.string().required("Landlord is required"),
   notification_date: Yup.date().required("Vacating Date Required"),
   vacating_date: Yup.date().required("Vacating Date Required"),
+  actual_vacated_date: Yup.date(),
   notice_details: Yup.string().trim().required('Notice Details are required')
 });
 
@@ -33,6 +34,7 @@ const NoticeInputForm = (props) => {
           landlord: values.landlord,
           notice_details: values.notice_details,
           vacating_date: values.vacating_date,
+          actual_vacated_date: values.actual_vacated_date,
           notification_date: values.notification_date,
           notice_details: values.notice_details,
         };
@@ -134,6 +136,20 @@ const NoticeInputForm = (props) => {
                   onBlur={handleBlur}
                   error={"vacating_date" in errors}
                   helperText={errors.vacating_date}
+                />
+                <TextField
+                  fullWidth
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  id="actual_vacated_date"
+                  name="actual_vacated_date"
+                  label="Actual Date Vacated"
+                  value={values.actual_vacated_date}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={"actual_vacated_date" in errors}
+                  helperText={errors.actual_vacated_date}
                 />
                 <TextField
                   fullWidth

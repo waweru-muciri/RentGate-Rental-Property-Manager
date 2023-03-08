@@ -17,6 +17,7 @@ import { commonStyles } from "../components/commonStyles";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import PrintMaintenanceRequest from "../assets/PrintMaintenanceRequest";
 
 const STATUS_LIST = ["Open", "Closed"];
 
@@ -28,16 +29,16 @@ const maintenanceRequestsTableHeadCells = [
 		label: "Date Created",
 	},
 	{
-		id: "first_name",
+		id: "tenant_name",
 		numeric: false,
 		disablePadding: true,
-		label: "Contact First Name",
+		label: "Tenant Name",
 	},
 	{
-		id: "last_name",
+		id: "property_ref",
 		numeric: false,
 		disablePadding: true,
-		label: "Contact Last Name",
+		label: "Property Ref",
 	},
 	{
 		id: "maintenance_details",
@@ -51,7 +52,11 @@ const maintenanceRequestsTableHeadCells = [
 let MaintenanceRequestsPage = ({
 	isLoading,
 	maintenanceRequests,
+	users,
 	contacts,
+	contact_phone_numbers,
+	contact_emails,
+	properties,
 	match,
 	error,
 }) => {
@@ -70,12 +75,38 @@ let MaintenanceRequestsPage = ({
 				const contactWithRequest = contacts.find(
 					(contact) => contact.id === maintenanceRequest.contact
 				);
+				const maintenanceRequestDetails = {}
+				if (typeof contactWithRequest !== 'undefined') {
+					maintenanceRequestDetails.tenant_id_number = contactWithRequest.id_number
+					maintenanceRequestDetails.tenant_name = contactWithRequest.first_name + " " + contactWithRequest.last_name
+					const property = properties.find(
+						({ tenants }) => tenants.length ? tenants[0] === contactWithRequest.id : false
+					);
+					if (typeof property !== "undefined") {
+						maintenanceRequestDetails.property_ref = property.ref;
+						maintenanceRequestDetails.property_address = property.address;
+						maintenanceRequestDetails.property = property.id;
+					}
+					const landlord = users.find(
+						(user) => user.id === contactWithRequest.assigned_to
+					);
+					if (typeof landlord !== "undefined") {
+						maintenanceRequestDetails.landlord_name = landlord.first_name + " " + landlord.last_name
+						maintenanceRequestDetails.landlord_email = landlord.email
+						maintenanceRequestDetails.landlord_phone_number = landlord.phone_number
+					}
+					const tenantPhoneNumber = contact_phone_numbers.find(
+						(phoneNumber) => phoneNumber.contact === contactWithRequest.id
+					);
+					const tenantEmail = contact_emails.find(
+						(contactEmail) => contactEmail.contact === contactWithRequest.id
+					);
+					maintenanceRequestDetails.tenant_email = typeof tenantEmail !== 'undefined' ? tenantEmail.email : ''
+					maintenanceRequestDetails.tenant_phone_number = typeof tenantPhoneNumber !== 'undefined' ? tenantPhoneNumber.phone_number : ''
+				}
 				return Object.assign(
 					{},
-					typeof contactWithRequest != "undefined"
-						? contactWithRequest
-						: null,
-					maintenanceRequest
+					maintenanceRequest, maintenanceRequestDetails
 				);
 			}
 		);
@@ -182,6 +213,12 @@ let MaintenanceRequestsPage = ({
 							onClick={(event) => {
 								exportMaintenanceRequestRecordsToExcel();
 							}}
+						/>
+					</Grid>
+					<Grid item>
+						<PrintMaintenanceRequest
+							disabled={selected.length <= 0}
+							maintenanceRequestToPrint={maintenanceRequestItems.find(({ id }) => id === selected[0])}
 						/>
 					</Grid>
 				</Grid>
@@ -358,7 +395,11 @@ let MaintenanceRequestsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
 	return {
+		contact_phone_numbers: state.contact_phone_numbers,
+		contact_emails: state.contact_emails,
 		maintenanceRequests: state.maintenanceRequests,
+		properties: state.properties,
+		users: state.users,
 		contacts: state.contacts,
 		isLoading: state.isLoading,
 		error: state.error,

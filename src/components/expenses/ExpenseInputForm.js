@@ -6,7 +6,6 @@ import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
-import { handleItemFormSubmit } from "../../actions/actions";
 
 const VacatingNoticeSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
@@ -15,7 +14,7 @@ const VacatingNoticeSchema = Yup.object().shape({
   property: Yup.string().required("Property is Required"),
 });
 
-const ExpenseInputForm = ({ properties, expenseToEdit }) => {
+const ExpenseInputForm = ({ properties, expenseToEdit, handleItemSubmit }) => {
   const history = useHistory();
   const classes = commonStyles();
 
@@ -32,7 +31,7 @@ const ExpenseInputForm = ({ properties, expenseToEdit }) => {
           property: values.property,
           expense_date: values.expense_date,
         };
-        handleItemFormSubmit(expense, "expenses").then((response) => {
+        handleItemSubmit(expense, "expenses").then((response) => {
           resetForm({});
           if (values.id) {
             history.goBack();
@@ -48,110 +47,110 @@ const ExpenseInputForm = ({ properties, expenseToEdit }) => {
         handleBlur,
         isSubmitting,
       }) => (
-        <form
-          className={classes.form}
-          method="post"
-          id="expenseInputForm"
-          onSubmit={handleSubmit}
-        >
-        {
-          console.log('Values => ', values)
-        }
-        {
-          console.log('Properties => ', properties)
-
-        }
-          <Grid
-            container
-            spacing={4}
-            justify="center"
-            alignItems="stretch"
-            direction="column"
+          <form
+            className={classes.form}
+            method="post"
+            id="expenseInputForm"
+            onSubmit={handleSubmit}
           >
-            <Grid item>
-              <TextField
-                fullWidth
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                variant="outlined"
-                id="expense_date"
-                name="expense_date"
-                label="Expenditure Date"
-                value={values.expense_date}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={"expense_date" in errors}
-                helperText={errors.expense_date}
-              />
-              <TextField
-                fullWidth
-                variant="outlined"
-                id="type"
-                name="type"
-                label="Expenditure Type/Name"
-                value={values.type}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={"type" in errors}
-                helperText={errors.type}
-              />
-              <TextField
-                fullWidth
-                variant="outlined"
-                id="amount"
-                name="amount"
-                label="Expenditure Amount"
-                value={values.amount}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={"amount" in errors}
-                helperText={errors.amount}
-              />
-              <TextField
-                fullWidth
-                select
-                variant="outlined"
-                name="property"
-                label="Property"
-                id="property"
-                onChange={handleChange}
-                value={values.property || ''}
-                error={"property" in errors}
-                helperText={errors.property}
-              >
-                {properties.map((property, index) => (
-                  <MenuItem key={index} value={property.id}>
-                    {property.ref}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item className={classes.buttonBox}>
-              <Button
-                color="secondary"
-                variant="contained"
-                size="medium"
-                startIcon={<CancelIcon />}
-                onClick={() => history.goBack()}
-                disableElevation
-              >
-                Cancel
+            {
+              console.log('Values => ', values)
+            }
+            {
+              console.log('Properties => ', properties)
+
+            }
+            <Grid
+              container
+              spacing={4}
+              justify="center"
+              alignItems="stretch"
+              direction="column"
+            >
+              <Grid item>
+                <TextField
+                  fullWidth
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  id="expense_date"
+                  name="expense_date"
+                  label="Expenditure Date"
+                  value={values.expense_date}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={"expense_date" in errors}
+                  helperText={errors.expense_date}
+                />
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  id="type"
+                  name="type"
+                  label="Expenditure Type/Name"
+                  value={values.type}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={"type" in errors}
+                  helperText={errors.type}
+                />
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  id="amount"
+                  name="amount"
+                  label="Expenditure Amount"
+                  value={values.amount}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={"amount" in errors}
+                  helperText={errors.amount}
+                />
+                <TextField
+                  fullWidth
+                  select
+                  variant="outlined"
+                  name="property"
+                  label="Property"
+                  id="property"
+                  onChange={handleChange}
+                  value={values.property || ''}
+                  error={"property" in errors}
+                  helperText={errors.property}
+                >
+                  {properties.map((property, index) => (
+                    <MenuItem key={index} value={property.id}>
+                      {property.ref}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item className={classes.buttonBox}>
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  size="medium"
+                  startIcon={<CancelIcon />}
+                  onClick={() => history.goBack()}
+                  disableElevation
+                >
+                  Cancel
               </Button>
-              <Button
-                type="submit"
-                color="primary"
-                variant="contained"
-                size="medium"
-                startIcon={<SaveIcon />}
-                form="expenseInputForm"
-                disabled={isSubmitting}
-              >
-                Save
+                <Button
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  size="medium"
+                  startIcon={<SaveIcon />}
+                  form="expenseInputForm"
+                  disabled={isSubmitting}
+                >
+                  Save
               </Button>
+              </Grid>
             </Grid>
-          </Grid>
-        </form>
-      )}
+          </form>
+        )}
     </Formik>
   );
 };

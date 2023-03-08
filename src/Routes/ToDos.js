@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
-import ToDoInputForm from "../components/to-dos/EventInputForm.js";
+import ToDoInputForm from "../components/to-dos/ToDoInputForm.js";
 import { Grid } from "@material-ui/core";
 import { connect } from "react-redux";
 import FullCalendar from "@fullcalendar/react";
@@ -13,9 +13,9 @@ import "@fullcalendar/core/main.css";
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
 import moment from "moment";
-import { handleItemFormSubmit } from "../actions/actions";
+import { handleItemFormSubmit, handleDelete } from "../actions/actions";
 
-let ToDosPage = ({ toDos, error, users }) => {
+let ToDosPage = ({ toDos, users, handleItemDelete, handleItemSubmit }) => {
 	const [open, toggleOpen] = React.useState(false);
 
 	const [eventToShow, setEventToShow] = React.useState({});
@@ -34,7 +34,7 @@ let ToDosPage = ({ toDos, error, users }) => {
 			id: info.event.id,
 			title: info.event.title,
 		};
-		handleItemFormSubmit(updatedEvent, "to-dos").then((response) => {
+		handleItemSubmit(updatedEvent, "to-dos").then((response) => {
 			console.log("Updated event successfully!", updatedEvent);
 		});
 	};
@@ -111,6 +111,8 @@ let ToDosPage = ({ toDos, error, users }) => {
 						dateClick={handleDateClick}
 					/>
 					<ToDoInputForm
+						handleItemDelete={handleItemDelete}
+						handleItemSubmit={handleItemSubmit}
 						users={users}
 						eventToShow={eventToShow}
 						setEventToShow={setEventToShow}
@@ -130,5 +132,10 @@ const mapStateToProps = (state) => {
 		users: state.users,
 	};
 };
-
-export default connect(mapStateToProps)(ToDosPage);
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	};
+};
+export default connect(mapStateToProps, mapDispatchToProps)(ToDosPage);

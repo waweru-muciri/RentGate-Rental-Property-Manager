@@ -9,6 +9,7 @@ import * as usersActions from "./users";
 import * as addressesActions from "./addresses";
 import * as phoneNumbersActions from "./phoneNumbers";
 import * as emailsActions from "./emails";
+import * as communicationEmailsActions from "./CommunicationEmails";
 import * as faxesActions from "./faxes";
 import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
@@ -71,7 +72,6 @@ export function uploadFilesToFirebase(filesArray) {
                     .getDownloadURL()
                     .then((url) => url)
                     .catch(function (error) {
-                        // https://firebase.google.com/docs/storage/web/handle-errors
                         switch (error.code) {
                             case "storage/object-not-found":
                                 console.log("File doesn't exist");
@@ -201,6 +201,12 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
+                    case "communication_emails":
+                        dispatch(
+                            communicationEmailsActions.communicationEmailsFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
                     default:
                         break;
                 }
@@ -209,10 +215,17 @@ export function itemsFetchData(collectionsUrls) {
         dispatch(itemsIsLoading(false));
     }
 }
+
 export function setPaginationPage(index) {
     return {
         type: actionTypes.SET_PAGINATION_PAGE,
         index,
+    };
+}
+export function toggleDrawer(toggleValue) {
+    return {
+        type: actionTypes.TOGGLE_DRAWER,
+        toggleValue,
     };
 }
 
@@ -324,6 +337,12 @@ export function handleDelete(itemId, url) {
                     case "users":
                         dispatch(
                             usersActions.deleteUser(itemId)
+                        );
+                        break;
+
+                    case "communication_emails":
+                        dispatch(
+                            communicationEmailsActions.deleteCommunicationEmail(itemId)
                         );
                         break;
 
@@ -440,6 +459,10 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
 
+                            case "users":
+                                dispatch(communicationEmailsActions.editCommunicationEmail(modifiedObject));
+                                break;
+
                             default:
                                 break;
                         }
@@ -528,6 +551,10 @@ export function handleItemFormSubmit(data, url) {
 
                             case "users":
                                 dispatch(usersActions.addUser(addedItem));
+                                break;
+
+                            case "communication_emails":
+                                dispatch(communicationEmailsActions.addCommunicationEmail(addedItem));
                                 break;
 
                             default:

@@ -55,7 +55,7 @@ let UsersPage = ({
 	users,
 	match,
 	error,
-	handleDelete,
+	handleItemDelete,
 }) => {
 	let [userItems, setUserItems] = useState([]);
 	let [firstNameFilter, setFirstNameFilter] = useState("");
@@ -298,7 +298,7 @@ let UsersPage = ({
 						setSelected={setSelected}
 						rows={userItems}
 						headCells={usersTableHeadCells}
-						handleDelete={handleDelete}
+						handleDelete={handleItemDelete}
 					/>
 				</Grid>
 				{isLoading && <LoadingBackdrop open={isLoading} />}
@@ -315,8 +315,12 @@ const mapStateToProps = (state, ownProps) => {
 		match: ownProps.match,
 	};
 };
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+	};
+};
 
-
-UsersPage = connect(mapStateToProps)(UsersPage);
+UsersPage = connect(mapStateToProps, mapDispatchToProps)(UsersPage);
 
 export default withRouter(UsersPage);

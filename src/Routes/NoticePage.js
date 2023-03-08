@@ -15,7 +15,7 @@ let NoticePage = (props) => {
     const { notices, users, contacts, submitForm } = props;
     let noticeToEditId = props.match.params.noticeId;
     let noticeToEdit = notices.find(({ id }) => id === noticeToEditId);
-    noticeToEdit = noticeToEditId ? noticeToEdit : { notification_date: defaultDate, vacating_date: defaultDate, landlord: '', tenant: '' };
+    noticeToEdit = typeof noticeToEditId !== 'undefined' ? Object.assign(noticeToEdit, { actual_vacated_date: noticeToEdit.actual_vacated_date ? noticeToEdit.actual_vacated_date : defaultDate }) : { notification_date: defaultDate, vacating_date: defaultDate, actual_vacated_date: defaultDate, landlord: '', tenant: '' };
 
     let pageTitle = noticeToEditId ? "Edit Notice" : "New Notice";
 
@@ -48,8 +48,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        submitForm: (notice) =>
-            dispatch(handleItemFormSubmit(notice, "notices")),
+        submitForm: (item, itemUrl) =>
+            dispatch(handleItemFormSubmit(item, itemUrl)),
     };
 };
 
