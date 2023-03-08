@@ -27,7 +27,7 @@ import { DropzoneAreaBase } from "material-ui-dropzone";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
 import {
-	handleItemFormSubmit,
+	handleItemFormSubmit, handleDelete,
 	uploadFilesToFirebase,
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
@@ -496,16 +496,16 @@ let InputForm = ({
 										</ListSubheader>
 									</GridListTile>
 									{values.property_media.map(
-										(propertyImage, imageIndex) => {
+										(propertyMediaFile, imageIndex) => {
 											const fileName =
-												typeof propertyImage.file !=
+												typeof propertyMediaFile.file !=
 												"undefined"
-													? propertyImage.file.name
+													? propertyMediaFile.file.name
 													: "File " + imageIndex;
 											return (
 												<GridListTile key={imageIndex}>
 													<img
-														src={propertyImage.data}
+														src={propertyMediaFile.url ||propertyMediaFile.data}
 														alt={fileName}
 													/>
 													<GridListTileBar
@@ -519,16 +519,20 @@ let InputForm = ({
 																	classes.icon
 																}
 																onClick={() => {
-																	const propertyImages = [
+
+																	const propertyMediaFiles = [
 																		...values.property_media,
 																	];
-																	propertyImages.splice(
+																	let removedFile = propertyMediaFiles.splice(
 																		imageIndex,
 																		1
 																	);
+																	if (removedFile.id) {
+																		handleDelete(removedFile.id, 'property_media')
+																	}
 																	setFieldValue(
 																		"property_media",
-																		propertyImages
+																		propertyMediaFiles
 																	);
 																}}
 															>
@@ -795,6 +799,9 @@ let PropertyInputForm = withFormik({
 		if (!propertyToEdit) {
 			propertyToEdit = {};
 		}
+		let property_media = props.propertiesMediaFiles.filter(
+			({ property }) => property === propertyToEdit.id
+		);
 		return {
 			id: propertyToEdit.id,
 			ref: propertyToEdit.ref || "",
@@ -826,7 +833,7 @@ let PropertyInputForm = withFormik({
 			has_sea_water_view: propertyToEdit.has_sea_water_view || false,
 			on_high_floor: propertyToEdit.on_high_floor || false,
 			tenants: propertyToEdit.tenants || [],
-			property_media: propertyToEdit.property_media || [],
+			property_media: property_media || [],
 			owner: propertyToEdit.owner || "",
 			contacts: props.contacts,
 			history: props.history,
@@ -858,7 +865,7 @@ let PropertyInputForm = withFormik({
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		let property_media = values.property_media;
+		let propertyFilesToSave = values.property_media.filter((file) => !file.id);
 		let property = {
 			id: values.id,
 			ref: values.ref,
@@ -892,12 +899,12 @@ let PropertyInputForm = withFormik({
 			owner: values.owner,
 		};
 		handleItemFormSubmit(property, "properties").then((propertyId) => {
-			if (property_media.length <= 0) {
+			if (propertyFilesToSave.length <= 0) {
 				// no need to proceed
 				return null;
 			}
 			let fileDownloadUrlsPromises = uploadFilesToFirebase(
-				property_media
+				propertyFilesToSave
 			);
 			Promise.all(fileDownloadUrlsPromises).then((fileDownloadUrls) => {
 				//here is the fileDownloadUrls array
@@ -925,6 +932,7 @@ let PropertyInputForm = withFormik({
 const mapStateToProps = (state) => {
 	return {
 		properties: state.properties,
+		propertiesMediaFiles: state.mediaFiles,
 		error: state.error,
 		contacts: state.contacts,
 	};

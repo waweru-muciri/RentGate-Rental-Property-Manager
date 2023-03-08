@@ -1,5 +1,6 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as propertyReducers from "./propertyReducers";
+import * as mediaFilesReducers from "./mediaFilesReducers";
 import * as contactsReducers from "./contacts";
 import * as transactionsReducers from "./transactions";
 import * as logsReducers from "./logs";
@@ -49,6 +50,7 @@ export function itemsIsLoading(state = false, action) {
 function reducers(state = {}, action) {
     return {
         properties: propertyReducers.properties(state.properties, action),
+        mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
         users: usersReducers.users(state.users, action),
         contacts: contactsReducers.contacts(state.contacts, action),
         contact_faxes: faxesReducers.faxes(state.contact_faxes, action),
