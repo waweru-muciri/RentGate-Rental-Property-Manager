@@ -26,6 +26,12 @@ const headCells = [
         label: "Transaction Type",
     },
     {
+        id: "transaction_date",
+        numeric: false,
+        disablePadding: true,
+        label: "Transaction Date",
+    },
+    {
         id: "tenant",
         numeric: false,
         disablePadding: true,
@@ -60,12 +66,6 @@ const headCells = [
         numeric: false,
         disablePadding: true,
         label: "Assigned To",
-    },
-    {
-        id: "transaction_date",
-        numeric: true,
-        disablePadding: false,
-        label: "Transaction Date",
     },
 ];
 //sample working data here

@@ -28,6 +28,15 @@ export function setPaginationPage(state = 0, action) {
     }
 }
 
+export function setCurrentUser(state = null, action) {
+    switch (action.type) {
+        case actionTypes.SET_CURRENT_USER:
+            return action.user;
+        default:
+            return state;
+    }
+}
+
 export function itemsIsLoading(state = false, action) {
     switch (action.type) {
         case actionTypes.ITEMS_IS_LOADING:
@@ -60,6 +69,7 @@ function reducers(state = {}, action) {
             state.maintenanceRequests,
             action
         ),
+        currentUser : setCurrentUser(state.currentUser, action),
         auditLogs: logsReducers.logs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),
         error: itemsHasErrored(state.itemsHasErrored, action),

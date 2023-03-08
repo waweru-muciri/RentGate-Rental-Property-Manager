@@ -14,6 +14,13 @@ import app from "../firebase";
 
 const db = app.firestore().collection("tenant").doc("wPEY7XfSReuoOEOa22aX");
 
+export function setCurrentUser(user){
+    return {
+        type: actionTypes.SET_CURRENT_USER,
+        user,
+    };
+}
+
 export function uploadFilesToFirebase(filesArray) {
     var storageRef = app.storage().ref();
     return filesArray.map((file) => {

@@ -3,6 +3,9 @@ import { connect } from "react-redux";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
+	Avatar,
+	Menu,
+	MenuItem,
 	Drawer,
 	AppBar,
 	Toolbar,
@@ -36,6 +39,9 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
 	root: {
 		display: "flex",
+	},
+	title: {
+		flexGrow: 1,
 	},
 	appBar: {
 		transition: theme.transitions.create(["margin", "width"], {
@@ -87,6 +93,10 @@ const useStyles = makeStyles((theme) => ({
 		}),
 		marginLeft: 0,
 	},
+	profileAvatar: {
+		width: theme.spacing(10),
+		height: theme.spacing(10),
+	},
 }));
 
 const nestedNavigations = [
@@ -107,10 +117,22 @@ const nestedNavigations = [
 ];
 
 function Layout(props) {
+	let { currentUser, pageTitle } = props;
 	const classes = useStyles();
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const { selectedTab, setSelectedTab } = props;
+	const [anchorEl, setAnchorEl] = React.useState(null);
+	const isProfileMenuOpen = Boolean(anchorEl);
+
+	const handleProfileMenuOpen = (event) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleProfileMenuClose = () => {
+		setAnchorEl(null);
+	};
+	const menuId = "primary-search-account-menu";
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -126,7 +148,7 @@ function Layout(props) {
 
 	return (
 		<div className={classes.root}>
-			<Head title={props.pageTitle} />
+			<Head title={pageTitle} />
 			<AppBar
 				position="fixed"
 				className={clsx(classes.appBar, {
@@ -146,9 +168,44 @@ function Layout(props) {
 					>
 						<MenuIcon />
 					</IconButton>
-					<Typography variant="h6" noWrap>
-						Gallant Property Management
+					<Typography variant="h6" noWrap className={classes.title}>
+						Yarra Property Management
 					</Typography>
+					<IconButton
+						edge="end"
+						aria-label="account of current user"
+						aria-controls="primary-search-account-menu"
+						aria-haspopup="true"
+						color="inherit"
+						onClick={handleProfileMenuOpen}
+					>
+						<Avatar
+							alt="Contact Image"
+							src={currentUser ? currentUser.photoURL : ""}
+						/>
+					</IconButton>
+					<Menu
+						anchorEl={anchorEl}
+						anchorOrigin={{ vertical: "top", horizontal: "right" }}
+						id={menuId}
+						keepMounted
+						transformOrigin={{
+							vertical: "top",
+							horizontal: "right",
+						}}
+						open={isProfileMenuOpen}
+						onClose={handleProfileMenuClose}
+					>
+						<MenuItem onClick={handleProfileMenuClose}>
+							Profile
+						</MenuItem>
+						<MenuItem onClick={handleProfileMenuClose}>
+							My account
+						</MenuItem>
+						<MenuItem onClick={handleProfileMenuClose}>
+							Sign Out
+						</MenuItem>
+					</Menu>
 				</Toolbar>
 			</AppBar>
 			<Drawer
@@ -198,6 +255,7 @@ function Layout(props) {
 const mapStateToProps = (state) => {
 	return {
 		selectedTab: state.selectedTab,
+		currentUser: state.currentUser,
 	};
 };
 

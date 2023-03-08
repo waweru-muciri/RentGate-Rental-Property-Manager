@@ -1,5 +1,4 @@
 import Layout from "../components/myLayout";
-import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
@@ -7,7 +6,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import { Grid, Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
