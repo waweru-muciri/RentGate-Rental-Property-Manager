@@ -15,12 +15,16 @@ import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import { parse } from "date-fns";
+import { getExpensesCategories } from "../assets/commonAssets";
+
+
+const EXPENSES_CATEGORIES = getExpensesCategories();
 
 const expensesTableHeadCells = [
     { id: "expense_date", numeric: false, disablePadding: true, label: "Date", },
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
-    { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
+    { id: "expense_name", numeric: false, disablePadding: true, label: "Expenditure Type" },
     { id: "amount", numeric: true, disablePadding: true, label: "Expenditure Amount(Ksh)" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -34,11 +38,11 @@ let ExpensesPage = ({
     match,
 }) => {
     const classes = commonStyles();
-    let [expenseItems, setExpenseItems] = useState([]);
-    let [filteredExpenseItems, setFilteredExpenseItems] = useState([]);
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
-    let [propertyFilter, setPropertyFilter] = useState("all");
+    const [expenseItems, setExpenseItems] = useState([]);
+    const [filteredExpenseItems, setFilteredExpenseItems] = useState([]);
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
+    const [propertyFilter, setPropertyFilter] = useState("all");
     const [selected, setSelected] = useState([]);
 
 
@@ -50,7 +54,7 @@ let ExpensesPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the expenses here according to search criteria
-        let filteredExpenses = expenseItems
+        const filteredExpenses = expenseItems
             .filter(({ expense_date, property_id }) =>
                 (!fromDateFilter ? true : expense_date >= fromDateFilter)
                 && (!toDateFilter ? true : expense_date <= toDateFilter)
@@ -279,7 +283,9 @@ const mapStateToProps = (state) => {
             .map(expense => {
                 const unitWithExpense = state.propertyUnits.find(({ id }) => id === expense.unit_id) || {}
                 const propertyWithUnit = state.properties.find(({ id }) => id === expense.property_id) || {}
-                return Object.assign({}, expense, { unit_ref: unitWithExpense.ref, property_ref: propertyWithUnit.ref })
+                const expenseDetails = EXPENSES_CATEGORIES.find(({ id }) => id === expense.type) || {}
+                return Object.assign({}, expense, { expense_name: expenseDetails.displayValue },
+                    { unit_ref: unitWithExpense.ref, property_ref: propertyWithUnit.ref })
             })
             .sort((expense1, expense2) => parse(expense2.expense_date, 'yyyy-MM-dd', new Date()) -
                 parse(expense1.expense_date, 'yyyy-MM-dd', new Date())),

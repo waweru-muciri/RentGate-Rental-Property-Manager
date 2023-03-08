@@ -8,41 +8,42 @@ const monthsInYear = eachMonthOfInterval({
 	end: endOfYear(startOfToday()),
 })
 //general contact titles
-const TITLES_LIST = ["Mr", "Prof", "Hon", "Sir", "Mrs", "Miss", "Dr", "Madam", "Other"]
+const TITLES_LIST = ["Mr", "Sir", "Mrs", "Miss", "Madam", "Other"]
 const GENDERS_LIST = ["Male", "Female", "Unspecified"];
+
 const EXPENSES_CATEGORIES = [
-	'Security Deposit Refund',
-	'Water Deposit Refund',
-	'Management Fees',
-	'Utilities',
-	'Taxes',
-	'Mortgage',
-	'Office',
-	'Maintenance & Cleaning',
-	'Advertising',
-	'Insurance',
-	'Legal & Other Professional Fees',
-	'Auto & Travel',
-	'Supplies',
-	'Other Refund',
-	'Repairs',
-	'Other'
+	{ id: "security_deposit_refund", displayValue: "Security Deposit Refund" },
+	{ id: "water_deposit_refund", displayValue: "Water Deposit Refund" },
+	{ id: "management_fees", displayValue: "Management Fees" },
+	{ id: "electricity", displayValue: "Electricity" },
+	{ id: "water", displayValue: "Water" },
+	{ id: "sewer", displayValue: "Sewer" },
+	{ id: "Repairs", displayValue: "Repairs" },
+	{ id: "taxes", displayValue: "Taxes" },
+	{ id: "salaries", displayValue: "Salaries" },
+	{ id: "maintenance_cleaning", displayValue: "Maintenance & Cleaning" },
+	{ id: "advertising", displayValue: "Advertising" },
+	{ id: "other_refund", displayValue: "Other Refund" },
+	{ id: "other", displayValue: "Other" },
 ]
+
 const PROPRERTY_TYPES = [
-	"Residential",
-	"Condo/Townhouse",
-	"Multi-family",
-	"Single-family",
+	{ id: "residential", displayValue: "Residential" },
+	{ id: "condo_townhouse", displayValue: "Condo/Townhouse" },
+	{ id: "multi_family", displayValue: "Multi-family" },
+	{ id: "single_family", displayValue: "Single-family" },
 ]
+
 const UNIT_TYPES = [
-	"Bed Sitter",
-	"One Bedroom",
-	"Two Bedroom",
-	"Single Room",
-	"Double Room",
-	"Shop",
-	"Other",
+	{ id: "bed_sitter", displayValue: "Bed Sitter" },
+	{ id: "one_bedroom", displayValue: "One Bedroom" },
+	{ id: "two_bedroom", displayValue: "Two Bedroom" },
+	{ id: "single_bedroom", displayValue: "Single Room" },
+	{ id: "double_room", displayValue: "Double Room" },
+	{ id: "shop", displayValue: "Shop" },
+	{ id: "other", displayValue: "Other" },
 ];
+
 const LEASE_OPTIONS = [
 	"Fixed",
 	"Fixed w/rollover",
@@ -59,6 +60,8 @@ const CHARGE_OPTIONS = [
 	{ id: "electric", displayValue: "Electric" },
 	{ id: "sewer", displayValue: "Sewer" },
 	{ id: "water", displayValue: "Water" },
+	{ id: "one_time_charge", displayValue: "One Time Charge" },
+	{ id: "recurring_charge", displayValue: "Recurring Charge" },
 	{ id: "other", displayValue: "Other" }
 ];
 const FREQUENCY_OPTIONS = ["Per Day", "Week", "Month", "Quarter", "Half Year", "Year"];
@@ -92,7 +95,7 @@ export function getPropertyBaths() {
 	for (let i = 1; i <= 5; i++) {
 		baths.push(i);
 	}
-	return baths.concat("5+");
+	return baths.concat('Other');
 }
 
 export function getPropertyBeds() {
@@ -100,7 +103,7 @@ export function getPropertyBeds() {
 	for (let i = 1; i <= 5; i++) {
 		beds.push(i);
 	}
-	return beds;
+	return beds.concat("Other");
 }
 
 export function getFrequencyOptions() {

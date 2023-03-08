@@ -15,7 +15,7 @@ import PageHeading from "../components/PageHeading";
 const emailsTableHeadCells = [
     { id: "from_user", numeric: false, disablePadding: true, label: "From" },
     { id: "date_sent", numeric: false, disablePadding: true, label: "Date Sent" },
-	{ id: "email_subject", numeric: false, disablePadding: true, label: "Email Subject" },
+    { id: "email_subject", numeric: false, disablePadding: true, label: "Email Subject" },
 ];
 
 let EmailsPage = ({
@@ -23,42 +23,41 @@ let EmailsPage = ({
     communicationEmails,
     match,
 }) => {
-    let [emailItems, setEmailItems] = useState([]);
-    let [selected, setSelected] = useState([]);
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
+    const classes = commonStyles();
+    const [emailItems, setEmailItems] = useState([]);
+    const [selected, setSelected] = useState([]);
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
 
     useEffect(() => {
-		fetchData(['communication_emails']);
-	}, [fetchData]);
-
-    const classes = commonStyles();
-
+        fetchData(['communication_emails']);
+    }, [fetchData]);
+    
+    
     useEffect(() => {
         setEmailItems(communicationEmails);
     }, [communicationEmails]);
-
+    
+    const filterEmailCommunicationsByCriteria = (emailsToFilter) => {
+        const filteredEmailCommunications = emailsToFilter
+        .filter(({ date_sent }) =>
+        (!fromDateFilter ? true : date_sent >= fromDateFilter)
+        && (!toDateFilter ? true : date_sent <= toDateFilter));
+        return filteredEmailCommunications;
+    }
+    
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the communicationEmails here according to search criteria
-        let filteredEmailCommunications = communicationEmails
-            .filter(({ date_sent }) =>
-                !fromDateFilter ? true : date_sent >= fromDateFilter
-            )
-            .filter(({ date_sent }) =>
-                !toDateFilter ? true : date_sent <= toDateFilter
-            );
-
-        setEmailItems(filteredEmailCommunications);
+        setEmailItems(filterEmailCommunicationsByCriteria(communicationEmails));
     };
-
+    
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setEmailItems(communicationEmails);
         setFromDateFilter("");
         setToDateFilter("");
     };
-
+    
     return (
         <Layout pageTitle="Emails">
             <Grid
@@ -66,7 +65,7 @@ let EmailsPage = ({
                 spacing={3}
                 justify="space-evenly"
                 alignItems="center"
-            >
+                >
                 <Grid item xs={12}>
                     <PageHeading text="Emails" />
                 </Grid>
@@ -77,7 +76,7 @@ let EmailsPage = ({
                     alignItems="center"
                     direction="row"
                     key={1}
-                >
+                    >
                     <Grid item>
                         <Button
                             type="button"
@@ -87,7 +86,7 @@ let EmailsPage = ({
                             startIcon={<AddIcon />}
                             component={Link}
                             to={`${match.url}/new`}
-                        >
+                            >
                             Compose Email
                         </Button>
                     </Grid>
@@ -97,18 +96,18 @@ let EmailsPage = ({
                         border={1}
                         borderRadius="borderRadius"
                         borderColor="grey.400"
-                    >
+                        >
                         <form
                             className={classes.form}
                             id="contactSearchForm"
                             onSubmit={handleSearchFormSubmit}
-                        >
+                            >
                             <Grid
                                 container
                                 spacing={2}
                                 justify="center"
                                 direction="row"
-                            >
+                                >
                                 <Grid item lg={6} md={6} xs={6}>
                                     <TextField
                                         fullWidth
@@ -122,9 +121,9 @@ let EmailsPage = ({
                                         onChange={(event) => {
                                             setFromDateFilter(
                                                 event.target.value
-                                            );
-                                        }}
-                                    />
+                                                );
+                                            }}
+                                            />
                                 </Grid>
                                 <Grid item lg={6} md={6} xs={6}>
                                     <TextField
@@ -139,7 +138,7 @@ let EmailsPage = ({
                                             setToDateFilter(event.target.value);
                                         }}
                                         value={toDateFilter}
-                                    />
+                                        />
                                 </Grid>
                             </Grid>
                             <Grid
@@ -150,7 +149,7 @@ let EmailsPage = ({
                                 alignItems="center"
                                 direction="row"
                                 key={1}
-                            >
+                                >
                                 <Grid item>
                                     <Button
                                         onClick={(event) =>
@@ -162,7 +161,7 @@ let EmailsPage = ({
                                         variant="contained"
                                         size="medium"
                                         startIcon={<SearchIcon />}
-                                    >
+                                        >
                                         SEARCH
                                     </Button>
                                 </Grid>
@@ -177,7 +176,7 @@ let EmailsPage = ({
                                         variant="contained"
                                         size="medium"
                                         startIcon={<UndoIcon />}
-                                    >
+                                        >
                                         RESET
                                     </Button>
                                 </Grid>
@@ -196,15 +195,16 @@ let EmailsPage = ({
                         noDetailsCol
                         noEditCol
                         noDeleteCol
-                    />
+                        />
                 </Grid>
-                
+
             </Grid>
         </Layout>
     );
 };
 
 const mapStateToProps = (state) => {
+    console.log(state.users)
     return {
         users: state.users,
         currentUser: state.currentUser,
@@ -212,9 +212,9 @@ const mapStateToProps = (state) => {
     };
 };
 const mapDispatchToProps = (dispatch) => {
-	return {
-		fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
-	};
+    return {
+        fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
+    };
 };
 EmailsPage = connect(mapStateToProps, mapDispatchToProps)(EmailsPage);
 

@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 
 let ManagementFeePage = ({ properties, currentUser, managementFeeToEdit, handleItemSubmit, history }) => {
     const pageTitle = managementFeeToEdit.id ? "Edit Management Fee" : "Collect Management Fee";
+
     return (
         <Layout pageTitle="Management Fee Details">
             <Grid container justify="center" direction="column">

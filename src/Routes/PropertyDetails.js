@@ -28,10 +28,9 @@ import ImportItemsBtn from "../components/ImportItemsBtn";
 import PropertySummaryPage from "./PropertySummaryPage";
 import PropertySettingsForm from "../components/property/PropertySettingsForm";
 
-const PROPERTY_TYPES = getUnitTypes();
+const UNIT_TYPES = getUnitTypes();
 
 const headCells = [
-    { id: "unit_type", numeric: false, disablePadding: true, label: "Unit Type" },
     { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
@@ -221,10 +220,10 @@ let PropertyDetailsPage = ({
                                             }}
                                             value={unitTypeFilter}
                                         >
-                                            {PROPERTY_TYPES.map(
+                                            {UNIT_TYPES.map(
                                                 (unit_type, index) => (
-                                                    <MenuItem key={index} value={unit_type}>
-                                                        {unit_type}
+                                                    <MenuItem key={index} value={unit_type.id}>
+                                                        {unit_type.displayValue}
                                                     </MenuItem>
                                                 )
                                             )}

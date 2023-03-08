@@ -57,7 +57,7 @@ const UnitLeaseSchema = Yup.object().shape({
 let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
 	const { contacts, history, properties, propertyUnits, leaseUnitCharges, handleItemSubmit, handleItemDelete } = props
-	let leaseToEdit = props.leaseToEdit || {};
+	const leaseToEdit = props.leaseToEdit || {};
 	const unitLeaseValues = {
 		id: leaseToEdit.id,
 		property_id: leaseToEdit.property_id || "",
@@ -120,7 +120,7 @@ let UnitLeaseInputForm = (props) => {
 						rent_amount: values.rent_amount,
 						terminated: values.terminated
 					};
-					await handleItemSubmit(propertyUnitLease, "leases")
+					const leaseId = await handleItemSubmit(propertyUnitLease, "leases")
 					if (!values.id) {
 						//post charges for rent and  security deposit 
 						const tenant = values.tenants[0]
@@ -134,6 +134,7 @@ let UnitLeaseInputForm = (props) => {
 							tenant_id: tenant.id,
 							unit_id: values.unit_id,
 							property_id: values.property_id,
+							lease_id: leaseId,
 						}
 						//charge rent on tenant first moving into the unit
 						await handleItemSubmit(newRentCharge, 'transactions-charges')
@@ -149,6 +150,7 @@ let UnitLeaseInputForm = (props) => {
 								tenant_id: tenant.id,
 								unit_id: values.unit_id,
 								property_id: values.property_id,
+								lease_id: leaseId,
 							}
 							await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 						}
@@ -164,6 +166,7 @@ let UnitLeaseInputForm = (props) => {
 								tenant_id: tenant.id,
 								unit_id: values.unit_id,
 								property_id: values.property_id,
+								lease_id: leaseId,
 							}
 							await handleItemSubmit(newWaterDepositCharge, 'transactions-charges')
 
@@ -172,7 +175,7 @@ let UnitLeaseInputForm = (props) => {
 						if (parseFloat(values.electricity_deposit)) {
 							const newElectricDepositCharge = {
 								payed: false,
-								charge_amount: values.water_deposit,
+								charge_amount: values.electricity_deposit,
 								charge_date: values.start_date,
 								charge_label: "Electricity Deposit",
 								charge_type: "electricity_deposit",
@@ -180,6 +183,7 @@ let UnitLeaseInputForm = (props) => {
 								tenant_id: tenant.id,
 								unit_id: values.unit_id,
 								property_id: values.property_id,
+								lease_id: leaseId,
 							}
 							await handleItemSubmit(newElectricDepositCharge, 'transactions-charges')
 						}

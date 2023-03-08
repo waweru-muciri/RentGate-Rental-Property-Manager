@@ -17,6 +17,7 @@ import { withRouter } from "react-router-dom";
 import EnhancedTableHead from "./EnhancedTableHead";
 import useStyles from "./tableStyles";
 import { stableSort, getSorting } from "./tablesSortingFunctions";
+import ConfirmDeleteDialog from "../ConfirmDeleteDialog";
 
 function CommonTable(props) {
     const {
@@ -37,6 +38,8 @@ function CommonTable(props) {
     const [orderBy, setOrderBy] = React.useState("Beds");
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(100);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+    const [idToDelete, setIdToDelete] = React.useState();
 
     const handleRequestSort = (event, property) => {
         const isDesc = orderBy === property && order === "desc";
@@ -182,10 +185,8 @@ function CommonTable(props) {
                                                                         >
                                                                             <IconButton
                                                                                 onClick={(event) => {
-                                                                                    handleDelete(
-                                                                                        row.id,
-                                                                                        deleteUrl
-                                                                                    );
+                                                                                    setIdToDelete(row.id);
+                                                                                    setDeleteConfirmOpen(!deleteConfirmOpen);
                                                                                 }}
                                                                                 color="primary"
                                                                                 size="small"
@@ -255,8 +256,15 @@ function CommonTable(props) {
                 onChangePage={handleChangePage}
                 onChangeRowsPerPage={handleChangeRowsPerPage}
             />
+            <ConfirmDeleteDialog open={deleteConfirmOpen} setDeleteConfirmOpen={setDeleteConfirmOpen} onConfirm={() => {
+                handleDelete(
+                    idToDelete,
+                    deleteUrl
+                );
+            }} />
         </Box>
     );
 }
+
 
 export default withRouter(CommonTable);

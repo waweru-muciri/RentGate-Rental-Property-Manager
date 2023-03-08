@@ -301,7 +301,7 @@ export default function HomePage() {
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="h6" color="textSecondary">
-                                            For property managers, owners, and management startups in Kenya.
+                                            Increase efficiency and save time with our user-friendly platform.
                                             Choose the property management software designed to inspire and power
                                             you to manage your rental properties.
                                 </Typography>
@@ -336,7 +336,7 @@ export default function HomePage() {
                             </Grid>
                             <Grid item xs={10}>
                                 <Typography component="p" variant="h6" color="textSecondary" align="center">
-                                    Through RentGate, you can keep up-to-date rental properties and units records, tenant
+                                    Through our software, you can keep up-to-date rental properties and units records, tenant
                                     details, rental agreements and occupancy records, resolve maintenance issues and
                                     update property financials, from anywhere.
                         </Typography>

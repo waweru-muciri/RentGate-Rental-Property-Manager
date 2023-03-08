@@ -8,7 +8,6 @@ import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleItemFormSubmit, handleDelete } from "../actions/actions";
@@ -42,13 +41,13 @@ let CreditNotesPage = ({
     handleItemSubmit,
 }) => {
     const classes = commonStyles();
-    let [creditNotesItems, setCreditNotesItems] = useState([]);
-    let [filteredCreditNotesItems, setFilteredCreditNotesItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("all");
-    let [periodFilter, setPeriodFilter] = useState("month-to-date");
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
-    let [contactFilter, setContactFilter] = useState(null);
+    const [creditNotesItems, setCreditNotesItems] = useState([]);
+    const [filteredCreditNotesItems, setFilteredCreditNotesItems] = useState([]);
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [periodFilter, setPeriodFilter] = useState("month-to-date");
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
+    const [contactFilter, setContactFilter] = useState(null);
     const [editCreditNoteModalState, setEditCreditNoteModalState] = useState(false);
 
     const [selected, setSelected] = useState([]);
@@ -128,8 +127,8 @@ let CreditNotesPage = ({
                     <Grid item>
                         <ExportToExcelBtn
                             disabled={!selected.length}
-                            reportName={'Rental Credit Notes Records'}
-                            reportTitle={'Rental Credit Notes Data'}
+                            reportName={'Credit Notes Records'}
+                            reportTitle={'Credit Notes Data'}
                             headCells={headCells}
                             dataToPrint={filteredCreditNotesItems.filter(({ id }) => selected.includes(id))}
                         />

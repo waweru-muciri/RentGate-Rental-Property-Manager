@@ -9,10 +9,11 @@ import UndoIcon from "@material-ui/icons/Undo";
 import { ExportStatementToExcelBtn } from "../components/ExportToExcelBtn";
 import { commonStyles } from "../components/commonStyles";
 import Typography from "@material-ui/core/Typography";
-import { getTransactionsFilterOptions, currencyFormatter, getMonthlyDatesFromPeriod } from "../assets/commonAssets";
+import { getTransactionsFilterOptions, getExpensesCategories, currencyFormatter, getMonthlyDatesFromPeriod } from "../assets/commonAssets";
 import { parse, format, isSameMonth } from 'date-fns'
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+const EXPENSES_CATEGORIES = getExpensesCategories()
 
 let PropertyIncomeStatement = ({
     rentalPayments,
@@ -20,14 +21,14 @@ let PropertyIncomeStatement = ({
     propertyUnits,
 }) => {
     const classes = commonStyles();
-    let [expensesItems, setExpensesItems] = useState([]);
-    let [paymentItems, setPaymentItems] = useState([]);
-    let [netIncomeObject, setNetIncomeObject] = useState({});
-    let [incomeStatements, setIncomeStatements] = useState([]);
-    let [headCells, setHeadCells] = useState([]);
-    let [expensesStatements, setExpensesStatements] = useState([]);
-    let [propertyUnitFilter, setPropertyUnitFilter] = useState("");
-    let [fromFilter, setFromDateFilter] = useState('month-to-date');
+    const [expensesItems, setExpensesItems] = useState([]);
+    const [paymentItems, setPaymentItems] = useState([]);
+    const [netIncomeObject, setNetIncomeObject] = useState({});
+    const [incomeStatements, setIncomeStatements] = useState([]);
+    const [headCells, setHeadCells] = useState([]);
+    const [expensesStatements, setExpensesStatements] = useState([]);
+    const [propertyUnitFilter, setPropertyUnitFilter] = useState("");
+    const [fromFilter, setFromDateFilter] = useState('month-to-date');
 
     useEffect(() => {
         //go back [numMonths] months from current date
@@ -75,7 +76,7 @@ let PropertyIncomeStatement = ({
         incomeMappedByMonth.push(totalIncomeObject)
         //calculate expenses
         const expensesMappedByMonth = []
-        const totalExpensesObject = { expense_type: 'Total Expenses' }
+        const totalExpensesObject = { expense_type: 'Total Expenses', expense_name: "Total Expenses" }
         const expenseObjectsInMonth = []
         eachPastMonthDate.forEach((monthDate) => {
             //get expenses recorded in the same month and year
@@ -103,6 +104,8 @@ let PropertyIncomeStatement = ({
                 } else {
                     const totalExpensesByTypeObject = {}
                     totalExpensesByTypeObject['expense_type'] = expenseType
+                    const EXPENSE_IN_FULL_DETAILS = EXPENSES_CATEGORIES.find(({ id }) => id === expenseType) || {}
+                    totalExpensesByTypeObject['expense_name'] = EXPENSE_IN_FULL_DETAILS.displayValue
                     totalExpensesByTypeObject[expenseObject.month] = parseFloat(expenseObject.amount) || 0
                     totalExpensesByTypeObject[headCellsForMonths[headCellsForMonths.length - 1]] = parseFloat(expenseObject.amount) || 0
                     expensesMappedByMonth.push(totalExpensesByTypeObject)
@@ -349,7 +352,7 @@ let PropertyIncomeStatement = ({
                             return (
                                 <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
                                     <Box textAlign="left" width={1} key={incomeIndex + "iiajl"} flexGrow={1} p={1} >
-                                        {expenseStatement['expense_type']}
+                                        {expenseStatement['expense_name']}
                                     </Box>
                                     {otherColumns}
                                 </Box>

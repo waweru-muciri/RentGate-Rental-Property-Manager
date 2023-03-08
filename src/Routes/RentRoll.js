@@ -56,13 +56,13 @@ let RentRollPage = ({
     handleItemSubmit,
     handleItemDelete
 }) => {
-    let [rentCharges, setRentCharges] = useState([]);
-    let [filteredRentCharges, setFilteredRentCharges] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("all");
-    let [contactFilter, setContactFilter] = useState(null);
-    let [periodFilter, setPeriodFilter] = useState("month-to-date");
-    let [fromDateFilter, setFromDateFilter] = useState('');
-    let [toDateFilter, setToDateFilter] = useState("");
+    const [rentCharges, setRentCharges] = useState([]);
+    const [filteredRentCharges, setFilteredRentCharges] = useState([]);
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [contactFilter, setContactFilter] = useState(null);
+    const [periodFilter, setPeriodFilter] = useState("month-to-date");
+    const [fromDateFilter, setFromDateFilter] = useState('');
+    const [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
     const [chargeToEditId, setChargeToEditId] = useState();
     const [addFullPaymentsToChargesModalState, setAddFullPaymentsToChargesModalState] = useState(false);
@@ -189,7 +189,7 @@ let RentRollPage = ({
                                 startIcon={<AddIcon />}
                                 disabled={!selected.length}
                                 onClick={() => handleAddFullPaymentsToChargesToggle()}
-                                >
+                            >
                                 Receive Full Payments
                             </Button>
                         </Grid>
@@ -199,10 +199,10 @@ let RentRollPage = ({
                                 color="primary"
                                 variant="contained"
                                 size="medium"
-                                disabled={!selected.length}
+                                disabled={selected.length !== 1}
                                 startIcon={<AddIcon />}
                                 onClick={() => toggleAddPaymentToChargeModal()}
-                                >
+                            >
                                 Receive Payment
                             </Button>
                         </Grid>
@@ -212,7 +212,7 @@ let RentRollPage = ({
                                 color="primary"
                                 variant="contained"
                                 size="medium"
-                                disabled={!selected.length}
+                                disabled={selected.length !== 1}
                                 startIcon={<AddIcon />}
                                 to={`${match.url}/charge-on-deposit/${selected[0]}/new`}
                                 component={Link}
@@ -384,7 +384,7 @@ let RentRollPage = ({
                                                 startIcon={<SearchIcon />}
                                             >
                                                 SEARCH
-                                    </Button>
+                                            </Button>
                                         </Grid>
                                         <Grid item>
                                             <Button
@@ -397,7 +397,7 @@ let RentRollPage = ({
                                                 startIcon={<UndoIcon />}
                                             >
                                                 RESET
-                                    </Button>
+                                            </Button>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -448,10 +448,10 @@ let RentRollPage = ({
                     }
                     {
                         addPaymentToChargeModalState ?
-                        <PaymentInputForm open={addPaymentToChargeModalState}
-                            chargeToAddPaymentTo={rentalCharges.find(({ id }) => selected.includes(id))}
-                            handleClose={toggleAddPaymentToChargeModal}
-                            handleItemSubmit={handleItemSubmit} /> : null
+                            <PaymentInputForm open={addPaymentToChargeModalState}
+                                chargeToAddPaymentTo={rentalCharges.find(({ id }) => selected.includes(id))}
+                                handleClose={toggleAddPaymentToChargeModal}
+                                handleItemSubmit={handleItemSubmit} /> : null
                     }
                     <Grid item xs={12}>
                         <CommonTable
@@ -459,7 +459,7 @@ let RentRollPage = ({
                             setSelected={setSelected}
                             rows={filteredRentCharges}
                             headCells={headCells}
-                            optionalEditHandler={(selectedRowIndex) => {setChargeToEditId(selectedRowIndex); toggleEditChargeModalState()}}
+                            optionalEditHandler={(selectedRowIndex) => { setChargeToEditId(selectedRowIndex); toggleEditChargeModalState() }}
                             noDetailsCol={true}
                             deleteUrl={'transactions-charges'}
                             handleDelete={handleRentChargeDelete}
@@ -480,24 +480,24 @@ const mapStateToProps = (state) => {
             .map((charge) => {
                 const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
                 const unitWithCharge = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
-                const chargeDetails = {}
-                chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
-                chargeDetails.tenant_id_number = tenant.id_number
                 const chargePayments = state.rentalPayments.filter((payment) => payment.charge_id === charge.id)
-                chargeDetails.payed_status = chargePayments.length ? true : false;
                 const payed_amount = chargePayments.reduce((total, currentValue) => {
                     return total + parseFloat(currentValue.payment_amount) || 0
                 }, 0)
-                chargeDetails.payed_amount = payed_amount
-                chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
                 const property = state.properties.find(property => property.id === charge.property_id) || {}
-                chargeDetails.unit_details = `${property.ref} - ${unitWithCharge.ref}`;
+                const chargeDetails = {
+                    tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                    tenant_id_number: tenant.id_number,
+                    payed_status: chargePayments.length ? true : false,
+                    payed_amount: payed_amount,
+                    balance: (parseFloat(charge.charge_amount) - payed_amount),
+                    unit_details: `${property.ref} - ${unitWithCharge.ref}`,
+                }
                 return Object.assign({}, charge, chargeDetails);
             }).sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
                 parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
         leases: state.leases,
-        isLoading: state.isLoading,
     };
 };
 

@@ -128,7 +128,7 @@ let PropertyUnitInputForm = (props) => {
 							<Grid item>
 								<Typography variant="subtitle2">
 									Unit Details
-									</Typography>
+								</Typography>
 							</Grid>
 							<Grid container item spacing={2} direction="row">
 								<Grid item xs={12} md={6}>
@@ -184,8 +184,8 @@ let PropertyUnitInputForm = (props) => {
 										helperText={touched.unit_type && errors.unit_type}
 									>
 										{UNIT_TYPES.map((unit_type, index) => (
-											<MenuItem key={index} value={unit_type}>
-												{unit_type}
+											<MenuItem key={index} value={unit_type.id}>
+												{unit_type.displayValue}
 											</MenuItem>
 										))}
 									</TextField>
@@ -316,7 +316,7 @@ let PropertyUnitInputForm = (props) => {
 									disableElevation
 								>
 									Cancel
-									</Button>
+								</Button>
 							</Grid>
 							<Grid item>
 								<Button
@@ -329,7 +329,7 @@ let PropertyUnitInputForm = (props) => {
 									disabled={isSubmitting}
 								>
 									Save
-									</Button>
+								</Button>
 							</Grid>
 						</Grid>
 					</Grid>

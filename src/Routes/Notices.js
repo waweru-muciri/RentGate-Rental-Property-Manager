@@ -151,7 +151,7 @@ let VacatingNoticesPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -168,7 +168,7 @@ let VacatingNoticesPage = ({
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -190,7 +190,7 @@ let VacatingNoticesPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         fullWidth
                                         select
@@ -216,7 +216,7 @@ let VacatingNoticesPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <Autocomplete
                                         id="contact_filter"
                                         options={contacts}

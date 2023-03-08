@@ -15,7 +15,7 @@ export function readXlsxFile(fileData) {
     const ws = readData.Sheets[wsname];
 
     /* Convert array to json*/
-    const dataParse = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false});
+    const dataParse = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false });
     return dataParse
 }
 
@@ -58,6 +58,9 @@ const createDocumentDefinition = (reportTitle, ...contentParts) => {
                 alignment: 'center',
                 margin: [0, 0, 0, 8],
             },
+            companyLogoStyle: {
+                alignment: 'center',
+            },
             titleSub: {
                 fontSize: 12,
                 alignment: 'center',
@@ -71,12 +74,20 @@ const createDocumentDefinition = (reportTitle, ...contentParts) => {
         },
 
         content: [
-            {
+            companyProfile.company_logo ? {
+                image: 'companyLogo',
+                width: 600,
+                height: 200,
+                style: 'companyLogoStyle'
+            } : {
                 text: `${companyProfile.company_name}`, style: 'title', width: '*'
             },
             { text: reportTitle, style: 'titleSub', width: '*' },
             { text: `Created: ${getReportDate()}`, style: 'titleDate', width: '*' },
         ],
+        images: {
+            companyLogo: `${companyProfile.company_logo}`
+        }
     };
     const docDefinition = JSON.parse(JSON.stringify(baseDocDefinition));
     docDefinition.footer = baseDocDefinition.footer;
@@ -122,7 +133,7 @@ export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
             return thl(`${columnTotal}`, -1, { rowSpan: 1, fontSize: fontSize })
         })
         body.push(tableTotalsRow);
-        
+
         return body;
     }
 
@@ -134,7 +145,7 @@ export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
             headerRows: 1,
             widths: tableColumnWidths,
             body: tableBody(dataToPrint),
-        }
+        },
     };
     printDocument(`${reportName} ${getReportDate()}`, reportTitle, tableData)
 }
@@ -359,7 +370,7 @@ export function printInvoice(tenantDetails, items) {
 
 }
 
-export function printReceipt(tenantDetails, items) {
+export function getReceiptHtml(tenantDetails, items) {
     const text = `
     <!doctype html>
     <html>
@@ -517,7 +528,12 @@ export function printReceipt(tenantDetails, items) {
         </div>
     </body>
     </html>`
+    return text;
+}
+
+export function printReceipt(tenantDetails, items) {
+    const receiptHtmlText = getReceiptHtml(tenantDetails, items);
     const my_window = window.open('', 'mywindow', 'status=1');
-    my_window.document.write(text);
+    my_window.document.write(receiptHtmlText);
     my_window.print();
 }

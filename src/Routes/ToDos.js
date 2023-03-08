@@ -36,7 +36,7 @@ let ToDosPage = ({ fetchData, currentUser, toDos, users, handleItemDelete, handl
 	}, [toDos]);
 
 	const handleEventDrop = async (info) => {
-		let updatedEvent = {
+		const updatedEvent = {
 			start: format(info.event.start, 'yyyy-MM-dd'),
 			end: format(info.event.start, 'yyyy-MM-dd'),
 			id: info.event.id,
@@ -54,6 +54,7 @@ let ToDosPage = ({ fetchData, currentUser, toDos, users, handleItemDelete, handl
 		const clickedEvent = {
 			title: event.title,
 			id: event.id,
+			assigned_to: event.extendedProps.assigned_to || null,
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
 			complete_status: event.extendedProps.complete_status,
@@ -63,13 +64,13 @@ let ToDosPage = ({ fetchData, currentUser, toDos, users, handleItemDelete, handl
 		};
 		setEventToShow(clickedEvent);
 		handleClose();
-		//console.log(event);
 	};
 
 	const handleEventResize = ({ event }) => {
 		const clickedEvent = {
 			title: event.title,
 			id: event.id,
+			assigned_to: event.extendedProps.assigned_to || null,
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
 			complete_status: event.extendedProps.complete_status,
@@ -83,7 +84,7 @@ let ToDosPage = ({ fetchData, currentUser, toDos, users, handleItemDelete, handl
 	};
 
 	const handleDateClick = (arg) => {
-		setEventToShow({});
+		setEventToShow({ start: arg.date ? format(arg.date, 'yyyy-MM-dd') : '' });
 		handleClose();
 	};
 
@@ -139,7 +140,6 @@ const mapStateToProps = (state) => {
 	return {
 		currentUser: state.currentUser,
 		toDos: state.toDos,
-		error: state.error,
 		users: state.users,
 	};
 };

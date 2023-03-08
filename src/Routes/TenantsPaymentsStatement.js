@@ -128,7 +128,7 @@ let TenantsPaymentsPage = ({
                 >
                     <form
                         className={classes.form}
-                        id="contactSearchForm"
+                        id="tenantPaymentsSearchForm"
                         onSubmit={handleSearchFormSubmit}
                     >
                         <Grid
@@ -258,7 +258,7 @@ let TenantsPaymentsPage = ({
                                     <Button
                                         onClick={(event) => handleSearchFormSubmit(event)}
                                         type="submit"
-                                        form="rentRollSearchForm"
+                                        form="tenantPaymentsSearchForm"
                                         color="primary"
                                         variant="contained"
                                         size="medium"
@@ -271,7 +271,7 @@ let TenantsPaymentsPage = ({
                                     <Button
                                         onClick={(event) => resetSearchForm(event)}
                                         type="reset"
-                                        form="rentRollSearchForm"
+                                        form="tenantPaymentsSearchForm"
                                         color="primary"
                                         variant="contained"
                                         size="medium"

@@ -30,6 +30,10 @@ import { Doughnut } from 'react-chartjs-2';
 import TEAL from '@material-ui/core/colors/teal';
 import RED from '@material-ui/core/colors/red';
 import GREY from "@material-ui/core/colors/grey";
+import { getUnitTypes } from "../assets/commonAssets";
+
+
+const UNIT_TYPES_WITH_DETAILS = getUnitTypes();
 
 
 const legendOpts = {
@@ -47,9 +51,8 @@ const headCells = [
     { id: "from_date", numeric: false, disablePadding: true, label: "From Date" },
     { id: "to_date", numeric: false, disablePadding: true, label: "To Date" },
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property" },
-    { id: "date_collected", numeric: false, disablePadding: true, label: "Date Collected" },
+    { id: "collection_date", numeric: false, disablePadding: true, label: "Date Collected" },
     { id: "fees_amount", numeric: false, disablePadding: true, label: "Amount Collected" },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
@@ -86,17 +89,25 @@ let UserDetailsPage = ({
     const totalPropertyUnits = propertyUnits.length
 
     //get occupancy graph data
-    const rentalUnitsOccupancyData = { datasets: [] }
-    rentalUnitsOccupancyData.labels = ['Occupied Units', 'Vacant Units']
+    const rentalUnitsOccupancyData = { datasets: [], labels: [] }
+    rentalUnitsOccupancyData.labels.push('Occupied Units', 'Vacant Units')
     rentalUnitsOccupancyData.datasets.push(
         {
             data: [activeLeasesNumber, (propertyUnits.length - activeLeasesNumber)],
             backgroundColor: [RED[800], RED[200]]
         })
     //get the number of the different units by category
-    const rentalUnitsDistributionData = { datasets: [] }
+    const rentalUnitsDistributionData = { datasets: [], labels: [] }
+    //get the unique unit types for the property units
     const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)))
-    rentalUnitsDistributionData.labels = unitTypes
+    //get the unit names for display to the user
+    const unitNamesForDisplay = unitTypes.map(unitType => {
+        const unitTypeDetails = UNIT_TYPES_WITH_DETAILS.find(({ id }) => id === unitType) || {}
+        return `${unitTypeDetails.displayValue}s`
+    })
+    //push the unit names for display to the labels array 
+    rentalUnitsDistributionData.labels.push(...unitNamesForDisplay);
+
     rentalUnitsDistributionData.datasets.push({
         data: unitTypes
             .map(unit_type => {
@@ -112,9 +123,9 @@ let UserDetailsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the management fees according to the search criteria here
-        const managementFeesForProperty = 
-        managementFeesItems
-        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        const managementFeesForProperty =
+            managementFeesItems
+                .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
         setFilteredManagementFeesItems(managementFeesForProperty);
 
     };
@@ -165,7 +176,7 @@ let UserDetailsPage = ({
                                     <CardContent>
                                         <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                             Contact Info
-                                    </Typography>
+                                        </Typography>
                                         <Typography variant="body2" component="p">
                                             ID Number: {userDetails.id_number || '-'}
                                         </Typography>
@@ -191,7 +202,7 @@ let UserDetailsPage = ({
                                     <CardContent>
                                         <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                             Property Portfolio
-                                    </Typography>
+                                        </Typography>
                                         <DataGridTable rows={properties} headCells={propertiesColumns} />
                                     </CardContent>
                                 </Card>
@@ -258,7 +269,7 @@ let UserDetailsPage = ({
                                 to={`${match.url}/management-fees/new`}
                             >
                                 Collect Fees
-                        </Button>
+                            </Button>
                         </Grid>
                         <Grid item>
                             <Button
@@ -272,7 +283,7 @@ let UserDetailsPage = ({
                                 to={`${match.url}/management-fees/${selected[0]}/edit`}
                             >
                                 Edit
-                        </Button>
+                            </Button>
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
@@ -387,7 +398,11 @@ const mapStateToProps = (state, ownProps) => {
         .filter(({ terminated }) => terminated !== true);
     return {
         managementFees: state.managementFees
-            .filter(({ user_id }) => user_id === ownProps.match.params.userId),
+            .filter(({ user_id }) => user_id === ownProps.match.params.userId).map(managementFee => {
+                const propertyWithFeeDetails = state.properties.find(({ id }) => id === managementFee.property_id) || {}
+                return Object.assign({}, managementFee, { property_ref: propertyWithFeeDetails.ref })
+
+            }),
         properties: propertiesAssignedToUser,
         activeLeasesNumber: totalActiveLeases.length,
         totalAssetsRentValue: totalActiveLeases

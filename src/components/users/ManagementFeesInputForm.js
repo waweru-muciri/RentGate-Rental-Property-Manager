@@ -29,15 +29,16 @@ const ManagmentFeeSchema = Yup.object().shape({
 const ManagmentFeeInputForm = (props) => {
   const { properties, currentUser, handleItemSubmit, history } = props
   const classes = commonStyles();
-  const managmentFeeToEdit = props.managmentFeeToEdit || {}
+  const managementFeeToEdit = props.managementFeeToEdit || {}
   const managmentFeeValues = {
-    id: managmentFeeToEdit.id,
-    management_fees_notes: managmentFeeToEdit.management_fees_notes || '',
-    from_date: managmentFeeToEdit.from_date || defaultDate,
-    to_date: managmentFeeToEdit.to_date || defaultDate,
-    collection_date: managmentFeeToEdit.collection_date || defaultDate,
-    fees_amount: managmentFeeToEdit.fees_amount || '',
-    property_id: managmentFeeToEdit.property_id || '',
+    id: managementFeeToEdit.id,
+    management_fees_notes: managementFeeToEdit.management_fees_notes || '',
+    from_date: managementFeeToEdit.from_date || defaultDate,
+    to_date: managementFeeToEdit.to_date || defaultDate,
+    collection_date: managementFeeToEdit.collection_date || defaultDate,
+    fees_amount: managementFeeToEdit.fees_amount || '',
+    property_id: managementFeeToEdit.property_id || '',
+    user_id: managementFeeToEdit.user_id || '',
   }
 
   return (
@@ -58,14 +59,17 @@ const ManagmentFeeInputForm = (props) => {
             management_fees_notes: values.management_fees_notes,
           };
           await handleItemSubmit(managementFeesRecord, "management-fees")
-          const managementFeesExpense = {
-            type: 'management_fees',
-            amount: values.fees_amount,
-            property_id: values.property_id,
-            expense_date: values.collection_date,
-            expense_notes: values.management_fees_notes,
-          };
-          await handleItemSubmit(managementFeesExpense, "expenses")
+          //only record an expense when a new management fee record is added
+          if (!values.id) {
+            const managementFeesExpense = {
+              type: 'management_fees',
+              amount: values.fees_amount,
+              property_id: values.property_id,
+              expense_date: values.collection_date,
+              expense_notes: values.management_fees_notes,
+            };
+            await handleItemSubmit(managementFeesExpense, "expenses")
+          }
           resetForm({});
           if (values.id) {
             history.goBack();
@@ -233,7 +237,7 @@ const ManagmentFeeInputForm = (props) => {
                   disabled={isSubmitting}
                 >
                   Save
-                  </Button>
+                </Button>
               </Grid>
             </Grid>
           </Grid>

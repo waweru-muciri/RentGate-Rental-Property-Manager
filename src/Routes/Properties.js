@@ -15,7 +15,6 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
-import ImportItemsBtn from "../components/ImportItemsBtn";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
@@ -127,11 +126,6 @@ let PropertyPage = ({
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
                             dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
-                        />
-                    </Grid>
-                    <Grid item>
-                        <ImportItemsBtn
-                            savingUrl="properties"
                         />
                     </Grid>
                 </Grid>

@@ -21,6 +21,7 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
 	memo: Yup.string().trim().max(50, "Memo details should be less than 50 characters").default(''),
+	reference_id: Yup.string().trim().max(20, "Reference Id should be <= 20 characters").default(''),
 	charge_balance: Yup.number().typeError('Charge Balance must be a number').required("Charge balance is required"),
 	payment_amount: Yup.number().typeError('Amount must be a number')
 		.positive("Amount must be a positive number")
@@ -45,6 +46,7 @@ export default function PaymentInputForm({ open, handleClose, chargeToAddPayment
 		memo: "",
 		payment_date: defaultDate,
 		tenant_id: chargeToAddPaymentTo.tenant_id,
+		reference_id: chargeToAddPaymentTo.reference_id || '',
 		property_id: chargeToAddPaymentTo.property_id,
 	};
 
@@ -69,6 +71,7 @@ export default function PaymentInputForm({ open, handleClose, chargeToAddPayment
 								memo: values.memo,
 								payment_date: values.payment_date,
 								tenant_id: values.tenant_id,
+								reference_id: values.reference_id,
 								unit_id: values.unit_id,
 								property_id: values.property_id,
 								payment_label: values.charge_label,
@@ -149,6 +152,21 @@ export default function PaymentInputForm({ open, handleClose, chargeToAddPayment
 										onBlur={handleBlur}
 										error={errors.payment_amount && touched.payment_amount}
 										helperText={touched.payment_amount && errors.payment_amount}
+									/>
+								</Grid>
+								<Grid item>
+									<TextField
+										fullWidth
+										type="text"
+										variant="outlined"
+										name="reference_id"
+										id="reference_id"
+										label="Reference Id"
+										value={values.reference_id}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.reference_id && touched.reference_id}
+										helperText={touched.reference_id && errors.reference_id}
 									/>
 								</Grid>
 								<Grid item>

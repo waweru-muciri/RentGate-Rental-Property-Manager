@@ -98,8 +98,8 @@ let PropertyInputForm = (props) => {
 							helperText={(indexInTouched && indexInTouched.unit_type) && (indexInErrors && indexInErrors.unit_type)}
 						>
 							{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
-								<MenuItem key={unitTypeIndex} value={unit_type}>
-									{unit_type}
+								<MenuItem key={unitTypeIndex} value={unit_type.id}>
+									{unit_type.displayValue}
 								</MenuItem>
 							))}
 						</TextField>

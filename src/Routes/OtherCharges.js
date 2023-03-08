@@ -55,18 +55,17 @@ let TenantChargesStatementPage = ({
     handleItemDelete,
 }) => {
     const classes = commonStyles()
-    let [allNonRentCharges, setAllNonRentCharges] = useState([]);
-    let [filteredAllNonRentCharges, setFilteredAllNonRentCharges] = useState([]);
-    let [chargeType, setChargeTypeFilter] = useState("");
-    let [fromDateFilter, setFromDateFilter] = useState('');
-    let [toDateFilter, setToDateFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState("month-to-date");
-    let [contactFilter, setContactFilter] = useState(null);
-    let [propertyFilter, setPropertyFilter] = useState("all");
+    const [allNonRentCharges, setAllNonRentCharges] = useState([]);
+    const [filteredAllNonRentCharges, setFilteredAllNonRentCharges] = useState([]);
+    const [chargeType, setChargeTypeFilter] = useState("");
+    const [fromDateFilter, setFromDateFilter] = useState('');
+    const [toDateFilter, setToDateFilter] = useState("");
+    const [periodFilter, setPeriodFilter] = useState("month-to-date");
+    const [contactFilter, setContactFilter] = useState(null);
+    const [propertyFilter, setPropertyFilter] = useState("all");
     const [addFullPaymentsToChargesModalState, setAddFullPaymentsToChargesModalState] = useState(false);
     const [editChargeModalState, setEditChargeModalState] = useState(false);
     const [addPaymentToChargeModalState, setAddPaymentToChargesModalState] = useState(false);
-
     const [selected, setSelected] = useState([]);
     const [chargeToEditId, setChargeToEditId] = useState();
 
@@ -191,7 +190,7 @@ let TenantChargesStatementPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={!selected.length}
+                            disabled={selected.length !== 1}
                             startIcon={<AddIcon />}
                             onClick={() => toggleAddPaymentToChargeModal()}
                         >
@@ -204,7 +203,7 @@ let TenantChargesStatementPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={!selected.length}
+                            disabled={selected.length !== 1}
                             startIcon={<AddIcon />}
                             to={`${match.url}/charge-on-deposit/${selected[0]}/new`}
                             component={Link}

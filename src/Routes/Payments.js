@@ -32,7 +32,7 @@ const headCells = [
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "payment_amount", numeric: true, disablePadding: true, label: "Payment Amount" },
-    { id: "memo", numeric: false, disablePadding: true, label: "Payment Notes/Memo" },
+    { id: "reference_id", numeric: false, disablePadding: true, label: "Reference Id" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
@@ -47,12 +47,12 @@ let PaymentsPage = ({
 }) => {
     const classes = commonStyles();
     let [paymentsItems, setPaymentsItems] = useState([]);
-    let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("all");
-    let [periodFilter, setPeriodFilter] = useState("month-to-date");
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
-    let [contactFilter, setContactFilter] = useState(null);
+    const [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [periodFilter, setPeriodFilter] = useState("month-to-date");
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
+    const [contactFilter, setContactFilter] = useState(null);
     const [editPaymentModalState, setEditPaymentModalState] = useState(false);
 
     const [selected, setSelected] = useState([]);
@@ -309,7 +309,7 @@ let PaymentsPage = ({
                                             startIcon={<SearchIcon />}
                                         >
                                             SEARCH
-                                    </Button>
+                                        </Button>
                                     </Grid>
                                     <Grid item>
                                         <Button
@@ -322,7 +322,7 @@ let PaymentsPage = ({
                                             startIcon={<UndoIcon />}
                                         >
                                             RESET
-                                    </Button>
+                                        </Button>
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -343,7 +343,7 @@ let PaymentsPage = ({
                         rows={filteredPaymentsItems}
                         headCells={headCells}
                         handleDelete={handlePaymentDelete}
-                        optionalEditHandler={(selectedRowIndex) => {setPaymentToEditId(selectedRowIndex); toggleEditPaymentModalState()}}
+                        optionalEditHandler={(selectedRowIndex) => { setPaymentToEditId(selectedRowIndex); toggleEditPaymentModalState() }}
                         deleteUrl={"charge-payments"}
                     />
                 </Grid>

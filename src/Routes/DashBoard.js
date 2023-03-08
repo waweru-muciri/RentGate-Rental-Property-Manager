@@ -14,7 +14,9 @@ import { Bar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, startOfYear, endOfYear, startOfToday, parse, eachMonthOfInterval, getMonth } from "date-fns";
+import { format, getYear, startOfYear, endOfYear, startOfToday, parse, eachMonthOfInterval, isSameMonth } from "date-fns";
+import { getUnitTypes } from "../assets/commonAssets";
+
 
 const options = {
   responsive: true,
@@ -50,6 +52,9 @@ var monthsInYear = eachMonthOfInterval({
   start: startOfYear(startOfToday()),
   end: endOfYear(startOfToday()),
 })
+
+//get the various unit types 
+const UNIT_TYPES = getUnitTypes();
 
 const currentYear = new Date().getFullYear()
 
@@ -101,44 +106,57 @@ let DashBoardPage = (props) => {
     setPropertyUnitItems(propertyUnits.filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter))
     setLeaseItems(leases.filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter))
   };
+  //GET THE TOTAL NUMBER OF PROPERTY UNITS
+  const TOTAL_PROPERTY_UNITS = propertyUnitItems.length;
 
-  const totalProperties = propertyUnitItems.length;
-  //get the number of the different units by category
-  const bedSitterUnits = propertyUnitItems.filter((property) => property.unit_type === 'Bed Sitter').length;
-  const oneBedUnits = propertyUnitItems.filter((property) => property.unit_type === 'One Bedroom').length;
-  const twoBedUnits = propertyUnitItems.filter((property) => property.unit_type === 'Two Bedroom').length;
-  const singleRoomUnits = propertyUnitItems.filter((property) => property.unit_type === 'Single Room').length;
-  const doubleRoomUnits = propertyUnitItems.filter((property) => property.unit_type === 'Double Room').length;
-  const shopUnits = propertyUnitItems.filter((property) => property.unit_type === 'Shop').length;
-  const otherUnits = propertyUnitItems.filter((property) => property.unit_type === 'Other').length;
-  //get the current number of occupied houses
-  const occupiedHouses = propertyActiveLeases.length;
-  //get months in an year in short format
-  const rentIncomeData = { datasets: [] }
-  rentIncomeData.labels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
+  //GET THE NUMBER OF THE DIFFERENT UNIT TYPES 
+  const EACH_UNIT_TYPE_WITH_AMOUNT = UNIT_TYPES.map(unitType => {
+    const numberOfUnitsOfType = propertyUnitItems.filter((property) => property.unit_type === unitType.id).length;
+    return {
+      units_name: `${unitType.displayValue}(s)`,
+      units_amount: numberOfUnitsOfType,
+    }
+  })
+  //GET THE NUMBER OF CURRENTLY OCCUPIED UNITS
+  const OCCUPIED_HOUSES = propertyActiveLeases.length;
+
+  // CREATE A UNIT OCCUPANCY DISPLAY DATA ARRAY INSTEAD OF REPEATING MULTIPLE ELEMENTS
+  const UNIT_OCCUPANCY_SUMMARY_DATA = [
+    { title: "Total Units", value: TOTAL_PROPERTY_UNITS },
+    { title: "Currently Occupied Units", value: OCCUPIED_HOUSES },
+    { title: "Currently Unoccupied Units", value: TOTAL_PROPERTY_UNITS - OCCUPIED_HOUSES },
+    { title: "Current Month Occupancy Rate", value: ((OCCUPIED_HOUSES / TOTAL_PROPERTY_UNITS) * 100) | 0 },
+  ]
+
+  //GET THE TOTAL PAYMENTS FOR EACH MONTH IN THE SELECTED YEAR
   const totalEachMonthPayments = monthsInYear.map((monthDate) => {
     //get rentalPayments recorded in the same month and year as monthDate
     return transactionItems
       .filter((payment) => {
         const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
-        return getMonth(monthDate) === getMonth(paymentDate)
+        return isSameMonth(monthDate, paymentDate)
       }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
   })
-  rentIncomeData.datasets.push({
-    data: totalEachMonthPayments, label: 'Monthly Payments Collection', type: 'bar',
-    fill: false,
-    backgroundColor: '#71B37C',
-    borderColor: '#71B37C',
-    hoverBackgroundColor: '#71B37C',
-    hoverBorderColor: '#71B37C',
-  })
+  // MAKE AN OBJECT FOR SHOWING AN INCOME GRAPH, BY MONTH, LATER
+  // LABELS ARE MONTHS IN THE YEAR IN SHORT FORMAT
+  const rentIncomeData = {
+    datasets: [{
+      data: totalEachMonthPayments, label: 'Monthly Payments Collection', type: 'bar',
+      fill: false,
+      backgroundColor: '#71B37C',
+      borderColor: '#71B37C',
+      hoverBackgroundColor: '#71B37C',
+      hoverBorderColor: '#71B37C',
+    }],
+    labels: monthsInYear.map((monthDate) => format(monthDate, 'MMMM')),
+  }
 
   const totalEachMonthCharges = monthsInYear.map((monthDate) => {
     //get rentalPayments recorded in the same month and year as monthDate
     return chargesItems
       .filter((charge) => {
         const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
-        return getMonth(monthDate) === getMonth(chargeDate)
+         return isSameMonth(monthDate, chargeDate)
       }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
   })
   rentIncomeData.datasets.push({
@@ -245,7 +263,7 @@ let DashBoardPage = (props) => {
                             startIcon={<SearchIcon />}
                           >
                             SEARCH
-                            </Button>
+                          </Button>
                         </Grid>
                       </Grid>
                     </form>
@@ -264,13 +282,11 @@ let DashBoardPage = (props) => {
           justify="space-around"
           key={3}
         >
-          <InfoDisplayPaper xs={6} title={"Bed Sitters"} value={bedSitterUnits} />
-          <InfoDisplayPaper xs={6} title={"One Bedrooms"} value={oneBedUnits} />
-          <InfoDisplayPaper xs={6} title={"Two Bedrooms"} value={twoBedUnits} />
-          <InfoDisplayPaper xs={6} title={"Single Rooms"} value={singleRoomUnits} />
-          <InfoDisplayPaper xs={6} title={"Double Rooms"} value={doubleRoomUnits} />
-          <InfoDisplayPaper xs={6} title={"Shops"} value={shopUnits} />
-          <InfoDisplayPaper xs={6} title={"Others"} value={otherUnits} />
+          {
+            EACH_UNIT_TYPE_WITH_AMOUNT.map((unitTypeWithAmount, index) =>
+              <InfoDisplayPaper key={index} xs={6} title={unitTypeWithAmount.units_name} value={unitTypeWithAmount.units_amount} />)
+          }
+
         </Grid>
         <Grid
           item
@@ -281,10 +297,11 @@ let DashBoardPage = (props) => {
           justify="space-around"
           key={2}
         >
-          <InfoDisplayPaper xs={12} title={"Total Units"} value={totalProperties} />
-          <InfoDisplayPaper xs={12} title={"Currently Occupied Units"} value={occupiedHouses} />
-          <InfoDisplayPaper xs={12} title={"Currently Unoccupied Units"} value={totalProperties - occupiedHouses} />
-          <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={((occupiedHouses / totalProperties) * 100) | 0} />
+          {
+            UNIT_OCCUPANCY_SUMMARY_DATA.map((unitOccupancyData, index) =>
+              <InfoDisplayPaper key={index} xs={12} title={unitOccupancyData.title} value={unitOccupancyData.value} />
+            )
+          }
         </Grid>
         <Grid item>
           <Typography variant="h6" align="center" gutterBottom>

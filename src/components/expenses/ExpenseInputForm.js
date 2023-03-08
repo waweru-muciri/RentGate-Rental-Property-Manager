@@ -21,7 +21,7 @@ const PropertyExpenseSchema = Yup.object().shape({
   amount: Yup.number().positive("Amount must be a positive number").required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
   property_id: Yup.string().required("Property is Required"),
-  unit_id: Yup.string().required("Unit is Required"),
+  unit_id: Yup.string().default(""),
   expense_notes: Yup.string().default(""),
 });
 
@@ -178,8 +178,8 @@ const ExpenseInputForm = (props) => {
                 helperText={touched.type && errors.type}
               >
                 {EXPENSE_CATEGORIES.map((category, index) => (
-                  <MenuItem key={index} value={category}>
-                    {category}
+                  <MenuItem key={index} value={category.id}>
+                    {category.displayValue}
                   </MenuItem>
                 ))}
               </TextField>

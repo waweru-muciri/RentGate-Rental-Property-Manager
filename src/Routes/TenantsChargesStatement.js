@@ -119,7 +119,7 @@ let TenantStatementsPage = ({
                 >
                     <form
                         className={classes.form}
-                        id="contactSearchForm"
+                        id="tenantChargesSearchForm"
                         onSubmit={handleSearchFormSubmit}
                     >
                         <Grid
@@ -131,12 +131,12 @@ let TenantStatementsPage = ({
                             <Grid
                                 container
                                 item
-                                xs={12} lg={6}
+                                xs={12} md={6}
                                 spacing={1}
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item xs={12} lg={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -153,7 +153,7 @@ let TenantStatementsPage = ({
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item xs={12} lg={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -230,7 +230,7 @@ let TenantStatementsPage = ({
                                     ))}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} lg={6}>
+                            <Grid item xs={12} md={6}>
                                 <Autocomplete
                                     id="contact_filter"
                                     options={contacts}
@@ -259,7 +259,7 @@ let TenantStatementsPage = ({
                                 <Button
                                     onClick={(event) => handleSearchFormSubmit(event)}
                                     type="submit"
-                                    form="contactSearchForm"
+                                    form="tenantChargesSearchForm"
                                     color="primary"
                                     variant="contained"
                                     size="medium"
@@ -272,7 +272,7 @@ let TenantStatementsPage = ({
                                 <Button
                                     onClick={(event) => resetSearchForm(event)}
                                     type="reset"
-                                    form="contactSearchForm"
+                                    form="tenantChargesSearchForm"
                                     color="primary"
                                     variant="contained"
                                     size="medium"

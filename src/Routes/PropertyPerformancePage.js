@@ -14,8 +14,9 @@ import { Bar, HorizontalBar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, parse, getMonth, isWithinInterval, addDays, isSameDay } from "date-fns";
+import { format, getYear, parse, isWithinInterval, addDays, isSameDay } from "date-fns";
 import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
+import isSameMonth from "date-fns/isSameMonth";
 
 
 const chargesPerformanceGraphsOptions = {
@@ -76,7 +77,7 @@ const monthsInYear = getMonthsInYear()
 
 let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
     const classes = commonStyles()
-    let [propertyFilter, setPropertyFilter] = useState("all");
+    const [propertyFilter, setPropertyFilter] = useState("all");
     const [chargesItems, setChargesItems] = useState([]);
     const [expensesItems, setExpensesItems] = useState(expenses);
 
@@ -143,7 +144,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
                 result = "Utility Charge"
                 break;
             case 'one_time_charge':
-                result = "Recurring Charges"
+                result = "One Time Charge"
                 break;
             default:
                 result = "Others"
@@ -190,13 +191,8 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
     const totalOtherChargesBalances = totalOtherCharges - totalOtherChargesPayments
     //get months in an year in short format
     const monthsOfYearLabels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
-    //get charges and payments graph data from previous values
-    const chargesAndPaymentsGraphData = {
-        labels: monthsOfYearLabels,
-        datasets: []
-    }
 
-    //get income categories graph data from previous values
+    //GET INCOME CATEGORIES GRAPH DATA FROM PREVIOUS VALUES
     const incomeCategoriesGraphData = {
         labels: paymentsTypesForDisplay,
         datasets: [
@@ -217,7 +213,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
         return chargesItems
             .filter(({ charge_date, charge_type }) => {
                 const chargeDate = parse(charge_date, 'yyyy-MM-dd', new Date())
-                return (charge_type === 'rent') && (getMonth(monthDate) === getMonth(chargeDate))
+                return (charge_type === 'rent') && isSameMonth(monthDate, chargeDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
     })
     //get ONLY RENT payments for each month of the year
@@ -226,7 +222,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
         return chargesItems
             .filter(({ charge_date, charge_type }) => {
                 const chargeDate = parse(charge_date, 'yyyy-MM-dd', new Date())
-                return (charge_type === 'rent') && (getMonth(monthDate) === getMonth(chargeDate))
+                return (charge_type === 'rent') && isSameMonth(monthDate, chargeDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payed_amount) || 0), 0)
     })
     const totalEachMonthExpenses = monthsInYear.map((monthDate) => {
@@ -234,10 +230,10 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
         return expensesItems
             .filter((expense) => {
                 const expenseDate = parse(expense.expense_date, 'yyyy-MM-dd', new Date())
-                return getMonth(monthDate) === getMonth(expenseDate)
+                return isSameMonth(monthDate, expenseDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.amount) || 0), 0)
     })
-    
+
 
     //get expenses categories graph data from previous values
     const expensesCategoriesGraphData = {
@@ -254,27 +250,31 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
             }
         ]
     }
-    
-    chargesAndPaymentsGraphData.datasets.push({
-        data: totalEachMonthRentCharges,
-        label: 'Monthly Rent Charges', type: 'line', borderColor: '#EC932F', fill: false,
-        backgroundColor: '#EC932F',
-        pointBorderColor: '#EC932F',
-        pointBackgroundColor: '#EC932F',
-        pointHoverBackgroundColor: '#EC932F',
-        pointHoverBorderColor: '#EC932F',
-    })
-    
-    chargesAndPaymentsGraphData.datasets.push({
-        data: totalEachMonthRentPayments,
-        label: 'Monthly Rent Payments Collection', type: 'bar',
-        fill: false,
-        backgroundColor: '#71B37C',
-        borderColor: '#71B37C',
-        hoverBackgroundColor: '#71B37C',
-        hoverBorderColor: '#71B37C',
-    })
 
+    //get charges and payments graph data from previous values
+    const chargesAndPaymentsGraphData = {
+        labels: monthsOfYearLabels,
+        datasets: [
+            {
+                data: totalEachMonthRentCharges,
+                label: 'Monthly Rent Charges', type: 'line', borderColor: '#EC932F', fill: false,
+                backgroundColor: '#EC932F',
+                pointBorderColor: '#EC932F',
+                pointBackgroundColor: '#EC932F',
+                pointHoverBackgroundColor: '#EC932F',
+                pointHoverBorderColor: '#EC932F',
+            },
+            {
+                data: totalEachMonthRentPayments,
+                label: 'Monthly Rent Payments Collection', type: 'bar',
+                fill: false,
+                backgroundColor: '#71B37C',
+                borderColor: '#71B37C',
+                hoverBackgroundColor: '#71B37C',
+                hoverBorderColor: '#71B37C',
+            },
+        ]
+    }
 
     const rentChargesPaymentsPeformanceData = {
         due_date: 0,
@@ -508,7 +508,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
                                                     startIcon={<SearchIcon />}
                                                 >
                                                     SEARCH
-                            </Button>
+                                                </Button>
                                             </Grid>
                                         </Grid>
                                     </form>
@@ -602,7 +602,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
                     <Grid item xs>
                         <Typography variant="h6" align="center" gutterBottom>
                             Income Categories
-                    </Typography>
+                        </Typography>
                         <HorizontalBar
                             height={250}
                             data={incomeCategoriesGraphData}
@@ -612,7 +612,7 @@ let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
                     <Grid item xs>
                         <Typography variant="h6" align="center" gutterBottom>
                             Expenses
-                    </Typography>
+                        </Typography>
                         <HorizontalBar
                             height={250}
                             data={expensesCategoriesGraphData}

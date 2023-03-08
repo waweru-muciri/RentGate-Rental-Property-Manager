@@ -161,12 +161,12 @@ let TenantChargesStatementPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={!selected.length}
+                            disabled={selected.length !== 1}
                             startIcon={<AddIcon />}
                             onClick={() => toggleAddPaymentToChargeModal()}
                         >
                             Receive Payment
-                            </Button>
+                        </Button>
                     </Grid>
                     <Grid item>
                         <Button

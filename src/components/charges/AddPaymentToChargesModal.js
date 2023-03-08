@@ -7,7 +7,10 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
-import CustomSnackbar from '../CustomSnackbar'
+import CustomSnackbar from '../CustomSnackbar';
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles.js";
@@ -28,6 +31,8 @@ export default function AddPaymentToChargesModal(props) {
     const paymentValues = {
         memo: "Charge Payment",
         payment_date: defaultDate,
+        send_email_receipts: false,
+        send_sms_receipts: false,
     }
 
     return (
@@ -43,10 +48,11 @@ export default function AddPaymentToChargesModal(props) {
                 <Formik
                     initialValues={paymentValues}
                     validationSchema={AddPaymentToChargesSchema}
-                    onSubmit={(values, { setStatus }) => {
+                    onSubmit={async (values, { setStatus }) => {
                         try {
                             //edit the charges here to show that they are payed
-                            chargesToAddPayments.forEach(async (charge) => {
+                            for (let index = 0; index < chargesToAddPayments.length; index++) {
+                                const charge = chargesToAddPayments[index];
                                 const chargePayment = {
                                     charge_id: charge.id,
                                     payment_amount: charge.charge_amount,
@@ -60,7 +66,14 @@ export default function AddPaymentToChargesModal(props) {
                                 };
                                 await handleItemSubmit(chargePayment, 'charge-payments')
                                 await handleItemSubmit({ id: charge.id, payed: true }, 'transactions-charges')
-                            })
+
+                            }
+                            if (values.send_email_receipts) {
+                                
+                            }
+                            if (values.send_sms_receipts) {
+                                
+                            }
                             setStatus({ sent: true, msg: "Payments added successfully." })
                             setTimeout(() => handleClose(), 1000);
                         } catch (error) {
@@ -133,6 +146,36 @@ export default function AddPaymentToChargesModal(props) {
                                             helperText={"Include details for the payments here (max 50)"}
                                         />
                                     </Grid>
+                                    <Grid item>
+                                        <FormControl color="secondary" error={errors.send_email_receipts && touched.send_email_receipts}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={values.send_email_receipts}
+                                                        onChange={handleChange}
+                                                        name="send_email_receipts"
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Send Email Receipts"
+                                            />
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item>
+                                        <FormControl color="secondary" error={errors.send_sms_receipts && touched.send_sms_receipts}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={values.send_sms_receipts}
+                                                        onChange={handleChange}
+                                                        name="send_sms_receipts"
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Send SMS Receipts"
+                                            />
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
                                 <Grid
                                     item
@@ -150,7 +193,7 @@ export default function AddPaymentToChargesModal(props) {
                                             disableElevation
                                         >
                                             Cancel
-									    </Button>
+                                        </Button>
                                     </Grid>
                                     <Grid item>
                                         <Button
@@ -163,7 +206,7 @@ export default function AddPaymentToChargesModal(props) {
                                             disabled={isSubmitting}
                                         >
                                             Add Payments
-								        </Button>
+                                        </Button>
                                     </Grid>
                                 </Grid>
                             </Grid>

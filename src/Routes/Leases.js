@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import RentAdjustModal from "./RentAdjustModal";
+import AddChargeForm from "../components/charges/AddChargeForm";
 import { parse } from "date-fns";
 
 const headCells = [
@@ -47,14 +48,15 @@ let TransactionPage = ({
     handleItemDelete,
 }) => {
     const classes = commonStyles();
-    let [leaseItems, setLeaseItems] = useState([]);
-    let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("all");
-    let [activeStatusFilter, setActiveStatusFilter] = useState("all");
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
+    const [leaseItems, setLeaseItems] = useState([]);
+    const [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [activeStatusFilter, setActiveStatusFilter] = useState("all");
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
     const [adjustRentModalState, setAdjustRentModalState] = useState(false);
+    const [addChargeModalState, setAddChargeModalState] = useState(false);
 
     const filterLeasesByCriteria = (leasesToFilter) => {
         //filter the leases according to the search criteria here
@@ -65,7 +67,7 @@ let TransactionPage = ({
                 && (propertyFilter === "all" ? true : property_id === propertyFilter)
                 && (activeStatusFilter === "all" ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter)
             )
-            return filteredLeases;
+        return filteredLeases;
     }
 
     useEffect(() => {
@@ -128,7 +130,7 @@ let TransactionPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={!selected.length}
+                            disabled={selected.length !== 1}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -141,10 +143,11 @@ let TransactionPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
+                            disabled={selected.length !== 1}
                             startIcon={<AddIcon />}
-                            disabled={!selected.length}
-                            component={Link}
-                            to={`charges/${selected[0]}/new`}
+                            onClick={() => {
+                                setAddChargeModalState(!addChargeModalState)
+                            }}
                         >
                             Add Charge
                         </Button>
@@ -168,7 +171,7 @@ let TransactionPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<BlockIcon />}
-                            disabled={!selected.length}
+                            disabled={selected.length !== 1}
                             component={Link}
                             to={`/app/notices/new?lease=${selected[0]}`}
                         >
@@ -341,6 +344,15 @@ let TransactionPage = ({
                         <RentAdjustModal open={adjustRentModalState}
                             leasesToAdjustRentAmounts={leaseItems.filter(({ id }) => selected.includes(id))}
                             handleClose={handleModalStateToggle} history={history}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
+                {
+                    addChargeModalState ?
+                        <AddChargeForm open={addChargeModalState}
+                            leaseToAddCharge={leaseItems.find(({ id }) => id === selected[0])}
+                            handleClose={() => {
+                                setAddChargeModalState(!addChargeModalState);
+                            }}
                             handleItemSubmit={handleItemSubmit} /> : null
                 }
                 <Grid item xs={12}>

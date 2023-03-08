@@ -152,7 +152,7 @@ let MaintenanceRequestsPage = ({
 								justify="center"
 								direction="row"
 							>
-								<Grid item lg={6} md={12} xs={12}>
+								<Grid item md={6} xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -169,7 +169,7 @@ let MaintenanceRequestsPage = ({
 										InputLabelProps={{ shrink: true }}
 									/>
 								</Grid>
-								<Grid item lg={6} md={12} xs={12}>
+								<Grid item md={6} xs={12}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -206,7 +206,7 @@ let MaintenanceRequestsPage = ({
 										renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
 									/>
 								</Grid>
-								<Grid item lg={6} md={12} xs={12}>
+								<Grid item md={6} xs={12}>
 									<TextField
 										fullWidth
 										select

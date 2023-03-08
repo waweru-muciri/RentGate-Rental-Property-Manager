@@ -11,7 +11,10 @@ import RED from '@material-ui/core/colors/red';
 import GREEN from '@material-ui/core/colors/green';
 import { Doughnut } from 'react-chartjs-2';
 import GREY from "@material-ui/core/colors/grey";
-import { isWithinInterval, startOfMonth, startOfToday, endOfMonth, parse } from 'date-fns'
+import { isWithinInterval, startOfMonth, startOfToday, endOfMonth, parse } from 'date-fns';
+import { getUnitTypes } from "../assets/commonAssets";
+
+const UNIT_TYPES_WITH_DETAILS = getUnitTypes();
 
 const legendOpts = {
     display: true,
@@ -27,7 +30,7 @@ const legendOpts = {
 let PropertySummaryPage = (props) => {
     let { classes, propertyActiveLeasesNumber, propertyToShowDetails, propertyUnits, rentalPayments, users } = props
     //get current month income data
-    const curentMonthIncomeData = { datasets: [] }
+    const curentMonthIncomeData = { datasets: [], labels: []}
     const totalPaymentsByType = []
     const rentalPaymentsForCurrentMonth = rentalPayments
         .filter(payment => {
@@ -42,30 +45,40 @@ let PropertySummaryPage = (props) => {
         .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
     totalPaymentsByType.push({ type: "rent", totalAmount: totalCurrentMonthRentPayments, label: "Rent" })
     totalPaymentsByType.push({ type: "other", totalAmount: totalCurrentMonthOtherPayments, label: "Others" })
-    curentMonthIncomeData.labels = totalPaymentsByType.map(totalPayment => totalPayment.label)
+    curentMonthIncomeData.labels.push(totalPaymentsByType.map(totalPayment => totalPayment.label))
     curentMonthIncomeData.datasets.push({
         data: totalPaymentsByType.map(totalPayment => totalPayment.totalAmount),
         backgroundColor: [GREEN[800], GREEN[200]]
     })
     //get occupancy graph data
-    const rentalUnitsOccupancyData = { datasets: [] }
-    rentalUnitsOccupancyData.labels = ['Occupied Units', 'Vacant Units']
+    const rentalUnitsOccupancyData = { datasets: [], labels: [] }
+    rentalUnitsOccupancyData.labels.push('Occupied Units', 'Vacant Units');
     rentalUnitsOccupancyData.datasets.push(
         {
             data: [propertyActiveLeasesNumber, (propertyUnits.length - propertyActiveLeasesNumber)],
             backgroundColor: [RED[800], RED[200]]
         })
     //get the number of the different units by category
-    const rentalUnitsDistributionData = { datasets: [] }
-    const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)))
-    rentalUnitsDistributionData.labels = unitTypes
+    const rentalUnitsDistributionData = {
+        datasets: [],
+        labels: [],
+    }
+    const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)));
+    const unitNamesForDisplay = unitTypes.map(unitType => {
+        const unitTypeDetails = UNIT_TYPES_WITH_DETAILS.find(({ id }) => id === unitType) || {}
+        return `${unitTypeDetails.displayValue}s`
+    })
+    //push the unit names for display to the labels array 
+    rentalUnitsDistributionData.labels.push(...unitNamesForDisplay);
+    //push the display data to the datasets array
     rentalUnitsDistributionData.datasets.push({
         data: unitTypes
-            .map(unit_type => {
-                return propertyUnits.filter((property) => property.unit_type === unit_type).length
-            }),
+        .map(unit_type => {
+            return propertyUnits.filter((property) => property.unit_type === unit_type).length
+        }),
         backgroundColor: unitTypes.map((_unit_type, key) => TEAL[(key + 1) * 100])
     })
+
     const propertyManager = users.find((user) => user.id === propertyToShowDetails.assigned_to) ||
         { first_name: 'R', last_name: 'O' }
     const propertyOwner = users.find((user) => user.id === propertyToShowDetails.owner) ||
