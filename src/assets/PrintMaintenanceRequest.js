@@ -1,14 +1,9 @@
-import jsPDF from "jspdf";
 import Button from "@material-ui/core/Button";
 import React from "react";
-import { renderToString } from "react-dom/server";
 import PrintIcon from "@material-ui/icons/Print";
-import MaintenanceRequestPrintLayout from "./MaintenanceRequestPrintLayout";
-import html2canvas from "html2canvas";
+import { printDocument } from "./PdfMakePrint";
 
 export default function (props) {
-    window.html2canvas = html2canvas;
-    var doc = new jsPDF("l", "pt", "a4");
     const maintenanceRequest = typeof props.maintenanceRequestToPrint !== 'undefined' ? props.maintenanceRequestToPrint : {}
     const maintenanceRequestDetails = {
         tenant_name: maintenanceRequest.tenant_name,
@@ -26,22 +21,41 @@ export default function (props) {
         property_address: maintenanceRequest.property_address,
         company_address: maintenanceRequest.company_address || '123 Company Address',
     }
-    var maintenanceRequestString = renderToString(<MaintenanceRequestPrintLayout maintenanceRequestToPrint={maintenanceRequestDetails} />);
+    var docDefinition = [{
+            columns: [
+            [
+                maintenanceRequestDetails.company_name, 
+                maintenanceRequestDetails.company_phone_number, 
+                maintenanceRequestDetails.company_address, 
+            ], 
+            [
+                {text: maintenanceRequestDetails.tenant_name, alignment: 'center'}, 
+                {text: maintenanceRequestDetails.tenant_phone_number, alignment: 'center'}, 
+                {text: maintenanceRequestDetails.tenant_email, alignment: 'center'}, 
+                {text: maintenanceRequestDetails.property_ref, alignment: 'center'}, 
+            ], 
+            ],
+            columnGap: 10,
+            
+        }, 
+        {text: `OBJECT: MAINTENANCE REQUEST ON ${maintenanceRequestDetails.date_created}`, bold: true, fontSize: 14, decoration: "underline", margin: [ 0, 6, 0, 6 ] }, 
+        {text: `Unit:  ${maintenanceRequestDetails.property_ref}, ${maintenanceRequestDetails.property_address}`, bold: true, fontSize: 12, },
+        [{text: `Request Details : `, fontSize: 12,  bold: true, margin: [ 0, 5, 0, 0 ]},
+        {text: `${maintenanceRequestDetails.maintenance_details}`,fontSize: 12, margin: [ 0, 5, 0, 10 ]},
+        {text: 'Sincerely,', }],
+        {text: maintenanceRequestDetails.landlord_name, fontSize: 12 },
+        {text: `${maintenanceRequestDetails.landlord_phone_number}, ${maintenanceRequestDetails.landlord_email},` ,fontSize: 12},
+        {text: 'Landlord', fontSize: 14},
+        ]
+
     return (
         <Button
-            disabled={props.disabled}
             aria-label="Print to Pdf"
             variant="contained"
             size="medium"
             color="primary"
-            // disabled={props.disabled}
-            onClick={() => {
-                doc.html(maintenanceRequestString, {
-                    callback: function (doc) {
-                        doc.save();
-                    },
-                });
-            }}
+            disabled={props.disabled}
+            onClick={() => printDocument(`${maintenanceRequestDetails.tenant_name} maintenance request`, docDefinition)}
             startIcon={<PrintIcon />}
         >
             pdf

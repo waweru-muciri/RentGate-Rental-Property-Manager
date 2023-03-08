@@ -28,13 +28,17 @@ import UserPage from "./UserPage";
 import UserProfilePage from "./UserProfilePage";
 import MaintenanceRequestPage from "./MaintenanceRequestPage";
 import ToDosPage from "./ToDos";
+import LeaseRenewalsPage from "./LeaseRenewals";
 import AuditLogsPage from "./AuditLogs";
 import TransactionsPage from "./Transactions";
 import PropertyPage from "./PropertyPage";
 import ContactPage from "./ContactPage";
 import ContactsPage from "./Contacts";
 import NoticesPage from "./Notices";
+import RentRollPage from "./RentRoll";
 import NoticePage from "./NoticePage";
+import MeterReadingsPage from "./MeterReadingsPage";
+import MeterReadingPage from "./MeterReadingPage";
 import TransactionPage from "./TransactionPage";
 import DashBoard from "./DashBoard";
 import clsx from "clsx";
@@ -75,7 +79,10 @@ import AssignmentIcon from "@material-ui/icons/Assignment";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import NoteIcon from '@material-ui/icons/Note';
+import ApartmentIcon from '@material-ui/icons/Apartment';
 import PaymentIcon from '@material-ui/icons/Payment';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import WorkIcon from '@material-ui/icons/Work';
 import Head from "../components/Head";
 
 
@@ -149,7 +156,6 @@ const useStyles = makeStyles((theme) => ({
 
 const navigationLinks = [
   { text: "Home", to: "/", icon: <DashboardIcon /> },
-  { text: "Rentals", to: "/properties/rentals/", icon: <HouseIcon /> },
   { text: "Contacts", to: "/contacts", icon: <ContactsIcon /> },
   { text: "Users", to: "/users", icon: <GroupIcon /> },
   {
@@ -164,17 +170,30 @@ const othersLinkNestedLinks = [
   { text: "Vacating Notices", to: "/notices", icon: <NoteIcon /> },
   { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
 ];
+
+const propertyLinkNestedLinks = [
+  { text: "Rentals", to: "/properties", icon: <ApartmentIcon /> },
+  { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
+  { text: "Rent Roll", to: "/rent-roll", icon: <AccountBalanceIcon /> },
+  { text: "Meter Readings", to: "/properties/meter-reading", icon: <PaymentIcon /> },
+];
+
 const reportLinkNestedLinks = [
   {
     text: "Property Performance",
     to: "/reports/property-performance",
     icon: <AssessmentIcon />,
   }, {
+    text: "Property Income",
+    to: "/reports/property-income",
+    icon: <PaymentIcon />,
+  }, {
     text: "Tenant Statements",
     to: "/reports/tenant-statements",
     icon: <PaymentIcon />,
   },
 ];
+
 const accountsLinkNestedLinks = [
   { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
   {
@@ -199,7 +218,7 @@ let MainPage = ({
 
   useEffect(() => {
     if (!properties.length) {
-      fetchData([
+       fetchData([
         "properties",
         "transactions",
         "maintenance-requests",
@@ -212,7 +231,8 @@ let MainPage = ({
         "notices",
         "to-dos",
         "users",
-        "property_expenditure",
+        "expenses",
+        "meter_readings",
       ]);
     }
   }, [properties]);
@@ -401,6 +421,60 @@ let MainPage = ({
                 </ListItem>
               </React.Fragment>
             ))}
+            {/* Property Navigation Links */}
+            <ListItem
+              button
+              key={40}
+              onClick={(event) => {
+                event.preventDefault();
+                if (selectedTab.parent === 40) {
+                  handleListItemClick({ parent: -1 });
+                }
+                else {
+                  handleListItemClick({ parent: 40 });
+                }
+              }}
+            >
+              <ListItemIcon>
+                <HouseIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Properties"} />
+              {selectedTab.parent === 40 ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse
+              in={selectedTab.parent === 40}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {propertyLinkNestedLinks.map(
+                  (innerLinkItem, innerLinkItemIndex) => (
+                    <ListItem
+                      component={Link}
+                      to={innerLinkItem.to}
+                      button
+                      className={classes.nested}
+                      key={innerLinkItem.text}
+                      selected={
+                        selectedTab.parent === 40 &&
+                        selectedTab.nestedLink === 'properties' + innerLinkItemIndex
+                      }
+                      onClick={(event) => {
+                        handleDrawerToggle();
+                        handleListItemClick({
+                          parent: 40,
+                          nestedLink: 'properties' + innerLinkItemIndex,
+                        });
+                      }}
+                    >
+                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
+                      <ListItemText primary={innerLinkItem.text} />
+                    </ListItem>
+                  )
+                )}
+              </List>
+            </Collapse>
+            {/*accounts tab here*/}
             <ListItem
               button
               key={10}
@@ -581,6 +655,8 @@ let MainPage = ({
         <Switch>
           <Route exact path={`${match.path}`} component={DashBoard} />
           <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
+          <Route exact path={`${match.path}properties/lease-renewals`} component={LeaseRenewalsPage} />
+          <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
           <Route exact path={`${match.path}emails`} component={EmailsPage} />
           <Route
             exact
@@ -682,7 +758,14 @@ let MainPage = ({
             path={`${match.path}notices/:noticeId/edit`}
             component={NoticePage}
           />
-          <Route path={`${match.path}properties`} component={PropertiesPage} />
+          <Route
+            exact
+            path={`${match.path}properties/meter-reading/:meterReadingId/edit`}
+            component={MeterReadingPage}
+          />
+          <Route exact path={`${match.path}properties`} component={PropertiesPage} />
+          <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
+          <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
           <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
           <Route
             exact

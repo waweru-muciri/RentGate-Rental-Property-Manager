@@ -28,14 +28,15 @@ const headCells = [
         disablePadding: true,
         label: "Property Type",
     },
+    { id: "ref", numeric: false, disablePadding: true, label: "Property/Unit Ref" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
     { id: "is_fully_furnished", numeric: false, disablePadding: true, label: "Fitted" },
     {
-        id: "postal_code",
+        id: "address",
         numeric: false,
         disablePadding: true,
-        label: "Postal Code",
+        label: "Property Adddress",
     },
     {
         id: "square_footage",
@@ -43,11 +44,11 @@ const headCells = [
         disablePadding: true,
         label: "Square Footage",
     },
-    { id: "price", numeric: false, disablePadding: true, label: "Price" },
+    { id: "price", numeric: false, disablePadding: true, label: "Rent" },
     { id: "tenant", numeric: false, disablePadding: true, label: "Tenant" },
     { id: "owner", numeric: false, disablePadding: true, label: "Owner" },
     {
-        id: "assigned_to",
+        id: "landlord_name",
         numeric: false,
         disablePadding: true,
         label: "Assigned To",
@@ -59,12 +60,12 @@ let PropertyPage = ({
     properties,
     currentUser,
     contacts,
+    users,
     match,
     error,
 }) => {
     const classes = commonStyles();
     // REMOVE THIS IN PRODUCTION APP
-    const ASSIGNED_TO = []
     let [propertyItems, setPropertyItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
     let [propertyAddressFilter, setPropertyAddressFilter] = useState("");
@@ -77,17 +78,22 @@ let PropertyPage = ({
     }, [properties, contacts])
 
     const getMappedProperties = () => {
+		console.log(properties)
         const mappedproperties = properties.map(
             (property) => {
                const tenant = contacts.find(
-                    (contact) => contact.id === property.tenants[0]
+                    (contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
                 );
             //replace this with users on production
-            const owner = contacts.find(
-                    (contact) => contact.id === property.owner
+            const owner = users.find(
+                    (user) => user.id === property.owner
+                );
+            const landlord  = users.find(
+                    (user) => user.id === property.assigned_to
                 );
             const propertyDetails = {}
             propertyDetails.owner = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
+            propertyDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
             propertyDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
             return Object.assign({}, property, propertyDetails);
             }
@@ -111,8 +117,9 @@ let PropertyPage = ({
         let filteredProperties = getMappedProperties()
         .filter(({ ref }) => !propertyRefFilter ? true : ref === propertyRefFilter)
         .filter(({ property_type }) => !propertyTypeFilter ? true : property_type === propertyTypeFilter)
-        .filter(({ postal_code }) => !propertyAddressFilter ? true : postal_code.toLowerCase().includes(propertyAddressFilter.toLowerCase()))
-        .filter(({ assigned_to }) => !assignedToFilter ? true : assigned_to === assignedToFilter)
+        .filter((property) => !propertyAddressFilter ? true : typeof property.address !== 'undefined'  ? property.address.toLowerCase().includes(propertyAddressFilter.toLowerCase()) : false)
+ 
+		.filter((property) => !assignedToFilter ? true : property.assigned_to  === assignedToFilter)
 
         setPropertyItems(filteredProperties);
     };
@@ -169,7 +176,7 @@ let PropertyPage = ({
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
-                            Edit Property
+                            Edit
                         </Button>
                     </Grid>
                     <Grid item>
@@ -241,9 +248,9 @@ let PropertyPage = ({
                                             );
                                         }}
                                     >
-                                    {ASSIGNED_TO.map((assigned_to, index) => (
-                                    <MenuItem key={index}   value={assigned_to}>
-                                            {assigned_to}
+                                    {users.map((user, index) => (
+                                    <MenuItem key={index}   value={user.id}>
+                                            {user.first_name + ' ' + user.last_name}
                                     </MenuItem>
                                     ))}
                                     </TextField>
@@ -355,6 +362,7 @@ const mapStateToProps = (state, ownProps) => {
         properties: state.properties,
         currentUser: state.currentUser,
         contacts: state.contacts,
+        users: state.users,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,

@@ -16,32 +16,38 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 
-const expensesTableHeadCells = [
+const meterReadingsTableHeadCells = [
     {
-        id: "expense_date",
+        id: "reading_date",
         numeric: false,
         disablePadding: true,
         label: "Date",
     },
-    { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
+    { id: "meter_type", numeric: false, disablePadding: true, label: "Meter Type" },
     {
         id: "property_ref",
         numeric: false,
         disablePadding: true,
-        label: "Property Ref",
+        label: "Property Ref/Unit",
     },
-    { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant Id Number" },
+    { id: "prior_value", numeric: false, disablePadding: true, label: "Prior Value" },
+    { id: "current_value", numeric: false, disablePadding: true, label: "Curent Value" },
+    { id: "usage", numeric: false, disablePadding: true, label: "Usage" },
+    { id: "amount", numeric: false, disablePadding: true, label: "Amount" },
 ];
 
-let ExpensesPage = ({
-    expenses,
+let MeterReadingsPage = ({
+    meterReadings,
     handleItemDelete,
     properties,
+	contacts,
     match,
     error,
 }) => {
     const classes = commonStyles();
-    let [expenseItems, setExpenseItems] = useState([]);
+    let [meterReadingItems, setMeterReadingItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [propertyFilter, setPropertyFilter] = useState("");
@@ -49,70 +55,80 @@ let ExpensesPage = ({
 
 
     useEffect(() => {
-        setExpenseItems(getMappedExpenses());
-    }, [expenses.length]);
+        setMeterReadingItems(getMappedMeterReadings());
+    }, [meterReadings]);
 
-    const exportVacatingExpensesToExcel = () => {
-        let items = expenseItems.filter(({ id }) => selected.includes(id));
+    const exportMeterReadingsToExcel = () => {
+        let items = meterReadingItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
-            "Expenses  Records",
+            "MeterReadings  Records",
             "Expense Data",
             items,
             "ExpenseData"
         );
     };
 
-    const getMappedExpenses = () => {
-        const mappedExpenses = expenses.map((expense) => {
+    const getMappedMeterReadings = () => {
+        const mappedMeterReadings = meterReadings.map((meterReading) => {
             const property = properties.find(
-                (property) => property.id === expense.property
+                (property) => property.id === meterReading.property
             );
-            const expenseDetails = {};
-            expenseDetails.property_ref =
+            const meterReadingDetails = {};
+				if (typeof property !== 'undefined') {
+				const tenant = contacts.find(
+					(contact) => property.tenants.length ? contact.id === property.tenants[0] : ''
+				);
+				console.log(tenant)
+				if (typeof tenant !== 'undefined') {
+					meterReadingDetails.tenant_id_number = tenant.id_number
+					meterReadingDetails.tenant_name = tenant.first_name + " " + tenant.last_name
+				}
+				}
+            const usage = parseFloat(meterReading.current_value) - parseFloat(meterReading.prior_value )
+            meterReadingDetails.usage = usage
+            meterReadingDetails.amount = (usage * parseFloat(meterReading.unit_charge)) + parseFloat(meterReading.base_charge)
+            meterReadingDetails.property_ref =
                 typeof property !== "undefined" ? property.ref : null;
-            expenseDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, expense, expenseDetails);
+            return Object.assign({}, meterReading, meterReadingDetails);
         });
-        return mappedExpenses;
+        return mappedMeterReadings;
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the expenses here according to search criteria
-        let filteredExpenses = getMappedExpenses()
-            .filter(({ expense_date }) =>
-                !fromDateFilter ? true : expense_date >= fromDateFilter
+        //filter the meterReadings here according to search criteria
+        let filteredMeterReadings = getMappedMeterReadings()
+            .filter(({ reading_date }) =>
+                !fromDateFilter ? true : reading_date >= fromDateFilter
             )
-            .filter(({ expense_date }) =>
-                !toDateFilter ? true : expense_date <= toDateFilter
+            .filter(({ reading_date }) =>
+                !toDateFilter ? true : reading_date <= toDateFilter
             )
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
 
-        setExpenseItems(filteredExpenses);
+        setMeterReadingItems(filteredMeterReadings);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setExpenseItems(getMappedExpenses());
+        setMeterReadingItems(getMappedMeterReadings());
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("");
     };
 
     return (
-                <Layout pageTitle="Property Expenses">
-
+        <Layout pageTitle="Property Meter Readings">
             <Grid
                 container
                 spacing={3}
                 justify="space-evenly"
                 alignItems="center"
-            > 
-            <Grid item lg={12}>
-                    <PageHeading text="Property Expenses" />
+            >
+                <Grid item lg={12}>
+                    <PageHeading text="Property Meter Readings" />
                 </Grid>
                 <Grid
                     container
@@ -154,7 +170,7 @@ let ExpensesPage = ({
                             aria-label="Export to Excel"
                             disabled={selected.length <= 0}
                             onClick={(event) => {
-                                exportVacatingExpensesToExcel();
+                                exportMeterReadingsToExcel();
                             }}
                         />
                     </Grid>
@@ -176,47 +192,47 @@ let ExpensesPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                            <Grid
-                                container
-                                item
-                                lg={6} md={12} xs={12}
-                                spacing={1}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        id="from_date_filter"
-                                        name="from_date_filter"
-                                        label="From Date"
-                                        value={fromDateFilter}
-                                        onChange={(event) => {
-                                            setFromDateFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
+                                <Grid
+                                    container
+                                    item
+                                    lg={6} md={12} xs={12}
+                                    spacing={1}
+                                    justify="center"
+                                    direction="row"
+                                >
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            id="from_date_filter"
+                                            name="from_date_filter"
+                                            label="From Date"
+                                            value={fromDateFilter}
+                                            onChange={(event) => {
+                                                setFromDateFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            name="to_date_filter"
+                                            label="To Date"
+                                            id="to_date_filter"
+                                            onChange={(event) => {
+                                                setToDateFilter(event.target.value);
+                                            }}
+                                            value={toDateFilter}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        name="to_date_filter"
-                                        label="To Date"
-                                        id="to_date_filter"
-                                        onChange={(event) => {
-                                            setToDateFilter(event.target.value);
-                                        }}
-                                        value={toDateFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                            </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
@@ -269,7 +285,7 @@ let ExpensesPage = ({
                                 </Grid>
                                 <Grid item>
                                     <Button
-                                        onClick={(event) => 
+                                        onClick={(event) =>
                                             resetSearchForm(event)
                                         }
                                         type="reset"
@@ -298,10 +314,10 @@ let ExpensesPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={expenseItems}
-                        headCells={expensesTableHeadCells}
+                        rows={meterReadingItems}
+                        headCells={meterReadingsTableHeadCells}
                         handleDelete={handleItemDelete}
-                        deleteUrl={"expenses"}
+                        deleteUrl={"meter_readings"}
                     />
                 </Grid>
             </Grid>
@@ -311,8 +327,9 @@ let ExpensesPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        expenses: state.expenses,
+        meterReadings: state.meterReadings,
         properties: state.properties,
+		contacts: state.contacts,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,
@@ -324,6 +341,6 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-ExpensesPage = connect(mapStateToProps, mapDispatchToProps)(ExpensesPage);
+MeterReadingsPage = connect(mapStateToProps, mapDispatchToProps)(MeterReadingsPage);
 
-export default withRouter(ExpensesPage);
+export default withRouter(MeterReadingsPage);

@@ -26,18 +26,16 @@ const PAYMENT_OPTIONS = getPaymentOptions();
 const defaultDate = moment().format("YYYY-MM-DD");
 
 const TransactionSchema = Yup.object().shape({
-	assigned_to: Yup.string().trim().required('Assigned To is Required'),
 	payment_term: Yup.string().trim().required("Payment Term is Required"),
 	transaction_ref: Yup.string().trim().required("Transaction Ref is Required"),
 	landlord: Yup.string().trim().required("Landlord is Required"),
 	tenant: Yup.string().trim().required("Tenant is Required"),
-	transaction_price: Yup.number().min(0).required("Transaction Price is Required"),
+	transaction_price: Yup.number().min(0).required("Rent Amount is Required"),
 	security_deposit: Yup.number().min(0).default(0),
-	agent_commission: Yup.number().min(0).default(0),
-	company_commission: Yup.number().min(0).default(0),
 	transaction_date: Yup.date().required("Transaction Date is Required").default(defaultDate),
 	lease_start: Yup.date().required("Lease Start Date is Required").default(defaultDate),
-	lease_end: Yup.date(),
+	lease_end: Yup.date().default(moment(defaultDate).add(1, 'M')),
+	lease_renewal: Yup.date().default(moment(defaultDate).add(1, 'M')),
 	property: Yup.string().trim().required("Property is Required"),
 	lease_type: Yup.string().trim().required("Lease Type is Required"),
 });
@@ -52,7 +50,6 @@ let TransactionInputForm = (props) => {
 		property: transactionToEdit.property || "",
 		tenant: transactionToEdit.tenant || "",
 		lease_renewal: transactionToEdit.lease_renewal || defaultDate,
-		renewal_reminder: transactionToEdit.renewal_reminder || defaultDate,
 		transaction_ref: transactionToEdit.transaction_ref || "",
 		transaction_date: transactionToEdit.transaction_date || defaultDate,
 		security_deposit: transactionToEdit.security_deposit || 0,
@@ -60,8 +57,6 @@ let TransactionInputForm = (props) => {
 		lease_start: transactionToEdit.lease_start || defaultDate,
 		lease_end: transactionToEdit.lease_end || defaultDate,
 		payment_term: transactionToEdit.payment_term || "",
-		agent_commission: transactionToEdit.agent_commission || 0,
-		company_commission: transactionToEdit.company_commission || 0,
 		lease_type: transactionToEdit.lease_type || "",
 		transaction_price: transactionToEdit.transaction_price || 0,
 	};
@@ -75,7 +70,6 @@ let TransactionInputForm = (props) => {
 					id: values.id,
 					property: values.property,
 					lease_renewal: values.lease_renewal,
-					renewal_reminder: values.renewal_reminder,
 					transaction_ref: values.transaction_ref,
 					transaction_date: values.transaction_date,
 					security_deposit: values.security_deposit,
@@ -84,8 +78,6 @@ let TransactionInputForm = (props) => {
 					lease_start: values.lease_start,
 					lease_end: values.lease_end,
 					payment_term: values.payment_term,
-					agent_commission: values.agent_commission || 0,
-					company_commission: values.company_commission || 0,
 					lease_type: values.lease_type,
 					transaction_price: values.transaction_price,
 				};
@@ -129,7 +121,7 @@ let TransactionInputForm = (props) => {
 									direction="column"
 								>
 									<Typography variant="h6">
-										Transaction Information
+										Lease Information
 									</Typography>
 									<TextField
 										variant="outlined"
@@ -146,28 +138,6 @@ let TransactionInputForm = (props) => {
 										{properties.map((property, index) => (
 											<MenuItem key={index} value={property.id}>
 												{property.ref}
-											</MenuItem>
-										))}
-									</TextField>
-
-									<TextField
-										error={'assigned_to' in errors}
-										helperText={
-											errors.assigned_to
-										}
-										variant="outlined"
-										type="select"
-										name="assigned_to"
-										id="assigned_to"
-										label="Assigned To"
-										value={values.assigned_to}
-										onChange={handleChange}
-										onBlur={handleBlur}
-									>
-										{/** substitute for users that can be assigned to here **/}
-										{users.map((user, index) => (
-											<MenuItem key={index} value={user.id}>
-												{user.first_name + " " + user.last_name}
 											</MenuItem>
 										))}
 									</TextField>
@@ -241,17 +211,6 @@ let TransactionInputForm = (props) => {
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
 									/>
-									<TextField
-										variant="outlined"
-										id="renewal_reminder"
-										label="Reminder Date"
-										type="date"
-										name="renewal_reminder"
-										value={values.renewal_reminder}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{ shrink: true }}
-									/>
 								</Grid>
 								<Grid
 									lg={6}
@@ -320,7 +279,7 @@ let TransactionInputForm = (props) => {
 										variant="outlined"
 										name="transaction_price"
 										id="transaction_price"
-										label="Transaction Price"
+										label="Rent Amount"
 										value={values.transaction_price}
 										onChange={handleChange}
 										onBlur={handleBlur}
@@ -370,37 +329,6 @@ let TransactionInputForm = (props) => {
 											)
 										)}
 									</TextField>
-									<TextField
-										variant="outlined"
-										id="company_commission"
-										label="Company Commission"
-										name="company_commission"
-										value={values.company_commission}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={
-											'company_commission' in errors
-										}
-										helperText={
-											errors.company_commission
-										}
-
-									/>
-									<TextField
-										variant="outlined"
-										id="agent_commission"
-										label="Agent Commission"
-										name="agent_commission"
-										value={values.agent_commission}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={
-											'agent_commission' in errors
-										}
-										helperText={
-											errors.agent_commission
-										}
-									/>
 								</Grid>
 								{/* end of input fields grid and start of buttons grid */}
 								<Grid

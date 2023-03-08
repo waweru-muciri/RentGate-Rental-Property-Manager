@@ -14,6 +14,7 @@ import * as faxesReducers from "./faxes";
 import * as noticesReducers from "./notices";
 import * as expensesReducers from "./expenses";
 import * as toDosReducers from "./toDos";
+import * as meterReadingsReducers from "./meterReadings";
 
 export function itemsHasErrored(state = null, action) {
     switch (action.type) {
@@ -86,6 +87,7 @@ function reducers(state = {}, action) {
             state.maintenanceRequests,
             action
         ),
+        meterReadings: meterReadingsReducers.meterReadings(state.meterReadings, action),
         toDos: toDosReducers.toDos(state.toDos, action),
         notices: noticesReducers.notices(state.notices, action),
         currentUser: setCurrentUser(state.currentUser, action),

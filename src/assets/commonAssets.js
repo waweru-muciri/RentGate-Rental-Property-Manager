@@ -38,7 +38,7 @@ export function getPropertyTypes() {
 
 export function getPropertyBaths() {
 	let baths = [];
-	for (let i = 1; i < 31; i++) {
+	for (let i = 1; i <= 5; i++) {
 		i === 1 ? baths.push(i + " Bath") : baths.push(i + " Baths");
 	}
 	return baths.concat([
@@ -50,14 +50,9 @@ export function getPropertyBaths() {
 	]);
 }
 
-export function getCurrencyOptions() {
-	let currency_options = ["Ksh", "Ush", "Tsh"];
-	return currency_options;
-}
-
 export function getPropertyBeds() {
 	let beds = ["Studio"];
-	for (let i = 1; i < 31; i++) {
+	for (let i = 1; i <= 5; i++) {
 		i === 1 ? beds.push(i + " Bed") : beds.push(i + " Beds");
 	}
 	return beds;
@@ -77,13 +72,15 @@ export function getFrequencyOptions() {
 	return ["Per Day", "Week", "Month", "Quarter", "Half Year", "Year"];
 }
 
+export function getMeterTypes() {
+	return ["Electric", "Gas", "Oil", "Sewer", "Water"];
+}
+
 export function getLeaseOptions() {
 	let lease_options = [
-		"Short Term",
-		"Long Term",
-		"Fixed Term",
-		"Student",
-		"Commercial",
+		"Fixed",
+		"Fixed w/rollover",
+		"At Will"
 	];
 	return lease_options;
 }

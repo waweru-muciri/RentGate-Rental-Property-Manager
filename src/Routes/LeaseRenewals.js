@@ -1,173 +1,115 @@
-import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
-import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
-import {
-    Box,
-    TextField,
-    Button,
-    MenuItem,
-} from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
+import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
-import UndoIcon from "@material-ui/icons/Undo";
-import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/customizedSnackbar";
-import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
-import CommonTable from "../components/table/commonTable";
-import LoadingBackdrop from "../components/loadingBackdrop";
-import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
+import AddIcon from "@material-ui/icons/Add";
+import UndoIcon from "@material-ui/icons/Undo";
+import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import CommonTable from "../components/table/commonTable";
+import { connect } from "react-redux";
 import { commonStyles } from "../components/commonStyles";
+import Layout from "../components/myLayout";
+import PageHeading from "../components/PageHeading";
+import moment from "moment";
 
 const headCells = [
     {
-        id: "transaction_date",
+        id: "days_left",
         numeric: false,
         disablePadding: true,
-        label: "Transaction Date",
+        label: "Days Left",
     },
     {
-        id: "tenant",
+        id: "lease",
         numeric: false,
         disablePadding: true,
-        label: "Tenant Name",
+        label: "Lease Details",
     },
     {
-        id: "landlord",
+        id: "current_terms",
         numeric: false,
         disablePadding: true,
-        label: "Landlord Name",
+        label: "Current Terms",
     },
     {
-        id: "property_ref",
+        id: "tenant_name",
         numeric: false,
         disablePadding: true,
-        label: "Property Ref",
-    },
-    {
-        id: "lease_start",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Start",
-    },
-    {
-        id: "lease_end",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease End",
-    },
-	{
-        id: "security_deposit",
-        numeric: false,
-        disablePadding: true,
-        label: "Deposit Held",
-    },
-	{
-        id: "rent_balance",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent Balance",
-    },
-    {
-        id: "transaction_price",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent",
+        label: "Unit/Property Tenants",
     },
 ];
 
-function TabPanel(props) {
-        const { children, value, index, ...other } = props;
-
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && <Box m={2}>{children}</Box>}
-            </div>
-        );
-    }
-
-let TransactionPage = ({
-    isLoading,
+let RentRollPage = ({
     transactions,
-	expenses,
     properties,
     contacts,
-    match,
-    users,
-    error,
+    users
 }) => {
-    const classes = commonStyles();
-    let [transactionItems, setTransactionItems] = useState([]);
+    let [statementItems, setStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
+    let [contactFilter, setContactFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
-        setTransactionItems(getMappedTransactions());
+        setStatementItems(getMappedStatements());
     }, [transactions, contacts]);
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
+    const classes = commonStyles();
 
-    const getMappedTransactions = () => {
+    const getMappedStatements = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
+            const landlord = contacts.find(
+                (contact) => contact.id === transaction.landlord
             );
             const property = properties.find(
                 (property) => property.id === transaction.property
             );
-            const transactionDetails = {};
-            transactionDetails.tenant =
-                typeof tenant !== "undefined"
-                    ? tenant.first_name + " " + tenant.last_name
-                    : "";
-            transactionDetails.landlord =
-            typeof landlord !== "undefined"
-                    ? landlord.first_name + " " + landlord.last_name
-							: "";
-			if(typeof property !== "undefined" ){
-					transactionDetails.property_ref = property.ref
-					transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
-			}
-            transactionDetails.property =
-                typeof property !== "undefined" ? property.id : null;
+            const transactionDetails = {}
+            if (typeof property !== 'undefined' && typeof tenant !== 'undefined') {
+                transactionDetails.lease = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
+                transactionDetails.current_terms = `${transaction.lease_type} | ${transaction.transaction_price} \n ${transaction.lease_start} - ${transaction.lease_end}`;
+            }
+            transactionDetails.days_left = moment(transaction.lease_end).diff(moment(transaction.lease_start), 'days') + ' Days'
+            if (typeof tenant !== 'undefined') {
+                transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
+                transactionDetails.tenantId = tenant.id
+            }
+            if (typeof landlord !== 'undefined') {
+                transactionDetails.landlord = landlord.first_name + ' ' + landlord.last_name
+            }
+            if (typeof property !== 'undefined') {
+                transactionDetails.property_ref = property.ref
+                transactionDetails.property = property.id
+                transactionDetails.property_price = property.price
+                transactionDetails.transaction_balance = property.price - transaction.transaction_price
+            }
             return Object.assign({}, transaction, transactionDetails);
         });
         return mappedTransactions;
-    };
+    }
 
     const exportTransactionsRecordsToExcel = () => {
-        let items = transactionItems.filter(({ id }) => selected.includes(id));
+        let items = statementItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
-            "Leases  Records",
-            "Leases Data",
+            "Rent Roll Records",
+            "Rent Roll Data",
             items,
-            "Leases Data"
+            "RentRoll"
         );
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = getMappedTransactions()
+        let filteredStatements = getMappedStatements()
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -177,30 +119,34 @@ let TransactionPage = ({
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
-            .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord  === assignedToFilter
+            .filter(({ tenantId }) =>
+                !contactFilter ? true : tenantId === contactFilter
+            )
+            .filter((landlord) =>
+                !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setTransactionItems(filteredTransactions);
+        setStatementItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setTransactionItems(getMappedTransactions());
+        setStatementItems(getMappedStatements());
         setPropertyFilter("");
+        setContactFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
         setToDateFilter("");
     };
 
     return (
-        <Layout pageTitle="Leases">
+        <Layout pageTitle="Rent Roll">
             <Grid
                 container
                 spacing={3}
-                alignItems="center"
+                justify="center" direction="column"
             >
-			<Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Leases'} />
+                <Grid item key={2}>
+                    <PageHeading paddingLeft={2} text={"Lease Renewals"} />
                 </Grid>
                 <Grid
                     container
@@ -216,26 +162,12 @@ let TransactionPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
+                            disabled={selected.length <= 0}
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`${match.url}/new`}
+                            to={`transactions/${selected[0]}/edit`}
                         >
-                            NEW
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        {" "}
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
-                            component={Link}
-                            to={`${match.url}/${selected[0]}/edit`}
-                        >
-                            Edit
+                            RENEW LEASE
                         </Button>
                     </Grid>
                     <Grid item>
@@ -256,9 +188,84 @@ let TransactionPage = ({
                     >
                         <form
                             className={classes.form}
-                            id="contactSearchForm"
+                            id="searchForm"
                             onSubmit={handleSearchFormSubmit}
                         >
+                            <Grid
+                                container
+                                spacing={2}
+                                justify="center"
+                                direction="row"
+                            >
+                                <Grid
+                                    container
+                                    item
+                                    lg={6} md={12} xs={12}
+                                    spacing={1}
+                                    justify="center"
+                                    direction="row"
+                                >
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            id="from_date_filter"
+                                            name="from_date_filter"
+                                            label="From Date"
+                                            value={fromDateFilter}
+                                            onChange={(event) => {
+                                                setFromDateFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            name="to_date_filter"
+                                            label="To Date"
+                                            id="to_date_filter"
+                                            onChange={(event) => {
+                                                setToDateFilter(event.target.value);
+                                            }}
+                                            value={toDateFilter}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid item lg={6} md={12} xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        variant="outlined"
+                                        name="property_filter"
+                                        label="Property"
+                                        id="property_filter"
+                                        onChange={(event) => {
+                                            setPropertyFilter(
+                                                event.target.value
+                                            );
+                                        }}
+                                        value={propertyFilter}
+                                    >
+                                        {properties.map(
+                                            (property, index) => (
+                                                <MenuItem
+                                                    key={index}
+                                                    value={property.id}
+                                                >
+                                                    {property.ref}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </TextField>
+                                </Grid>
+                            </Grid>
                             <Grid
                                 container
                                 spacing={2}
@@ -281,79 +288,33 @@ let TransactionPage = ({
                                         }}
                                     >
                                         {users.map((user, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={user.id}
-                                            >
-                                                {user.first_name + ' ' +
-                                                    user.last_name}
+                                            <MenuItem key={index} value={user.id}>
+                                                {user.first_name + ' ' + user.last_name}
                                             </MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
                                     <TextField
-                                        fullWidth
                                         select
+                                        fullWidth
                                         variant="outlined"
-                                        name="property_filter"
-                                        label="Select Property"
-                                        id="property_filter"
+                                        type="text"
+                                        name="contact_filter"
+                                        label="Contact"
+                                        id="contact_filter"
                                         onChange={(event) => {
-                                            setPropertyFilter(
-                                                event.target.value
-                                            );
+                                            setContactFilter(event.target.value);
                                         }}
-                                        value={propertyFilter}
+                                        value={contactFilter}
+                                        InputLabelProps={{ shrink: true }}
                                     >
-                                        {properties.map((property, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={property.id}
-                                            >
-                                                {property.ref}
+                                        {contacts.map((contact, contactIndex) => (
+                                            <MenuItem key={contactIndex} value={contact.id}>
+                                                {contact.first_name + ' ' + contact.last_name}
                                             </MenuItem>
                                         ))}
                                     </TextField>
-                                </Grid>
-                            </Grid>
-                            <Grid
-                                container
-                                spacing={2}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        id="from_date_filter"
-                                        name="from_date_filter"
-                                        label="From Date"
-                                        value={fromDateFilter}
-                                        onChange={(event) => {
-                                            setFromDateFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        name="to_date_filter"
-                                        label="To Date"
-                                        id="to_date_filter"
-                                        onChange={(event) => {
-                                            setToDateFilter(event.target.value);
-                                        }}
-                                        value={toDateFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
                                 </Grid>
                             </Grid>
                             <Grid
@@ -369,7 +330,7 @@ let TransactionPage = ({
                                     <Button
                                         onClick={(event) => handleSearchFormSubmit(event)}
                                         type="submit"
-                                        form="contactSearchForm"
+                                        form="searchForm"
                                         color="primary"
                                         variant="contained"
                                         size="medium"
@@ -382,7 +343,7 @@ let TransactionPage = ({
                                     <Button
                                         onClick={(event) => resetSearchForm(event)}
                                         type="reset"
-                                        form="contactSearchForm"
+                                        form="searchForm"
                                         color="primary"
                                         variant="contained"
                                         size="medium"
@@ -396,24 +357,16 @@ let TransactionPage = ({
                     </Box>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={transactionItems}
+                        rows={statementItems}
                         headCells={headCells}
-                        handleDelete={handleDelete}
-                        deleteUrl={"transactions"}
+                        noDetailsCol={true}
+                        noEditCol={true}
+                        noDeleteCol={true}
                     />
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
         </Layout>
     );
@@ -421,18 +374,11 @@ let TransactionPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        transactions: state.transactions,
-        users: state.users,
-        expenses: state.expenses,
-        currentUser: state.currentUser,
         properties: state.properties,
+        transactions: state.transactions,
         contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
+        users: state.users,
     };
 };
 
-TransactionPage = connect(mapStateToProps)(TransactionPage);
-
-export default withRouter(TransactionPage);
+export default connect(mapStateToProps)(RentRollPage);

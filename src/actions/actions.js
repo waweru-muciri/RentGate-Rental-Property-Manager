@@ -13,6 +13,7 @@ import * as communicationEmailsActions from "./CommunicationEmails";
 import * as faxesActions from "./faxes";
 import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
+import * as meterReadingsActions from "./meterReadings";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import app from "../firebase";
 
@@ -195,6 +196,12 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
+                    case "meter_readings":
+                        dispatch(
+                            meterReadingsActions.meterReadingsFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
                     case "users":
                         dispatch(
                             usersActions.usersFetchDataSuccess(fetchedItems)
@@ -340,6 +347,12 @@ export function handleDelete(itemId, url) {
                         );
                         break;
 
+                    case "meter_readings":
+                        dispatch(
+                            meterReadingsActions.deleteMeterReading(itemId)
+                        );
+                        break;
+
                     case "communication_emails":
                         dispatch(
                             communicationEmailsActions.deleteCommunicationEmail(itemId)
@@ -372,9 +385,6 @@ export function handleItemFormSubmit(data, url) {
                         let modifiedObject = Object.assign(
                             {},
                             data,
-                            {
-                                id: docRef.id,
-                            }
                         );
                         switch (url) {
                             case "properties":
@@ -459,6 +469,12 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
 
+                    case "meter_readings":
+                        dispatch(
+                            meterReadingsActions.editMeterReading(modifiedObject)
+                        );
+                        break;
+
                             case "users":
                                 dispatch(communicationEmailsActions.editCommunicationEmail(modifiedObject));
                                 break;
@@ -466,7 +482,7 @@ export function handleItemFormSubmit(data, url) {
                             default:
                                 break;
                         }
-                        resolve(docRef.id);
+                        resolve(data.id);
                     })
                     .catch((error) => {
                         console.log("Error => ", error.response);
@@ -552,6 +568,12 @@ export function handleItemFormSubmit(data, url) {
                             case "users":
                                 dispatch(usersActions.addUser(addedItem));
                                 break;
+
+                    case "meter_readings":
+                        dispatch(
+                            meterReadingsActions.addMeterReading(addedItem)
+                        );
+                        break;
 
                             case "communication_emails":
                                 dispatch(communicationEmailsActions.addCommunicationEmail(addedItem));

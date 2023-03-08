@@ -1,16 +1,12 @@
-import jsPDF from "jspdf";
 import Button from "@material-ui/core/Button";
 import React from "react";
-import { renderToString } from "react-dom/server";
 import PrintIcon from "@material-ui/icons/Print";
-import VacatingNoticeLayout from "./VacatingNoticeLayout";
-import html2canvas from "html2canvas";
+import { printDocument } from "./PdfMakePrint";
 
 export default function (props) {
-    window.html2canvas = html2canvas;
-    var doc = new jsPDF("l", "pt", "a4");
     const notice = typeof props.noticeToPrint !== 'undefined' ? props.noticeToPrint : {}
     const noticeDetails = {
+        details: notice.notice_details,
         tenant_name: notice.tenant_name,
         tenant_email: notice.tenant_email,
         tenant_phone_number: notice.tenant_phone_number,
@@ -25,7 +21,31 @@ export default function (props) {
         property_address: notice.property_address,
         company_address: notice.company_address || '123 Company Address',
     }
-    var vacatingNoticeString = renderToString(<VacatingNoticeLayout noticeToPrint={noticeDetails} />);
+    var docDefinition = [{
+            columns: [
+            [
+                noticeDetails.company_name, 
+                noticeDetails.company_phone_number, 
+                noticeDetails.company_address, 
+            ], 
+            [
+                {text: noticeDetails.tenant_name, alignment: 'center'}, 
+                {text: noticeDetails.tenant_phone_number, alignment: 'center'}, 
+                {text: noticeDetails.tenant_email, alignment: 'center'}, 
+                {text: noticeDetails.tenant_id_number, alignment: 'center'}, 
+            ], 
+            ],
+            columnGap: 10,
+            
+        }, 
+        {text: `OBJECT: NOTICE OF TERMINATION OF LEASE ON ${noticeDetails.vacating_date}`, bold: true, fontSize: 10, decoration: "underline", margin: [ 0, 6, 0, 6 ] }, 
+        {text: `Dear, ${noticeDetails.tenant_name}, Unit ${noticeDetails.property_ref}`, bold: true, fontSize: 10, },
+        {text: noticeDetails.details, margin: [ 0, 10, 0, 10 ]},
+        {text: 'Sincerely,', },
+        {text: noticeDetails.landlord_name, },
+        {text: `${noticeDetails.landlord_phone_number}, ${noticeDetails.landlord_email},` },
+        {text: 'Landlord', },
+        ]
     return (
         <Button
             disabled={props.disabled}
@@ -33,14 +53,7 @@ export default function (props) {
             variant="contained"
             size="medium"
             color="primary"
-            // disabled={props.disabled}
-            onClick={() => {
-                doc.html(vacatingNoticeString, {
-                    callback: function (doc) {
-                        doc.save();
-                    },
-                });
-            }}
+            onClick={() => printDocument(`${noticeDetails.tenant_name} vacating notice`, docDefinition)}
             startIcon={<PrintIcon />}
         >
             pdf

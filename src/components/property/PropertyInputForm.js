@@ -41,7 +41,6 @@ import {
 	getFrequencyOptions,
 	getLeaseOptions,
 	getFurnishedOptions,
-	getCurrencyOptions,
 } from "../../assets/commonAssets.js";
 
 const PROPERTY_TYPES = getPropertyTypes();
@@ -58,8 +57,6 @@ const LEASE_OPTIONS = getLeaseOptions();
 
 const FURNISHED_OPTIONS = getFurnishedOptions();
 
-const CURRENCY_OPTIONS = getCurrencyOptions();
-
 let InputForm = ({
 	values,
 	touched,
@@ -71,8 +68,6 @@ let InputForm = ({
 	isSubmitting,
 }) => {
 	const classes = commonStyles();
-
-	const ASSIGNED_TO = [];
 
 	return (
 		<form
@@ -92,7 +87,6 @@ let InputForm = ({
 						error={errors.assigned_to && touched.assigned_to}
 						helperText={touched.assigned_to && errors.assigned_to}
 						variant="outlined"
-						type="text"
 						name="assigned_to"
 						id="assigned_to"
 						label="Assigned To"
@@ -100,9 +94,9 @@ let InputForm = ({
 						onChange={handleChange}
 						onBlur={handleBlur}
 					>
-						{ASSIGNED_TO.map((assigned_to, index) => (
-							<MenuItem key={index} value={assigned_to}>
-								{assigned_to}
+						{values.users.map((user, index) => (
+							<MenuItem key={index} value={user.id}>
+								{user.first_name + ' ' + user.last_name}
 							</MenuItem>
 						))}
 					</TextField>
@@ -114,7 +108,7 @@ let InputForm = ({
 						type="text"
 						name="ref"
 						id="ref"
-						label="Ref"
+						label="Unit/Property Ref"
 						value={values.ref}
 						onChange={handleChange}
 						onBlur={handleBlur}
@@ -181,27 +175,6 @@ let InputForm = ({
 					<TextField
 						fullWidth
 						variant="outlined"
-						id="country"
-						name="country"
-						label="Country"
-						value={values.country}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
-						id="region"
-						label="Region"
-						type="text"
-						name="region"
-						value={values.region}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
 						id="city"
 						type="text"
 						name="city"
@@ -240,7 +213,6 @@ let InputForm = ({
 						fullWidth
 						variant="outlined"
 						id="floor"
-						type="number"
 						label="Floor"
 						name="floor"
 						value={values.floor}
@@ -250,8 +222,6 @@ let InputForm = ({
 					<TextField
 						fullWidth
 						variant="outlined"
-						type="number"
-						step="100"
 						name="square_footage"
 						id="square_footage"
 						label="Square Footage"
@@ -262,19 +232,6 @@ let InputForm = ({
 						helperText={
 							touched.square_footage && errors.square_footage
 						}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
-						id="view"
-						type="text"
-						label="View"
-						name="view"
-						value={values.view}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						error={'view' in errors}
-						helperText={errors.view}
 					/>
 					<TextField
 						fullWidth
@@ -298,45 +255,14 @@ let InputForm = ({
 					<TextField
 						fullWidth
 						variant="outlined"
-						select
-						name="currency"
-						label="Currency"
-						id="currency"
-						onBlur={handleBlur}
-						onChange={handleChange}
-						value={values.currency}
-						error={'currency' in errors}
-						helperText={errors.currency}
-					>
-						{CURRENCY_OPTIONS.map((furnished_option, index) => (
-							<MenuItem key={index} value={furnished_option}>
-								{furnished_option}
-							</MenuItem>
-						))}
-					</TextField>
-					<TextField
-						fullWidth
-						variant="outlined"
 						id="price"
-						type="number"
-						label="Price"
+						label="Rent Amount"
 						name="price"
 						value={values.price}
 						onChange={handleChange}
 						onBlur={handleBlur}
 						error={'price' in errors}
 						helperText={errors.price}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
-						id="sqm_price"
-						disabled
-						label="Price/Sqm"
-						name="sqm_price"
-						value={values.sqm_price}
-						onChange={handleChange}
-						onBlur={handleBlur}
 					/>
 					<TextField
 						fullWidth
@@ -379,24 +305,7 @@ let InputForm = ({
 					<TextField
 						fullWidth
 						variant="outlined"
-						id="company_commission"
-						type="number"
-						label="Commission"
-						name="company_commission"
-						value={values.company_commission}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						error={'company_commission' in errors
-						}
-						helperText={
-							errors.company_commission
-						}
-					/>
-					<TextField
-						fullWidth
-						variant="outlined"
 						id="deposit"
-						type="number"
 						label="Deposit"
 						name="deposit"
 						value={values.deposit}
@@ -797,7 +706,6 @@ let PropertyInputForm = withFormik({
 		return {
 			id: propertyToEdit.id,
 			ref: propertyToEdit.ref || "",
-			region: propertyToEdit.region || "",
 			assigned_to: propertyToEdit.assigned_to || "",
 			city: propertyToEdit.city || "",
 			postal_code: propertyToEdit.postal_code || "",
@@ -806,18 +714,13 @@ let PropertyInputForm = withFormik({
 			property_type: propertyToEdit.property_type || "",
 			beds: propertyToEdit.beds || "",
 			baths: propertyToEdit.baths || "",
-			country: propertyToEdit.country || "",
 			square_footage: propertyToEdit.square_footage || 0,
-			currency: propertyToEdit.currency || "",
 			price: propertyToEdit.price || 0,
 			furnished: propertyToEdit.furnished || "",
 			frequency: propertyToEdit.frequency || "",
 			checks: propertyToEdit.checks || "",
-			company_commission: propertyToEdit.company_commission || 0,
 			deposit: propertyToEdit.deposit || 0,
 			lease_type: propertyToEdit.lease_type || "",
-			view: propertyToEdit.view || "",
-			address_2: propertyToEdit.address_2 || "",
 			has_solid_wood_floor: propertyToEdit.has_solid_wood_floor || false,
 			has_balcony: propertyToEdit.has_balcony || false,
 			is_fully_furnished: propertyToEdit.is_fully_furnished || false,
@@ -829,6 +732,7 @@ let PropertyInputForm = withFormik({
 			owner: propertyToEdit.owner || "",
 			contacts: props.contacts,
 			history: props.history,
+			users: props.users,
 			handleItemDelete: props.handleItemDelete,
 			handleItemSubmit: props.handleItemSubmit,
 			match: props.match,
@@ -841,7 +745,7 @@ let PropertyInputForm = withFormik({
 		let errors = {};
 
 		if (!values.ref) {
-			errors.ref = "Ref Required";
+			errors.ref = "Property/Unit Ref Required";
 		}
 		if (!values.beds) {
 			errors.beds = "Beds is Required";
@@ -865,7 +769,6 @@ let PropertyInputForm = withFormik({
 		let property = {
 			id: values.id,
 			ref: values.ref,
-			region: values.region,
 			city: values.city,
 			postal_code: values.postal_code,
 			address: values.address,
@@ -873,18 +776,13 @@ let PropertyInputForm = withFormik({
 			property_type: values.property_type,
 			beds: values.beds,
 			baths: values.baths,
-			country: values.country,
 			square_footage: values.square_footage,
-			currency: values.currency,
 			price: values.price,
 			furnished: values.furnished,
 			frequency: values.frequency,
 			checks: values.checks,
-			company_commission: values.company_commission,
 			deposit: values.deposit,
 			lease_type: values.lease_type,
-			view: values.view,
-			address_2: values.address_2,
 			has_solid_wood_floor: values.has_solid_wood_floor,
 			has_balcony: values.has_balcony,
 			is_fully_furnished: values.is_fully_furnished,
@@ -931,6 +829,7 @@ const mapStateToProps = (state) => {
 		propertiesMediaFiles: state.mediaFiles,
 		error: state.error,
 		contacts: state.contacts,
+		users: state.users,
 	};
 };
 const mapDispatchToProps = (dispatch) => {
