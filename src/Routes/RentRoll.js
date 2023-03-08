@@ -84,8 +84,8 @@ let RentRollPage = ({
                 transactionDetails.property_price = property.price
             }
             transactionDetails.status = moment(transaction.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
-		    const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
-            transactionDetails.days_left = daysLeft  < 0 ? 0 : daysLeft
+            const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
+            transactionDetails.days_left = daysLeft < 0 ? 0 : daysLeft
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
@@ -159,7 +159,7 @@ let RentRollPage = ({
                     direction="row"
                     key={1}
                 >
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
                             type="button"
                             color="primary"
@@ -167,8 +167,8 @@ let RentRollPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Rent Roll Records'}
-							reportTitle = {'Rent Records'}
+                            reportName={'Rent Roll Records'}
+                            reportTitle={'Rent Records'}
                             headCells={headCells}
                             dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
                         >
@@ -205,121 +205,122 @@ let RentRollPage = ({
                                 <Grid
                                     container
                                     item
-                                    lg={6} md={12} xs={12}
                                     spacing={1}
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item container xs={12} md={6} direction="row" spacing={2}>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                type="date"
+                                                id="from_date_filter"
+                                                name="from_date_filter"
+                                                label="From Date"
+                                                value={fromDateFilter}
+                                                onChange={(event) => {
+                                                    setFromDateFilter(
+                                                        event.target.value
+                                                    );
+                                                }}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                type="date"
+                                                name="to_date_filter"
+                                                label="To Date"
+                                                id="to_date_filter"
+                                                onChange={(event) => {
+                                                    setToDateFilter(event.target.value);
+                                                }}
+                                                value={toDateFilter}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
+                                            select
                                             variant="outlined"
-                                            type="date"
-                                            id="from_date_filter"
-                                            name="from_date_filter"
-                                            label="From Date"
-                                            value={fromDateFilter}
+                                            name="property_filter"
+                                            label="Property"
+                                            id="property_filter"
                                             onChange={(event) => {
-                                                setFromDateFilter(
+                                                setPropertyFilter(
                                                     event.target.value
                                                 );
                                             }}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
+                                            value={propertyFilter}
+                                        >
+                                            {properties.map(
+                                                (property, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={property.id}
+                                                    >
+                                                        {property.ref}
+                                                    </MenuItem>
+                                                )
+                                            )}
+                                        </TextField>
                                     </Grid>
-                                    <Grid item lg={6} md={12} xs={12}>
+                                </Grid>
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    justify="center"
+                                    direction="row"
+                                >
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
+                                            select
                                             variant="outlined"
-                                            type="date"
-                                            name="to_date_filter"
-                                            label="To Date"
-                                            id="to_date_filter"
+                                            id="assigned_to"
+                                            name="assigned_to"
+                                            label="Assigned To"
+                                            value={assignedToFilter}
                                             onChange={(event) => {
-                                                setToDateFilter(event.target.value);
+                                                setAssignedToFilter(
+                                                    event.target.value
+                                                );
                                             }}
-                                            value={toDateFilter}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        name="property_filter"
-                                        label="Property"
-                                        id="property_filter"
-                                        onChange={(event) => {
-                                            setPropertyFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        value={propertyFilter}
-                                    >
-                                        {properties.map(
-                                            (property, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={property.id}
-                                                >
-                                                    {property.ref}
+                                        >
+                                            {users.map((user, index) => (
+                                                <MenuItem key={index} value={user.id}>
+                                                    {user.first_name + ' ' + user.last_name}
                                                 </MenuItem>
-                                            )
-                                        )}
-                                    </TextField>
-                                </Grid>
-                            </Grid>
-                            <Grid
-                                container
-                                spacing={2}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        id="assigned_to"
-                                        name="assigned_to"
-                                        label="Assigned To"
-                                        value={assignedToFilter}
-                                        onChange={(event) => {
-                                            setAssignedToFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                    >
-                                        {users.map((user, index) => (
-                                            <MenuItem key={index} value={user.id}>
-                                                {user.first_name + ' ' + user.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        select
-                                        fullWidth
-                                        variant="outlined"
-                                        type="text"
-                                        name="contact_filter"
-                                        label="Contact"
-                                        id="contact_filter"
-                                        onChange={(event) => {
-                                            setContactFilter(event.target.value);
-                                        }}
-                                        value={contactFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    >
-                                        {contacts.map((contact, contactIndex) => (
-                                            <MenuItem key={contactIndex} value={contact.id}>
-                                                {contact.first_name + ' ' + contact.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            variant="outlined"
+                                            type="text"
+                                            name="contact_filter"
+                                            label="Contact"
+                                            id="contact_filter"
+                                            onChange={(event) => {
+                                                setContactFilter(event.target.value);
+                                            }}
+                                            value={contactFilter}
+                                            InputLabelProps={{ shrink: true }}
+                                        >
+                                            {contacts.map((contact, contactIndex) => (
+                                                <MenuItem key={contactIndex} value={contact.id}>
+                                                    {contact.first_name + ' ' + contact.last_name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                             <Grid
@@ -361,7 +362,7 @@ let RentRollPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

@@ -11,19 +11,20 @@ import moment from "moment";
 const defaultDate = moment().format("YYYY-MM-DD");
 
 let MeterReadingPage = (props) => {
-    const { currentUser, meterReadings, users, contacts, properties, handleItemSubmit } = props;
+    const { currentUser, history, meterReadings, users, contacts, propertyUnits, properties, handleItemSubmit } = props;
     let meterReadingToEditId = props.match.params.meterReadingId;
     let meterReadingToEdit = meterReadings.find(({ id }) => id === meterReadingToEditId);
     meterReadingToEdit =
         typeof meterReadingToEdit === "undefined"
             ? {
                 property: '',
+                property_unit: '',
                 reading_date: defaultDate,
-                prior_value: 0,
-                current_value: 0,
-                base_charge: 0,
-                unit_charge: 0,
-                reading_type: '',
+                prior_value: '',
+                current_value: '',
+                base_charge: '',
+                unit_charge: '',
+                meter_type: '',
             }
             : meterReadingToEdit;
     let pageTitle = meterReadingToEditId ? "Edit Meter Reading" : "New Meter Reading";
@@ -38,9 +39,10 @@ let MeterReadingPage = (props) => {
                         meterReadingToEdit={meterReadingToEdit}
                         handleItemSubmit={handleItemSubmit}
                         users={users}
+                        history={history}
                         currentUser={currentUser}
-                        contacts={contacts}
                         properties={properties}
+                        propertyUnits={propertyUnits}
                     />
                 </Grid>
             </Grid>
@@ -48,9 +50,10 @@ let MeterReadingPage = (props) => {
     );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
         properties: state.properties,
+        propertyUnits: state.propertyUnits,
         meterReadings: state.meterReadings,
         users: state.users,
         contacts: state.contacts,

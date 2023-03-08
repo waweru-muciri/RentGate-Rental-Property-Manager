@@ -82,22 +82,6 @@ const headCells = [
 
 ];
 
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box m={2}>{children}</Box>}
-        </div>
-    );
-}
-
 let TransactionPage = ({
     currentUser,
     isLoading,
@@ -117,7 +101,6 @@ let TransactionPage = ({
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
         const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
@@ -150,10 +133,6 @@ let TransactionPage = ({
         setTransactionItems(mappedTransactions);
         setFilteredTransactionItems(mappedTransactions);
     }, [transactions, contacts, properties, users]);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
 
     const exportTransactionsRecordsToExcel = () => {
         let items = transactionItems.filter(({ id }) => selected.includes(id));
@@ -281,7 +260,7 @@ let TransactionPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -307,7 +286,7 @@ let TransactionPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -339,7 +318,7 @@ let TransactionPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -356,7 +335,7 @@ let TransactionPage = ({
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"

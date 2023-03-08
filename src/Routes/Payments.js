@@ -264,7 +264,7 @@ let TransactionPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -281,7 +281,7 @@ let TransactionPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -307,7 +307,7 @@ let TransactionPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -339,7 +339,7 @@ let TransactionPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -356,7 +356,7 @@ let TransactionPage = ({
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"

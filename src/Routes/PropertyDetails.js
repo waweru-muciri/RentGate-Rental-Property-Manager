@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../components/myLayout";
-import Typography  from "@material-ui/core/Typography";
+import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import exportDataToXSL from "../assets/printToExcel";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -69,7 +69,7 @@ let PropertyPage = ({
     propertyUnits,
     isLoading,
     transactions,
-    expenses, 
+    expenses,
     meterReadings,
     currentUser,
     history,
@@ -80,7 +80,7 @@ let PropertyPage = ({
 }) => {
     const classes = commonStyles();
     const propertyToShowDetailsId = match.params.propertyId;
-    const propertyToShowDetails = properties.find(({id}) => id === propertyToShowDetailsId) || {}
+    const propertyToShowDetails = properties.find(({ id }) => id === propertyToShowDetailsId) || {}
     let [propertyUnitsItems, setPropertyUnitItems] = useState([])
     let [filteredPropertyItems, setFilteredPropertyUnitsItems] = useState([])
     let [propertyRefFilter, setPropertyRefFilter] = useState("");
@@ -100,7 +100,7 @@ let PropertyPage = ({
                 const tenant = contacts.find(
                     (contact) => property.tenants ? contact.id === property.tenants[0] : ''
                 ) || {}
-                return Object.assign({}, property, {tenant_name: tenant.first_name + ' ' + tenant.last_name});
+                return Object.assign({}, property, { tenant_name: tenant.first_name + ' ' + tenant.last_name });
             }
         );
 
@@ -149,11 +149,11 @@ let PropertyPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
-                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} 
-                propertyUnits={propertyUnitsItems} users={users}/>
+                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails}
+                    propertyUnits={propertyUnitsItems} users={users} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits} transactions={transactions} expenses={expenses} meterReadings={meterReadings}/>
+                <IndividualPropertyIncomeStatement propertyUnits={propertyUnits} transactions={transactions} expenses={expenses} meterReadings={meterReadings} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
                 <Grid
@@ -211,10 +211,9 @@ let PropertyPage = ({
                                 reportName={'Rental Records'}
                                 reportTitle={'Rentals Records'}
                                 headCells={headCells}
-                                dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
-                            >
+                                dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}>
                                 Pdf
-                        </PrintArrayToPdf>
+                            </PrintArrayToPdf>
                         </Grid>
                         <Grid item>
                             <ExportToExcelBtn
@@ -226,7 +225,7 @@ let PropertyPage = ({
                             />
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Grid item xs={12}>
                         <Box
                             border={1}
                             borderRadius="borderRadius"
@@ -243,7 +242,7 @@ let PropertyPage = ({
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item sm>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
                                             select
@@ -270,7 +269,7 @@ let PropertyPage = ({
                                             )}
                                         </TextField>
                                     </Grid>
-                                    <Grid item sm>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
                                             variant="outlined"

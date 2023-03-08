@@ -193,7 +193,7 @@ let MeterReadingsPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -213,12 +213,12 @@ let MeterReadingsPage = ({
                                 <Grid
                                     container
                                     item
-                                    lg={6} md={12} xs={12}
+                                    xs={12} md={6}
                                     spacing={1}
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -235,7 +235,7 @@ let MeterReadingsPage = ({
                                             InputLabelProps={{ shrink: true }}
                                         />
                                     </Grid>
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -251,7 +251,7 @@ let MeterReadingsPage = ({
                                         />
                                     </Grid>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select

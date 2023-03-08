@@ -62,6 +62,9 @@ let ToDoInputForm = (props) => {
 				handleItemSubmit(currentUser, todo, "to-dos").then((response) => {
 					setEventToShow({});
 					resetForm({});
+					if (values.id) {
+						handleClose()
+					}
 				});
 			}}
 		>

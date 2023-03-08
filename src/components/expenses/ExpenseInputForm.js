@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Grid, Button, TextField, MenuItem } from "@material-ui/core";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
@@ -11,54 +10,55 @@ import moment from "moment";
 
 const defaultDate = moment().format("YYYY-MM-DD");
 
-const VacatingNoticeSchema = Yup.object().shape({
+const PropertyExpenseSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
   amount: Yup.number().min(0).required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
   property: Yup.string().required("Property is Required"),
+  property_unit: Yup.string().required("Unit is Required"),
   expense_notes: Yup.string().default(""),
 });
 
 const ExpenseInputForm = (props) => {
-  const { properties, handleItemSubmit, currentUser } = props
-  const history = useHistory();
+  const { properties, propertyUnits, handleItemSubmit, currentUser, history } = props
   const classes = commonStyles();
   const expenseCategories = getExpensesCategories();
-  const expenseToEdit =  typeof props.expenseToEdit !== 'undefined' ? props.expenseToEdit : {}
-  const expenseValues =  {
-        id: expenseToEdit.id,
-		expense_notes: expenseToEdit.expense_notes ||  '',
-		expense_date: expenseToEdit.expense_date || defaultDate,
-		amount: expenseToEdit.amount || 0,
-		property: expenseToEdit.property || '',
-		type: expenseToEdit.type || '',
-	}
+  const expenseToEdit = typeof props.expenseToEdit !== 'undefined' ? props.expenseToEdit : {}
+  const expenseValues = {
+    id: expenseToEdit.id,
+    expense_notes: expenseToEdit.expense_notes || '',
+    expense_date: expenseToEdit.expense_date || defaultDate,
+    amount: expenseToEdit.amount || '',
+    property: expenseToEdit.property || '',
+    property_unit: expenseToEdit.property_unit || '',
+    type: expenseToEdit.type || '',
+  }
 
   return (
     <Formik
       initialValues={expenseValues}
       enableReinitialize
-      validationSchema={VacatingNoticeSchema}
-      onSubmit={(values, { resetForm }) => {
+      validationSchema={PropertyExpenseSchema}
+      onSubmit={async (values, { resetForm }) => {
         const expense = {
           id: values.id,
           type: values.type,
           amount: values.amount,
-          property: values.property,
+          property_unit: values.property_unit,
           expense_date: values.expense_date,
           expense_notes: values.expense_notes,
         };
-        handleItemSubmit(currentUser, expense, "expenses").then((response) => {
-          resetForm({});
-          if (values.id) {
-            history.goBack();
-          }
-        });
+        await handleItemSubmit(currentUser, expense, "expenses")
+        resetForm({});
+        if (values.id) {
+          history.goBack();
+        }
       }}
     >
       {({
         values,
         handleSubmit,
+        touched,
         errors,
         handleChange,
         handleBlur,
@@ -72,30 +72,56 @@ const ExpenseInputForm = (props) => {
           >
             <Grid
               container
-              spacing={4}
+              spacing={2}
               justify="center"
               alignItems="stretch"
               direction="column"
             >
+              <Grid item container direction="row" spacing={2}>
+                <Grid item sm={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    variant="outlined"
+                    name="property"
+                    label="Property"
+                    id="property"
+                    onChange={handleChange}
+                    value={values.property}
+                    error={errors.property && touched.property}
+                    helperText={touched.property && errors.property}
+
+                  >
+                    {properties.map((property, index) => (
+                      <MenuItem key={index} value={property.id}>
+                        {property.ref}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item sm={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    variant="outlined"
+                    name="property_unit"
+                    label="Unit"
+                    id="property_unit"
+                    onChange={handleChange}
+                    value={values.property_unit}
+                    error={errors.property_unit && touched.property_unit}
+                    helperText={touched.property_unit && errors.property_unit}
+
+                  >
+                    {propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
+                      <MenuItem key={index} value={property_unit.id}>
+                        {property_unit.ref}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+              </Grid>
               <Grid item>
-                <TextField
-                  fullWidth
-                  select
-                  variant="outlined"
-                  name="property"
-                  label="Property/Unit Ref"
-                  id="property"
-                  onChange={handleChange}
-                  value={values.property || ''}
-                  error={"property" in errors}
-                  helperText={errors.property}
-                >
-                  {properties.map((property, index) => (
-                    <MenuItem key={index} value={property.id}>
-                      {property.ref}
-                    </MenuItem>
-                  ))}
-                </TextField>
                 <TextField
                   fullWidth
                   type="date"
@@ -107,9 +133,11 @@ const ExpenseInputForm = (props) => {
                   value={values.expense_date}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={"expense_date" in errors}
-                  helperText={errors.expense_date}
+                  error={errors.expense_date && touched.expense_date}
+                  helperText={touched.expense_date && errors.expense_date}
                 />
+              </Grid>
+              <Grid item>
                 <TextField
                   fullWidth
                   select
@@ -120,8 +148,8 @@ const ExpenseInputForm = (props) => {
                   value={values.type}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={"type" in errors}
-                  helperText={errors.type}
+                  error={errors.type && touched.type}
+                  helperText={touched.type && errors.type}
                 >
                   {expenseCategories.map((category, index) => (
                     <MenuItem key={index} value={category}>
@@ -129,6 +157,8 @@ const ExpenseInputForm = (props) => {
                     </MenuItem>
                   ))}
                 </TextField>
+              </Grid>
+              <Grid item>
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -138,9 +168,11 @@ const ExpenseInputForm = (props) => {
                   value={values.amount}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={"amount" in errors}
-                  helperText={errors.amount}
+                  error={errors.amount && touched.amount}
+                  helperText={touched.amount && errors.amount}
                 />
+              </Grid>
+              <Grid item>
                 <TextField
                   fullWidth
                   multiline
@@ -155,28 +187,32 @@ const ExpenseInputForm = (props) => {
                   helperText={"Any notes regarding this expense?"}
                 />
               </Grid>
-              <Grid item className={classes.buttonBox}>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  size="medium"
-                  startIcon={<CancelIcon />}
-                  onClick={() => history.goBack()}
-                  disableElevation
-                >
-                  Cancel
-              </Button>
-                <Button
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  size="medium"
-                  startIcon={<SaveIcon />}
-                  form="expenseInputForm"
-                  disabled={isSubmitting}
-                >
-                  Save
-              </Button>
+              <Grid item container direction="row" className={classes.buttonBox}>
+                <Grid item>
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    size="medium"
+                    startIcon={<CancelIcon />}
+                    onClick={() => history.goBack()}
+                    disableElevation
+                  >
+                    Cancel
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    variant="contained"
+                    size="medium"
+                    startIcon={<SaveIcon />}
+                    form="expenseInputForm"
+                    disabled={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </form>

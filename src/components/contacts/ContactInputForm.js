@@ -39,7 +39,7 @@ const ContactSchema = Yup.object().shape({
 	contact_email: Yup.string().trim().email(),
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
-	personal_mobile_number: Yup.string().trim(),
+	personal_mobile_number: Yup.string().trim().required('Personal Mobile Number is Required'),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 const currentDate = moment().format("YYYY-MM-DD");
@@ -57,9 +57,11 @@ let ContactInputForm = (props) => {
 	let contactToEdit = typeof props.contactToEdit !== 'undefined' ? props.contactToEdit : {};
 	const contactValues = {
 		id: contactToEdit.id,
+		gender: contactToEdit.gender || "",
 		assigned_to: contactToEdit.assigned_to || '',
 		contact_avatar_url: contactToEdit.contact_avatar_url || "",
 		id_number: contactToEdit.id_number || "",
+		title: contactToEdit.title || "",
 		present_address: contactToEdit.present_address || "",
 		alternate_address: contactToEdit.alternate_address || "",
 		contact_email: contactToEdit.contact_email || "",
@@ -70,16 +72,13 @@ let ContactInputForm = (props) => {
 		custom_mobile_number: contactToEdit.custom_mobile_number || "",
 		id_issue_date: contactToEdit.id_issue_date || currentDate,
 		id_issue_place: contactToEdit.id_issue_place || "",
-		title: contactToEdit.title || "",
 		date_of_birth: contactToEdit.date_of_birth || currentDate,
-		gender: contactToEdit.gender || "",
 		emergency_contact_email: contactToEdit.emergency_contact_email || "",
 		emergency_contact_name: contactToEdit.emergency_contact_name || "",
 		emergency_contact_phone_number: contactToEdit.emergency_contact_phone_number || "",
 		emergency_contact_relationship: contactToEdit.emergency_contact_relationship || "",
 		first_name: contactToEdit.first_name || "",
 		last_name: contactToEdit.last_name || "",
-		company_name: contactToEdit.company_name || "",
 		contact_images: [],
 	};
 
@@ -90,12 +89,15 @@ let ContactInputForm = (props) => {
 			onSubmit={(values, { resetForm }) => {
 				let contact = {
 					id: values.id,
-					assigned_to: values.assigned_to,
+					title: values.title,
+					gender: values.gender,
+					first_name: values.first_name,
+					last_name: values.last_name,
+					date_of_birth: values.date_of_birth,
 					id_number: values.id_number,
+					assigned_to: values.assigned_to,
 					id_issue_date: values.id_issue_date,
 					id_issue_place: values.id_issue_place,
-					title: values.title,
-					date_of_birth: values.date_of_birth,
 					present_address: values.present_address,
 					alternate_address: values.alternate_address,
 					contact_email: values.contact_email,
@@ -104,10 +106,6 @@ let ContactInputForm = (props) => {
 					work_mobile_number: values.work_mobile_number,
 					home_phone_number: values.home_phone_number,
 					custom_mobile_number: values.custom_mobile_number,
-					gender: values.gender,
-					first_name: values.first_name,
-					last_name: values.last_name,
-					company_name: values.company_name,
 					emergency_contact_name: values.emergency_contact_name,
 					emergency_contact_relationship: values.emergency_contact_relationship,
 					emergency_contact_phone_number: values.emergency_contact_phone_number,
@@ -136,6 +134,7 @@ let ContactInputForm = (props) => {
 		>
 			{({
 				values,
+				touched,
 				handleSubmit,
 				setFieldValue,
 				errors,
@@ -222,9 +221,9 @@ let ContactInputForm = (props) => {
 									</Grid>
 									<TextField
 										select
-										error={'assigned_to' in errors}
+										error={errors.assigned_to && touched.assigned_to}
 										helperText={
-											errors.assigned_to
+											touched.assigned_to && errors.assigned_to
 										}
 										variant="outlined"
 										type="text"
@@ -250,8 +249,8 @@ let ContactInputForm = (props) => {
 										onBlur={handleBlur}
 										onChange={handleChange}
 										value={values.title}
-										error={'title' in errors}
-										helperText={errors.title}
+										error={errors.title && touched.title}
+										helperText={touched.title && errors.title}
 									>
 										{CONTACT_TITLES.map((contact_title, index) => (
 											<MenuItem key={index} value={contact_title}>
@@ -267,8 +266,8 @@ let ContactInputForm = (props) => {
 										value={values.first_name}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={'first_name' in errors}
-										helperText={errors.first_name}
+										error={errors.first_name && touched.first_name}
+										helperText={touched.first_name && errors.first_name}
 									/>
 									<TextField
 										variant="outlined"
@@ -278,8 +277,8 @@ let ContactInputForm = (props) => {
 										value={values.last_name}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={'last_name' in errors}
-										helperText={errors.last_name}
+										error={errors.last_name && touched.last_name}
+										helperText={touched.last_name && errors.last_name}
 									/>
 									<TextField
 										variant="outlined"
@@ -290,8 +289,8 @@ let ContactInputForm = (props) => {
 										onBlur={handleBlur}
 										onChange={handleChange}
 										value={values.gender}
-										error={'gender' in errors}
-										helperText={errors.gender}
+										error={errors.gender && touched.gender}
+										helperText={touched.gender && errors.gender}
 									>
 										{GENDERS_LIST.map((gender_type, index) => (
 											<MenuItem key={index} value={gender_type}>
@@ -308,12 +307,8 @@ let ContactInputForm = (props) => {
 										value={values.date_of_birth}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={
-											'date_of_birth' in errors
-										}
-										helperText={
-											errors.date_of_birth
-										}
+										error={errors.date_of_birth && touched.date_of_birth}
+										helperText={touched.date_of_birth && errors.date_of_birth}
 										InputLabelProps={{ shrink: true }}
 									/>
 									<TextField
@@ -325,12 +320,8 @@ let ContactInputForm = (props) => {
 										value={values.id_number}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={
-											'id_number' in errors
-										}
-										helperText={
-											errors.id_number
-										}
+										error={errors.id_number && touched.id_number}
+										helperText={touched.id_number && errors.id_number}
 									/>
 									<TextField
 										type="date"
@@ -380,10 +371,8 @@ let ContactInputForm = (props) => {
 												label="Personal Mobile Number"
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'personal_mobile_number' in errors
-												}
-												helperText="Mobile Phone Number"
+												error={errors.personal_mobile_number && touched.personal_mobile_number}
+												helperText={touched.personal_mobile_number && errors.personal_mobile_number}
 												value={values.personal_mobile_number}
 											/>
 										</Grid>
@@ -447,12 +436,8 @@ let ContactInputForm = (props) => {
 												value={values.contact_email}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'contact_email' in errors
-												}
-												helperText={
-													errors.contact_email
-												}
+												error={errors.contact_email && touched.contact_email}
+										helperText={touched.contact_email && errors.contact_email}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -466,12 +451,8 @@ let ContactInputForm = (props) => {
 												value={values.alternate_email}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'alternate_email' in errors
-												}
-												helperText={
-													errors.alternate_email
-												}
+												error={errors.alternate_email && touched.alternate_email}
+										helperText={touched.alternate_email && errors.alternate_email}
 											/>
 										</Grid>
 									</Grid>
@@ -491,14 +472,11 @@ let ContactInputForm = (props) => {
 											value={
 												values.present_address
 											}
-											error={
-												"present_address" in errors
-											}
+											
 											onChange={handleChange}
 											onBlur={handleBlur}
-											helperText={
-												errors.present_address
-											}
+											error={errors.present_address && touched.present_address}
+										helperText={touched.present_address && errors.present_address}
 										/>
 										<TextField
 											fullWidth
@@ -531,12 +509,8 @@ let ContactInputForm = (props) => {
 												value={values.emergency_contact_name}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'emergency_contact_name' in errors
-												}
-												helperText={
-													errors.emergency_contact_name
-												}
+												error={errors.emergency_contact_name && touched.emergency_contact_name}
+										helperText={touched.emergency_contact_name && errors.emergency_contact_name}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -550,12 +524,8 @@ let ContactInputForm = (props) => {
 												value={values.emergency_contact_relationship}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'emergency_contact_relationship' in errors
-												}
-												helperText={
-													errors.emergency_contact_relationship
-												}
+												error={errors.emergency_contact_relationship && touched.emergency_contact_relationship}
+										helperText={touched.emergency_contact_relationship && errors.emergency_contact_relationship}
 											/>
 										</Grid>
 									</Grid>
@@ -571,12 +541,8 @@ let ContactInputForm = (props) => {
 												value={values.emergency_contact_phone_number}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'emergency_contact_phone_number' in errors
-												}
-												helperText={
-													errors.emergency_contact_phone_number
-												}
+												error={errors.emergency_contact_phone_number && touched.emergency_contact_phone_number}
+										helperText={touched.emergency_contact_phone_number && errors.emergency_contact_phone_number}
 											/>
 										</Grid>
 										<Grid item sm>
@@ -590,12 +556,9 @@ let ContactInputForm = (props) => {
 												value={values.emergency_contact_email}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={
-													'emergency_contact_email' in errors
-												}
-												helperText={
-													errors.emergency_contact_email
-												}
+												error={errors.emergency_contact_email && touched.emergency_contact_email}
+												helperText={touched.emergency_contact_email && errors.emergency_contact_email}
+		
 											/>
 										</Grid>
 									</Grid>

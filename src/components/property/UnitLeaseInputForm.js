@@ -95,88 +95,93 @@ let UnitLeaseInputForm = (props) => {
 	};
 
 	const RecurringChargesInputComponent = ({ remove, push, form }) => {
-		const { errors, values, handleChange, handleBlur } = form
+		const { errors, touched, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['recurring_charges']
-		const layout = values.recurring_charges.map((unit_charge, unitChargeIndex) =>
-			<Grid key={`unit_charge-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-				<Grid xs item key={`recurring_charges[${unitChargeIndex}].account`}>
-					<TextField
-						fullWidth
-						label="Account"
-						variant="outlined"
-						select
-						value={unit_charge.account}
-						name={`recurring_charges.${unitChargeIndex}.account`}
-						error={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['account'] !== 'undefined'}
-						helperText={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].account || "Account to record the charge"}
-						onChange={handleChange}
-						onBlur={handleBlur}>
-						{propertyAccounts.map((account, index) => (
-							<MenuItem key={index} value={account.id}>
-								{account.name}
-							</MenuItem>
-						))}
-					</TextField>
+		const propertyUnitTouched = touched['recurring_charges']
+		const layout = values.recurring_charges.map((unit_charge, unitChargeIndex) => {
+			const indexInErrors = propertyUnitErrors && propertyUnitErrors[unitChargeIndex];
+			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
+			return (
+				<Grid key={`unit_charge-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
+					<Grid xs item key={`recurring_charges[${unitChargeIndex}].account`}>
+						<TextField
+							fullWidth
+							label="Account"
+							variant="outlined"
+							select
+							value={unit_charge.account}
+							name={`recurring_charges.${unitChargeIndex}.account`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
+							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
+						>
+							{propertyAccounts.map((account, index) => (
+								<MenuItem key={index} value={account.id}>
+									{account.name}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid xs item key={`recurring_charges[${unitChargeIndex}].due_date`}>
+						<TextField
+							fullWidth
+							variant="outlined"
+							id="due_date"
+							type="date"
+							name={`recurring_charges.${unitChargeIndex}.due_date`}
+							label="Next Due Date"
+							value={unit_charge.due_date}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							InputLabelProps={{ shrink: true }}
+							error={(indexInErrors && 'due_date' in indexInErrors) && (indexInTouched && indexInTouched.due_date)}
+							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)} />
+					</Grid>
+					<Grid xs item key={`recurring_charges[${unitChargeIndex}].amount`}>
+						<TextField
+							label="Amount"
+							variant="outlined"
+							type="text"
+							value={unit_charge.amount}
+							name={`recurring_charges.${unitChargeIndex}.amount`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'amount' in indexInErrors) && (indexInTouched && indexInTouched.amount)}
+							helperText={(indexInTouched && indexInTouched.amount) && (indexInErrors && indexInErrors.amount)}
+						/>
+					</Grid>
+					<Grid xs item key={`recurring_charges[${unitChargeIndex}].frequency`}>
+						<TextField
+							fullWidth
+							variant="outlined"
+							select
+							name={`recurring_charges.${unitChargeIndex}.frequency`}
+							label="Frequency"
+							onBlur={handleBlur}
+							onChange={handleChange}
+							value={unit_charge.frequency}
+							error={(indexInErrors && 'frequency' in indexInErrors) && (indexInTouched && indexInTouched.frequency)}
+							helperText={(indexInTouched && indexInTouched.frequency) && (indexInErrors && indexInErrors.frequency)}
+						>
+							{RENT_CYCLES.map((frequency, index) => (
+								<MenuItem key={index} value={frequency}>
+									{frequency}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid item key={`recurring_charges[${unitChargeIndex}].delete`}>
+						<IconButton aria-label="delete"
+							onClick={() => { remove(unitChargeIndex) }}
+							size="medium">
+							<DeleteIcon />
+						</IconButton>
+					</Grid>
 				</Grid>
-				<Grid xs item key={`recurring_charges[${unitChargeIndex}].due_date`}>
-					<TextField
-						fullWidth
-						variant="outlined"
-						id="due_date"
-						type="date"
-						name={`recurring_charges.${unitChargeIndex}.due_date`}
-						label="Next Due Date"
-						value={unit_charge.due_date}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						error={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['due_date'] !== 'undefined'}
-						helperText={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].due_date || 'Next date when the charge is due'}
-						InputLabelProps={{ shrink: true }}
-					/>
-				</Grid>
-				<Grid xs item key={`recurring_charges[${unitChargeIndex}].amount`}>
-					<TextField
-						label="Amount"
-						variant="outlined"
-						type="text"
-						value={unit_charge.amount}
-						name={`recurring_charges.${unitChargeIndex}.amount`}
-						error={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['amount'] !== 'undefined'}
-						helperText={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].amount || 'Amount to charge'}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-				</Grid>
-				<Grid xs item key={`recurring_charges[${unitChargeIndex}].frequency`}>
-					<TextField
-						fullWidth
-						variant="outlined"
-						select
-						name={`recurring_charges.${unitChargeIndex}.frequency`}
-						label="Frequency"
-						onBlur={handleBlur}
-						onChange={handleChange}
-						value={unit_charge.frequency}
-						error={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['frequency'] !== 'undefined'}
-						helperText={'recurring_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].frequency || 'How often to make the charge'}
-					>
-						{RENT_CYCLES.map((frequency, index) => (
-							<MenuItem key={index} value={frequency}>
-								{frequency}
-							</MenuItem>
-						))}
-					</TextField>
-				</Grid>
-				<Grid item key={`recurring_charges[${unitChargeIndex}].delete`}>
-					<IconButton aria-label="delete"
-						onClick={() => { remove(unitChargeIndex) }}
-						size="medium">
-						<DeleteIcon />
-					</IconButton>
-				</Grid>
-			</Grid>
 
-		)
+			)
+		})
 		return <Grid item container direction="column" spacing={2}>
 			{layout}
 			<Grid item>
@@ -193,69 +198,75 @@ let UnitLeaseInputForm = (props) => {
 	}
 
 	const OneTimeChargesComponent = ({ remove, push, form }) => {
-		const { errors, values, handleChange, handleBlur } = form
+		const { errors, touched, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['one_time_charges']
-		const layout = values.one_time_charges.map((unit_charge, unitChargeIndex) =>
-			<Grid key={`one_time_charges-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-				<Grid xs item key={`one_time_charges[${unitChargeIndex}].account`}>
-					<TextField
-						fullWidth
-						label="Account"
-						variant="outlined"
-						select
-						value={unit_charge.account}
-						name={`one_time_charges.${unitChargeIndex}.account`}
-						error={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['account'] !== 'undefined'}
-						helperText={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].account || 'Account to record charge'}
-						onChange={handleChange}
-						onBlur={handleBlur}>
-						{propertyAccounts.map((account, index) => (
-							<MenuItem key={index} value={account.id}>
-								{account.name}
-							</MenuItem>
-						))}
-					</TextField>
+		const propertyUnitTouched = touched['one_time_charges']
+		const layout = values.one_time_charges.map((unit_charge, unitChargeIndex) => {
+			const indexInErrors = propertyUnitErrors && propertyUnitErrors[unitChargeIndex];
+			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
+			return (
+				<Grid key={`one_time_charges-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
+					<Grid xs item key={`one_time_charges[${unitChargeIndex}].account`}>
+						<TextField
+							fullWidth
+							label="Account"
+							variant="outlined"
+							select
+							value={unit_charge.account}
+							name={`one_time_charges.${unitChargeIndex}.account`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
+							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
+						>
+							{propertyAccounts.map((account, index) => (
+								<MenuItem key={index} value={account.id}>
+									{account.name}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid xs item key={`one_time_charges[${unitChargeIndex}].due_date`}>
+						<TextField
+							fullWidth
+							variant="outlined"
+							id="due_date"
+							type="date"
+							name={`one_time_charges.${unitChargeIndex}.due_date`}
+							label="Due Date"
+							value={unit_charge.due_date}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							InputLabelProps={{ shrink: true }}
+							error={(indexInErrors && 'due_date' in indexInErrors) && (indexInTouched && indexInTouched.due_date)}
+							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)}
+						/>
+					</Grid>
+					<Grid xs item key={`one_time_charges[${unitChargeIndex}].amount`}>
+						<TextField
+							fullWidth
+							label="Amount"
+							variant="outlined"
+							type="text"
+							value={unit_charge.amount}
+							name={`one_time_charges.${unitChargeIndex}.amount`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'amount' in indexInErrors) && (indexInTouched && indexInTouched.amount)}
+							helperText={(indexInTouched && indexInTouched.amount) && (indexInErrors && indexInErrors.amount)}
+						/>
+					</Grid>
+					<Grid item key={`one_time_charges[${unitChargeIndex}].delete`}>
+						<IconButton aria-label="delete"
+							onClick={() => { remove(unitChargeIndex) }}
+							size="medium">
+							<DeleteIcon />
+						</IconButton>
+					</Grid>
 				</Grid>
-				<Grid xs item key={`one_time_charges[${unitChargeIndex}].due_date`}>
-					<TextField
-						fullWidth
-						variant="outlined"
-						id="due_date"
-						type="date"
-						name={`one_time_charges.${unitChargeIndex}.due_date`}
-						label="Due Date"
-						value={unit_charge.due_date}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						error={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['due_date'] !== 'undefined'}
-						helperText={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].due_date || 'Next date when the charge is due'}
-						InputLabelProps={{ shrink: true }}
-					/>
-				</Grid>
-				<Grid xs item key={`one_time_charges[${unitChargeIndex}].amount`}>
-					<TextField
-						fullWidth
-						label="Amount"
-						variant="outlined"
-						type="text"
-						value={unit_charge.amount}
-						name={`one_time_charges.${unitChargeIndex}.amount`}
-						error={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && typeof propertyUnitErrors[unitChargeIndex]['amount'] !== 'undefined'}
-						helperText={'one_time_charges' in errors && typeof propertyUnitErrors[unitChargeIndex] !== 'undefined' && propertyUnitErrors[unitChargeIndex].amount || 'Amount to charge'}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-				</Grid>
-				<Grid item key={`one_time_charges[${unitChargeIndex}].delete`}>
-					<IconButton aria-label="delete"
-						onClick={() => { remove(unitChargeIndex) }}
-						size="medium">
-						<DeleteIcon />
-					</IconButton>
-				</Grid>
-			</Grid>
 
-		)
+			)
+		})
 		return <Grid item container direction="column" spacing={2}>
 			{layout}
 			<Grid item>
@@ -307,6 +318,7 @@ let UnitLeaseInputForm = (props) => {
 				values,
 				handleSubmit,
 				errors,
+				touched,
 				handleChange,
 				setFieldValue,
 				handleBlur,
@@ -320,7 +332,7 @@ let UnitLeaseInputForm = (props) => {
 					>
 						<Grid container spacing={1} direction="column">
 							<Grid item>
-								<Typography variant="subtitle1">
+								<Typography variant="subtitle1" component="h2">
 									Lease Details
 								</Typography>
 							</Grid>
@@ -333,11 +345,12 @@ let UnitLeaseInputForm = (props) => {
 										id="property"
 										select
 										name="property"
-										error={'property' in errors}
-										helperText={errors.property}
 										value={values.property}
 										onChange={handleChange}
-										onBlur={handleBlur}>
+										onBlur={handleBlur}
+										error={errors.property && touched.property}
+										helperText={touched.property && errors.property}
+									>
 										{properties.map((property, index) => (
 											<MenuItem key={index} value={property.id}>
 												{property.ref}
@@ -356,7 +369,8 @@ let UnitLeaseInputForm = (props) => {
 										value={values.property_unit}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										helperText={errors.property_unit}
+										error={errors.property_unit && touched.property_unit}
+										helperText={touched.property_unit && errors.property_unit}
 									>
 										{/* This requires some additional changes */}
 										{propertyUnits.filter((property_unit) => property_unit.property_id === values.property).map((unit, index) => (
@@ -379,10 +393,8 @@ let UnitLeaseInputForm = (props) => {
 										onBlur={handleBlur}
 										onChange={handleChange}
 										value={values.lease_type}
-										error={'lease_type' in errors}
-										helperText={
-											errors.lease_type
-										}
+										error={errors.lease_type && touched.lease_type}
+										helperText={touched.lease_type && errors.lease_type}
 									>
 										{LEASE_TYPES.map((lease_type, index) => (
 											<MenuItem key={index} value={lease_type}>
@@ -420,15 +432,15 @@ let UnitLeaseInputForm = (props) => {
 											value={values.end_date}
 											onChange={handleChange}
 											onBlur={handleBlur}
-											error={'end_date' in errors}
-											helperText={errors.end_date}
 											InputLabelProps={{ shrink: true }}
+											error={errors.end_date && touched.end_date}
+											helperText={touched.end_date && errors.end_date}
 										/>
 									</Grid>
 								</Grid>
 							</Grid>
 							<Grid item>
-								<Typography variant="subtitle1">
+								<Typography variant="subtitle1" component="h2">
 									Tenants and Cosigner
 								</Typography>
 							</Grid>
@@ -471,8 +483,8 @@ let UnitLeaseInputForm = (props) => {
 									<TextField
 										fullWidth
 										select
-										error={'cosigner' in errors}
-										helperText={"Unit Tenancy Cosinger"}
+										error={errors.cosigner && touched.cosigner}
+										helperText={"Unit Tenancy Cosigner"}
 										variant="outlined"
 										name="cosigner"
 										id="cosigner"
@@ -490,7 +502,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item>
-								<Typography variant="subtitle1">
+								<Typography variant="subtitle1" component="h2">
 									Rent
 								</Typography>
 							</Grid>
@@ -506,9 +518,8 @@ let UnitLeaseInputForm = (props) => {
 										onBlur={handleBlur}
 										onChange={handleChange}
 										value={values.rent_account}
-										error={'rent_account' in errors}
-										helperText={
-											errors.rent_account || 'Account to Record Rent Collection'
+										error={errors.rent_account && touched.rent_account}
+										helperText={touched.rent_account && errors.rent_account || 'Account to Record Rent Collection'
 										}
 									>
 										{propertyAccounts.map((rent_account, index) => (
@@ -529,9 +540,8 @@ let UnitLeaseInputForm = (props) => {
 										onBlur={handleBlur}
 										onChange={handleChange}
 										value={values.rent_cycle}
-										error={'rent_cycle' in errors}
-										helperText={
-											errors.rent_cycle || 'Frequency at which rent is charged on unit'
+										error={errors.rent_cycle && touched.rent_cycle}
+										helperText={touched.rent_cycle && errors.rent_cycle || 'Frequency at which rent is charged on unit'
 										}
 									>
 										{RENT_CYCLES.map((rent_cycle, index) => (
@@ -546,8 +556,6 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										label="Rent Amount"
-										error={'transaction_price' in errors}
-										helperText={errors.transaction_price}
 										id="transaction_price"
 										type="text"
 										name="transaction_price"
@@ -555,6 +563,8 @@ let UnitLeaseInputForm = (props) => {
 										onChange={handleChange}
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
+										error={errors.transaction_price && touched.transaction_price}
+										helperText={touched.transaction_price && errors.transaction_price}
 									/>
 								</Grid>
 								<Grid item sm>
@@ -566,8 +576,8 @@ let UnitLeaseInputForm = (props) => {
 										name="next_due_date"
 										label="Next Due Date"
 										value={values.next_due_date}
-										error={'next_due_date' in errors}
-										helperText={errors.next_due_date || 'Next date when the rent is due'}
+										error={errors.next_due_date && touched.next_due_date}
+										helperText={touched.next_due_date && errors.next_due_date || 'Next date when the rent is due'}
 										onChange={handleChange}
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
@@ -575,7 +585,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item>
-								<Typography variant="subtitle1" paragraph>
+								<Typography variant="subtitle1" component="h2" paragraph>
 									Security Deposit
 								</Typography>
 							</Grid>
@@ -604,10 +614,8 @@ let UnitLeaseInputForm = (props) => {
 										value={values.security_deposit}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={'security_deposit' in errors}
-										helperText={
-											errors.security_deposit
-										}
+										error={errors.security_deposit && touched.security_deposit}
+										helperText={touched.security_deposit && errors.security_deposit}
 									/>
 								</Grid>
 								<Grid item xs>
@@ -615,7 +623,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item>
-								<Typography variant="subtitle1">
+								<Typography variant="subtitle1" component="h2">
 									Charges
 								</Typography>
 							</Grid>

@@ -46,7 +46,7 @@ const headCells = [
 let RentRollPage = ({
     currentUser,
     transactions,
-	match,
+    match,
     properties,
     contacts,
     users
@@ -76,8 +76,8 @@ let RentRollPage = ({
                 transactionDetails.lease = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
                 transactionDetails.current_terms = `${transaction.lease_type} | ${transaction.transaction_price} \n ${transaction.lease_start} - ${transaction.lease_end}`;
             }
-		    const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
-            transactionDetails.days_left = daysLeft  < 0 ? 0 : daysLeft
+            const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
+            transactionDetails.days_left = daysLeft < 0 ? 0 : daysLeft
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
@@ -199,7 +199,7 @@ let RentRollPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -219,79 +219,81 @@ let RentRollPage = ({
                                 <Grid
                                     container
                                     item
-                                    lg={6} md={12} xs={12}
                                     spacing={1}
                                     justify="center"
                                     direction="row"
                                 >
-                                    <Grid item lg={6} md={12} xs={12}>
+                                    <Grid item container xs={12} md={6} direction="row" spacing={2}>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                type="date"
+                                                id="from_date_filter"
+                                                name="from_date_filter"
+                                                label="From Date"
+                                                value={fromDateFilter}
+                                                onChange={(event) => {
+                                                    setFromDateFilter(
+                                                        event.target.value
+                                                    );
+                                                }}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                type="date"
+                                                name="to_date_filter"
+                                                label="To Date"
+                                                id="to_date_filter"
+                                                onChange={(event) => {
+                                                    setToDateFilter(event.target.value);
+                                                }}
+                                                value={toDateFilter}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
+                                            select
                                             variant="outlined"
-                                            type="date"
-                                            id="from_date_filter"
-                                            name="from_date_filter"
-                                            label="From Date"
-                                            value={fromDateFilter}
+                                            name="property_filter"
+                                            label="Property"
+                                            id="property_filter"
                                             onChange={(event) => {
-                                                setFromDateFilter(
+                                                setPropertyFilter(
                                                     event.target.value
                                                 );
                                             }}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
+                                            value={propertyFilter}
+                                        >
+                                            {properties.map(
+                                                (property, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={property.id}
+                                                    >
+                                                        {property.ref}
+                                                    </MenuItem>
+                                                )
+                                            )}
+                                        </TextField>
                                     </Grid>
-                                    <Grid item lg={6} md={12} xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            type="date"
-                                            name="to_date_filter"
-                                            label="To Date"
-                                            id="to_date_filter"
-                                            onChange={(event) => {
-                                                setToDateFilter(event.target.value);
-                                            }}
-                                            value={toDateFilter}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        name="property_filter"
-                                        label="Property"
-                                        id="property_filter"
-                                        onChange={(event) => {
-                                            setPropertyFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        value={propertyFilter}
-                                    >
-                                        {properties.map(
-                                            (property, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={property.id}
-                                                >
-                                                    {property.ref}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                    </TextField>
                                 </Grid>
                             </Grid>
                             <Grid
+                                item
                                 container
                                 spacing={2}
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -313,7 +315,7 @@ let RentRollPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         select
                                         fullWidth

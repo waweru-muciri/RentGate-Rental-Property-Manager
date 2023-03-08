@@ -19,11 +19,11 @@ import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 
 const SignInSchema = Yup.object().shape({
-  password: Yup.string()
+  password: Yup.string().trim()
     .min(6, "Too Short!")
     .max(50, "We prefer insecure system, try a shorter password.")
     .required("Pasword is Required"),
-  email: Yup.string().email("Invalid email").required("Email is Required"),
+  email: Yup.string().trim().email("Invalid email").required("Email is Required"),
 });
 
 let SignInLayout = ({ setUser }) => {
@@ -83,13 +83,6 @@ let SignInLayout = ({ setUser }) => {
                     <PageHeading paddingLeft={2} text={"Sign In"} />
                   </Grid>
                   <Grid item key={3}>
-                    <FormControl fullWidth>
-                      {status && (
-                        <FormHelperText error={true}>
-                          {status.error}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -115,8 +108,8 @@ let SignInLayout = ({ setUser }) => {
                       value={values.password}
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      helperText={touched.password && errors.password}
-                      error={errors.password && touched.password}
+                      helperText={touched.password && errors.password ||   (status && status.error) }
+                      error={(errors.password && touched.password) || (status && status.error ? true : false)}
                       InputLabelProps={{ shrink: true }}
                     />
                   </Grid>

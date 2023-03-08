@@ -15,6 +15,8 @@ import "@fullcalendar/timegrid/main.css";
 import moment from "moment";
 import { handleItemFormSubmit, handleDelete } from "../actions/actions";
 
+const defaultDate = moment().format('YYYY-MM-DD')
+
 let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit }) => {
 	const [open, toggleOpen] = React.useState(false);
 
@@ -28,11 +30,11 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 
 	const handleEventDrop = (info) => {
 		let updatedEvent = {
-			...info.event.extendedProps,
 			start: moment(info.event.start).format("YYYY-MM-DD"),
 			end: moment(info.event.start).format("YYYY-MM-DD"),
 			id: info.event.id,
 			title: info.event.title,
+			extendedProps: {...info.event.extendedProps}
 		};
 		handleItemSubmit(currentUser, updatedEvent, "to-dos").then((response) => {
 			console.log("Updated event successfully!", updatedEvent);
@@ -49,8 +51,9 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			id: event.id,
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
-			start: event.start ? moment(event.start).format("YYYY-MM-DD") : "",
-			end: event.end ? moment(event.end).format("YYYY-MM-DD") : "",
+			complete_status: event.extendedProps.complete_status,
+			start: event.start ? moment(event.start).format("YYYY-MM-DD") : defaultDate,
+			end: event.end ? moment(event.end).format("YYYY-MM-DD") : defaultDate,
 			allDay: event.allDay,
 		};
 		setEventToShow(clickedEvent);
@@ -64,8 +67,9 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			id: event.id,
 			description: event.extendedProps.description,
 			reminder_date: event.extendedProps.reminder_date,
-			start: event.start ? moment(event.start).format("YYYY-MM-DD") : "",
-			end: event.end ? moment(event.end).format("YYYY-MM-DD") : "",
+			complete_status: event.extendedProps.complete_status,
+			start: event.start ? moment(event.start).format("YYYY-MM-DD") : defaultDate,
+			end: event.end ? moment(event.end).format("YYYY-MM-DD") : defaultDate,
 			allDay: event.allDay,
 		};
 		setEventToShow(clickedEvent);

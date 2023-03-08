@@ -35,7 +35,7 @@ const PropertySchema = Yup.object().shape({
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().required("Beds is required").default(''),
 		sqft: Yup.number().typeError('Square Footage must be a number').integer().min(0),
-	})).required()
+	}))
 });
 
 const PROPERTY_TYPES = getPropertyTypes();
@@ -59,125 +59,131 @@ let PropertyInputForm = (props) => {
 		owner: propertyToEdit.owner || "",
 	};
 	const CustomInputComponent = ({ remove, push, form }) => {
-		const { errors, values, handleChange, handleBlur } = form
+		const { errors, touched, values, handleChange, handleBlur } = form
 		const propertyUnitErrors = errors['property_units']
-		const layout = values.property_units.map((property_unit, propertyUnitIndex) =>
-			<Grid key={`property_unit-${propertyUnitIndex}`} container item direction="row" alignItems="center" spacing={2}>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].ref`}>
-					<TextField
-						label="Unit Number/Ref"
-						variant="outlined"
-						type="text"
-						value={property_unit.ref}
-						name={`property_units.${propertyUnitIndex}.ref`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['ref'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].ref}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].address`}>
-					<TextField
-						label="Unit Address"
-						variant="outlined"
-						type="text"
-						value={property_unit.address}
-						name={`property_units.${propertyUnitIndex}.address`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['address'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].address}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].unit_type`}>
-					<TextField
-						fullWidth
-						label="Unit Type"
-						defaultValue=""
-						variant="outlined"
-						select
-						value={property_unit.unit_type}
-						name={`property_units.${propertyUnitIndex}.unit_type`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['unit_type'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].unit_type}
-						onChange={handleChange}
-						onBlur={handleBlur}>
-						{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
-							<MenuItem key={unitTypeIndex} value={unit_type}>
-								{unit_type}
-							</MenuItem>
-						))}
-					</TextField>
-				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].beds`}>
-					<TextField
-						fullWidth
-						label="Beds/Rooms"
-						variant="outlined"
-						defaultValue=""
-						select
-						value={property_unit.beds}
-						name={`property_units.${propertyUnitIndex}.beds`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['beds'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].beds}
-						onChange={handleChange}
-						onBlur={handleBlur}>
-						{PROPERTY_BEDS.map((property_bed, bedNumberIndex) => (
-							<MenuItem key={bedNumberIndex} value={property_bed}>
-								{property_bed}
-							</MenuItem>
-						))}
-					</TextField>
-				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].baths`}>
-					<TextField
-						fullWidth
-						label="Baths"
-						variant="outlined"
-						defaultValue=""
-						select
-						value={property_unit.baths}
-						name={`property_units.${propertyUnitIndex}.baths`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['baths'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].baths}
-						onChange={handleChange}
-						onBlur={handleBlur}>
-						{PROPERTY_BATHS.map((property_bath, bathNumberIndex) => (
-							<MenuItem key={bathNumberIndex} value={property_bath}>
-								{property_bath}
-							</MenuItem>
-						))}
-					</TextField>
-				</Grid>
-				<Grid xs item key={`property_units[${propertyUnitIndex}].sqft`}>
-					<TextField
-						label="Sqft"
-						variant="outlined"
-						type="text"
-						value={property_unit.sqft}
-						name={`property_units.${propertyUnitIndex}.sqft`}
-						error={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && typeof propertyUnitErrors[propertyUnitIndex]['sqft'] !== 'undefined'}
-						helperText={'property_units' in errors && typeof propertyUnitErrors[propertyUnitIndex] !== 'undefined' && propertyUnitErrors[propertyUnitIndex].sqft}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
-				</Grid>
-				<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
-					<IconButton aria-label="delete"
-						onClick={() => { remove(propertyUnitIndex) }}
-						size="medium">
-						<DeleteIcon />
-					</IconButton>
-				</Grid>
-			</Grid>
+		const propertyUnitTouched = touched['property_units']
+		const layout = values.property_units.map((property_unit, propertyUnitIndex) => {
+			const indexInErrors = propertyUnitErrors && propertyUnitErrors[propertyUnitIndex];
+			const indexInTouched = propertyUnitTouched && propertyUnitTouched[propertyUnitIndex];
+			return (
+				<Grid key={`property_unit-${propertyUnitIndex}`} container item direction="row" alignItems="center" spacing={2}>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].ref`}>
+						<TextField
+							label="Unit Number/Ref"
+							variant="outlined"
+							type="text"
+							value={property_unit.ref}
+							name={`property_units.${propertyUnitIndex}.ref`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'ref' in indexInErrors) && (indexInTouched && indexInTouched.ref)}
+							helperText={(indexInTouched && indexInTouched.ref) && (indexInErrors && indexInErrors.ref)}
+						/>
+					</Grid>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].address`}>
+						<TextField
+							label="Unit Address"
+							variant="outlined"
+							type="text"
+							value={property_unit.address}
+							name={`property_units.${propertyUnitIndex}.address`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							helperText={"Unit Address For Reference"}
+						/>
+					</Grid>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].unit_type`}>
+						<TextField
+							fullWidth
+							label="Unit Type"
+							defaultValue=""
+							variant="outlined"
+							select
+							value={property_unit.unit_type}
+							name={`property_units.${propertyUnitIndex}.unit_type`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'unit_type' in indexInErrors) && (indexInTouched && indexInTouched.unit_type)}
+							helperText={(indexInTouched && indexInTouched.unit_type) && (indexInErrors && indexInErrors.unit_type)}
+						>
+							{UNIT_TYPES.map((unit_type, unitTypeIndex) => (
+								<MenuItem key={unitTypeIndex} value={unit_type}>
+									{unit_type}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].beds`}>
+						<TextField
+							fullWidth
+							label="Beds/Rooms"
+							variant="outlined"
+							defaultValue=""
+							select
+							value={property_unit.beds}
+							name={`property_units.${propertyUnitIndex}.beds`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'beds' in indexInErrors) && (indexInTouched && indexInTouched.beds)}
+							helperText={(indexInTouched && indexInTouched.beds) && (indexInErrors && indexInErrors.beds)}
+						>
+							{PROPERTY_BEDS.map((property_bed, bedNumberIndex) => (
+								<MenuItem key={bedNumberIndex} value={property_bed}>
+									{property_bed}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].baths`}>
+						<TextField
+							fullWidth
+							label="Baths"
+							variant="outlined"
+							defaultValue=""
+							select
+							value={property_unit.baths}
+							name={`property_units.${propertyUnitIndex}.baths`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'baths' in indexInErrors) && (indexInTouched && indexInTouched.baths)}
+							helperText={(indexInTouched && indexInTouched.baths) && (indexInErrors && indexInErrors.baths)}
+						>
+							{PROPERTY_BATHS.map((property_bath, bathNumberIndex) => (
+								<MenuItem key={bathNumberIndex} value={property_bath}>
+									{property_bath}
+								</MenuItem>
+							))}
+						</TextField>
+					</Grid>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].sqft`}>
+						<TextField
+							label="Sqft"
+							variant="outlined"
+							type="text"
+							value={property_unit.sqft}
+							name={`property_units.${propertyUnitIndex}.sqft`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							error={(indexInErrors && 'sqft' in indexInErrors) && (indexInTouched && indexInTouched.sqft)}
+							helperText={(indexInTouched && indexInTouched.sqft) && (indexInErrors && indexInErrors.sqft)}
+						/>
+					</Grid>
+					<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
+						<IconButton aria-label="delete"
+							onClick={() => { remove(propertyUnitIndex) }}
+							size="medium">
+							<DeleteIcon />
+						</IconButton>
+					</Grid>
+				</Grid>)
 
-		)
+		})
 		return <Grid>
 			{layout}
 			<Button
 				variant="outlined"
 				size="medium"
-				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: ''})}
+				onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: '' })}
 				disableElevation>
 				Add Unit
 			</Button>
@@ -205,8 +211,10 @@ let PropertyInputForm = (props) => {
 					if (!property_unit.address) {
 						property_unit.address = values.address + ' - ' + property_unit.ref
 					}
-					const propertyUnitToSave = Object.assign({}, property_unit, { property_id: propertyId,
-						 tenants: [], assigned_to: values.assigned_to })
+					const propertyUnitToSave = Object.assign({}, property_unit, {
+						property_id: propertyId,
+						tenants: [], assigned_to: values.assigned_to
+					})
 					await handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
 				})
 				resetForm({});
@@ -215,6 +223,7 @@ let PropertyInputForm = (props) => {
 			{({
 				values,
 				handleSubmit,
+				touched,
 				errors,
 				handleChange,
 				handleBlur,
@@ -226,11 +235,13 @@ let PropertyInputForm = (props) => {
 						id="propertyInputForm"
 						onSubmit={handleSubmit}
 					>
-						<Grid container spacing={4} direction="row">
+						<Grid container spacing={1} direction="column">
 							<Grid sm={12} item>
 								<Typography variant="h5">
 									{values.address}
 								</Typography>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									variant="outlined"
@@ -241,10 +252,8 @@ let PropertyInputForm = (props) => {
 									onBlur={handleBlur}
 									onChange={handleChange}
 									value={values.property_type}
-									error={'property_type' in errors}
-									helperText={
-										errors.property_type
-									}
+									error={errors.property_type && touched.property_type}
+									helperText={touched.property_type && errors.property_type}
 								>
 									{PROPERTY_TYPES.map((property_type, index) => (
 										<MenuItem key={index} value={property_type}>
@@ -252,20 +261,26 @@ let PropertyInputForm = (props) => {
 										</MenuItem>
 									))}
 								</TextField>
+							</Grid>
+							<Grid item>
 								<Typography variant="subtitle1">Street Address</Typography>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									variant="outlined"
 									label="Address"
-									error={'address' in errors}
-									helperText={errors.address}
 									id="address"
 									type="text"
 									name="address"
 									value={values.address}
 									onChange={handleChange}
 									onBlur={handleBlur}
+									error={errors.address && touched.address}
+									helperText={touched.address && errors.address}
 								/>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									variant="outlined"
@@ -277,6 +292,8 @@ let PropertyInputForm = (props) => {
 									onChange={handleChange}
 									onBlur={handleBlur}
 								/>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									label="Postal Code"
@@ -284,12 +301,14 @@ let PropertyInputForm = (props) => {
 									id="postal_code"
 									type="text"
 									name="postal_code"
-									error={'postal_code' in errors}
-									helperText={errors.postal_code}
 									value={values.postal_code}
 									onChange={handleChange}
 									onBlur={handleBlur}
+									error={errors.postal_code && touched.postal_code}
+									helperText={touched.postal_code && errors.postal_code}
 								/>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									select
@@ -310,11 +329,11 @@ let PropertyInputForm = (props) => {
 										</MenuItem>
 									))}
 								</TextField>
+							</Grid>
+							<Grid item>
 								<TextField
 									fullWidth
 									select
-									error={'assigned_to' in errors}
-									helperText={errors.assigned_to}
 									variant="outlined"
 									name="assigned_to"
 									id="assigned_to"
@@ -322,6 +341,8 @@ let PropertyInputForm = (props) => {
 									value={values.assigned_to}
 									onChange={handleChange}
 									onBlur={handleBlur}
+									error={errors.assigned_to && touched.assigned_to}
+									helperText={touched.assigned_to && errors.assigned_to}
 								>
 									{users.map((user, index) => (
 										<MenuItem key={index} value={user.id}>
@@ -329,13 +350,15 @@ let PropertyInputForm = (props) => {
 										</MenuItem>
 									))}
 								</TextField>
+							</Grid>
+							<Grid item>
 								<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
-								<Grid item container direction="column">
-									<FieldArray
-										name="property_units"
-										component={CustomInputComponent}
-									/>
-								</Grid>
+							</Grid>
+							<Grid item container direction="column">
+								<FieldArray
+									name="property_units"
+									component={CustomInputComponent}
+								/>
 							</Grid>
 							<Grid
 								item
@@ -344,27 +367,31 @@ let PropertyInputForm = (props) => {
 								direction="row"
 								className={classes.buttonBox}
 							>
-								<Button
-									color="secondary"
-									variant="contained"
-									size="medium"
-									startIcon={<CancelIcon />}
-									onClick={() => history.goBack()}
-									disableElevation
-								>
-									Cancel
-					</Button>
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="propertyInputForm"
-									disabled={isSubmitting}
-								>
-									Save
-					</Button>
+								<Grid item>
+									<Button
+										color="secondary"
+										variant="contained"
+										size="medium"
+										startIcon={<CancelIcon />}
+										onClick={() => history.goBack()}
+										disableElevation
+									>
+										Cancel
+									</Button>
+								</Grid>
+								<Grid item>
+									<Button
+										type="submit"
+										color="primary"
+										variant="contained"
+										size="medium"
+										startIcon={<SaveIcon />}
+										form="propertyInputForm"
+										disabled={isSubmitting}
+									>
+										Add Property
+									</Button>
+								</Grid>
 							</Grid>
 						</Grid>
 					</form>

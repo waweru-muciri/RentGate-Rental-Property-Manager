@@ -198,10 +198,10 @@ let PropertyPage = ({
                             <Grid
                                 container
                                 spacing={2}
-                                justify="center"
+                                justify="space-around"
                                 direction="row"
                             >
-                                <Grid item sm>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -223,7 +223,7 @@ let PropertyPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item sm>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select

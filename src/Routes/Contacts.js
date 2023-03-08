@@ -217,7 +217,7 @@ let ContactsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={6} xs={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -232,7 +232,7 @@ let ContactsPage = ({
                                         }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={6} xs={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         variant="outlined"
@@ -254,7 +254,7 @@ let ContactsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={6} xs={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select
@@ -276,7 +276,7 @@ let ContactsPage = ({
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item lg={6} md={6} xs={6}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         select

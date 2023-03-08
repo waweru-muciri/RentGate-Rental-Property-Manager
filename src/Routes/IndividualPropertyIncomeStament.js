@@ -216,7 +216,7 @@ let PropertyIncomeStatement = ({
                             justify="center"
                             direction="row"
                         >
-                            <Grid item md>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     select
@@ -241,7 +241,7 @@ let PropertyIncomeStatement = ({
                                     ))}
                                 </TextField>
                             </Grid>
-                            <Grid item md>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     variant="outlined"

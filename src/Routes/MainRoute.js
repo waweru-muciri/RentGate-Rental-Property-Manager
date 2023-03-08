@@ -77,20 +77,20 @@ let MainPage = ({
       fetchData([
         "properties",
         "property_units",
-        "property_accounts",
-        "transactions",
-        "maintenance-requests",
-        "property_media",
+        // "property_accounts",
+        // "transactions",
+        // "maintenance-requests",
+        // "property_media",
         "contacts",
-        "contact_phone_numbers",
-        "contact_emails",
-        "contact_faxes",
-        "contact_addresses",
-        "notices",
-        "to-dos",
+        // "contact_phone_numbers",
+        // "contact_emails",
+        // "contact_faxes",
+        // "contact_addresses",
+        // "notices",
+        // "to-dos",
         "users",
-        "expenses",
-        "meter_readings",
+        // "expenses",
+        // "meter_readings",
       ]);
     }
   }, [currentUser]);
@@ -242,12 +242,11 @@ let MainPage = ({
   );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    drawerOpen: state.drawerOpen,
+    match: ownProps.match,
     properties: state.properties,
     currentUser: state.currentUser,
-    selectedTab: state.selectedTab,
   };
 };
 
@@ -255,8 +254,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (tenant, url) => dispatch(itemsFetchData(tenant, url)),
     setUser: (user) => dispatch(setCurrentUser(user)),
-    setSelectedTab: (index) => dispatch(setPaginationPage(index)),
-    setDrawerToggleState: (toggleValue) => dispatch(toggleDrawer(toggleValue)),
   };
 };
 
