@@ -13,6 +13,7 @@ import {
 import PropertiesPage from "./Properties";
 import MaintenancesPage from "./Maintenances";
 import UsersPage from "./Users";
+import EmailsPage from "./Emails";
 import UserPage from "./UserPage";
 import MaintenanceRequestPage from "./MaintenanceRequestPage";
 import ToDosPage from "./ToDos";
@@ -136,7 +137,7 @@ const nestedNavigations = [
   { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
   { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
   // { text: "SMS", to: "/sms", icon: <ContactPhoneIcon /> },
-  { text: "Email", to: "/email", icon: <ContactMailIcon /> },
+  { text: "Email", to: "/emails", icon: <ContactMailIcon /> },
   { text: "Audit Logs", to: "/audit-logs", icon: <HistoryIcon /> },
 ];
 
@@ -166,20 +167,20 @@ let MainPage = ({
 
   useEffect(() => {
     if (!properties.length) {
-      fetchData([
-        "properties",
-        "transactions",
-        "maintenance-requests",
-        "property_media",
-        "contacts",
-        "contact_phone_numbers",
-        "contact_emails",
-        "contact_faxes",
-        "contact_addresses",
-        "notices",
-        "to-dos",
-        "users",
-      ]);
+      // fetchData([
+      //   "properties",
+      //   "transactions",
+      //   "maintenance-requests",
+      //   "property_media",
+      //   "contacts",
+      //   "contact_phone_numbers",
+      //   "contact_emails",
+      //   "contact_faxes",
+      //   "contact_addresses",
+      //   "notices",
+      //   "to-dos",
+      //   "users",
+      // ]);
     }
   }, [
     contacts,
@@ -384,6 +385,7 @@ let MainPage = ({
         />
         <Switch>
           <Route exact path={`${match.path}`} component={DashBoard} />
+          <Route exact path={`${match.path}emails`} component={EmailsPage} />
           <Route
             exact
             path={`${match.path}maintenance-requests/new`}
