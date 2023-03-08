@@ -685,7 +685,7 @@ export default function HomePage() {
                                         message: values.message,
                                         email: values.email
                                     }
-                                    fetch('https://us-central1-propertymanager-a321f.cloudfunctions.net/sendEmailTest', {
+                                    return fetch('https://us-central1-propertymanager-a321f.cloudfunctions.net/sendEmailTest', {
                                         method: "POST",
                                         headers: {
                                             'Content-Type': 'application/json'
