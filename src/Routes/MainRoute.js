@@ -154,12 +154,6 @@ let MainPage = ({
 }) => {
   const history = useHistory()
 
-  const checkIfUser = () => {
-    if (!currentUser) {
-        history.push("/login");
-    }
-  }
-
   useEffect(() => {
     if (!properties.length) {
       fetchData([
@@ -207,6 +201,7 @@ let MainPage = ({
           user.getIdToken().then(function (accessToken) {
             userDetails.accessToken = accessToken;
           });
+          history.push("/login");
           setUser(userDetails);
         } else {
           // User is signed out.
