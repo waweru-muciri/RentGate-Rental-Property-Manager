@@ -1,25 +1,23 @@
 import React from "react";
-import {
-	FormHelperText,
-	FormControl,
-	InputLabel,
-	Select,
-	Chip,
-	GridList,
-	GridListTile,
-	ListSubheader,
-	GridListTileBar,
-	IconButton,
-	Box,
-	Button,
-	TextField,
-	MenuItem,
-	Grid,
-	Typography,
-	FormGroup,
-	FormControlLabel,
-	Checkbox,
-} from "@material-ui/core";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
+import MenuItem from "@material-ui/core/MenuItem";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
+import IconButton from "@material-ui/core/IconButton";
+import GridListTileBar from "@material-ui/core/GridListTileBar";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import GridListTile from "@material-ui/core/GridListTile";
+import GridList from "@material-ui/core/GridList";
+import Chip from "@material-ui/core/Chip";
+import FormControl from "@material-ui/core/FormControl";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
 import DeleteIcon from "@material-ui/icons/Delete";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
@@ -337,7 +335,7 @@ let PropertyInputForm = (props) => {
 									onBlur={handleBlur}
 									error={errors.square_footage}
 									helperText={
-										'square_footage' in errors									}
+										'square_footage' in errors}
 								/>
 								<TextField
 									fullWidth
@@ -565,12 +563,8 @@ let PropertyInputForm = (props) => {
 									alignItems="flex-start"
 								>
 									<Grid item>
-										<Typography variant="h6">
-											Other Property Features
-							</Typography>
-										<Typography variant="subtitle1">
-											Home Comforts
-							</Typography>
+										<Typography variant="h6">Unit Features</Typography>
+										<Typography variant="subtitle1">Home Comforts</Typography>
 									</Grid>
 									<Grid item container spacing={4} direction="row">
 										<Grid item>

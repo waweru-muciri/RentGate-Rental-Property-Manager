@@ -8,10 +8,6 @@ export function getGendersList() {
 	return gendersList;
 }
 
-export function getContactTypes() {
-	return ["Individual", "Company"];
-}
-
 export function getExpensesCategories() {
 	return [
 		'Taxes',
@@ -34,12 +30,12 @@ export function getExpensesCategories() {
 //general property values
 export function getPropertyTypes() {
 	return [
-		"Single Family",
-		"Apartment/Condo",
-		"Townhouse",
-		"Duplex",
-		"Multi-Family",
-		"Loft Apartment",
+		"Bedsitter",
+		"One Bedroom",
+		"Two Bedroom",
+		"Single Room",
+		"Double Room",
+		"Shop",
 	];
 }
 

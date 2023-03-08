@@ -1,13 +1,12 @@
 import React from "react";
-import {
-	Box,
-	Avatar,
-	Typography,
-	Button,
-	TextField,
-	MenuItem,
-	Grid,
-} from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuItem from "@material-ui/core/MenuItem";
+import Grid from "@material-ui/core/Grid";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
@@ -22,7 +21,6 @@ import { commonStyles } from "../commonStyles";
 import {
 	getContactTitles,
 	getGendersList,
-	getContactTypes,
 } from "../../assets/commonAssets.js";
 import { DropzoneDialogBase } from "material-ui-dropzone";
 import * as Yup from "yup";
@@ -30,7 +28,6 @@ import moment from "moment";
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
-const CONTACT_TYPES = getContactTypes();
 
 
 const ContactSchema = Yup.object().shape({
@@ -40,7 +37,6 @@ const ContactSchema = Yup.object().shape({
 	gender: Yup.string().trim().required("Gender is required"),
 	id_number: Yup.string().trim().required("ID Number is required"),
 	assigned_to: Yup.string().trim().required("Assigned To is required"),
-	contact_type: Yup.string().trim().required("Contact Type is required"),
 	contact_email: Yup.string().trim().email().required('Contact Email is Required'),
 	present_address: Yup.string().trim().required('Contact Address is Required'),
 	personal_mobile_number: Yup.string().trim().required('Contact Phone Number is Required'),
@@ -75,7 +71,6 @@ let ContactInputForm = (props) => {
 		custom_mobile_number: contactToEdit.custom_mobile_number || "",
 		id_issue_date: contactToEdit.id_issue_date || currentDate,
 		id_issue_place: contactToEdit.id_issue_place || "",
-		contact_type: contactToEdit.contact_type || "",
 		title: contactToEdit.title || "",
 		date_of_birth: contactToEdit.date_of_birth || currentDate,
 		gender: contactToEdit.gender || "",
@@ -99,7 +94,6 @@ let ContactInputForm = (props) => {
 					id_number: values.id_number,
 					id_issue_date: values.id_issue_date,
 					id_issue_place: values.id_issue_place,
-					contact_type: values.contact_type,
 					title: values.title,
 					date_of_birth: values.date_of_birth,
 					present_address: values.present_address,
@@ -247,26 +241,6 @@ let ContactInputForm = (props) => {
 									<TextField
 										variant="outlined"
 										select
-										name="contact_type"
-										label="Type of Contact"
-										id="contact_type"
-										onBlur={handleBlur}
-										onChange={handleChange}
-										value={values.contact_type}
-										error={'contact_type' in errors}
-										helperText={
-											errors.contact_type
-										}
-									>
-										{CONTACT_TYPES.map((contact_type, index) => (
-											<MenuItem key={index} value={contact_type}>
-												{contact_type}
-											</MenuItem>
-										))}
-									</TextField>
-									<TextField
-										variant="outlined"
-										select
 										name="title"
 										label="Title"
 										id="title"
@@ -303,15 +277,6 @@ let ContactInputForm = (props) => {
 										onBlur={handleBlur}
 										error={'last_name' in errors}
 										helperText={errors.last_name}
-									/>
-									<TextField
-										variant="outlined"
-										id="company_name"
-										name="company_name"
-										label="Company Name"
-										value={values.company_name}
-										onChange={handleChange}
-										onBlur={handleBlur}
 									/>
 									<TextField
 										variant="outlined"
@@ -510,7 +475,7 @@ let ContactInputForm = (props) => {
 											helperText="Permanent Address"
 										/>
 									</Grid>
-							</Grid>
+								</Grid>
 							</Grid >
 							{/** end of contact details grid **/}
 							< Grid

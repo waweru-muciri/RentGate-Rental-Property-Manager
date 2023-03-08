@@ -3,7 +3,11 @@ import Layout from "../components/myLayout";
 import { connect } from "react-redux";
 import PageHeading from "../components/PageHeading";
 import InfoDisplayPaper from "../components/InfoDisplayPaper";
-import { Grid, Typography, Box, TextField, Button } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
 import { commonStyles } from "../components/commonStyles";
 import {
@@ -26,7 +30,7 @@ const FilterYearSchema = Yup.object().shape({
     .required("Year is required")
     .positive()
     .min(2000, "Must be greater than 2000")
-    .max(10000, "Max year is 10000")
+    .max(2100, "We won't be here during those times dear")
     .integer(),
 });
 
@@ -49,12 +53,19 @@ let DashBoardPage = (props) => {
   };
 
   const totalProperties = properties.length;
-
-  const occupiedHouses = properties.filter((property) => property.tenant)
+  //get the number of the different units by category
+  const bedSitterUnits = properties.filter((property) => property.property_type === 'Bedsitter').length;
+  const oneBedUnits = properties.filter((property) => property.property_type === 'One Bedroom').length;
+  const twoBedUnits = properties.filter((property) => property.property_type === 'Two Bedroom').length;
+  const singleRoomUnits = properties.filter((property) => property.property_type === 'Single Room').length;
+  const doubleRoomUnits = properties.filter((property) => property.property_type === 'Double Room').length;
+  const shopUnits = properties.filter((property) => property.property_type === 'Shop').length;
+  //get the current number of occupied houses
+  const occupiedHouses = transactionItems.filter(({ transaction_date }) => moment(transaction_date).month() === moment().month())
     .length;
-
+  //get months in an year in short format
   const monthsOfTheYear = moment.monthsShort();
-
+  //
   const transactionsGraphData = Array.from(monthsOfTheYear, (monthOfYear) => ({
     month: monthOfYear,
     amount: 0,
@@ -86,50 +97,30 @@ let DashBoardPage = (props) => {
           container
           spacing={2}
           direction="row"
-          alignItems="center"
-          justify="space-evenly"
+          alignItems="stretch"
+          justify="space-around"
+          key={3}
+        >
+          <InfoDisplayPaper xs={6} title={"Bed Sitters"} value={bedSitterUnits} />
+          <InfoDisplayPaper xs={6} title={"1 Bed"} value={oneBedUnits} />
+          <InfoDisplayPaper xs={6} title={"2 Beds"} value={twoBedUnits} />
+          <InfoDisplayPaper xs={6} title={"Single Room"} value={singleRoomUnits} />
+          <InfoDisplayPaper xs={6} title={"Double Room"} value={doubleRoomUnits} />
+          <InfoDisplayPaper xs={6} title={"Shop"} value={shopUnits} />
+        </Grid>
+        <Grid
+          item
+          container
+          spacing={2}
+          direction="row"
+          alignItems="stretch"
+          justify="space-around"
           key={2}
         >
-          <Grid item md={3}>
-            <InfoDisplayPaper>
-              <Typography variant="subtitle1" align="center">
-                Total Rentals
-              </Typography>
-              <Typography variant="subtitle2" align="center">
-                {totalProperties}
-              </Typography>
-            </InfoDisplayPaper>
-          </Grid>
-          <Grid item md={3}>
-            <InfoDisplayPaper>
-              <Typography variant="subtitle1" align="center">
-                Current Month Occupancy Rate
-              </Typography>
-              <Typography variant="subtitle2" align="center">
-                {(occupiedHouses / totalProperties) * 100}
-              </Typography>
-            </InfoDisplayPaper>
-          </Grid>
-          <Grid item md={3}>
-            <InfoDisplayPaper>
-              <Typography variant="subtitle1" align="center">
-                Currently Occupied Rentals
-              </Typography>
-              <Typography variant="subtitle2" align="center">
-                {occupiedHouses}
-              </Typography>
-            </InfoDisplayPaper>
-          </Grid>
-          <Grid item md={3}>
-            <InfoDisplayPaper>
-              <Typography variant="subtitle1" align="center">
-                Currently Unoccupied Rentals
-              </Typography>
-              <Typography variant="subtitle2" align="center">
-                {totalProperties - occupiedHouses}
-              </Typography>
-            </InfoDisplayPaper>
-          </Grid>
+          <InfoDisplayPaper xs={12} title={"Total Rentals"} value={totalProperties} />
+          <InfoDisplayPaper xs={12} title={"Currently Occupied Rentals"} value={occupiedHouses} />
+          <InfoDisplayPaper xs={12} title={"Currently Unoccupied Rentals"} value={totalProperties - occupiedHouses} />
+          <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={(occupiedHouses / totalProperties) * 100} />
         </Grid>
         <Grid item>
           <Box
@@ -149,7 +140,7 @@ let DashBoardPage = (props) => {
                     initialValues={{ filter_year: moment().get("year") }}
                     validationSchema={FilterYearSchema}
                     onSubmit={(values) => {
-                      setFilteredTransactionItemsByYear(values.filter_year);
+                      setFilteredTransactionItemsByYear(parseInt(values.filter_year));
                     }}
                   >
                     {({

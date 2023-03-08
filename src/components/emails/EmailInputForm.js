@@ -1,8 +1,10 @@
-import React, { useEffect }  from "react";
+import React, { useEffect } from "react";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
-import { Button, TextField, Grid } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Grid from "@material-ui/core/Grid";
 import ReactQuill from 'react-quill'; // ES6
 import 'react-quill/dist/quill.snow.css'; // ES6
 import Typography from "@material-ui/core/Typography";
@@ -63,25 +65,25 @@ export default function HorizontalLinearStepper(props) {
   const [left, setLeft] = React.useState([]);
   const [right, setRight] = React.useState([]);
   const [emailsSource, setEmailsSource] = React.useState('Tenants');
-  const emailsSources  = ["Tenants", "Users"];
-	
+  const emailsSources = ["Tenants", "Users"];
+
   useEffect(() => {
-	setLeft(contacts);
+    setLeft(contacts);
   }, [contacts, users])
 
-	const setEmailsBySource = (source) => {
-setEmailsSource(source);
-		switch(source){
-			case 'Tenants' : setLeft(contacts); setRight([]); setChecked([]);
-			break;
+  const setEmailsBySource = (source) => {
+    setEmailsSource(source);
+    switch (source) {
+      case 'Tenants': setLeft(contacts); setRight([]); setChecked([]);
+        break;
 
-			case 'Users' : setLeft(users); setRight([]); setChecked([]);
-			break;
+      case 'Users': setLeft(users); setRight([]); setChecked([]);
+        break;
 
-			default: break;
-		}
+      default: break;
+    }
 
-	}
+  }
   const steps = getSteps();
 
   const handleNext = () => {
@@ -142,7 +144,7 @@ setEmailsSource(source);
                     touched,
                     errors,
                     handleChange,
-					setFieldValue,
+                    setFieldValue,
                     handleBlur,
                   }) => (
                       <form
@@ -219,36 +221,35 @@ setEmailsSource(source);
                                 }
                               />
 
-			    <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
-                <ReactQuill
-				value={values.email_message}
-				onChange={handleChange}
-                  theme="snow"
-                  modules={quillEditorModules}
-                  formats={quillEditorFormats} >
-                              <TextField
-                                fullWidth
-                                variant="outlined"
-								id="email_message"
-								name="email_message"
-								label="Email Message"
-								placeholder="Email Message"
-                                onBlur={handleBlur}
-                                error={
-                                 'email_message' in  errors                                  }
-                                helperText={
-                                  errors.email_message
-                                }
-                />
-								</ReactQuill>
+                              <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
+                              <ReactQuill
+                                placeholder="Email Message"
+
+                                value={values.email_message}
+                                onChange={handleChange}
+                                theme="snow"
+                                modules={quillEditorModules}
+                                formats={quillEditorFormats} >
+                                <TextField
+                                  fullWidth
+                                  variant="outlined"
+                                  id="email_message"
+                                  name="email_message"
+                                  onBlur={handleBlur}
+                                  error={'email_message' in errors}
+                                  helperText={
+                                    errors.email_message
+                                  }
+                                />
+                              </ReactQuill>
                             </Grid>
                           </Grid>
                         ) : (
                             <EmailsSelect
                               contacts={contacts}
-							  emailsSources ={ emailsSources }
-                              selectedEmailsSource ={emailsSource}
-                              setEmailsSource ={setEmailsBySource}
+                              emailsSources={emailsSources}
+                              selectedEmailsSource={emailsSource}
+                              setEmailsSource={setEmailsBySource}
                               checked={checked}
                               setChecked={setChecked}
                               setLeft={setLeft}
@@ -257,56 +258,56 @@ setEmailsSource(source);
                               left={left}
                             />
                           )}
-                            <Grid
-                              item
-                              container
-                              spacing={2}
+                        <Grid
+                          item
+                          container
+                          spacing={2}
+                        >
+                          <Grid item>
+                            <Button
+                              color="secondary"
+                              variant="contained"
+                              size="medium"
+                              startIcon={<CancelIcon />}
+                              onClick={() => history.goBack()}
+                              disableElevation
                             >
-                        <Grid item>
-                          <Button
-                            color="secondary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<CancelIcon />}
-                            onClick={() => history.goBack()}
-                            disableElevation
-                          >
-                            cancel
+                              cancel
                       </Button>
-						  </Grid>
-                        <Grid item>
-                          <Button
-                            disabled={activeStep === 0}
-                            onClick={handleBack}
-                            variant="contained"
-                            className={classes.oneMarginRight}
-                          >
-                            Back
+                          </Grid>
+                          <Grid item>
+                            <Button
+                              disabled={activeStep === 0}
+                              onClick={handleBack}
+                              variant="contained"
+                              className={classes.oneMarginRight}
+                            >
+                              Back
                       </Button>
-                        </Grid>
-                        <Grid item>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={activeStep === 1}
-                            onClick={handleNext}
-                            className={classes.oneMarginRight}
-                          >
-                            Next
+                          </Grid>
+                          <Grid item>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={activeStep === 1}
+                              onClick={handleNext}
+                              className={classes.oneMarginRight}
+                            >
+                              Next
                       </Button>
-                        </Grid>
-                        <Grid item>
-                          <Button
-                            disabled={!right.length}
-                            form="emailDetailsInputForm"
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            className={classes.oneMarginRight}
-                          >
-                            Send
+                          </Grid>
+                          <Grid item>
+                            <Button
+                              disabled={!right.length}
+                              form="emailDetailsInputForm"
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              className={classes.oneMarginRight}
+                            >
+                              Send
                           </Button>
-                        </Grid>
+                          </Grid>
                         </Grid>
                       </form>
                     )}
