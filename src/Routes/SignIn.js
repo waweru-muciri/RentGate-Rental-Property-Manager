@@ -80,7 +80,7 @@ let SignInLayout = ({ setUser }) => {
               >
                 <Grid container justify="center" direction="column" spacing={3}>
                   <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={"Sign In"} />
+                    <PageHeading  text={"Sign In"} />
                   </Grid>
                   <Grid item key={3}>
                     <TextField

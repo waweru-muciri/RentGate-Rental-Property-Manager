@@ -138,7 +138,7 @@ let RentRollPage = ({
                 justify="center" direction="column"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={"Lease Renewals"} />
+                    <PageHeading  text={"Lease Renewals"} />
                 </Grid>
                 <Grid
                     container
@@ -359,7 +359,7 @@ let RentRollPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

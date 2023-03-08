@@ -14,7 +14,7 @@ import { Bar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, startOfToday, parse, eachMonthOfInterval, isSameMonth } from "date-fns";
+import { format, getYear, startOfYear, endOfYear, startOfToday, parse, eachMonthOfInterval, getMonth } from "date-fns";
 
 const options = {
   responsive: true,
@@ -34,20 +34,20 @@ const FilterYearSchema = Yup.object().shape({
     .required("Year is required")
     .positive()
     .min(0, "Must be greater than 0")
-    .max(2100, "We won't be here during those times dear")
+    .max(2100, "Sorry but we won't be here during those times.")
     .integer(),
 });
 
 var monthsInYear = eachMonthOfInterval({
-  start: new Date(2020, 0, 1),
-  end: new Date(2020, 11, 1)
+  start: startOfYear(startOfToday()),
+  end: endOfYear(startOfToday()),
 })
 
 let DashBoardPage = (props) => {
   const classes = commonStyles()
   const { propertyUnits, transactions, transactionsCharges, leases, properties } = props;
   const [transactionItems, setTransactionItems] = useState([]);
-  let [propertyFilter, setPropertyFilter] = useState("");
+  let [propertyFilter, setPropertyFilter] = useState("all");
   const [chargesItems, setChargesItems] = useState([]);
   const propertyActiveLeases = leases.filter(({ terminated }) => terminated !== true)
 
@@ -88,7 +88,7 @@ let DashBoardPage = (props) => {
     return transactionItems
       .filter((payment) => {
         const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
-        return isSameMonth(monthDate, paymentDate)
+        return getMonth(monthDate) === getMonth(paymentDate)
       }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payment_amount) || 0), 0)
   })
   rentIncomeData.datasets.push({
@@ -105,7 +105,7 @@ let DashBoardPage = (props) => {
     return chargesItems
       .filter((charge) => {
         const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
-        return isSameMonth(monthDate, chargeDate)
+        return getMonth(monthDate) === getMonth(chargeDate)
       }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
   })
   rentIncomeData.datasets.push({
@@ -122,7 +122,7 @@ let DashBoardPage = (props) => {
     <Layout pageTitle="Dashboard">
       <Grid container justify="center" direction="column" spacing={4}>
         <Grid item key={0}>
-          <PageHeading paddingLeft={2} text={"Dashboard"} />
+          <PageHeading text={"Dashboard"} />
         </Grid>
         <Grid item>
           <Grid container item direction="column" spacing={4}>
@@ -174,6 +174,7 @@ let DashBoardPage = (props) => {
                               }}
                               value={propertyFilter}
                             >
+                              <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                               {properties.map(
                                 (property, index) => (
                                   <MenuItem

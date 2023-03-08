@@ -1,7 +1,7 @@
 import Button from "@material-ui/core/Button";
 import React from "react";
 import PrintIcon from "@material-ui/icons/Print";
-import { printTenantTransactions } from "./PdfPrintingHelper";
+import { printDataRows } from "./PdfPrintingHelper";
 import PropTypes from 'prop-types';
 
 function PrintArrayToPdf (props) {
@@ -14,7 +14,7 @@ function PrintArrayToPdf (props) {
             size="medium"
             color="primary"
             disabled={disabled}
-            onClick={() => printTenantTransactions(reportName, reportTitle, headCells, dataToPrint)}
+            onClick={() => printDataRows(reportName, reportTitle, headCells, dataToPrint)}
             startIcon={<PrintIcon />}
         >
             Pdf

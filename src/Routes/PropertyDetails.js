@@ -120,7 +120,7 @@ let PropertyDetailsPage = ({
                     justify="space-evenly"
                     alignItems="center"
                 >
-                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Grid item xs={12}>
                         <Typography variant="h6">Rental Units</Typography>
                     </Grid>
                     <Grid
@@ -255,7 +255,7 @@ let PropertyDetailsPage = ({
                                             size="medium"
                                             startIcon={<SearchIcon />}
                                         >
-                                            SEARCH{" "}
+                                            SEARCH
                                         </Button>
                                     </Grid>
                                     <Grid item>
@@ -270,14 +270,14 @@ let PropertyDetailsPage = ({
                                             size="medium"
                                             startIcon={<UndoIcon />}
                                         >
-                                            RESET{" "}
+                                            RESET
                                         </Button>
                                     </Grid>
                                 </Grid>
                             </form>
                         </Box>
                     </Grid>
-                    <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                    <Grid item xs={12}>
                         <CommonTable
                             selected={selected}
                             setSelected={setSelected}

@@ -8,25 +8,23 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let ExpensePage = (props) => {
-    const { expenses, contacts, properties, propertyUnits, handleItemSubmit, history } = props;
+    const { expenses, properties, propertyUnits, handleItemSubmit, history } = props;
     let expenseToEditId = props.match.params.expenseId;
-    let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId);
-    let pageTitle = expenseToEditId ? "Edit Expense" : "New Expense";
-    const propertyUnitsWithTenants = propertyUnits.filter((propertyUnit) => propertyUnit.tenants.length)
+    let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId) || {};
+    let pageTitle = expenseToEdit.id ? "Edit Expense" : "New Expense";
     return (
         <Layout pageTitle="Expense Details">
             <Grid container justify="center" direction="column">
                 <Grid item key={1}>
-                    <PageHeading paddingLeft={2} text={pageTitle} />
+                    <PageHeading  text={pageTitle} />
                 </Grid>
                 <Grid item key={2}>
                     <ExpenseInputForm
                         history={history}
                         expenseToEdit={expenseToEdit}
                         handleItemSubmit={handleItemSubmit}
-                        contacts={contacts}
                         properties={properties}
-                        propertyUnits={propertyUnitsWithTenants}
+                        propertyUnits={propertyUnits}
                     />
                 </Grid>
             </Grid>
@@ -37,7 +35,6 @@ let ExpensePage = (props) => {
 const mapStateToProps = (state) => {
     return {
         properties: state.properties,
-        contacts: state.contacts,
         propertyUnits: state.propertyUnits,
         expenses: state.expenses,
     };

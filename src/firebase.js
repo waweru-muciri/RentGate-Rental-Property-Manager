@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import {auth as firebaseAuth, firestore as firebaseFirestore, functions as firebaseFunctions, storage as firebaseStorage, initializeApp} from "firebase";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -12,6 +12,8 @@ var firebaseConfig = {
 	measurementId: "G-X1Y3NZTL1J",
 };
 // Initialize firebase
-var app = firebase.initializeApp(firebaseConfig);
-
-export default app;
+initializeApp(firebaseConfig);
+export const auth = firebaseAuth()
+export const storage = firebaseStorage()
+export const firestore = firebaseFirestore()
+export const functions = firebaseFunctions()

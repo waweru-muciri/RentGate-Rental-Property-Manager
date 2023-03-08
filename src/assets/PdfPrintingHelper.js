@@ -30,10 +30,10 @@ const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
     const baseDocDefinition = {
         pageSize: 'A4',
         info: {
-            title: 'Yarra Property Management Services Document',
-            author: 'yarra property management',
-            subject: 'subject of document',
-            keywords: 'keywords for document',
+            title: `Yarra Property Management Services - ${reportTitle}`,
+            author: 'Yarra Property Management Services',
+            subject: `${reportTitle}`,
+            keywords: `${reportTitle}`,
         },
         footer: (currentPage, pageCount) => {
             return {
@@ -77,13 +77,12 @@ const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
 export const printDocument = (reportName, reportTitle, documentContent) => {
     const reportDate = new Date().toDateString()
     const docDefinition = createDocumentDefinition(reportDate, reportTitle, documentContent);
-    // pdfMake.createPdf(docDefinition).download(reportName)
     pdfMake.createPdf(docDefinition).open()
 }
 
 
-// -- Generate the Underlying Transactions Summary report.
-export function printTenantTransactions(reportName, reportTitle, headCells, dataToPrint) {
+// -- Generate the Pdf with Data in Rows.
+export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
     const headCellsToPrint = headCells.filter(({id}) => id !== 'edit' && id !== 'delete' && id !== 'details')
 
     const fontSize = 9;

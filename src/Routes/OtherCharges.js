@@ -34,6 +34,7 @@ const headCells = [
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
@@ -41,6 +42,7 @@ const headCells = [
 let TenantChargesStatementPage = ({
     properties,
     contacts,
+    transactions,
     transactionsCharges,
     handleItemDelete,
 }) => {
@@ -65,17 +67,18 @@ let TenantChargesStatementPage = ({
 
     const totalNumOfCharges = filteredChargeItems.length
 
-    const totalChargesAmount = filteredChargeItems.filter(charge => charge.charge_type !== 'rent')
+    const totalChargesAmount = filteredChargeItems
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.charge_amount) || 0
         }, 0)
 
     const chargesWithPayments = filteredChargeItems.filter(charge => charge.payed_status === true).length
 
-    const totalPaymentsAmount = filteredChargeItems.filter(payment => payment.charge_type !== 'rent')
+    const totalPaymentsAmount = filteredChargeItems
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
+
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
@@ -124,12 +127,19 @@ let TenantChargesStatementPage = ({
         setFilteredChargeItems(filteredStatements);
     };
 
+    const handleChargeDelete = async (chargeId, url) => {
+        transactions.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
+            await handleItemDelete(payment.id, "charge-payments")
+        });
+        await handleItemDelete(chargeId, url)
+    }
+
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("");
-        setContactFilter('')
+        setPeriodFilter("month-to-date");
+        setContactFilter(null)
         setPropertyFilter('')
     };
 
@@ -141,7 +151,7 @@ let TenantChargesStatementPage = ({
                 justify="center" direction="column"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={"Other Charges"} />
+                    <PageHeading  text={"Other Charges"} />
                 </Grid>
                 <Grid
                     container
@@ -395,9 +405,9 @@ let TenantChargesStatementPage = ({
                             setSelected={setSelected}
                             rows={filteredChargeItems}
                             headCells={headCells}
-                            noEditCol
-                            deleteUrl={'unit-charges'}
-                            handleDelete={handleItemDelete}
+                            noDetailsCol={true}
+                            deleteUrl={'transactions-charges'}
+                            handleDelete={handleChargeDelete}
                         />
                     </Grid>
                 </Grid>

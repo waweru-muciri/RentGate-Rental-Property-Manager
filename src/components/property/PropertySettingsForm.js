@@ -29,7 +29,6 @@ const MANAGEMENT_FEES_ATTACH_OPTIONS = ['Per Property', 'Per Unit']
 
 const PropertySettingsSchema = Yup.object().shape({
 	property: Yup.string().trim().required("Property is Required"),
-	payment_due_date: Yup.date().required("Payments Due Date is Required"),
 	grace_period: Yup.number().typeError('Grace Period days must be a number').default(0),
 	late_fee_amount: Yup.number().typeError('Amount must be a number').required("Late Fee amount is required"),
 	late_fee_frequency: Yup.string().trim().required("Frequency to charge fees is required"),
@@ -50,7 +49,6 @@ let PropertySettingsInputForm = (props) => {
 	const propertyValues = {
 		id: propertySettingsToEdit.id,
 		property: propertySettingsToEdit.property || "",
-		payment_due_date: propertySettingsToEdit.payment_due_date || "",
 		late_fee_max_amount: propertySettingsToEdit.late_fee_max_amount || "",
 		grace_period: propertySettingsToEdit.grace_period || 0,
 		late_fee_frequency: propertySettingsToEdit.late_fee_frequency || "",
@@ -70,7 +68,6 @@ let PropertySettingsInputForm = (props) => {
 			onSubmit={async (values, { resetForm }) => {
 				let property_unit = {
 					id: values.id,
-					payment_due_date: values.payment_due_date,
 					late_fee_max_amount: values.late_fee_max_amount,
 					grace_period: values.grace_period,
 					late_fee_frequency: values.late_fee_frequency,
@@ -105,27 +102,6 @@ let PropertySettingsInputForm = (props) => {
 							<Grid item container spacing={4} direction="row">
 								<Grid container item xs spacing={2} direction="column">
 									<Grid item>
-										<Typography variant="subtitle1">
-											Payment Settings
-										</Typography>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											variant="outlined"
-											label="Payment Due Date"
-											id="payment_due_date"
-											type="date"
-											name="payment_due_date"
-											value={values.payment_due_date}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											InputLabelProps={{ shrink: true }}
-											error={errors.payment_due_date && touched.payment_due_date}
-											helperText={touched.payment_due_date && errors.payment_due_date}
-										/>
-									</Grid>
-									<Grid item>
 										<Typography variant="subtitle1">Late Fee Policy</Typography>
 									</Grid>
 									<Grid item>
@@ -138,12 +114,12 @@ let PropertySettingsInputForm = (props) => {
 													name="late_fee_policy_status"
 													inputProps={{ 'aria-label': 'Late fees checkbox' }}
 												/>}
-												label="Automatice Late Fees"
+												label="Automatic Late Fees"
 												labelPlacement="start"
 											/>
 										</FormControl>
 										<Typography variant="body2" >
-											If automatice late fees are on, we will post late fees charges
+											If automatic late fees are on, we will post late fees charges
 											residents ledgers based on the settings below.
 										</Typography>
 									</Grid>

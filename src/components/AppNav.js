@@ -80,14 +80,15 @@ const reportLinkNestedLinks = [
     // *** NOTE *** include relevant data points on each of these modules for easy reference.
     //show income here from all charges and provide a way to filter the charges according to type, 
     //show payments received from these charges and any outstanding balances
+    //show outstanding balances on tenant statements
     {
         text: "Outstanding Balances",
         to: "/reports/outstanding-balances",
         icon: <MoneyOffIcon/>,
     }, 
     {
-        text: "Property Performance",
-        to: "/reports/property-income",
+        text: "Properties Performance",
+        to: "/reports/property-performance",
         icon: <ShowChartIcon />,
     }, 
     {
@@ -104,7 +105,6 @@ const reportLinkNestedLinks = [
     //show property occupancy rate over periods of time and provide for filtering criteria by property, unit, 
     //generate tenant statements and filtering criteria by each property and others
     //show total of values and other relevant data points
-    //show outstanding balances on tenant statements
 ];
 
 const accountsLinkNestedLinks = [

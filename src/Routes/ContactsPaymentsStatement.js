@@ -10,7 +10,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, dateRange, getYearToDateFromToDates } from "../assets/commonAssets";
+import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
@@ -117,7 +117,7 @@ let TenantsPaymentsPage = ({
             alignItems="center"
         >
             <Grid item key={2}>
-                <PageHeading paddingLeft={2} text={'Tenants Payments Statement'} />
+                <PageHeading  text={'Tenants Payments Statement'} />
             </Grid>
             <Grid
                 container

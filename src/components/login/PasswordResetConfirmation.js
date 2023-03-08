@@ -114,7 +114,7 @@ let PasswordResetConfirmation = (props) => {
                     >
                         <Grid container justify="center" direction="column" spacing={3}>
                             <Grid item key={2}>
-                                <PageHeading paddingLeft={2} text={"Reset Password"} />
+                                <PageHeading  text={"Reset Password"} />
                             </Grid>
                             <Grid item key={'hhhf'}>
                                 {

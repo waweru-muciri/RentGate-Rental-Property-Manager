@@ -1,4 +1,5 @@
 import React from "react";
+import CustomSnackbar from '../CustomSnackbar'
 import { Grid, Button, TextField, MenuItem } from "@material-ui/core";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
@@ -7,7 +8,6 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import * as Yup from "yup";
 import { getExpensesCategories } from "../../assets/commonAssets";
 import { format, startOfToday } from "date-fns";
-
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const EXPENSE_CATEGORIES = getExpensesCategories();
 
@@ -16,12 +16,12 @@ const PropertyExpenseSchema = Yup.object().shape({
   amount: Yup.number().min(0).required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
   property_id: Yup.string().required("Property is Required"),
-  property_unit: Yup.string().required("Unit is Required"),
+  unit_id: Yup.string().required("Unit is Required"),
   expense_notes: Yup.string().default(""),
 });
 
 const ExpenseInputForm = (props) => {
-  const { properties, propertyUnits, contacts, handleItemSubmit, history } = props
+  const { properties, propertyUnits, handleItemSubmit, history } = props
   const classes = commonStyles();
   const expenseToEdit = props.expenseToEdit || {}
   const expenseValues = {
@@ -30,7 +30,7 @@ const ExpenseInputForm = (props) => {
     expense_date: expenseToEdit.expense_date || defaultDate,
     amount: expenseToEdit.amount || '',
     property_id: expenseToEdit.property_id || '',
-    property_unit: expenseToEdit.property_unit || '',
+    unit_id: expenseToEdit.unit_id || '',
     type: expenseToEdit.type || '',
   }
 
@@ -40,27 +40,35 @@ const ExpenseInputForm = (props) => {
       enableReinitialize
       validationSchema={PropertyExpenseSchema}
       onSubmit={async (values, { resetForm }) => {
-        //assign tenant details to meter reading
-        const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.property_unit) || {}
-        const tenant = contacts.find(
-          (contact) => propertyUnitSelected.tenants.length ? contact.id === propertyUnitSelected.tenants[0] || propertyUnitSelected.tenants[1] : false) || {};
-        const expense = {
-          id: values.id,
-          type: values.type,
-          amount: values.amount,
-          property_unit: values.property_unit,
-          property_id: values.property_id,
-          expense_date: values.expense_date,
-          expense_notes: values.expense_notes,
-        };
-        expense.unit_ref = propertyUnitSelected.ref
-        expense.tenant = tenant.id
-        expense.tenant_id_number = tenant.id_number
-        expense.tenant_name = `${tenant.first_name} ${tenant.last_name}`
-        await handleItemSubmit(expense, "expenses")
-        resetForm({});
-        if (values.id) {
-          history.goBack();
+        try {
+          //assign tenant details to meter reading
+          const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.unit_id) || {}
+          const propertyWithUnit = properties.find((property) => property.id === values.property_id) || {}
+          const expense = {
+            id: values.id,
+            type: values.type,
+            amount: values.amount,
+            unit_id: values.unit_id,
+            property_id: values.property_id,
+            expense_date: values.expense_date,
+            expense_notes: values.expense_notes,
+            property_ref: propertyWithUnit.ref,
+            unit_ref: propertyUnitSelected.ref,
+          };
+          await handleItemSubmit(expense, "expenses")
+          resetForm({});
+          if (values.id) {
+            history.goBack();
+          }
+        } catch (error) {
+            return error && (
+              <div>
+                <CustomSnackbar
+                  variant="error"
+                  message={error.message}
+                />
+              </div>
+            )
         }
       }}
     >
@@ -98,7 +106,7 @@ const ExpenseInputForm = (props) => {
                     id="property_id"
                     onChange={(event) => {
                       setFieldValue('property_id', event.target.value);
-                      setFieldValue('property_unit', '');
+                      setFieldValue('unit_id', '');
                     }}
                     value={values.property_id}
                     error={errors.property_id && touched.property_id}
@@ -117,17 +125,17 @@ const ExpenseInputForm = (props) => {
                     fullWidth
                     select
                     variant="outlined"
-                    name="property_unit"
+                    name="unit_id"
                     label="Unit"
-                    id="property_unit"
+                    id="unit_id"
                     onChange={handleChange}
-                    value={values.property_unit}
-                    error={errors.property_unit && touched.property_unit}
-                    helperText={touched.property_unit && errors.property_unit}
+                    value={values.unit_id}
+                    error={errors.unit_id && touched.unit_id}
+                    helperText={touched.unit_id && errors.unit_id}
                   >
-                    {propertyUnits.filter(({property_id}) => property_id === values.property_id).map((property_unit, index) => (
-                      <MenuItem key={index} value={property_unit.id}>
-                        {property_unit.ref}
+                    {propertyUnits.filter(({ property_id }) => property_id === values.property_id).map((unit_id, index) => (
+                      <MenuItem key={index} value={unit_id.id}>
+                        {unit_id.ref}
                       </MenuItem>
                     ))}
                   </TextField>

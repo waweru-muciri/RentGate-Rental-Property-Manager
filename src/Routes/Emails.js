@@ -90,7 +90,7 @@ let EmailsPage = ({
                 justify="space-evenly"
                 alignItems="center"
             >
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <PageHeading text="Emails" />
                 </Grid>
                 <Grid
@@ -124,7 +124,7 @@ let EmailsPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -217,7 +217,7 @@ let EmailsPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

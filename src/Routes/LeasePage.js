@@ -26,7 +26,7 @@ let TransactionPage = ({ leases, match, contacts, history, properties, propertyU
 		<Layout pageTitle="Rental Agreement Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading paddingLeft={2} text={pageTitle} />
+					<PageHeading  text={pageTitle} />
 				</Grid>
 				<Grid
 					container

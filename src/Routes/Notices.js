@@ -81,7 +81,7 @@ let VacatingNoticesPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Move Outs'} />
+                    <PageHeading  text={'Move Outs'} />
                 </Grid>
                 <Grid
                     container
@@ -128,7 +128,7 @@ let VacatingNoticesPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"

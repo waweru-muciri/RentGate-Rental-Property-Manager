@@ -7,7 +7,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
@@ -35,8 +34,8 @@ let MaintenanceRequestsPage = ({
 	users,
 	contacts,
 	propertyUnits,
-	match,
-	error, handleItemDelete
+	match, 
+	handleItemDelete
 }) => {
 	let [maintenanceRequestItems, setMaintenanceRequestItems] = useState([]);
 	let [filteredMaintenanceRequestItems, setFilteredMaintenanceRequestItems] = useState([]);
@@ -104,7 +103,7 @@ let MaintenanceRequestsPage = ({
 				justify="space-evenly"
 				alignItems="center"
 			>
-				<Grid item xs={12} sm={12} md={12} lg={12}>
+				<Grid item xs={12}>
 					<PageHeading text="Maintenance Requests" />
 				</Grid>
 				<Grid
@@ -156,7 +155,7 @@ let MaintenanceRequestsPage = ({
 					<Grid item>
 					</Grid>
 				</Grid>
-				<Grid item xs={12} sm={12} md={12} lg={12}>
+				<Grid item xs={12}>
 					<Box
 						border={1}
 						borderRadius="borderRadius"
@@ -291,21 +290,12 @@ let MaintenanceRequestsPage = ({
 						</form>
 					</Box>
 				</Grid>
-				<Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-					{error && (
-						<div>
-							<CustomizedSnackbar
-								variant="error"
-								message={error.message}
-							/>
-						</div>
-					)}
+				<Grid item xs={12}>
 					<CommonTable
 						selected={selected}
 						setSelected={setSelected}
 						rows={filteredMaintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
-
 						handleDelete={handleItemDelete}
 						deleteUrl={"maintenance-requests"}
 					/>
@@ -324,7 +314,6 @@ const mapStateToProps = (state, ownProps) => {
 		users: state.users,
 		contacts: state.contacts,
 		isLoading: state.isLoading,
-		error: state.error,
 		match: ownProps.match,
 	};
 };

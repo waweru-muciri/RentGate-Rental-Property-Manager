@@ -28,7 +28,7 @@ const PROPERTY_BATHS = getPropertyBaths();
 const PropertyUnitSchema = Yup.object().shape({
 	property_id: Yup.string().trim().required("Property is Required"),
 	unit_type: Yup.string().trim().required("Unit Type is Required"),
-	baths: Yup.string().trim().required("Baths is Required"),
+	baths: Yup.string().trim(),
 	beds: Yup.string().trim().required("Beds is required"),
 	ref: Yup.string().trim().required("Unit Ref Required"),
 	sqft: Yup.number().typeError('Sqft must be a number').min(0).default(0),
@@ -92,14 +92,14 @@ let PropertyUnitInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2}>
-							<Grid container item spacing={1} direction="column">
+							<Grid container item spacing={2} direction="column">
 								<Grid item>
 									<Typography variant="subtitle2">
 										Unit Details
-										</Typography>
+									</Typography>
 								</Grid>
-								<Grid xs={12} container item spacing={2} direction="row">
-									<Grid item sm>
+								<Grid container item spacing={2} direction="row">
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -120,7 +120,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -136,8 +136,8 @@ let PropertyUnitInputForm = (props) => {
 										/>
 									</Grid>
 								</Grid>
-								<Grid xs={12} container item spacing={1} direction="row">
-									<Grid item sm>
+								<Grid container item spacing={2} direction="row">
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -158,7 +158,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -180,8 +180,8 @@ let PropertyUnitInputForm = (props) => {
 										</TextField>
 									</Grid>
 								</Grid>
-								<Grid xs={12} container item spacing={1} direction="row">
-									<Grid item sm>
+								<Grid container item spacing={2} direction="row">
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -193,7 +193,7 @@ let PropertyUnitInputForm = (props) => {
 											onChange={handleChange}
 											value={values.baths}
 											error={errors.baths && touched.baths}
-											helperText={touched.baths && errors.baths}
+											helperText={"Baths in Unit"}
 										>
 											{PROPERTY_BATHS.map((property_bath, index) => (
 												<MenuItem key={index} value={property_bath}>
@@ -202,7 +202,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"

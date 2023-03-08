@@ -30,7 +30,7 @@ let PropertyIncomeStatement = ({
     let [incomeStatements, setIncomeStatements] = useState([]);
     let [headCells, setHeadCells] = useState([]);
     let [expensesStatements, setExpensesStatements] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("all");
     let [fromFilter, setFromFilter] = useState('month-to-date');
 
     useEffect(() => {
@@ -171,21 +171,21 @@ let PropertyIncomeStatement = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setPropertyFilter("");
+        setPropertyFilter("all");
         setFromFilter("month-to-date");
         setExpensesItems(expenses)
         setPaymentItems(transactions)
     };
 
     return (
-        <Layout pageTitle="Property Income Statement">
+        <Layout pageTitle="Properties Income Statement">
             <Grid
                 container
                 spacing={3}
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Property Income Statement'} />
+                    <PageHeading text={'Properties Income Statement'} />
                 </Grid>
                 <Grid
                     container
@@ -197,14 +197,14 @@ let PropertyIncomeStatement = ({
                 >
                     <Grid item>
                         <ExportToExcelBtn
-                            reportName={'Income Statements Records'}
-                            reportTitle={'Income Statements Records'}
+                            reportName={'Properties Income Records'}
+                            reportTitle={'Properties Income Records'}
                             headCells={headCells}
                             dataToPrint={incomeStatements}
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -236,6 +236,7 @@ let PropertyIncomeStatement = ({
                                             );
                                         }}
                                     >
+                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
                                         {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}

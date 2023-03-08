@@ -16,14 +16,11 @@ import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
 import * as meterReadingsActions from "./meterReadings";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
-import app from "../firebase";
+import {auth, storage, functions} from "../firebase";
 import { getDatabaseRef } from "./firebaseHelpers";
 
 
-// Initialize Cloud Functions through Firebase
-var functions = app.functions();
-const auth = app.auth()
-const storageRef = app.storage().ref();
+const storageRef = storage.ref();
 
 export function setCurrentUser(user) {
     return {
@@ -34,8 +31,7 @@ export function setCurrentUser(user) {
 
 export const firebaseSignOutUser = () => {
     return (dispatch) => {
-        app
-            .auth()
+            auth
             .signOut()
             .then(function () {
 
@@ -72,7 +68,7 @@ export const getFirebaseUserDetails = (userToken) => {
 export const signUpWithEmailAndPassword = async (email, password) => {
 
     try {
-        const authCredential = await app.auth().createUserWithEmailAndPassword(email, password);
+        const authCredential = await auth.createUserWithEmailAndPassword(email, password);
         //get user details from autheCredential
         const user = authCredential.user;
         //   //call api to set custom claims on user 
@@ -90,7 +86,7 @@ export const signUpWithEmailAndPassword = async (email, password) => {
                         ? "Email is Invalid"
                         : errorCode === "auth/email-already-in-use"
                             ? "Email is already in Use"
-                            : "May God help Us";
+                            : "Failed to connect to resource. Check your internet connection";
         throw new Error(errorMessage)
     }
 };
@@ -114,7 +110,7 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
                     ? "Email is Invalid"
                     : errorCode === "auth/user-not-found"
                         ? "No user found with email"
-                        : "May God help Us";
+                        : "Failed to connect to resource. Check your internet connection";
         throw new Error(errorMessage);
     }
 

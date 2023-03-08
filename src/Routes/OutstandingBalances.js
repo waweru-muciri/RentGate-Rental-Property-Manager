@@ -1,98 +1,81 @@
-import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
-import TabPanel from "../components/TabPanel";
-import Tab from '@material-ui/core/Tab';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import Layout from "../components/PrivateLayout";
+import PageHeading from "../components/PageHeading";
+import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import AddIcon from "@material-ui/icons/Add";
-import { Link } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
+import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
-import { commonStyles } from "../components/commonStyles";
-import Layout from "../components/PrivateLayout";
-import PageHeading from "../components/PageHeading";
-import RentBalancesPage from "./RentBalancesPage";
-import { handleItemFormSubmit, handleDelete } from '../actions/actions'
+import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { getTransactionsFilterOptions, currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getYearToDateFromToDates } from "../assets/commonAssets";
-import { parse, isWithinInterval, format, startOfToday } from "date-fns";
-const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
-const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
+import { currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { parse, isWithinInterval } from "date-fns";
+
+
+const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    { id: "unit_details", numeric: false, disablePadding: true, label: "Unit Details", },
-    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
-    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
-    { id: "due_date", numeric: false, disablePadding: true, label: "Rent Due Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Rent Charge Amount", },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant", },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
+    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type", },
+    { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
+    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
-    { id: "balance", numeric: false, disablePadding: true, label: "Rent Balance" },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+
 ];
 
-let RentRollPage = ({
-    transactionsCharges,
+let TenantChargesStatementPage = ({
     properties,
     contacts,
-    transactions,
-    handleItemSubmit,
-    handleItemDelete
+    transactionsCharges,
 }) => {
-    let [rentCharges, setChargeItems] = useState([]);
+    const classes = commonStyles()
+    let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
-    let [contactFilter, setContactFilter] = useState(null);
+    let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
-    let [fromDateFilter, setFromDateFilter] = useState('');
-    let [toDateFilter, setToDateFilter] = useState("");
+    let [contactFilter, setContactFilter] = useState(null);
+    let [propertyFilter, setPropertyFilter] = useState("");
+
     const [selected, setSelected] = useState([]);
-    const classes = commonStyles();
 
-    const [tabValue, setTabValue] = React.useState(0);
+    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
+        .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
+        .map(chargeType => JSON.parse(chargeType))
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
+    useEffect(() => {
+        setTenantChargesItems(transactionsCharges);
+        setFilteredChargeItems(transactionsCharges);
+    }, [transactionsCharges]);
 
-    const rentChargesWithBalances = rentCharges.filter(rentCharge => rentCharge.balance > 0)
+    const totalNumOfCharges = filteredChargeItems.length
 
-    const totalRentCharges = filteredChargeItems
+    const totalChargesAmount = filteredChargeItems
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.charge_amount) || 0
         }, 0)
 
-    const totalRentPayments = filteredChargeItems
+    const chargesWithPayments = filteredChargeItems.filter(charge => charge.payed_status === true).length
+
+    const totalPaymentsAmount = filteredChargeItems
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
 
-    useEffect(() => {
-        setChargeItems(transactionsCharges);
-        setFilteredChargeItems(transactionsCharges);
-    }, [transactionsCharges]);
-
-    const handleRentChargeDelete = async (chargeId, url) => {
-        transactions.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
-            await handleItemDelete(payment.id, "charge-payments")
-        });
-        await handleItemDelete(chargeId, url)
-    }
-
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the charges according to the search criteria here
-        let filteredRentCharges = rentCharges
+        //filter the transactionsCharges according to the search criteria here
+        let filteredStatements = tenantChargesItems
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -124,132 +107,68 @@ let RentRollPage = ({
                     endOfPeriod = dateRange[1]
                     break;
             }
-            filteredRentCharges = filteredRentCharges.filter((chargeItem) => {
+            filteredStatements = filteredStatements.filter((chargeItem) => {
                 const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
                 return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
             })
         }
-        filteredRentCharges = filteredRentCharges
-            .filter(({ charge_date }) =>
-                !fromDateFilter ? true : charge_date >= fromDateFilter
-            )
-            .filter(({ charge_date }) =>
-                !toDateFilter ? true : charge_date <= toDateFilter
-            )
-            .filter(({ property_id }) =>
-                !propertyFilter ? true : property_id === propertyFilter
-            )
-            .filter(({ tenant_id }) =>
-                !contactFilter ? true : tenant_id === contactFilter.id
-            )
-        setFilteredChargeItems(filteredRentCharges);
+        filteredStatements = filteredStatements.filter(({ charge_type }) =>
+            !chargeType ? true : charge_type === chargeType
+        ).filter(({ tenant_id }) =>
+            !contactFilter ? true : tenant_id === contactFilter.id
+        )
+        setFilteredChargeItems(filteredStatements);
     };
+
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(rentCharges);
-        setPropertyFilter("");
-        setContactFilter("");
+        setFilteredChargeItems(tenantChargesItems);
+        setChargeTypeFilter("");
         setPeriodFilter("");
-        setFromDateFilter("");
-        setToDateFilter("");
+        setContactFilter(null)
+        setPropertyFilter('')
     };
 
-    const setChargesPaidInFull = () => {
-        const chargesToAddPayments = transactionsCharges.filter(({ id }) => selected.includes(id))
-            .filter(({ payed_status }) => payed_status === false)
-        //post the charges here to show that they are payed
-        chargesToAddPayments.forEach(async (charge) => {
-            const chargePayment = {
-                charge_id: charge.id,
-                amount: charge.charge_amount,
-                payment_date: defaultDate,
-                tenant_id: charge.tenant_id,
-                unit_ref: charge.unit_ref,
-                unit_id: charge.unit_id,
-                property_id: charge.property_id,
-                payment_label: charge.charge_label,
-                payment_type: charge.charge_type,
-            };
-            await handleItemSubmit(chargePayment, 'charge-payments')
-        })
-    }
-
     return (
-        <Layout pageTitle="Rent Roll">
-            <AppBar position="static">
-                <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
-                    <Tab label="Rent Roll" />
-                    <Tab label="Rent Outstanding Balances" />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={tabValue} index={1}>
-                <RentBalancesPage transactionsCharges={rentChargesWithBalances} properties={properties}
-                contacts={contacts} classes={classes} />
-            </TabPanel>
-            <TabPanel value={tabValue} index={0}>
+        <Layout pageTitle="Outstanding Balances">
+            <Grid
+                container
+                spacing={2}
+                justify="center" direction="column"
+            >
+                <Grid item key={2}>
+                    <PageHeading  text={"Outstanding Balances"} />
+                </Grid>
                 <Grid
                     container
-                    spacing={3}
-                    justify="center" direction="column"
+                    spacing={2}
+                    item
+                    alignItems="center"
+                    direction="row"
+                    key={1}
                 >
-                    <Grid item key={2}>
-                        <PageHeading text={"Rent Roll"} />
+                    <Grid item>
+                        <ExportToExcelBtn
+                            disabled={selected.length <= 0}
+                            reportName={`Tenants Outstanding Balances Records`}
+                            reportTitle={'Tenants Outstanding Balances Data'}
+                            headCells={headCells}
+                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                        />
                     </Grid>
-                    <Grid
-                        container
-                        spacing={2}
-                        item
-                        alignItems="center"
-                        direction="row"
-                        key={1}
-                    >
-                        <Grid item>
-                            <Button
-                                type="button"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                disabled={selected.length <= 0}
-                                onClick={() => setChargesPaidInFull()}
-                            >
-                                Receive Full Payments
-                        </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                type="button"
-                                color="primary"
-                                variant="contained"
-                                size="medium"
-                                disabled={selected.length <= 0}
-                                startIcon={<AddIcon />}
-                                component={Link}
-                                to={`/payments/${selected[0]}/new`}
-                            >
-                                Receive Payment
-                        </Button>
-                        </Grid>
-                        <Grid item>
-                            <PrintArrayToPdf
-                                disabled={selected.length <= 0}
-                                reportName={'Rent Roll Records'}
-                                reportTitle={'Rent Roll Data'}
-                                headCells={headCells}
-                                dataToPrint={rentCharges.filter(({ id }) => selected.includes(id))}
-                            />
-                        </Grid>
-                        <Grid item>
-                            <ExportToExcelBtn
-                                disabled={selected.length <= 0}
-                                reportName={'Rent Roll Records'}
-                                reportTitle={'Rent Roll Data'}
-                                headCells={headCells}
-                                dataToPrint={rentCharges.filter(({ id }) => selected.includes(id))}
-                            />
-                        </Grid>
+                    <Grid item>
+                        <PrintArrayToPdf
+                            disabled={selected.length <= 0}
+                            reportName={'Tenants Outstanding Balances Data'}
+                            reportTitle={`Tenants Outstanding Balances Records`}
+                            headCells={headCells}
+                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                        />
                     </Grid>
-                    <Grid item xs={12}>
+                </Grid>
+                <Grid item container>
+                    <Grid item sm={12}>
                         <Box
                             border={1}
                             borderRadius="borderRadius"
@@ -257,51 +176,18 @@ let RentRollPage = ({
                         >
                             <form
                                 className={classes.form}
-                                id="rentRollSearchForm"
+                                id="contactSearchForm"
                                 onSubmit={handleSearchFormSubmit}
                             >
                                 <Grid
                                     container
                                     spacing={2}
                                     justify="center"
+                                    direction="column"
                                 >
-                                    <Grid item container spacing={2}>
+                                    <Grid item container direction="column" spacing={2}>
                                         <Grid item container direction="row" spacing={2}>
-                                            <Grid item container xs={12} md={6} direction="row" spacing={2}>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        type="date"
-                                                        id="from_date_filter"
-                                                        name="from_date_filter"
-                                                        label="From Date"
-                                                        value={fromDateFilter}
-                                                        onChange={(event) => {
-                                                            setFromDateFilter(
-                                                                event.target.value
-                                                            );
-                                                        }}
-                                                        InputLabelProps={{ shrink: true }}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        type="date"
-                                                        name="to_date_filter"
-                                                        label="To Date"
-                                                        id="to_date_filter"
-                                                        onChange={(event) => {
-                                                            setToDateFilter(event.target.value);
-                                                        }}
-                                                        value={toDateFilter}
-                                                        InputLabelProps={{ shrink: true }}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item md={6} xs={12}>
                                                 <TextField
                                                     fullWidth
                                                     variant="outlined"
@@ -315,9 +201,8 @@ let RentRollPage = ({
                                                             event.target.value
                                                         );
                                                     }}
-                                                    InputLabelProps={{ shrink: true }}
                                                 >
-                                                    {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
+                                                    {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
                                                         <MenuItem
                                                             key={index}
                                                             value={filterOption.id}
@@ -327,9 +212,36 @@ let RentRollPage = ({
                                                     ))}
                                                 </TextField>
                                             </Grid>
+                                            <Grid item md={6} xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    variant="outlined"
+                                                    name="chargeType"
+                                                    label="Charge Type"
+                                                    id="chargeType"
+                                                    onChange={(event) => {
+                                                        setChargeTypeFilter(
+                                                            event.target.value
+                                                        );
+                                                    }}
+                                                    value={chargeType}
+                                                >
+                                                    {CHARGE_TYPES.map(
+                                                        (charge_type, index) => (
+                                                            <MenuItem
+                                                                key={index}
+                                                                value={charge_type.value}
+                                                            >
+                                                                {charge_type.label}
+                                                            </MenuItem>
+                                                        )
+                                                    )}
+                                                </TextField>
+                                            </Grid>
                                         </Grid>
                                         <Grid item container direction="row" spacing={2}>
-                                            <Grid item md={6} xs={12}>
+                                            <Grid item xs={12} md={6}>
                                                 <TextField
                                                     fullWidth
                                                     select
@@ -362,6 +274,7 @@ let RentRollPage = ({
                                                     options={contacts}
                                                     getOptionSelected={(option, value) => option.id === value.id}
                                                     name="contact_filter"
+                                                    defaultValue=""
                                                     onChange={(event, newValue) => {
                                                         setContactFilter(newValue);
                                                     }}
@@ -386,7 +299,7 @@ let RentRollPage = ({
                                             <Button
                                                 onClick={(event) => handleSearchFormSubmit(event)}
                                                 type="submit"
-                                                form="rentRollSearchForm"
+                                                form="contactSearchForm"
                                                 color="primary"
                                                 variant="contained"
                                                 size="medium"
@@ -399,7 +312,7 @@ let RentRollPage = ({
                                             <Button
                                                 onClick={(event) => resetSearchForm(event)}
                                                 type="reset"
-                                                form="rentRollSearchForm"
+                                                form="contactSearchForm"
                                                 color="primary"
                                                 variant="contained"
                                                 size="medium"
@@ -413,61 +326,75 @@ let RentRollPage = ({
                             </form>
                         </Box>
                     </Grid>
-                    <Grid item>
+                </Grid>
+                <Grid item container>
+                    <Grid item sm={12}>
                         <Box border={1} borderRadius="borderRadius" borderColor="grey.400" className={classes.form}>
                             <Grid container direction="row" spacing={1}>
                                 <Grid item container md={4}>
                                     <Grid item sm={12}>
                                         <Typography variant="subtitle1" align="center">
-                                            Total Rent Charges: {currencyFormatter.format(totalRentCharges)}
+                                            Total Charges: {currencyFormatter.format(totalChargesAmount)}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={12}>
+                                        <Typography variant="subtitle1" align="center">
+                                            Total Charges: {totalNumOfCharges}
                                         </Typography>
                                     </Grid>
                                 </Grid>
                                 <Grid item container md={4}>
                                     <Grid item sm={12}>
                                         <Typography variant="subtitle1" align="center">
-                                            Total Rent Payments: {currencyFormatter.format(totalRentPayments)}
+                                            Total  Payments: {currencyFormatter.format(totalPaymentsAmount)}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={12}>
+                                        <Typography variant="subtitle1" align="center">
+                                            Charges With Payments: {chargesWithPayments}
                                         </Typography>
                                     </Grid>
                                 </Grid>
                                 <Grid item container md={4}>
                                     <Grid item sm={12}>
                                         <Typography variant="subtitle1" align="center">
-                                            Outstanding Rent Balances: {currencyFormatter.format((totalRentCharges - totalRentPayments))}
+                                            Outstanding Balances: {currencyFormatter.format((totalChargesAmount - totalPaymentsAmount))}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={12}>
+                                        <Typography variant="subtitle1" align="center">
+                                            Charges Without Payments: {(totalNumOfCharges - chargesWithPayments)}
                                         </Typography>
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </Box>
                     </Grid>
-                    <Grid item xs={12}>
+                </Grid>
+                <Grid item container>
+                    <Grid item sm={12}>
                         <CommonTable
                             selected={selected}
                             setSelected={setSelected}
                             rows={filteredChargeItems}
                             headCells={headCells}
                             noDetailsCol={true}
-                            deleteUrl={'transactions-charges'}
-                            handleDelete={handleRentChargeDelete}
+                            noEditCol={true}
+                            noDeleteCol={true}
                         />
                     </Grid>
                 </Grid>
-            </TabPanel>
-        </Layout>
+            </Grid>
+        </Layout >
     );
 };
 
 const mapStateToProps = (state) => {
     return {
-        properties: state.properties,
-        transactions: state.transactions.filter((payment) => payment.payment_type === 'rent'),
-        transactionsCharges: state.transactionsCharges
-            .filter((charge) => charge.charge_type === 'rent').sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
-            .map((charge) => {
-                const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
+        transactions: state.transactions,
+        transactionsCharges: state.transactionsCharges.map((charge) => {
                 const chargeDetails = {}
-                chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
-                chargeDetails.tenant_id_number = tenant.id_number
+                //get payments with this charge id
                 const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
                 const payed_amount = chargePayments.reduce((total, currentValue) => {
@@ -475,20 +402,14 @@ const mapStateToProps = (state) => {
                 }, 0)
                 chargeDetails.payed_amount = payed_amount
                 chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
-                const property = state.properties.find(property => property.id === charge.property_id) || {}
-                chargeDetails.unit_details = `${property.ref} - ${charge.unit_ref}`;
                 return Object.assign({}, charge, chargeDetails);
-            }),
+            }).filter((charge) => charge.balance > 0)
+            .sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
         contacts: state.contacts,
+        properties: state.properties,
     };
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
-        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-    }
-};
+TenantChargesStatementPage = connect(mapStateToProps)(TenantChargesStatementPage);
 
-
-export default connect(mapStateToProps, mapDispatchToProps)(RentRollPage);
+export default withRouter(TenantChargesStatementPage);

@@ -79,7 +79,7 @@ const SignUpLayout = ({ setUser }) => {
             >
               <Grid container justify="center" direction="column" spacing={3}>
                 <Grid item key={2}>
-                  <PageHeading paddingLeft={2} text={"Sign Up"} />
+                  <PageHeading  text={"Sign Up"} />
                 </Grid>
                 <FormControl fullWidth>
                   {status && (

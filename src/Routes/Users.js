@@ -107,7 +107,7 @@ let UsersPage = ({
 				justify="space-evenly"
 				alignItems="center"
 			>
-				<Grid item xs={12} sm={12} md={12} lg={12}>
+				<Grid item xs={12}>
 					<PageHeading text="Users" />
 				</Grid>
 				<Grid
@@ -180,7 +180,7 @@ let UsersPage = ({
 						/>
 					</Grid>
 				</Grid>
-				<Grid item xs={12} sm={12} md={12} lg={12}>
+				<Grid item xs={12}>
 					<Box
 						border={1}
 						borderRadius="borderRadius"
@@ -296,7 +296,7 @@ let UsersPage = ({
 										size="medium"
 										startIcon={<SearchIcon />}
 									>
-										SEARCH{" "}
+										SEARCH
 									</Button>
 								</Grid>
 								<Grid item>
@@ -311,14 +311,14 @@ let UsersPage = ({
 										size="medium"
 										startIcon={<UndoIcon />}
 									>
-										RESET{" "}
+										RESET
 									</Button>
 								</Grid>
 							</Grid>
 						</form>
 					</Box>
 				</Grid>
-				<Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+				<Grid item xs={12}>
 					{error && (
 						<div>
 							<CustomizedSnackbar

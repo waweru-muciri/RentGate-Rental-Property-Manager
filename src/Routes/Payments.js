@@ -127,7 +127,7 @@ let PaymentsPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Payments'} />
+                    <PageHeading  text={'Payments'} />
                 </Grid>
                 <Grid
                     container

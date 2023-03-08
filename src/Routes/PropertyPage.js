@@ -23,7 +23,7 @@ let PropertyPage = (props) => {
 		<Layout pageTitle={pageTitle}>
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading paddingLeft={2} text={pageTitle} />
+					<PageHeading  text={pageTitle} />
 				</Grid>
 				<Grid
 					container

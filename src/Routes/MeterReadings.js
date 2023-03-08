@@ -15,7 +15,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, dateRange, getYearToDateFromToDates } from "../assets/commonAssets";
+import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 
 
@@ -379,7 +379,7 @@ let MeterReadingsPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     {error && (
                         <div>
                             <CustomizedSnackbar

@@ -88,7 +88,7 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 				justify="space-evenly"
 				alignItems="center"
 			>
-				<Grid item xs={12} sm={12} md={12} lg={12}>
+				<Grid item xs={12}>
 					<PageHeading text="To-Dos" />
 				</Grid>
 				<Grid item>

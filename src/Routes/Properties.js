@@ -203,7 +203,7 @@ let PropertyPage = ({
                                         size="medium"
                                         startIcon={<SearchIcon />}
                                     >
-                                        SEARCH{" "}
+                                        SEARCH
                                     </Button>
                                 </Grid>
                                 <Grid item>
@@ -218,7 +218,7 @@ let PropertyPage = ({
                                         size="medium"
                                         startIcon={<UndoIcon />}
                                     >
-                                        RESET{" "}
+                                        RESET
                                     </Button>
                                 </Grid>
                             </Grid>

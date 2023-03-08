@@ -15,7 +15,7 @@ import {
 import DashBoard from "./DashBoard";
 import LoadingBackdrop from '../components/LoadingBackdrop'
 import ErrorBoundary from '../components/ErrorBoundary'
-import app from '../firebase'
+import { auth } from '../firebase'
 import PropertiesPage from "./Properties";
 import PropertyPage from "./PropertyPage";
 import PropertyUnitPage from "./PropertyUnitPage";
@@ -41,12 +41,14 @@ const ToDosPage = lazy(() => import('./ToDos'));
 const NoticePage = lazy(() => import('./NoticePage'));
 const NoticesPage = lazy(() => import('./Notices'));
 const PropertyIncomeStatement = lazy(() => import('./PropertyIncomeStatement'));
+const PropertyPerformancePage = lazy(() => import('./PropertyPerformancePage'));
 const TenantsStatementsPage = lazy(() => import('./TenantsStatements'));
 const EmailPage = lazy(() => import('./EmailPage'));
 const EmailsPage = lazy(() => import('./Emails'));
 const MeterReadingPage = lazy(() => import('./MeterReadingPage'));
 const MeterReadingsPage = lazy(() => import('./MeterReadings'));
 const OtherChargesPage = lazy(() => import('./OtherCharges'));
+const OutstandingBalancesPage = lazy(() => import('./OutstandingBalances'));
 
 
 let MainPage = ({
@@ -58,11 +60,9 @@ let MainPage = ({
 
   useEffect(() => {
     if (!currentUser) {
-      app.auth().onAuthStateChanged(
+      auth.onAuthStateChanged(
         function (user) {
           if (user) {
-            // User is signed in 
-            //set the database reference to be used by user
             //get details about user
             const userDetails = getFirebaseUserDetails(user)
             setUser(userDetails)
@@ -106,6 +106,7 @@ let MainPage = ({
             <Suspense fallback={<LoadingBackdrop open={true} />}>
               <Switch>
                 <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
+                <Route exact path={`${match.path}reports/property-performance`} component={PropertyPerformancePage} />
                 <Route exact path={`${match.path}`} component={DashBoard} />
                 <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
                 <Route exact path={`${match.path}emails`} component={EmailsPage} />
@@ -233,6 +234,11 @@ let MainPage = ({
                   exact
                   path={`${match.path}notices/new`}
                   component={NoticePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}reports/outstanding-balances`}
+                  component={OutstandingBalancesPage}
                 />
                 <Route
                   exact

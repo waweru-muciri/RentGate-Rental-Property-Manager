@@ -18,9 +18,8 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const expensesTableHeadCells = [
     { id: "expense_date", numeric: false, disablePadding: true, label: "Date", },
+    { id: "property_ref", numeric: false, disablePadding: true, label: "Property" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
-    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
-    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
     { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
@@ -268,7 +267,7 @@ let ExpensesPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     {error && (
                         <div>
                             <CustomizedSnackbar

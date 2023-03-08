@@ -96,7 +96,7 @@ export default class Header extends React.Component {
                             <DropdownMenu right>
                                 <DropdownItem href="/company_profile">
                                     Profile
-                                </DropdownItem>{" "}
+                                </DropdownItem>
                                 <DropdownItem href="/company_settings">
                                     Settings
                                 </DropdownItem>

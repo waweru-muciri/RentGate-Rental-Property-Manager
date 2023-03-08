@@ -105,7 +105,7 @@ let AuditLogsPage = ({
     return (
         <Layout pageTitle="Audit Logs">
             <Grid container spacing={3} justify="flex-start" alignItems="start">
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <PageHeading text="Audit Logs" />
                 </Grid>
                 <Grid item>
@@ -117,7 +117,7 @@ let AuditLogsPage = ({
                         dataToPrint={auditLogItems.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -258,7 +258,7 @@ let AuditLogsPage = ({
                                         size="medium"
                                         startIcon={<SearchIcon />}
                                     >
-                                        SEARCH{" "}
+                                        SEARCH
                                     </Button>
                                 </Grid>
                                 <Grid item>
@@ -273,14 +273,14 @@ let AuditLogsPage = ({
                                         size="medium"
                                         startIcon={<UndoIcon />}
                                     >
-                                        RESET{" "}
+                                        RESET
                                     </Button>
                                 </Grid>
                             </Grid>
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     {error && (
                         <div>
                             <CustomizedSnackbar

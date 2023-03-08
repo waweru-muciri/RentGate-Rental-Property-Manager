@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Layout from "../components/PrivateLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
@@ -34,7 +34,6 @@ let TenantDetailsPage = ({
     transactions,
     transactionsCharges,
     tenantUnit,
-    history,
     tenantDetails,
     handleItemDelete,
 }) => {

@@ -98,7 +98,7 @@ let ContactsPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Tenants'} />
+                    <PageHeading  text={'Tenants'} />
                 </Grid>
                 <Grid
                     container
@@ -154,7 +154,7 @@ let ContactsPage = ({
                         />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12}>
                     <Box
                         border={1}
                         borderRadius="borderRadius"
@@ -294,7 +294,7 @@ let ContactsPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
+                <Grid item xs={12}>
                     {error && (
                         <div>
                             <CustomizedSnackbar
@@ -308,7 +308,6 @@ let ContactsPage = ({
                         setSelected={setSelected}
                         rows={filteredContactItems}
                         headCells={contactsTableHeadCells}
-
                         handleDelete={handleItemDelete}
                         noDetailsCol={true}
                         deleteUrl={"contacts"}

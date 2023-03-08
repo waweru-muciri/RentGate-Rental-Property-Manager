@@ -39,26 +39,6 @@ let TenantStatementsPage = ({
         .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
         .map(chargeType => JSON.parse(chargeType))
 
-    const totalRentCharges = filteredChargeItems.filter(charge => charge.charge_type === 'rent')
-        .reduce((total, currentValue) => {
-            return total + parseFloat(currentValue.charge_amount) || 0
-        }, 0)
-
-    const totalOtherCharges = filteredChargeItems.filter(charge => charge.charge_type !== 'rent')
-        .reduce((total, currentValue) => {
-            return total + parseFloat(currentValue.charge_amount) || 0
-        }, 0)
-
-    const totalRentPayments = filteredChargeItems.filter(payment => payment.charge_type === 'rent')
-        .reduce((total, currentValue) => {
-            return total + parseFloat(currentValue.payed_amount) || 0
-        }, 0)
-
-    const totalOtherPayments = filteredChargeItems.filter(payment => payment.charge_type !== 'rent')
-        .reduce((total, currentValue) => {
-            return total + parseFloat(currentValue.payed_amount) || 0
-        }, 0)
-
     useEffect(() => {
         setTenantChargesItems(transactionsCharges);
         setFilteredChargeItems(transactionsCharges);
@@ -127,7 +107,7 @@ let TenantStatementsPage = ({
             justify="center" direction="column"
         >
             <Grid item key={2}>
-                <PageHeading paddingLeft={2} text={"Tenants Charges Statement"} />
+                <PageHeading  text={"Tenants Charges Statement"} />
             </Grid>
             <Grid
                 container
@@ -156,7 +136,7 @@ let TenantStatementsPage = ({
                     />
                 </Grid>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid item xs={12}>
                 <Box
                     border={1}
                     borderRadius="borderRadius"

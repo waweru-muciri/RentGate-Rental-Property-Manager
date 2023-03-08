@@ -1,5 +1,5 @@
 import React from "react";
-import app from "../firebase";
+import { auth } from "../firebase";
 import Layout from "../components/PrivateLayout";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -31,7 +31,6 @@ const ResetPasswordSchema = Yup.object().shape({
 });
 
 let AccountActions = (props) => {
-    const auth = app.auth()
     const classes = commonStyles();
     const { setUser } = props
 
