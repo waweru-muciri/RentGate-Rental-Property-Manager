@@ -9,8 +9,8 @@ import TextField from "@material-ui/core/TextField";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
+import BlockIcon from "@material-ui/icons/Block";
 import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
@@ -22,9 +22,11 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property", },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit", },
+    { id: "lease_type", numeric: false, disablePadding: true, label: "Lease Type", },
+    { id: "rent_cycle", numeric: false, disablePadding: true, label: "Rent Cycle", },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
-    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit", },
     { id: "start_date", numeric: false, disablePadding: true, label: "Lease Start", },
     { id: "end_date", numeric: false, disablePadding: true, label: "Lease End", },
     { id: "security_deposit", numeric: false, disablePadding: true, label: "Deposit Held", },
@@ -34,10 +36,8 @@ const headCells = [
 ];
 
 let TransactionPage = ({
-    currentUser,
     leases,
     properties,
-    contacts,
     match,
     users,
     handleItemDelete,
@@ -47,7 +47,7 @@ let TransactionPage = ({
     let [leaseItems, setLeaseItems] = useState([]);
     let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState('');
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -64,11 +64,11 @@ let TransactionPage = ({
             .filter(({ start_date }) =>
                 !fromDateFilter ? true : start_date >= fromDateFilter
             )
-            .filter(({ start_date }) =>
-                !toDateFilter ? true : start_date <= toDateFilter
+            .filter(({ end_date }) =>
+                !toDateFilter ? true : !end_date ? false : end_date <= toDateFilter
             )
-            .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
+            .filter(({ property_id }) =>
+                !propertyFilter ? true : property_id === propertyFilter
             )
             .filter(({ landlord }) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
@@ -128,6 +128,18 @@ let TransactionPage = ({
                             to={`${match.url}/${selected[0]}/edit`}
                         >
                             Edit
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<BlockIcon />}
+                            disabled={selected.length <= 0}
+                        >
+                            End Lease
                         </Button>
                     </Grid>
                     <Grid item>
@@ -296,14 +308,6 @@ let TransactionPage = ({
                     </Box>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
@@ -323,7 +327,7 @@ const mapStateToProps = (state) => {
         leases: state.leases.sort((lease1, lease2) => lease2.start_date > lease1.start_date)
             .map((lease) => {
                 const tenant = state.contacts.find((contact) => contact.id === lease.tenants[0]) || {};
-                const property = state.properties.find((property) => property.id === lease.property) || {};
+                const property = state.properties.find(({ id }) => id === lease.property_id) || {};
                 return Object.assign({}, lease,
                     {
                         tenant_name: tenant.first_name + " " + tenant.last_name,
@@ -332,12 +336,7 @@ const mapStateToProps = (state) => {
                     });
             }),
         users: state.users,
-        currentUser: state.currentUser,
-        expenses: state.expenses,
         properties: state.properties,
-        contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
     };
 };
 

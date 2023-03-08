@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import ChargesTable from './ChargesTable'
+import ChargeInputModal from './ChargeInputModal'
 import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
 import FormControl from "@material-ui/core/FormControl";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -12,9 +13,9 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
-import DeleteIcon from "@material-ui/icons/Delete";
+import AddIcon from "@material-ui/icons/Add";
 import { connect } from "react-redux";
-import { Formik, FieldArray } from "formik";
+import { Formik } from "formik";
 import {
 	handleItemFormSubmit,
 	handleDelete,
@@ -31,261 +32,129 @@ const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
 const defaultDate = moment().format("YYYY-MM-DD");
 
+const recurringChargesTableHeadCells = [
+	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
+	{ id: "account", numeric: false, disablePadding: true, label: "Charge Name" },
+	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
+	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
+	{ id: "frequency", numeric: false, disablePadding: true, label: "Frequency" },
+	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
+	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+]
+
 const UnitLeaseSchema = Yup.object().shape({
 	lease_type: Yup.string().trim().required("Lease Type is Required"),
 	rent_cycle: Yup.string().trim().required("Rent Cycle is Required"),
-	tenant: Yup.string().trim().required("Unit Tenant is Required"),
+	tenants: Yup.array().required("Unit Tenant is Required"),
 	start_date: Yup.date().required('Start Date is Required'),
 	rent_amount: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
 	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0),
-	property: Yup.string().trim().required('Property is Required'),
-	property_unit: Yup.string().trim().required('Unit is Required'),
+	property_id: Yup.string().trim().required('Property is Required'),
+	unit_id: Yup.string().trim().required('Unit is Required'),
 	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
-	next_due_date: Yup.date().required('Next Due Date is Required'),
+	rent_due_date: Yup.date().required('Next Due Date is Required'),
 	security_deposit_due_date: Yup.date(),
-	recurring_charges: Yup.array().of(Yup.object().shape({
-		type: Yup.string().default('recurring_charge'),
-		frequency: Yup.string().trim().required('Frequency to make charge is required'),
-		due_date: Yup.date().required("Due Date is required"),
-		account: Yup.string().trim().required("Account is required"),
-		amount: Yup.number().typeError('Amount must be a number').integer().min(0).required('Charge Amount is required'),
-	})),
-	one_time_charges: Yup.array().of(Yup.object().shape({
-		type: Yup.string().default('one_time_charge'),
-		due_date: Yup.date().required("Due Date is required"),
-		account: Yup.string().trim().required("Account is required"),
-		amount: Yup.number().typeError('Amount must be a number').integer().min(0).required('Charge Amount is required'),
-	})),
 });
 
 
 let UnitLeaseInputForm = (props) => {
 	const classes = commonStyles();
-	const { currentUser, contacts, history, properties, propertyUnits, handleItemSubmit } = props
-	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
+	const { contacts, history, properties, propertyUnits, propertyUnitCharges, handleItemSubmit, handleItemDelete } = props
+	const [propertyUnitChargesItems, setpropertyUnitChargesItems] = useState([])
+	let leaseToEdit = props.leaseToEdit || {};
 	const unitLeaseValues = {
-		id: propertyToEdit.id,
-		property_unit: propertyToEdit.property_unit || "",
-		tenants: propertyToEdit.tenants || [],
-		cosigner: propertyToEdit.cosigner || "",
-		start_date: propertyToEdit.start_date || defaultDate,
-		end_date: propertyToEdit.end_date || moment().add(1, 'M').format('YYYY-MM-DD'),
-		next_due_date: propertyToEdit.next_due_date || moment().add(1, 'M').format('YYYY-MM-DD'),
-		security_deposit_due_date: propertyToEdit.security_deposit_due_date || defaultDate,
-		property: propertyToEdit.property || "",
-		rent_amount: propertyToEdit.rent_amount || 0,
-		security_deposit: propertyToEdit.security_deposit || 0,
-		lease_type: propertyToEdit.lease_type || LEASE_TYPES[1],
-		rent_cycle: propertyToEdit.rent_cycle || "Monthly",
-		one_time_charges: propertyToEdit.one_time_charges || [],
-		recurring_charges: propertyToEdit.recurring_charges || [],
+		id: leaseToEdit.id,
+		property_id: leaseToEdit.property_id || "",
+		unit_id: leaseToEdit.unit_id || "",
+		tenants: leaseToEdit.tenants || [],
+		cosigner: leaseToEdit.cosigner || "",
+		start_date: leaseToEdit.start_date || defaultDate,
+		end_date: leaseToEdit.end_date || '',
+		rent_due_date: leaseToEdit.rent_due_date || moment().add(1, 'M').format('YYYY-MM-DD'),
+		security_deposit_due_date: leaseToEdit.security_deposit_due_date || defaultDate,
+		rent_amount: leaseToEdit.rent_amount || '',
+		security_deposit: leaseToEdit.security_deposit || 0,
+		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
+		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
+		unit_charges :	propertyUnitChargesItems.filter((unit_charge) => unit_charge.unit_id === leaseToEdit.unit_id)
 	};
 
-	const RecurringChargesInputComponent = ({ remove, push, form }) => {
-		const { errors, touched, values, handleChange, handleBlur } = form
-		const propertyUnitErrors = errors['recurring_charges']
-		const propertyUnitTouched = touched['recurring_charges']
-		const layout = values.recurring_charges.map((unit_charge, unitChargeIndex) => {
-			const indexInErrors = propertyUnitErrors && propertyUnitErrors[unitChargeIndex];
-			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
-			return (
-				<Grid key={`unit_charge-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].account`}>
-						<TextField
-							fullWidth
-							label="Charge Name/Details"
-							variant="outlined"
-							type="text"
-							value={unit_charge.account}
-							name={`recurring_charges.${unitChargeIndex}.account`}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
-							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
-						/>
-					</Grid>
-					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].due_date`}>
-						<TextField
-							fullWidth
-							variant="outlined"
-							id="due_date"
-							type="date"
-							name={`recurring_charges.${unitChargeIndex}.due_date`}
-							label="Next Due Date"
-							value={unit_charge.due_date}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							InputLabelProps={{ shrink: true }}
-							error={(indexInErrors && 'due_date' in indexInErrors) && (indexInTouched && indexInTouched.due_date)}
-							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)} />
-					</Grid>
-					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].amount`}>
-						<TextField
-							fullWidth
-							label="Amount"
-							variant="outlined"
-							type="text"
-							value={unit_charge.amount}
-							name={`recurring_charges.${unitChargeIndex}.amount`}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							error={(indexInErrors && 'amount' in indexInErrors) && (indexInTouched && indexInTouched.amount)}
-							helperText={(indexInTouched && indexInTouched.amount) && (indexInErrors && indexInErrors.amount)}
-						/>
-					</Grid>
-					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].frequency`}>
-						<TextField
-							fullWidth
-							variant="outlined"
-							select
-							name={`recurring_charges.${unitChargeIndex}.frequency`}
-							label="Frequency"
-							onBlur={handleBlur}
-							onChange={handleChange}
-							value={unit_charge.frequency}
-							error={(indexInErrors && 'frequency' in indexInErrors) && (indexInTouched && indexInTouched.frequency)}
-							helperText={(indexInTouched && indexInTouched.frequency) && (indexInErrors && indexInErrors.frequency)}
-						>
-							{RENT_CYCLES.map((frequency, index) => (
-								<MenuItem key={index} value={frequency}>
-									{frequency}
-								</MenuItem>
-							))}
-						</TextField>
-					</Grid>
-					<Grid item key={`recurring_charges[${unitChargeIndex}].delete`}>
-						<IconButton aria-label="delete"
-							onClick={() => { remove(unitChargeIndex) }}
-							size="medium">
-							<DeleteIcon />
-						</IconButton>
-					</Grid>
-				</Grid>
+	useEffect(() => {
+		setpropertyUnitChargesItems(propertyUnitCharges)
+	}, [propertyUnitCharges])
 
-			)
-		})
-		return <Grid item container direction="column" spacing={2}>
-			{layout}
-			<Grid item>
-				<Button
-					className={classes.oneMarginTopBottom}
-					variant="outlined"
-					size="medium"
-					onClick={() => push({ type: 'recurring_charge', due_date: moment().add(1, 'M').format('YYYY-MM-DD'), account: '', amount: '', frequency: "Monthly" })}
-					disableElevation>
-					Add Recurring Charge
-				</Button>
-			</Grid>
-		</Grid>
+
+	const defaultChargeValues = {
+		unit_id: leaseToEdit.unit_id,
+		frequency: '',
+		amount: '',
+		due_date: defaultDate,
+		account: '',
+		type: 'recurring_charge',
 	}
 
-	const OneTimeChargesComponent = ({ remove, push, form }) => {
-		const { errors, touched, values, handleChange, handleBlur } = form
-		const propertyUnitErrors = errors['one_time_charges']
-		const propertyUnitTouched = touched['one_time_charges']
-		const layout = values.one_time_charges.map((unit_charge, unitChargeIndex) => {
-			const indexInErrors = propertyUnitErrors && propertyUnitErrors[unitChargeIndex];
-			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
-			return (
-				<Grid key={`one_time_charges-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].account`}>
-						<TextField
-							fullWidth
-							label="Charge Name/Details"
-							variant="outlined"
-							type="text"
-							value={unit_charge.account}
-							name={`one_time_charges.${unitChargeIndex}.account`}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							error={(indexInErrors && 'account' in indexInErrors) && (indexInTouched && indexInTouched.account)}
-							helperText={(indexInTouched && indexInTouched.account) && (indexInErrors && indexInErrors.account)}
-						/>
-					</Grid>
-					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].due_date`}>
-						<TextField
-							fullWidth
-							variant="outlined"
-							id="due_date"
-							type="date"
-							name={`one_time_charges.${unitChargeIndex}.due_date`}
-							label="Due Date"
-							value={unit_charge.due_date}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							InputLabelProps={{ shrink: true }}
-							error={(indexInErrors && 'due_date' in indexInErrors) && (indexInTouched && indexInTouched.due_date)}
-							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)}
-						/>
-					</Grid>
-					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].amount`}>
-						<TextField
-							fullWidth
-							label="Amount"
-							variant="outlined"
-							type="text"
-							value={unit_charge.amount}
-							name={`one_time_charges.${unitChargeIndex}.amount`}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							error={(indexInErrors && 'amount' in indexInErrors) && (indexInTouched && indexInTouched.amount)}
-							helperText={(indexInTouched && indexInTouched.amount) && (indexInErrors && indexInErrors.amount)}
-						/>
-					</Grid>
-					<Grid item key={`one_time_charges[${unitChargeIndex}].delete`}>
-						<IconButton aria-label="delete"
-							onClick={() => { remove(unitChargeIndex) }}
-							size="medium">
-							<DeleteIcon />
-						</IconButton>
-					</Grid>
-				</Grid>
+	const [modalOpenState, toggleModalState] = useState(false)
+	const [chargeToEdit, setChargeToEdit] = useState(defaultChargeValues)
 
-			)
-		})
-		return <Grid item container direction="column" spacing={2}>
-			{layout}
-			<Grid item>
-				<Button
-					className={classes.oneMarginTopBottom}
-					variant="outlined"
-					size="medium"
-					onClick={() => push({ type: 'one_time_charge', due_date: moment().add(1, 'M').format('YYYY-MM-DD'), account: '', amount: '' })}
-					disableElevation>
-					Add One Time Charge
-				</Button>
-			</Grid>
-		</Grid>
+
+	const handleModalStateToggle = () => {
+		toggleModalState(!modalOpenState)
 	}
 
-
+	const handleEditClick = (rowId) => {
+		setChargeToEdit(unitLeaseValues.unit_charges.find(({ id }) => id === rowId) || defaultChargeValues)
+		handleModalStateToggle()
+	}
 	return (
 		<Formik
 			initialValues={unitLeaseValues}
 			enableReinitialize validationSchema={UnitLeaseSchema}
 			onSubmit={async (values, { resetForm }) => {
-				const unit_charges = []
-				unit_charges.push([...values.one_time_charges, ...values.recurring_charges])
 				let propertyUnitLease = {
 					id: values.id,
-					tenant: values.tenant,
-					cosigner: values.cosigner,
-					end_date: values.end_date,
-					next_due_date: values.next_due_date,
-					security_deposit: values.security_deposit,
-					security_deposit_due_date: values.security_deposit_due_date,
-					property: values.property,
-					start_date: values.start_date,
-					rent_amount: values.rent_amount,
+					property_id: values.property_id,
+					unit_id: values.unit_id,
 					lease_type: values.lease_type,
 					rent_cycle: values.rent_cycle,
-					property_unit: values.property_unit,
+					tenants: values.tenants,
+					cosigner: values.cosigner,
+					start_date: values.start_date,
+					end_date: values.end_date,
+					rent_due_date: values.rent_due_date,
+					security_deposit: values.security_deposit,
+					security_deposit_due_date: values.security_deposit_due_date,
+					rent_amount: values.rent_amount,
 				};
-				await handleItemSubmit( propertyUnitLease, "leases")
-				unit_charges.forEach(async (unitCharge) => {
-					const unitChargeToSave = Object.assign({}, unitCharge, { unit_id: values.property_unit })
-					await handleItemSubmit( unitChargeToSave, 'unit_charges')
-				})
+				await handleItemSubmit(propertyUnitLease, "leases")
+				if (!values.id) {
+					//post charges for rent and  security deposit 
+					const tenant = contacts.find(({ id }) => id === values.tenants[0]) || {}
+					const newRentCharge = {
+						charge_amount: values.rent_amount,
+						charge_date: defaultDate,
+						charge_label: "Rent",
+						charge_type: "rent",
+						due_date: defaultDate,
+						tenant_id: tenant.id,
+						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+						unit_id: values.unit_id,
+					}
+					const newSecurityDepositCharge = {
+						charge_amount: values.rent_amount,
+						charge_date: defaultDate,
+						charge_label: "Security Deposit",
+						charge_type: "security_deposit",
+						due_date: defaultDate,
+						tenant_id: tenant.id,
+						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+						unit_id: values.unit_id,
+					}
+					await handleItemSubmit(newRentCharge, 'transactions-charges')
+					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
+				}
+				if(values.id){
+					history.goBack()
+				}
 				resetForm({});
 			}}
 		>
@@ -302,7 +171,7 @@ let UnitLeaseInputForm = (props) => {
 					<form
 						className={classes.form}
 						method="post"
-						id="propertyInputForm"
+						id="unitLeaseInputForm"
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={1} direction="column">
@@ -317,14 +186,17 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										label="Property"
 										variant="outlined"
-										id="property"
+										id="property_id"
 										select
-										name="property"
-										value={values.property}
-										onChange={handleChange}
+										name="property_id"
+										value={values.property_id}
+										onChange={(event) => {
+											setFieldValue('property_id', event.target.value)
+											setFieldValue('unit_id', '')
+										}}
 										onBlur={handleBlur}
-										error={errors.property && touched.property}
-										helperText={touched.property && errors.property}
+										error={errors.property_id && touched.property_id}
+										helperText={touched.property_id && errors.property_id}
 									>
 										{properties.map((property, index) => (
 											<MenuItem key={index} value={property.id}>
@@ -338,17 +210,21 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										select
 										variant="outlined"
-										id="property_unit"
-										name="property_unit"
+										id="unit_id"
+										name="unit_id"
 										label="Unit"
-										value={values.property_unit}
-										onChange={handleChange}
+										value={values.unit_id}
+										onChange={(event) => {
+											setFieldValue('unit_id', event.target.value)
+											setFieldValue('unit_charges', propertyUnitChargesItems.filter(({ unit_id }) => unit_id === event.target.value)
+											)
+										}}
 										onBlur={handleBlur}
-										error={errors.property_unit && touched.property_unit}
-										helperText={touched.property_unit && errors.property_unit}
+										error={errors.unit_id && touched.unit_id}
+										helperText={touched.unit_id && errors.unit_id}
 									>
 										{/* This requires some additional changes */}
-										{propertyUnits.filter((property_unit) => property_unit.property_id === values.property).map((unit, index) => (
+										{propertyUnits.filter(({ property_id }) => property_id === values.property_id).map((unit, index) => (
 											<MenuItem key={index} value={unit.id}>
 												{unit.ref}
 											</MenuItem>
@@ -415,87 +291,6 @@ let UnitLeaseInputForm = (props) => {
 							</Grid>
 							<Grid item>
 								<Typography variant="subtitle1" component="h2">
-									Tenants and Cosigner
-								</Typography>
-							</Grid>
-							<Grid item container direction="row" spacing={4}>
-								<Grid item xs={12} md={6}>
-									<FormControl
-										variant="outlined"
-										fullWidth
-										className={classes.formControl}
-									>
-										<InputLabel id="demo-simple-select-outlined-label">
-											Tenants
-										</InputLabel>
-										<Select
-											fullWidth
-											multiple
-											labelId="demo-simple-select-outlined-label"
-											id="demo-simple-select-outlined"
-											name="tenant"
-											label="Tenants"
-											value={values.tenants}
-											onChange={(event) =>
-												setFieldValue("tenants", event.target.value)
-											}
-											onBlur={handleBlur}
-											renderValue={(selectedContacts) => {
-												const contactsWithDetails = contacts.filter(
-													({ id }) =>
-														selectedContacts.includes(id)
-												);
-												return contactsWithDetails.map(
-													(selectedContact, index) => (
-														<Chip
-															color="primary"
-															key={index}
-															label={
-																selectedContact.first_name +
-																" " +
-																selectedContact.last_name
-															}
-															className={classes.chip}
-														/>
-													)
-												);
-											}}
-										>
-											{contacts.map((contact, contactIndex) => (
-												<MenuItem key={contactIndex} value={contact.id}>
-													{contact.first_name +
-														" " +
-														contact.last_name}
-												</MenuItem>
-											))}
-										</Select>
-										<FormHelperText>Select Tenants</FormHelperText>
-									</FormControl>
-								</Grid>
-								<Grid item xs={12} md={6}>
-									<TextField
-										fullWidth
-										select
-										error={errors.cosigner && touched.cosigner}
-										helperText={"Unit Tenancy Cosigner"}
-										variant="outlined"
-										name="cosigner"
-										id="cosigner"
-										label="Cosigner"
-										value={values.cosigner}
-										onChange={handleChange}
-										onBlur={handleBlur}
-									>
-										{contacts.map((contact, index) => (
-											<MenuItem key={index} value={contact.id}>
-												{contact.first_name + ' ' + contact.last_name}
-											</MenuItem>
-										))}
-									</TextField>
-								</Grid>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1" component="h2">
 									Rent
 								</Typography>
 							</Grid>
@@ -542,13 +337,13 @@ let UnitLeaseInputForm = (props) => {
 									<TextField
 										fullWidth
 										variant="outlined"
-										id="next_due_date"
+										id="rent_due_date"
 										type="date"
-										name="next_due_date"
+										name="rent_due_date"
 										label="Next Due Date"
-										value={values.next_due_date}
-										error={errors.next_due_date && touched.next_due_date}
-										helperText={touched.next_due_date && errors.next_due_date || 'Next date when the rent is due'}
+										value={values.rent_due_date}
+										error={errors.rent_due_date && touched.rent_due_date}
+										helperText={touched.rent_due_date && errors.rent_due_date || 'Next date when the rent is due'}
 										onChange={handleChange}
 										onBlur={handleBlur}
 										InputLabelProps={{ shrink: true }}
@@ -595,31 +390,116 @@ let UnitLeaseInputForm = (props) => {
 							</Grid>
 							<Grid item>
 								<Typography variant="subtitle1" component="h2">
-									Charges
+									Tenants and Cosigner
 								</Typography>
 							</Grid>
-							<Grid item container direction="column" spacing={1}>
+							<Grid item container direction="row" spacing={4}>
+								<Grid item xs={12} md={6}>
+									<FormControl
+										variant="outlined"
+										fullWidth
+										className={classes.formControl}
+									>
+										<InputLabel id="demo-simple-select-outlined-label">
+											Tenants
+										</InputLabel>
+										<Select
+											fullWidth
+											multiple
+											labelId="demo-simple-select-outlined-label"
+											id="tenants"
+											name="tenants"
+											label="Tenants"
+											error={errors.tenants && touched.tenants}
+											value={values.tenants}
+											onChange={(event) =>
+												setFieldValue("tenants", event.target.value)
+											}
+											onBlur={handleBlur}
+											renderValue={(selectedContacts) => {
+												const contactsWithDetails = contacts.filter(
+													({ id }) =>
+														selectedContacts.includes(id)
+												);
+												return contactsWithDetails.map(
+													(selectedContact, index) => (
+														<Chip
+															color="primary"
+															key={index}
+															label={`
+																${selectedContact.first_name} ${selectedContact.last_name}`
+															}
+															className={classes.chip}
+														/>
+													)
+												);
+											}}
+										>
+											{contacts.map((contact, contactIndex) => (
+												<MenuItem key={contactIndex} value={contact.id}>
+													{contact.first_name} {contact.last_name}
+												</MenuItem>
+											))}
+										</Select>
+										<FormHelperText error={errors.tenants && touched.tenants}>Select Tenants</FormHelperText>
+									</FormControl>
+								</Grid>
+								<Grid item xs={12} md={6}>
+									<TextField
+										fullWidth
+										select
+										error={errors.cosigner && touched.cosigner}
+										helperText={"Unit Tenancy Cosigner"}
+										variant="outlined"
+										name="cosigner"
+										id="cosigner"
+										label="Cosigner"
+										value={values.cosigner}
+										onChange={handleChange}
+										onBlur={handleBlur}
+									>
+										{contacts.map((contact, index) => (
+											<MenuItem key={index} value={contact.id}>
+												{contact.first_name} {contact.last_name}
+											</MenuItem>
+										))}
+									</TextField>
+								</Grid>
+							</Grid>
+							<Grid item container direction="column" spacing={2}>
 								<Grid item>
-									<Typography variant="subtitle2">
-										Recurring Charges
-								</Typography>
+									<Typography variant="subtitle1">Unit Charges</Typography>
 								</Grid>
-								<Grid item container>
-									<FieldArray
-										name="recurring_charges"
-										component={RecurringChargesInputComponent}
-									/>
+								<Grid item>
+									<ChargesTable
+										rows={values.unit_charges}
+										headCells={recurringChargesTableHeadCells}
+										handleEditClick={handleEditClick}
+										handleItemSubmit={handleItemSubmit}
+										handleDelete={handleItemDelete}
+										deleteUrl={"unit-charges"} />
+									{
+										modalOpenState ? <ChargeInputModal open={modalOpenState}
+											handleClose={handleModalStateToggle} history={history}
+											handleItemSubmit={handleItemSubmit}
+											chargeValues={chargeToEdit} /> : null
+									}
 								</Grid>
-								<Grid item >
-									<Typography variant="subtitle2">
-										One Time Charges
-								</Typography>
-								</Grid>
-								<Grid item container>
-									<FieldArray
-										name="one_time_charges"
-										component={OneTimeChargesComponent}
-									/>
+								<Grid item>
+									<Button
+										className={classes.oneMarginTopBottom}
+										variant="outlined"
+										size="medium"
+										startIcon={<AddIcon />}
+										onClick={() => {
+											setChargeToEdit({ ...defaultChargeValues, unit_id: values.unit_id })
+											if (values.unit_id) {
+												handleModalStateToggle()
+											}
+										}}
+										disableElevation>
+										Add Charge
+									</Button>
 								</Grid>
 							</Grid>
 							<Grid
@@ -648,11 +528,11 @@ let UnitLeaseInputForm = (props) => {
 										variant="contained"
 										size="medium"
 										startIcon={<SaveIcon />}
-										form="propertyInputForm"
+										form="unitLeaseInputForm"
 										disabled={isSubmitting}
 									>
-										Add Lease
-								</Button>
+										{values.id ? "Edit Lease" : "Add Lease"}
+									</Button>
 								</Grid>
 							</Grid>
 						</Grid>
@@ -668,6 +548,7 @@ const mapStateToProps = (state) => {
 		properties: state.properties,
 		error: state.error,
 		propertyUnits: state.propertyUnits,
+		propertyUnitCharges: state.propertyUnitCharges,
 		// contacts: state.contacts.filter(({ id }) => !state.properties.find((property) => property.tenants.includes(id))),
 		currentUser: state.currentUser,
 		users: state.users,
@@ -676,7 +557,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

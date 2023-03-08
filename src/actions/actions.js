@@ -1,5 +1,6 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as vacatingNoticesActions from "./notices";
+import * as emailTemplatesActions from "./emailTemplates";
 import * as propertyActions from "./property";
 import * as propertyUnitChargeActions from "./propertyUnitCharges";
 import * as propertyUnitActions from "./propertyUnits";
@@ -286,6 +287,12 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
+                    case "email-templates":
+                        dispatch(
+                            emailTemplatesActions.emailTemplatesFetchDataSuccess(fetchedItems)
+                        );
+                        break;
+
                     case "property_media":
                         dispatch(
                             mediaFilesActions.mediaFilesFetchDataSuccess(fetchedItems)
@@ -411,6 +418,10 @@ export function handleDelete(itemId, url) {
                     dispatch(toDoActions.deleteToDo(itemId));
                     break;
 
+                case "unit-charges":
+                    dispatch(propertyUnitChargeActions.deletePropertyUnitCharge(itemId));
+                    break;
+
                 case "maintenance-requests":
                     dispatch(
                         maintenanceRequestsActions.deleteMaintenanceRequest(
@@ -428,6 +439,12 @@ export function handleDelete(itemId, url) {
                 case "notices":
                     dispatch(
                         vacatingNoticesActions.deleteNotice(itemId)
+                    );
+                    break;
+
+                case "email-templates":
+                    dispatch(
+                        emailTemplatesActions.deleteEmailTemplate(itemId)
                     );
                     break;
 
@@ -559,6 +576,12 @@ export function handleItemFormSubmit(data, url) {
                                 );
                                 break;
 
+                            case "email-templates":
+                                dispatch(
+                                    emailTemplatesActions.editEmailTemplate(modifiedObject)
+                                );
+                                break;
+
                             case "property_media":
                                 dispatch(
                                     mediaFilesActions.editMediaFile(modifiedObject)
@@ -663,6 +686,10 @@ export function handleItemFormSubmit(data, url) {
 
                             case "notices":
                                 dispatch(vacatingNoticesActions.addNotice(addedItem));
+                                break;
+
+                            case "email-templates":
+                                dispatch(emailTemplatesActions.addEmailTemplate(addedItem));
                                 break;
 
                             case "property_media":

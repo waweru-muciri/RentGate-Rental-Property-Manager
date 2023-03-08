@@ -16,9 +16,10 @@ import { withRouter } from "react-router-dom";
 const defaultDate = moment().format("YYYY-MM-DD");
 const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
+	memo: Yup.string().trim().max(50, "Memo details should be less than 50 characters").default(''),
 	charge_balance: Yup.number().typeError('Charge Balance must be a number').required("Charge balance is required"),
 	payment_amount: Yup.number().typeError('Amount must be a number').max(Yup.ref('charge_balance'), 'Payment Amount Cannot be greater than charge amount')
-	.required("Payment amount is required"),
+		.required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
 });
 
@@ -35,6 +36,7 @@ let PaymentInputForm = (props) => {
 		charge_label: chargeToAddPayment.charge_label || 0,
 		charge_type: chargeToAddPayment.charge_type || 0,
 		payment_amount: "",
+		memo: "",
 		payment_date: defaultDate,
 		tenant_id: chargeToAddPayment.tenant_id,
 	};
@@ -47,6 +49,7 @@ let PaymentInputForm = (props) => {
 				const chargePayment = {
 					charge_id: values.charge_id,
 					amount: values.payment_amount,
+					memo: values.memo,
 					payment_date: values.payment_date,
 					tenant_id: values.tenant_id,
 					unit_ref: values.unit_ref,
@@ -76,6 +79,9 @@ let PaymentInputForm = (props) => {
 					>
 						<Grid container spacing={2} direction="row">
 							<Grid item sm={12}>
+								<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>
+							</Grid>
+							<Grid item sm={12}>
 								<Typography variant="subtitle1">Total Charge Amount : {values.charge_amount}</Typography>
 							</Grid>
 							<Grid item sm={12}>
@@ -96,6 +102,8 @@ let PaymentInputForm = (props) => {
 									error={errors.payment_date && touched.payment_date}
 									helperText={touched.payment_date && errors.payment_date}
 								/>
+							</Grid>
+							<Grid sm={12} item>
 								<TextField
 									fullWidth
 									type="text"
@@ -108,6 +116,23 @@ let PaymentInputForm = (props) => {
 									onBlur={handleBlur}
 									error={errors.payment_amount && touched.payment_amount}
 									helperText={touched.payment_amount && errors.payment_amount}
+								/>
+							</Grid>
+							<Grid sm={12} item>
+								<TextField
+									fullWidth
+									type="text"
+									multiline
+									rows={4}
+									variant="outlined"
+									name="memo"
+									id="memo"
+									label="Payment Details/Memo"
+									value={values.memo}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.memo && touched.memo}
+									helperText={"Include details for the payments here (max 50)"}
 								/>
 							</Grid>
 							<Grid

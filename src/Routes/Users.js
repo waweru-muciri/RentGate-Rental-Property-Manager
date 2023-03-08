@@ -151,6 +151,19 @@ let UsersPage = ({
 							color="primary"
 							variant="contained"
 							size="medium"
+							component={Link}
+							to={`/emails/new`}
+							disabled={selected.length <= 0}
+						>
+							Compose Email
+						</Button>
+					</Grid>
+					<Grid item>
+						<Button
+							type="button"
+							color="primary"
+							variant="contained"
+							size="medium"
 							startIcon={<BlockIcon />}
 							disabled={selected.length <= 0}
 						>

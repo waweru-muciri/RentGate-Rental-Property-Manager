@@ -57,7 +57,7 @@ export default function FormDialog(props) {
                             due_date: values.due_date,
                             frequency: values.frequency,
                         };
-                        await handleItemSubmit('', unitChargeToSave, 'unit-charges')
+                        await handleItemSubmit(unitChargeToSave, 'unit-charges')
                         resetForm({});
                         if(values.id){
                             handleClose()

@@ -53,7 +53,6 @@ export default function EnhancedTable(props) {
   const {
     rows,
     headCells,
-    tenantId,
     deleteUrl,
     handleEditClick,
     handleDelete,
@@ -132,7 +131,6 @@ export default function EnhancedTable(props) {
                                     <IconButton
                                       onClick={(event) => {
                                         handleDelete(
-                                          tenantId,
                                           row.id,
                                           deleteUrl
                                         );

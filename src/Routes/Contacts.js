@@ -139,6 +139,19 @@ let ContactsPage = ({
                             </Button>
                     </Grid>
                     <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            component={Link}
+                            to={`/notices/new`}
+                        >
+                        Move Tenant Out With Notice
+                        </Button>
+                    </Grid>
+                    <Grid item>
                         <PrintArrayToPdf
                             disabled={selected.length <= 0}
                             reportName={'Tenant Records'}
@@ -311,13 +324,13 @@ let ContactsPage = ({
                         setSelected={setSelected}
                         rows={filteredContactItems}
                         headCells={contactsTableHeadCells}
-                        
+
                         handleDelete={handleItemDelete}
                         noDetailsCol={true}
                         deleteUrl={"contacts"}
                     />
                 </Grid>
-                
+
             </Grid>
         </Layout>
     );
@@ -336,7 +349,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

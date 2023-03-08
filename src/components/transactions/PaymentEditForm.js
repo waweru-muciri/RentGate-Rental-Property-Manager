@@ -18,6 +18,7 @@ import { withRouter } from "react-router-dom";
 const defaultDate = moment().format("YYYY-MM-DD");
 const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
+	memo: Yup.string().trim().max(50, "Memo details should be less than 50").default(''),
 	payment_amount: Yup.number().typeError('Amount must be a number').required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
 });
@@ -37,6 +38,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 		unit_id: paymentToEdit.unit_id,
 		unit_ref: paymentToEdit.unit_ref,
 		payment_amount: paymentToEdit.amount || 0,
+		memo: paymentToEdit.memo || '',
 		payment_label: paymentToEdit.payment_label || 0,
 		payment_type: paymentToEdit.payment_type || 0,
 		payment_date: defaultDate,
@@ -64,6 +66,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 								id: paymentToEdit.id,
 								charge_id: values.charge_id,
 								amount: values.payment_amount,
+								memo: values.memo,
 								payment_date: values.payment_date,
 								tenant_id: values.tenant_id,
 								unit_ref: values.unit_ref,
@@ -122,6 +125,23 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 													onBlur={handleBlur}
 													error={errors.payment_amount && touched.payment_amount}
 													helperText={touched.payment_amount && errors.payment_amount}
+												/>
+											</Grid>
+											<Grid sm={12} item>
+												<TextField
+													fullWidth
+													type="text"
+													multiline
+													rows={4}
+													variant="outlined"
+													name="memo"
+													id="memo"
+													label="Payment Details/Memo"
+													value={values.memo}
+													onChange={handleChange}
+													onBlur={handleBlur}
+													error={errors.memo && touched.memo}
+													helperText={touched.memo && errors.memo || "Include details for the payments here (max 50)"}
 												/>
 											</Grid>
 										</Grid>

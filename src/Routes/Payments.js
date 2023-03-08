@@ -33,6 +33,7 @@ const headCells = [
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "amount", numeric: false, disablePadding: true, label: "Payment Amount" },
+    { id: "memo", numeric: false, disablePadding: true, label: "Payment Notes/Memo" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];

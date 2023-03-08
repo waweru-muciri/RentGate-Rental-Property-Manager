@@ -7,9 +7,8 @@ import EmailInputForm from "../components/emails/EmailInputForm";
 import { withRouter } from "react-router-dom";
 
 let EmailPage = (props) => {
-	const { users, currentUser, contacts } = props
+	const { users, currentUser, contacts, emailTemplates } = props
 	let pageTitle = "Compose Email";
-
 	return (
 		<Layout pageTitle="Email Campaign Details">
 			<Grid container justify="center" direction="column">
@@ -23,7 +22,8 @@ let EmailPage = (props) => {
 					item
 					key={3}
 				>
-					<EmailInputForm currentUser={currentUser} contacts={contacts} history={props.history} users={users}/>
+					<EmailInputForm currentUser={currentUser} contacts={contacts} history={props.history}
+					 users={users} emailTemplates={emailTemplates}/>
 				</Grid>
 			</Grid>
 		</Layout>
@@ -34,8 +34,7 @@ const mapStateToProps = (state) => {
 	return {
 		contacts: state.contacts,
 		currentUser: state.currentUser,
-		communicationEmails : state.communicationEmails,
-		error: state.error,
+		emailTemplates : state.emailTemplates,
 		users: state.users,
 	};
 };

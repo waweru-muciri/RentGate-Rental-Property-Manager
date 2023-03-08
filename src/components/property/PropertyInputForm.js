@@ -46,8 +46,8 @@ const PROPERTY_BATHS = getPropertyBaths();
 
 let PropertyInputForm = (props) => {
 	const classes = commonStyles();
-	const { currentUser, history, users, handleItemSubmit } = props
-	let propertyToEdit = typeof props.propertyToEdit !== 'undefined' ? props.propertyToEdit : {};
+	const { history, users, handleItemSubmit } = props
+	let propertyToEdit = props.propertyToEdit || {};
 	const propertyValues = {
 		id: propertyToEdit.id,
 		assigned_to: propertyToEdit.assigned_to || "",
@@ -215,27 +215,7 @@ let PropertyInputForm = (props) => {
 					ref: values.ref,
 					owner: values.owner,
 				};
-				// handleItemSubmit( property, "property_units").then((propertyId) => {
-				// 	if (propertyFilesToSave.length) {
-				// 		let fileDownloadUrls = uploadFilesToFirebase(
-				// 			propertyFilesToSave
-				// 		);
-				// 		//here is the fileDownloadUrls array. Filter the array to remove 
-				// 		//undefined values
-				// 		fileDownloadUrls.filter((fileDownloadUrl) => typeof fileDownloadUrl !== 'undefined').forEach((fileDownloadUrl) => {
-				// 			let fileDownloadUrlObject = {
-				// 				url: fileDownloadUrl,
-				// 				property: propertyId,
-				// 			};
-				// 			handleItemSubmit(
-				// 				currentUser,
-				// 				fileDownloadUrlObject,
-				// 				"property_media"
-				// 			);
-				// 		});
-				// 	}
-				// });
-				const propertyId = await handleItemSubmit( property, "properties")
+				const propertyId = await handleItemSubmit(property, "properties")
 				values.property_units.forEach(async (property_unit) => {
 					//assign a default address to each property unit
 					property_unit.address = values.address + ' - ' + property_unit.ref
@@ -252,7 +232,7 @@ let PropertyInputForm = (props) => {
 						tenants: [],
 						assigned_to: values.assigned_to
 					})
-					await handleItemSubmit( propertyUnitToSave, 'property_units')
+					await handleItemSubmit(propertyUnitToSave, 'property_units')
 				})
 				resetForm({});
 				if (values.id) {
@@ -444,7 +424,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

@@ -28,7 +28,6 @@ const UsersPage = lazy(() => import('./Users'));
 const LeasePage = lazy(() => import('./LeasePage'));
 const LeasesPage = lazy(() => import('./Leases'));
 const AuditLogsPage = lazy(() => import('./AuditLogs'));
-const LeaseRenewalsPage = lazy(() => import('./LeaseRenewals'));
 const RentRollPage = lazy(() => import('./RentRoll'));
 const ContactsPage = lazy(() => import('./Contacts'));
 const ContactPage = lazy(() => import('./ContactPage'));
@@ -110,7 +109,6 @@ let MainPage = ({
                 <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
                 <Route exact path={`${match.path}`} component={DashBoard} />
                 <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
-                <Route exact path={`${match.path}properties/lease-renewals`} component={LeaseRenewalsPage} />
                 <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
                 <Route exact path={`${match.path}emails`} component={EmailsPage} />
                 <Route
@@ -153,7 +151,7 @@ let MainPage = ({
                 <Route exact path={`${match.path}users`} component={UsersPage} />
                 <Route
                   exact
-                  path={`${match.path}transactions/new`}
+                  path={`${match.path}leases/new`}
                   component={LeasePage}
                 />
                 <Route
@@ -193,7 +191,7 @@ let MainPage = ({
                 />
                 <Route
                   exact
-                  path={`${match.path}transactions/:transactionId/edit`}
+                  path={`${match.path}leases/:leaseId/edit`}
                   component={LeasePage}
                 />
                 <Route
@@ -257,7 +255,7 @@ let MainPage = ({
                 <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
                 <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
                 <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
-                <Route exact path={`${match.path}transactions`} component={LeasesPage} />
+                <Route exact path={`${match.path}leases`} component={LeasesPage} />
                 <Route exact path={`${match.path}payments`} component={PaymentsPage} />
               </Switch>
             </Suspense>

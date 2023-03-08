@@ -125,7 +125,7 @@ let TenantChargesStatementPage = ({
                             component={Link}
                             to={`/payments/${selected[0]}/new`}
                         >
-                            Add Payment
+                            Receive Payment
                         </Button>
                     </Grid>
                     <Grid item>

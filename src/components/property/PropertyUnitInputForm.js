@@ -70,7 +70,7 @@ const PropertyUnitSchema = Yup.object().shape({
 
 let PropertyUnitInputForm = (props) => {
 	const classes = commonStyles();
-	const { properties, leases, propertyUnitCharges, currentUser, contacts, history, handleItemDelete, handleItemSubmit } = props
+	const { properties, leases, propertyUnitCharges, contacts, history, handleItemDelete, handleItemSubmit } = props
 	let propertyUnitToEdit = props.propertyUnitToEdit || {};
 	const unitLease = leases.filter((lease) => lease.unit_id === propertyUnitToEdit.id)
 		.sort((lease1, lease2) => lease1.start_end > lease2.start_date)[0] || {}
@@ -146,54 +146,8 @@ let PropertyUnitInputForm = (props) => {
 					sqft: values.sqft,
 					tenants: values.tenants,
 				};
-				let propertyUnitLease = {
-					id: values.lease_id,
-					unit_ref: values.ref,
-					property: values.property_id,
-					lease_type: values.lease_type,
-					rent_cycle: values.rent_cycle,
-					tenants: values.tenants,
-					cosigner: values.cosigner,
-					start_date: values.start_date,
-					end_date: values.end_date,
-					rent_due_date: values.rent_due_date,
-					security_deposit: values.security_deposit,
-					security_deposit_due_date: values.security_deposit_due_date,
-					rent_amount: values.rent_amount,
-				};
 				//save the unit details
-				const unitId = await handleItemSubmit(unit, 'property_units')
-				propertyUnitLease.unit_id = unitId
-				//save the lease details after saving unit
-				await handleItemSubmit(propertyUnitLease, 'leases')
-				if (!values.lease_id) {
-					//post charges for rent and  security deposit 
-					const tenant = contacts.find(({id}) => id === values.tenants[0]) || {}
-					const newRentCharge = {
-						charge_amount: values.rent_amount,
-						charge_date: defaultDate,
-						charge_label: "Rent Income",
-						charge_type: "rent",
-						due_date: defaultDate,
-						tenant_id: tenant.id,
-						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
-						unit_id: unitId,
-						unit_ref: values.ref,
-					}
-					const newSecurityDepositCharge = {
-						charge_amount: values.rent_amount,
-						charge_date: defaultDate,
-						charge_label: "Security Deposit",
-						charge_type: "security_deposit",
-						due_date: defaultDate,
-						tenant_id: tenant.id,
-						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
-						unit_id: unitId,
-						unit_ref: values.ref,
-					}
-					await handleItemSubmit(newRentCharge, 'transactions-charges')
-					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
-				}
+				await handleItemSubmit(unit, 'property_units')
 				resetForm({});
 				if (values.id) {
 					history.goBack();
@@ -581,7 +535,6 @@ let PropertyUnitInputForm = (props) => {
 									<ChargesTable
 										rows={values.unit_charges}
 										headCells={recurringChargesTableHeadCells}
-										
 										handleEditClick={handleEditClick}
 										handleItemSubmit={handleItemSubmit}
 										handleDelete={handleItemDelete}
@@ -651,7 +604,6 @@ const mapStateToProps = (state) => {
 		properties: state.properties,
 		error: state.error,
 		contacts: state.contacts,
-		currentUser: state.currentUser,
 		users: state.users,
 	};
 };

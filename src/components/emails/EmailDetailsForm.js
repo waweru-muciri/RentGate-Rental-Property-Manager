@@ -4,6 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import CancelIcon from "@material-ui/icons/Cancel";
 import Typography from "@material-ui/core/Typography";
+import MenuItem from "@material-ui/core/MenuItem";
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import ReactQuill from 'react-quill'; // ES6
@@ -42,9 +43,8 @@ const quillEditorFormats = [
   'link', 'image', 'video'
 ]
 
-const EmailDetailsForm = (props) => {
+const EmailDetailsForm = ({ emailValues, submitEmailValues, handleCancel, emailTemplates }) => {
   const classes = commonStyles();
-  const { emailValues, submitEmailValues, handleCancel } = props;
   return (
     <Formik
       initialValues={emailValues}
@@ -52,10 +52,8 @@ const EmailDetailsForm = (props) => {
       onSubmit={(values) => {
         const email = {
           from_user: values.from_user,
-          email_bcc: values.email_bcc,
           email_subject: values.email_subject,
           email_message: values.email_message,
-          email_cc: values.email_cc,
         };
         submitEmailValues(email);
       }}
@@ -95,34 +93,28 @@ const EmailDetailsForm = (props) => {
                   error={errors.from_user && touched.from_user}
                   helperText={errors.from_user}
                 />
+              </Grid>
+              <Grid item>
                 <TextField
                   fullWidth
-                  type="text"
-                  InputLabelProps={{ shrink: true }}
+                  select
                   variant="outlined"
-                  id="email_cc"
-                  name="email_cc"
-                  label="CC:"
-                  value={values.email_cc}
+                  id="template"
+                  name="template"
+                  label="Template"
+                  value={values.template}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={errors.email_cc && touched.email_cc}
-                  helperText={errors.email_cc}
-                />
-                <TextField
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  id="email_bcc"
-                  name="email_bcc"
-                  label="BCC:"
-                  value={values.email_bcc}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={errors.email_bcc && touched.email_bcc}
-                  helperText={touched.email_bcc && errors.email_bcc}
-                />
-
+                  error={errors.template && touched.template}
+                  helperText={errors.template}>
+                  {emailTemplates.map((type, index) => (
+                    <MenuItem key={index} value={type.id}>
+                      {type.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item>
                 <TextField
                   fullWidth
                   InputLabelProps={{ shrink: true }}
@@ -140,11 +132,11 @@ const EmailDetailsForm = (props) => {
                     touched.email_subject && errors.email_subject
                   }
                 />
-
+              </Grid>
+              <Grid item>
                 <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
                 <ReactQuill
                   placeholder="Email Message"
-
                   value={values.email_message}
                   onChange={handleChange}
                   theme="snow"
@@ -163,32 +155,32 @@ const EmailDetailsForm = (props) => {
                   />
                 </ReactQuill>
               </Grid>
-            </Grid>
-            <Grid
-              item
-              container
-              spacing={2}
-            >
-              <Grid item>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  size="medium"
-                  startIcon={<CancelIcon />}
-                  onClick={handleCancel}
-                  disableElevation
-                >
-                  Cancel
+              <Grid
+                item
+                container
+                spacing={2}
+              >
+                <Grid item>
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    size="medium"
+                    startIcon={<CancelIcon />}
+                    onClick={handleCancel}
+                    disableElevation
+                  >
+                    Cancel
                       </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  form="emailDetailsInputForm"
-                  type="submit"
-                  variant="contained"
-                  color="primary">
-                  Next
+                </Grid>
+                <Grid item>
+                  <Button
+                    form="emailDetailsInputForm"
+                    type="submit"
+                    variant="contained"
+                    color="primary">
+                    Next
                   </Button>
+                </Grid>
               </Grid>
             </Grid>
           </form>

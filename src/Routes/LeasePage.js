@@ -5,21 +5,11 @@ import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import UnitLeaseInputForm from "../components/property/UnitLeaseInputForm";
 import { withRouter } from "react-router-dom";
-import queryString from 'query-string';
 
 let TransactionPage = (props) => {
-	let params = queryString.parse(props.location.search)
-	// Get the action to complete.
-	var leaseToRenew = params.leaseToRenew;
-	let transactionToEditId = props.match.params.transactionId;
-	let transactionToEdit = props.transactions.find(
-		({ id }) => id === transactionToEditId
-	);
-	transactionToEdit = typeof transactionToEdit !== 'undefined' ? transactionToEdit : {}
-	if (leaseToRenew) {
-		transactionToEdit = Object.assign({}, transactionToEdit, { id: undefined });	
-	}
-	let pageTitle = leaseToRenew ? "Renew Lease" : transactionToEditId ? "Edit Lease" : "New Lease";
+	let leaseToEditId = props.match.params.leaseId;
+	let leaseToEdit = props.leases.find(({ id }) => id === leaseToEditId) || {};
+	let pageTitle =  leaseToEdit.id ? "Edit Lease" : "Add New Lease";
 
 	return (
 		<Layout pageTitle="Lease Details">
@@ -35,7 +25,7 @@ let TransactionPage = (props) => {
 					key={3}
 				>
 					<UnitLeaseInputForm
-						transactionToEdit={transactionToEdit} leaseToRenew={leaseToRenew}
+						leaseToEdit={leaseToEdit}
 					/>
 				</Grid>
 			</Grid>
@@ -45,8 +35,7 @@ let TransactionPage = (props) => {
 
 const mapStateToProps = (state) => {
 	return {
-		transactions: state.transactions,
-		error: state.error,
+		leases: state.leases,
 	};
 };
 

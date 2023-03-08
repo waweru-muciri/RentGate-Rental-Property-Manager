@@ -7,7 +7,6 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import TEAL from '@material-ui/core/colors/teal';
-import PURPLE from '@material-ui/core/colors/purple';
 import { Doughnut } from 'react-chartjs-2';
 
 
@@ -66,7 +65,7 @@ let PropertySummaryPage = (props) => {
                                 {propertyToShowDetails.address}
                             </Typography>
                             <Typography variant="body2" component="p">
-                                {propertyToShowDetails.city}, {propertyToShowDetails.county}
+                                {propertyToShowDetails.city}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -135,11 +134,6 @@ let PropertySummaryPage = (props) => {
                         </CardContent>
                     </Card>
                 </Grid>
-            </Grid>
-            <Grid item>
-                <Typography gutterBottom variant="subtitle1" component="h2">
-                    Files
-                </Typography>
             </Grid>
         </Grid>
     );

@@ -72,8 +72,8 @@ const othersLinkNestedLinks = [
 
 const propertyLinkNestedLinks = [
     { text: "Rentals Properties", to: "/properties", icon: <ApartmentIcon /> },
-    { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
-    { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
+    { text: "Leases", to: "/leases", icon: <AttachMoneyIcon /> },
+    // { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
     { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
 ];
 
