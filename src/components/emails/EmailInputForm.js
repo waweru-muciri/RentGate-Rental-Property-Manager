@@ -98,13 +98,17 @@ export default function HorizontalLinearStepper(props) {
   const handleSendEmailSubmit = async (emailsArray) => {
     //send the emails here
     setIsSaving(true)
-    await sendEmails(emailValues.from_user, emailValues.email_subject, emailValues.email_message, emailsArray)
-    const emailObjectToSave = {
-      email_subject: emailValues.email_subject,
-      from_user: emailValues.from_user,
-      date_sent: new Date().toDateString(),
+    try {
+      await sendEmails(emailValues.from_user, emailValues.email_subject, emailValues.email_message, emailsArray)
+      const emailObjectToSave = {
+        email_subject: emailValues.email_subject,
+        from_user: emailValues.from_user,
+        date_sent: new Date().toDateString(),
+      }
+      await handleItemSubmit(emailObjectToSave, "communication_emails")
+    } catch (error) {
+      console.log("Error during sending email => ", error)
     }
-    await handleItemSubmit(emailObjectToSave, "communication_emails")
     setIsSaving(false)
     handleNext()
   }

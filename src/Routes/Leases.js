@@ -18,7 +18,6 @@ import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import ImportItemsBtn from "../components/ImportItemsBtn";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import RentAdjustModal from "./RentAdjustModal";
 import { parse } from "date-fns";
@@ -32,8 +31,9 @@ const headCells = [
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
     { id: "start_date", numeric: false, disablePadding: true, label: "Start Date", },
     { id: "end_date", numeric: false, disablePadding: true, label: "End Date", },
-    { id: "security_deposit", numeric: false, disablePadding: true, label: "Deposit Held", },
-    { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent", },
+    { id: "security_deposit", numeric: true, disablePadding: true, label: "Deposit Held", },
+    { id: "rent_amount", numeric: true, disablePadding: true, label: "Rent", },
+    { id: "rent_due_date", numeric: false, disablePadding: true, label: "Rent Due Date", },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
@@ -56,44 +56,34 @@ let TransactionPage = ({
     const [selected, setSelected] = useState([]);
     const [adjustRentModalState, setAdjustRentModalState] = useState(false);
 
+    const filterLeasesByCriteria = (leasesToFilter) => {
+        //filter the leases according to the search criteria here
+        const filteredLeases = leasesToFilter
+            .filter(({ start_date, end_date, property_id, terminated }) =>
+                (!fromDateFilter ? true : start_date >= fromDateFilter)
+                && (!toDateFilter ? true : !end_date ? false : end_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                && (activeStatusFilter === "all" ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter)
+            )
+            return filteredLeases;
+    }
+
     useEffect(() => {
         setLeaseItems(leases);
-        setFilteredLeaseItems(leases);
+        setFilteredLeaseItems(filterLeasesByCriteria(leases));
     }, [leases]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the leases according to the search criteria here
-        let filteredLeases = leaseItems
-            .filter(({ start_date }) =>
-                !fromDateFilter ? true : start_date >= fromDateFilter
-            )
-            .filter(({ end_date }) =>
-                !toDateFilter ? true : !end_date ? false : end_date <= toDateFilter
-            )
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ terminated }) =>
-                activeStatusFilter === "all" ? true : typeof terminated === 'undefined' ? true : terminated === activeStatusFilter
-            );
-        setFilteredLeaseItems(filteredLeases);
+        setFilteredLeaseItems(filterLeasesByCriteria(leases));
     };
 
     const handleModalStateToggle = () => {
         setAdjustRentModalState(!adjustRentModalState)
     }
 
-    const getSelectedLeaseDetailsForRentChargesUpload = () => {
-        const { tenants, unit_id, property_id } = leaseItems.find(({ id }) => id === selected[0]) || {}
-        return {
-            unit_id, property_id,
-            tenant_id: Array.isArray(tenants) ? tenants[0] : "",
-            charge_type: "rent", charge_label: "Rent"
-        }
-    }
-
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredLeaseItems(leaseItems);
         setPropertyFilter("all");
         setActiveStatusFilter("all");
         setFromDateFilter("");
@@ -151,10 +141,24 @@ let TransactionPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
+                            startIcon={<AddIcon />}
+                            disabled={!selected.length}
+                            component={Link}
+                            to={`charges/${selected[0]}/new`}
+                        >
+                            Add Charge
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
                             disabled={!selected.length}
                             onClick={handleModalStateToggle}
                         >
-                            Adjust Rent Amounts
+                            Adjust Rent Amount
                         </Button>
                     </Grid>
                     <Grid item>
@@ -187,14 +191,6 @@ let TransactionPage = ({
                             reportTitle={'Rental Agreements Data'}
                             headCells={headCells}
                             dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
-                        />
-                    </Grid>
-                    <Grid item>
-                        <ImportItemsBtn
-                            disabled={selected.length != 1}
-                            savingUrl="transactions-charges"
-                            text="Upload Rent Charges"
-                            baseObjectToAddProperties={getSelectedLeaseDetailsForRentChargesUpload()}
                         />
                     </Grid>
                 </Grid>
@@ -250,7 +246,7 @@ let TransactionPage = ({
                                         }}
                                         value={propertyFilter}
                                     >
-                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                        <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                         {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}

@@ -6,22 +6,26 @@ import { connect } from "react-redux";
 import ManagementFeesInputForm from "../components/users/ManagementFeesInputForm";
 import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
+import Typography from "@material-ui/core/Typography";
 
-let ManagementFeePage = ({ properties, transactions, managementFeeToEdit, handleItemSubmit, history }) => {
+let ManagementFeePage = ({ properties, currentUser, managementFeeToEdit, handleItemSubmit, history }) => {
     const pageTitle = managementFeeToEdit.id ? "Edit Management Fee" : "Collect Management Fee";
     return (
         <Layout pageTitle="Management Fee Details">
             <Grid container justify="center" direction="column">
                 <Grid item key={1}>
-                    <PageHeading  text={pageTitle} />
+                    <PageHeading text={pageTitle} />
+                    <Typography variant='body1' color="textSecondary">
+						Management fees are automatically recorded as expenses
+					</Typography>
                 </Grid>
                 <Grid item key={2}>
                     <ManagementFeesInputForm
                         history={history}
                         managementFeeToEdit={managementFeeToEdit}
                         handleItemSubmit={handleItemSubmit}
-                        transactions={transactions}
                         properties={properties}
+                        currentUser={currentUser}
                     />
                 </Grid>
             </Grid>
@@ -31,14 +35,14 @@ let ManagementFeePage = ({ properties, transactions, managementFeeToEdit, handle
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        transactions: state.transactions,
         properties: state.properties,
+        currentUser: state.currentUser,
         managementFeeToEdit: state.managementFees.find(({ id }) => id === ownProps.match.params.managementFeeId) || {},
     };
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
     }
 };
 

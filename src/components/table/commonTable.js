@@ -29,13 +29,14 @@ function CommonTable(props) {
         noEditCol,
         noDeleteCol,
         noDetailsCol,
+        optionalEditHandler
     } = props;
     const { match } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState("asc");
     const [orderBy, setOrderBy] = React.useState("Beds");
     const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(50);
+    const [rowsPerPage, setRowsPerPage] = React.useState(100);
 
     const handleRequestSort = (event, property) => {
         const isDesc = orderBy === property && order === "desc";
@@ -82,6 +83,7 @@ function CommonTable(props) {
     };
 
     const isSelected = (id) => selected.indexOf(id) !== -1;
+    const customEditFunctionPresent = optionalEditHandler && typeof optionalEditHandler === 'function';
 
     return (
         <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
@@ -115,7 +117,6 @@ function CommonTable(props) {
 
                                 return (
                                     <TableRow
-                                        // onClick={() => {if(typeof tableRowOnClickHandler === 'function') tableRowOnClickHandler(row.id) }}
                                         hover
                                         role="checkbox"
                                         aria-checked={isItemSelected}
@@ -138,6 +139,7 @@ function CommonTable(props) {
                                             (headCell, tableCellIndex) => {
                                                 const tableCellData =
                                                     row[headCell.id];
+
                                                 return (
                                                     headCell.id === 'edit' ?
                                                         (
@@ -155,8 +157,9 @@ function CommonTable(props) {
                                                                         <IconButton
                                                                             color="primary"
                                                                             size="small"
-                                                                            component={Link}
-                                                                            to={`${match.url}/${row.id}/edit`}
+                                                                            {...(customEditFunctionPresent ?
+                                                                                { onClick: () => optionalEditHandler(row.id) } :
+                                                                                { to: `${match.url}/${row.id}/edit`, component: Link, })}
                                                                         >
                                                                             <EditIcon fontSize="default" />
                                                                         </IconButton>
@@ -224,6 +227,7 @@ function CommonTable(props) {
                                                                     component="th"
                                                                     id={labelId}
                                                                     scope="row"
+                                                                    align="center"
                                                                     padding="none"
                                                                 >
                                                                     {typeof tableCellData ===

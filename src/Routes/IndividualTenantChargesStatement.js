@@ -11,7 +11,7 @@ import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, currencyFormatter, getYearToDateFromToDates } from "../assets/commonAssets";
+import {getTransactionsFilterOptions, currencyFormatter, getStartEndDatesForPeriod } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import { printInvoice } from "../assets/PrintingHelper";
 
@@ -21,9 +21,9 @@ const headCells = [
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Type" },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
     { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "charge_amount", numeric: true, disablePadding: true, label: "Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
-    { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
+    { id: "payed_amount", numeric: true, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
 ];
 
@@ -63,68 +63,33 @@ let TenantChargesStatementPage = ({
         }, 0)
 
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const chargesForCurrentMonth = tenantTransactionCharges.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setTenantChargesItems(chargesForCurrentMonth);
-        setFilteredChargeItems(chargesForCurrentMonth);
+        setTenantChargesItems(tenantTransactionCharges);
+        setFilteredChargeItems(filterChargesByCriteria(tenantTransactionCharges));
     }, [tenantTransactionCharges]);
+
+    const filterChargesByCriteria = (chargesToFilter) => {
+        let filteredStatements = chargesToFilter
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            filteredStatements = filteredStatements.filter((chargeItem) => {
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startDate, end: endDate })
+            })
+        }
+        filteredStatements = filteredStatements.filter(({ charge_type }) =>
+            !chargeType ? true : charge_type === chargeType
+        )
+        return filteredStatements;
+    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the tenantTransactionCharges according to the search criteria here
-        let filteredStatements = tenantTransactionCharges
-        let dateRange = []
-        let startOfPeriod;
-        let endOfPeriod;
-        switch (periodFilter) {
-            case 'last-month':
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'year-to-date':
-                dateRange = getYearToDateFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'last-year':
-                dateRange = getLastYearFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'month-to-date':
-                dateRange = getCurrentMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case '3-months-to-date':
-                dateRange = getLastThreeMonthsFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            default:
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-        }
-        filteredStatements = filteredStatements.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        filteredStatements = filteredStatements.filter(({ charge_type }) =>
-            !chargeType ? true : charge_type === chargeType
-        )
-        setFilteredChargeItems(filteredStatements);
+        setFilteredChargeItems(filterChargesByCriteria(tenantChargesItems));
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
         setPeriodFilter("month-to-date");
     };

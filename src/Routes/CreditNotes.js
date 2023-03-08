@@ -19,87 +19,73 @@ import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import { getStartEndDatesForPeriod, getTransactionsFilterOptions } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { printReceipt } from "../assets/PrintingHelper";
-import PaymentEditForm from "../components/payments/PaymentEditForm";
+import CreditNoteEditForm from "../components/charges/EditCreditNote";
 
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
-    { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
+    { id: "credit_issue_date", numeric: false, disablePadding: true, label: "Date Issued" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
-    { id: "payment_amount", numeric: true, disablePadding: true, label: "Payment Amount" },
-    { id: "memo", numeric: false, disablePadding: true, label: "Payment Notes/Memo" },
+    { id: "credit_amount", numeric: true, disablePadding: true, label: "Credit Amount" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 
-let PaymentsPage = ({
-    rentalPayments,
+let CreditNotesPage = ({
+    creditNotes,
     contacts,
     properties,
     handleItemSubmit,
-    handleItemDelete,
 }) => {
     const classes = commonStyles();
-    let [paymentsItems, setPaymentsItems] = useState([]);
-    let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
+    let [creditNotesItems, setCreditNotesItems] = useState([]);
+    let [filteredCreditNotesItems, setFilteredCreditNotesItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
     let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
-    const [editPaymentModalState, setEditPaymentModalState] = useState(false);
+    const [editCreditNoteModalState, setEditCreditNoteModalState] = useState(false);
 
     const [selected, setSelected] = useState([]);
-    const [paymentToEditId, setPaymentToEditId] = useState();
+    const [creditNoteToEditId, setCreditNoteToEditId] = useState();
 
     useEffect(() => {
-        setPaymentsItems(rentalPayments);
-        setFilteredPaymentsItems(filterPaymentsByCriteria(rentalPayments));
-    }, [rentalPayments]);
+        setCreditNotesItems(creditNotes);
+        setFilteredCreditNotesItems(filterCreditNotesByCriteria(creditNotes));
+    }, [creditNotes]);
 
-    const filterPaymentsByCriteria = (paymentsToFilter) => {
-        //filter the payments according to the search criteria here
-        let filteredPayments = paymentsToFilter
+    const filterCreditNotesByCriteria = (creditNotesToFilter) => {
+        //filter the creditNotes according to the search criteria here
+        let filteredCreditNotes = creditNotesToFilter
         if (periodFilter) {
             const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
-            filteredPayments = filteredPayments.filter((paymentItem) => {
-                const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(paymentDate, { start: startDate, end: endDate })
+            filteredCreditNotes = filteredCreditNotes.filter((creditNoteItem) => {
+                const creditNoteDate = parse(creditNoteItem.credit_issue_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(creditNoteDate, { start: startDate, end: endDate })
             })
         }
-        filteredPayments = filteredPayments
-            .filter(({ payment_date, tenant_id, property_id }) =>
-                (!fromDateFilter ? true : payment_date >= fromDateFilter)
-                && (!toDateFilter ? true : payment_date <= toDateFilter)
+        filteredCreditNotes = filteredCreditNotes
+            .filter(({ credit_issue_date, tenant_id, property_id }) =>
+                (!fromDateFilter ? true : credit_issue_date >= fromDateFilter)
+                && (!toDateFilter ? true : credit_issue_date <= toDateFilter)
                 && (propertyFilter === "all" ? true : property_id === propertyFilter)
                 && (!contactFilter ? true : tenant_id === contactFilter.id)
             )
-        return filteredPayments;
+        return filteredCreditNotes;
     }
 
-    const toggleEditPaymentModalState = () => {
-        setEditPaymentModalState(!editPaymentModalState)
+    const toggleEditCreditNoteModalState = () => {
+        setEditCreditNoteModalState(!editCreditNoteModalState)
     }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        setFilteredPaymentsItems(filterPaymentsByCriteria(paymentsItems));
-    }
-
-    const handlePaymentDelete = async (paymentId, url) => {
-        const paymentToDelete = paymentsItems.find(({ id }) => id === paymentId) || {}
-        const paymentForSameCharge = paymentsItems
-            .find(({ id, charge_id }) => charge_id === paymentToDelete.charge_id && id !== paymentToDelete.id)
-        if (!paymentForSameCharge) {
-            await handleItemSubmit({ id: paymentToDelete.charge_id, payed: false }, 'transactions-charges')
-        }
-        await handleItemDelete(paymentId, url)
+        setFilteredCreditNotesItems(filterCreditNotesByCriteria(creditNotesItems));
     }
 
     const resetSearchForm = (event) => {
@@ -112,14 +98,14 @@ let PaymentsPage = ({
     };
 
     return (
-        <Layout pageTitle="Payments">
+        <Layout pageTitle="Credit Notes">
             <Grid
                 container
                 spacing={3}
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading text={'Payments'} />
+                    <PageHeading text={'Credit Notes'} />
                 </Grid>
                 <Grid
                     container
@@ -133,35 +119,19 @@ let PaymentsPage = ({
                     <Grid item>
                         <PrintArrayToPdf
                             disabled={!selected.length}
-                            reportName={'Rental Payments Records'}
-                            reportTitle={'Rental Payments Data'}
+                            reportName={'Credit Notes Records'}
+                            reportTitle={'Credit Notes Data'}
                             headCells={headCells}
-                            dataToPrint={filteredPaymentsItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={filteredCreditNotesItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
-                    <Button
-                        aria-label="Print Receipt"
-                        variant="contained"
-                        size="medium"
-                        color="primary"
-                        disabled={!contactFilter || !selected.length}
-                        onClick={() => {
-                            const tenantDetails = contacts.find(({ id }) => id === contactFilter.id)
-                            printReceipt(
-                                tenantDetails,
-                                filteredPaymentsItems.filter(({ id }) => selected.includes(id))
-                            )
-                        }}
-                        startIcon={<PrintIcon />}>
-                        Print Receipt
-                    </Button>
                     <Grid item>
                         <ExportToExcelBtn
                             disabled={!selected.length}
-                            reportName={'Rental Payments Records'}
-                            reportTitle={'Rental Payments Data'}
+                            reportName={'Rental Credit Notes Records'}
+                            reportTitle={'Rental Credit Notes Data'}
                             headCells={headCells}
-                            dataToPrint={filteredPaymentsItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={filteredCreditNotesItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -173,7 +143,7 @@ let PaymentsPage = ({
                     >
                         <form
                             className={classes.form}
-                            id="paymentsSearchForm"
+                            id="creditNoteSearchForm"
                             onSubmit={handleSearchFormSubmit}
                         >
                             <Grid
@@ -302,7 +272,7 @@ let PaymentsPage = ({
                                     <Grid item>
                                         <Button
                                             type="submit"
-                                            form="paymentsSearchForm"
+                                            form="creditNoteSearchForm"
                                             color="primary"
                                             variant="contained"
                                             size="medium"
@@ -315,7 +285,7 @@ let PaymentsPage = ({
                                         <Button
                                             onClick={(event) => resetSearchForm(event)}
                                             type="reset"
-                                            form="paymentsSearchForm"
+                                            form="creditNoteSearchForm"
                                             color="primary"
                                             variant="contained"
                                             size="medium"
@@ -330,21 +300,20 @@ let PaymentsPage = ({
                     </Box>
                 </Grid>
                 {
-                    editPaymentModalState ?
-                        <PaymentEditForm open={editPaymentModalState}
-                            paymentToEdit={paymentsItems.find(({ id }) => id === paymentToEditId)}
-                            handleClose={toggleEditPaymentModalState}
+                    editCreditNoteModalState ?
+                        <CreditNoteEditForm open={editCreditNoteModalState}
+                            creditNoteToEdit={creditNotesItems.find(({ id }) => id === creditNoteToEditId)}
+                            handleClose={toggleEditCreditNoteModalState}
                             handleItemSubmit={handleItemSubmit} /> : null
                 }
                 <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={filteredPaymentsItems}
+                        rows={filteredCreditNotesItems}
                         headCells={headCells}
-                        handleDelete={handlePaymentDelete}
-                        optionalEditHandler={(selectedRowIndex) => {setPaymentToEditId(selectedRowIndex); toggleEditPaymentModalState()}}
-                        deleteUrl={"charge-payments"}
+                        optionalEditHandler={(selectedRowIndex) => {setCreditNoteToEditId(selectedRowIndex); toggleEditCreditNoteModalState()}}
+                        deleteUrl={"credit-notes"}
                     />
                 </Grid>
 
@@ -355,19 +324,19 @@ let PaymentsPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        rentalPayments: state.rentalPayments
-            .map((payment) => {
-                const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
-                const tenantUnit = state.propertyUnits.find(({ id }) => id === payment.unit_id) || {};
+        creditNotes: state.creditNotes
+            .map((creditNote) => {
+                const tenant = state.contacts.find((contact) => contact.id === creditNote.tenant_id) || {};
+                const tenantUnit = state.propertyUnits.find(({ id }) => id === creditNote.unit_id) || {};
 
-                return Object.assign({}, payment, {
+                return Object.assign({}, creditNote, {
                     tenant_name: `${tenant.first_name} ${tenant.last_name}`,
                     tenant_id_number: tenant.id_number,
                     unit_ref: tenantUnit.ref
                 })
             })
-            .sort((payment1, payment2) => parse(payment2.payment_date, 'yyyy-MM-dd', new Date()) -
-                parse(payment1.payment_date, 'yyyy-MM-dd', new Date())),
+            .sort((creditNote1, creditNote2) => parse(creditNote2.credit_issue_date, 'yyyy-MM-dd', new Date()) -
+                parse(creditNote1.credit_issue_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         contacts: state.contacts,
     };
@@ -380,6 +349,6 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-PaymentsPage = connect(mapStateToProps, mapDispatchToProps)(PaymentsPage);
+CreditNotesPage = connect(mapStateToProps, mapDispatchToProps)(CreditNotesPage);
 
-export default withRouter(PaymentsPage);
+export default withRouter(CreditNotesPage);

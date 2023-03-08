@@ -12,7 +12,7 @@ import AppTheme from "./components/AppTheme";
 const saveTenantId = store => next => action => {
 	if (action.type === 'SET_CURRENT_USER') {
 		setTenantId(action.user ? action.user.tenant_id : '')
-		// setTenantId('wPEY7XfSReuoOEOa22aX')
+		//  setTenantId('wPEY7XfSReuoOEOa22aX')
 	} else if (action.type === "COMPANY_PROFILES_FETCH_DATA_SUCCESS") {
 		setCompanyProfile(action.companyProfiles[0] || {})
 	}

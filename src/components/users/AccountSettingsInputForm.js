@@ -108,7 +108,7 @@ let UserInputForm = (props) => {
                             user.user_avatar_url = fileDownloadUrl;
                         }
                         await handleItemSubmit(user, "users")
-                        setStatus({ sent: true, msg: "Details saved successfully!" })
+                        setStatus({ sent: true, msg: "Details saved successfully." })
                     } catch (error) {
                         setStatus({ sent: false, msg: `Error! ${error}.` })
                     }
@@ -389,7 +389,7 @@ let UserInputForm = (props) => {
                     try {
                         await updateFirebaseUser({ uid: userToShow.id, userProfile: { password: values.password } })
                         resetForm({});
-                        setStatus({ sent: true, msg: "Password updated successfully!" })
+                        setStatus({ sent: true, msg: "Password updated successfully." })
                     } catch (error) {
                         setStatus({ sent: false, msg: `Error! ${error}.` })
                     }

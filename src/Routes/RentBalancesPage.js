@@ -18,11 +18,11 @@ import { parse, isWithinInterval, startOfToday, subDays } from "date-fns";
 const headCells = [
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant", },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
-    { id: "last_thirty", numeric: false, disablePadding: true, label: "0-30 Days" },
-    { id: "last_sixty", numeric: false, disablePadding: true, label: "31-60 Days" },
-    { id: "last_ninety", numeric: false, disablePadding: true, label: "61-90 Days" },
-    { id: "ninety_plus", numeric: false, disablePadding: true, label: "90+ Days" },
-    { id: "totalTenantRentBalance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "last_thirty", numeric: true, disablePadding: true, label: "0-30 Days" },
+    { id: "last_sixty", numeric: true, disablePadding: true, label: "31-60 Days" },
+    { id: "last_ninety", numeric: true, disablePadding: true, label: "61-90 Days" },
+    { id: "ninety_plus", numeric: true, disablePadding: true, label: "90+ Days" },
+    { id: "totalTenantRentBalance", numeric: true, disablePadding: true, label: "Balance" },
 
 ];
 
@@ -34,7 +34,7 @@ const defaultEarliestTime = new Date(2000, 1, 1);
 let RentBalancesPage = ({
     properties,
     contacts,
-    transactionsCharges,
+    rentalCharges,
     classes
 }) => {
     let [filteredMappedRentBalancesItems, setFilteredMappedRentalBalances] = useState([]);
@@ -47,8 +47,8 @@ let RentBalancesPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const uniqueTenantIdsWithCharges = new Set(transactionsCharges.map(rentCharge => rentCharge.tenant_id))
-        const tenantsWithCharges = transactionsCharges
+        const uniqueTenantIdsWithCharges = new Set(rentalCharges.map(rentCharge => rentCharge.tenant_id))
+        const tenantsWithCharges = rentalCharges
             .map(rentCharge => ({
                 id: rentCharge.tenant_id, tenant_id: rentCharge.tenant_id, tenant_name: rentCharge.tenant_name,
                 property_id: rentCharge.property_id,
@@ -59,11 +59,11 @@ let RentBalancesPage = ({
             const tenantDetails = tenantsWithCharges.find(({ tenant_id }) => tenant_id === tenantId) || {}
             const tenantBalancesDetails = {}
             let totalTenantRentBalance = 0
-            transactionsCharges.filter(({ tenant_id }) => tenant_id === tenantId).forEach(rentCharge => {
+            rentalCharges.filter(({ tenant_id }) => tenant_id === tenantId).forEach(rentCharge => {
                 const rentChargeDueDate = parse(rentCharge.due_date, 'yyyy-MM-dd', new Date())
                 totalTenantRentBalance += parseFloat(rentCharge.balance) || 0
                 //check if due date is within a month ago
-                if (isWithinInterval(rentChargeDueDate, { start: endOfLastThirtyDays , end: startOfToday() })) {
+                if (isWithinInterval(rentChargeDueDate, { start: endOfLastThirtyDays, end: startOfToday() })) {
                     tenantBalancesDetails['last_thirty'] = rentCharge.balance
                 }
                 //check if due date is within 31-60 days ago
@@ -87,14 +87,16 @@ let RentBalancesPage = ({
         setTotalBalancesAmount(totalRentBalances)
         setMappedRentBalances(mappedTenantsRentBalances)
         setFilteredMappedRentalBalances(mappedTenantsRentBalances);
-    }, [transactionsCharges]);
+    }, [rentalCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactionsCharges according to the search criteria here
+        //filter the rentalCharges according to the search criteria here
         const filteredMappedRentBalances = mappedRentBalances
-        .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+            .filter(({ tenant_id, property_id }) =>
+                (!contactFilter ? true : tenant_id === contactFilter.id)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+            )
         setFilteredMappedRentalBalances(filteredMappedRentBalances)
     };
 
@@ -103,7 +105,6 @@ let RentBalancesPage = ({
         event.preventDefault();
         setContactFilter(null)
         setPropertyFilter('all')
-        setFilteredMappedRentalBalances(mappedRentBalances)
     };
 
     return (
@@ -177,7 +178,7 @@ let RentBalancesPage = ({
                                                 }}
                                                 value={propertyFilter}
                                             >
-                                                <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                                <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                 {properties.map(
                                                     (property, index) => (
                                                         <MenuItem

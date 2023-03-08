@@ -14,7 +14,7 @@ import { Bar, HorizontalBar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, parse, getMonth, isWithinInterval, startOfToday, addDays, isSameDay } from "date-fns";
+import { format, getYear, parse, getMonth, isWithinInterval, addDays, isSameDay } from "date-fns";
 import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 
 
@@ -67,25 +67,27 @@ const FilterYearSchema = Yup.object().shape({
     filter_year: Yup.number()
         .typeError("Year must be a number!")
         .required("Year is required")
-        .positive()
-        .min(0, "Must be greater than 0")
+        .positive("Year must be greater than 0")
         .max(2100, "Sorry but we won't be here during those times.")
         .integer(),
 });
 
 const monthsInYear = getMonthsInYear()
 
-let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) => {
+let PropertyPerformancePage = ({ rentalCharges, expenses, properties }) => {
     const classes = commonStyles()
     let [propertyFilter, setPropertyFilter] = useState("all");
     const [chargesItems, setChargesItems] = useState([]);
     const [expensesItems, setExpensesItems] = useState(expenses);
 
     useEffect(() => {
-        setChargesItems(transactionsCharges
-            .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === getYear(new Date()))
+        //get only rent charges for display in bar graph
+        setChargesItems(rentalCharges
+            .filter(({ charge_date }) =>
+                getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === getYear(new Date())
+            )
         );
-    }, [transactionsCharges]);
+    }, [rentalCharges]);
 
     useEffect(() => {
         setExpensesItems(expenses
@@ -95,14 +97,18 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
 
     const setFilteredTransactionItemsByYear = (filterYear) => {
         setChargesItems(
-            transactionsCharges
-                .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
-                .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+            rentalCharges
+                .filter(({ charge_date, property_id }) =>
+                    (getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
+                    && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                )
         );
         setExpensesItems(
             expenses
-                .filter(({ expense_date }) => getYear(parse(expense_date, 'yyyy-MM-dd', new Date())) === filterYear)
-                .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+                .filter(({ expense_date, property_id }) =>
+                    (getYear(parse(expense_date, 'yyyy-MM-dd', new Date())) === filterYear)
+                    && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                )
         );
     };
     //get the different charges types as a set
@@ -117,12 +123,18 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
     })
     const paymentsTypesForDisplay = paymentsTypes.map(paymentType => {
         let result;
-        switch (paymentType) {
+        switch (paymentType.toLowerCase()) {
             case 'security_deposit':
                 result = "Security Deposit"
                 break;
             case 'rent':
                 result = "Rent"
+                break;
+            case 'water':
+                result = "Water"
+                break;
+            case 'electric':
+                result = "Electricity"
                 break;
             case 'recurring_charge':
                 result = "Recurring Charges"
@@ -146,7 +158,13 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
             return total + parseFloat(currentValue.charge_amount) || 0
         }, 0)
 
-    const totalOtherCharges = chargesItems.filter(charge => charge.charge_type !== 'rent')
+    //get total security deposit charges 
+    const totalSecurityDepositCharges = chargesItems.filter(charge => charge.charge_type === 'security_deposit')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.charge_amount) || 0
+        }, 0)
+
+    const totalOtherCharges = chargesItems.filter(charge => charge.charge_type !== 'rent' && charge.charge_type !== 'security_deposit')
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.charge_amount) || 0
         }, 0)
@@ -156,11 +174,19 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
 
-    const totalOtherChargesPayments = chargesItems.filter(payment => payment.charge_type !== 'rent')
+    //get total security deposit payments
+    const totalSecurityDepositPayments = chargesItems.filter(payment => payment.charge_type === 'security_deposit')
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
+
+    const totalOtherChargesPayments = chargesItems.filter(payment => payment.charge_type !== 'rent' && payment.charge_type !== 'security_deposit')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.payed_amount) || 0
+        }, 0)
+
     const totalRentChargesBalances = totalRentCharges - totalRentPayments
+    const totalSecurityDepositChargesBalances = totalSecurityDepositCharges - totalSecurityDepositPayments
     const totalOtherChargesBalances = totalOtherCharges - totalOtherChargesPayments
     //get months in an year in short format
     const monthsOfYearLabels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
@@ -185,31 +211,33 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
             }
         ]
     }
-    const totalEachMonthPayments = monthsInYear.map((monthDate) => {
-        //get transactions recorded in the same month and year as monthDate
+    //get ONLY RENT charges for each month of the year
+    const totalEachMonthRentCharges = monthsInYear.map((monthDate) => {
+        //get rentalPayments recorded in the same month and year as monthDate
         return chargesItems
-            .filter((charge) => {
-                const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
-                return getMonth(monthDate) === getMonth(chargeDate)
+            .filter(({ charge_date, charge_type }) => {
+                const chargeDate = parse(charge_date, 'yyyy-MM-dd', new Date())
+                return (charge_type === 'rent') && (getMonth(monthDate) === getMonth(chargeDate))
+            }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
+    })
+    //get ONLY RENT payments for each month of the year
+    const totalEachMonthRentPayments = monthsInYear.map((monthDate) => {
+        //get rentalPayments recorded in the same month and year as monthDate
+        return chargesItems
+            .filter(({ charge_date, charge_type }) => {
+                const chargeDate = parse(charge_date, 'yyyy-MM-dd', new Date())
+                return (charge_type === 'rent') && (getMonth(monthDate) === getMonth(chargeDate))
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.payed_amount) || 0), 0)
     })
     const totalEachMonthExpenses = monthsInYear.map((monthDate) => {
-        //get transactions recorded in the same month and year as monthDate
+        //get rentalPayments recorded in the same month and year as monthDate
         return expensesItems
             .filter((expense) => {
                 const expenseDate = parse(expense.expense_date, 'yyyy-MM-dd', new Date())
                 return getMonth(monthDate) === getMonth(expenseDate)
             }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.amount) || 0), 0)
     })
-
-    const totalEachMonthCharges = monthsInYear.map((monthDate) => {
-        //get transactions recorded in the same month and year as monthDate
-        return chargesItems
-            .filter((charge) => {
-                const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
-                return getMonth(monthDate) === getMonth(chargeDate)
-            }).reduce((total, currentTransaction) => total + (parseFloat(currentTransaction.charge_amount) || 0), 0)
-    })
+    
 
     //get expenses categories graph data from previous values
     const expensesCategoriesGraphData = {
@@ -226,10 +254,20 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
             }
         ]
     }
-
+    
     chargesAndPaymentsGraphData.datasets.push({
-        data: totalEachMonthPayments,
-        label: 'Monthly Payments Collection', type: 'bar',
+        data: totalEachMonthRentCharges,
+        label: 'Monthly Rent Charges', type: 'line', borderColor: '#EC932F', fill: false,
+        backgroundColor: '#EC932F',
+        pointBorderColor: '#EC932F',
+        pointBackgroundColor: '#EC932F',
+        pointHoverBackgroundColor: '#EC932F',
+        pointHoverBorderColor: '#EC932F',
+    })
+    
+    chargesAndPaymentsGraphData.datasets.push({
+        data: totalEachMonthRentPayments,
+        label: 'Monthly Rent Payments Collection', type: 'bar',
         fill: false,
         backgroundColor: '#71B37C',
         borderColor: '#71B37C',
@@ -237,15 +275,6 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
         hoverBorderColor: '#71B37C',
     })
 
-    chargesAndPaymentsGraphData.datasets.push({
-        data: totalEachMonthCharges,
-        label: 'Monthly Charges', type: 'line', borderColor: '#EC932F', fill: false,
-        backgroundColor: '#EC932F',
-        pointBorderColor: '#EC932F',
-        pointBackgroundColor: '#EC932F',
-        pointHoverBackgroundColor: '#EC932F',
-        pointHoverBorderColor: '#EC932F',
-    })
 
     const rentChargesPaymentsPeformanceData = {
         due_date: 0,
@@ -291,7 +320,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                 rentChargesPaymentsPeformanceData['next_three_months'] += 1
             }
         })
-    chargesItems.filter(({ charge_type, payed_status }) => charge_type != "rent" && payed_status)
+    chargesItems.filter(({ charge_type, payed_status }) => charge_type !== "rent" && payed_status)
         .forEach(otherCharge => {
             const otherChargeLastPaymentDate = parse(otherCharge.last_payment_date, 'yyyy-MM-dd', new Date())
             const otherChargeDueDate = parse(otherCharge.due_date, 'yyyy-MM-dd', new Date())
@@ -441,7 +470,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                                                     }}
                                                     value={propertyFilter}
                                                 >
-                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem
@@ -499,7 +528,20 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                 >
                     <InfoDisplayPaper xs={12} title={"Total Rent Charges"} value={currencyFormatter.format(totalRentCharges)} />
                     <InfoDisplayPaper xs={12} title={"Total Rent Payments"} value={currencyFormatter.format(totalRentPayments)} />
-                    <InfoDisplayPaper xs={12} title={"Total Rent Outstanding Balances"} value={currencyFormatter.format(totalRentChargesBalances)} />
+                    <InfoDisplayPaper xs={12} title={"Total Rent Balances"} value={currencyFormatter.format(totalRentChargesBalances)} />
+                </Grid>
+                <Grid
+                    item
+                    container
+                    spacing={2}
+                    direction="row"
+                    alignItems="stretch"
+                    justify="space-around"
+                    key={3}
+                >
+                    <InfoDisplayPaper xs={12} title={"Total Security Deposit Charges"} value={currencyFormatter.format(totalSecurityDepositCharges)} />
+                    <InfoDisplayPaper xs={12} title={"Total Security Deposit Payments"} value={currencyFormatter.format(totalSecurityDepositPayments)} />
+                    <InfoDisplayPaper xs={12} title={"Total Security Deposit Balances"} value={currencyFormatter.format(totalSecurityDepositChargesBalances)} />
                 </Grid>
                 <Grid
                     item
@@ -511,7 +553,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                 >
                     <InfoDisplayPaper xs={12} title={"Total Other Charges"} value={currencyFormatter.format(totalOtherCharges)} />
                     <InfoDisplayPaper xs={12} title={"Total Other Payments"} value={currencyFormatter.format(totalOtherChargesPayments)} />
-                    <InfoDisplayPaper xs={12} title={"Total Other Charges Outstanding Balances"} value={currencyFormatter.format(totalOtherChargesBalances)} />
+                    <InfoDisplayPaper xs={12} title={"Total Other Charges Balances"} value={currencyFormatter.format(totalOtherChargesBalances)} />
                 </Grid>
                 <Grid item>
                     <Typography variant="h6" align="center" gutterBottom>
@@ -586,10 +628,10 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
 const mapStateToProps = (state) => {
     return {
         properties: state.properties,
-        transactionsCharges: state.transactionsCharges.map((charge) => {
+        rentalCharges: state.rentalCharges.map((charge) => {
             const chargeDetails = {}
             //get payments with this charge id
-            const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+            const chargePayments = state.rentalPayments.filter((payment) => payment.charge_id === charge.id)
             if (chargePayments.length) {
                 chargeDetails.payed_status = true
                 chargeDetails.last_payment_date = chargePayments.slice(-1)[0].payment_date

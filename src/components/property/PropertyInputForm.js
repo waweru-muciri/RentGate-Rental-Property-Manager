@@ -264,7 +264,7 @@ let PropertyInputForm = (props) => {
 					if (values.id) {
 						history.goBack()
 					}
-					setStatus({ sent: true, msg: "Details saved successfully!" })
+					setStatus({ sent: true, msg: "Details saved successfully." })
 
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })

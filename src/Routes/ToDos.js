@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import ToDoInputForm from "../components/to-dos/ToDoInputForm.js";
@@ -12,21 +12,28 @@ import interactionPlugin from "@fullcalendar/interaction";
 import "@fullcalendar/core/main.css";
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
-import { handleItemFormSubmit, handleDelete } from "../actions/actions";
+import { handleItemFormSubmit, handleDelete, itemsFetchData } from "../actions/actions";
 import { format, startOfToday } from "date-fns";
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
-let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit }) => {
-	const [open, toggleOpen] = React.useState(false);
+let ToDosPage = ({ fetchData, currentUser, toDos, users, handleItemDelete, handleItemSubmit }) => {
+	const [open, toggleOpen] = useState(false);
+	const [toDoItems, setToDoItems] = useState([]);
+	const [eventToShow, setEventToShow] = useState({});
 
-	const [eventToShow, setEventToShow] = React.useState({});
+	useEffect(() => {
+		fetchData(['to-dos']);
+	}, [fetchData]);
 
-	const mappedToDos = toDos.map((event) =>
-		Object.assign({}, event, {
-			backgroundColor: event.extendedProps.complete_status === "true" ? "#008000" : "",
-		})
-	);
+	useEffect(() => {
+		const mappedToDos = toDos.map((event) =>
+			Object.assign({}, event, {
+				backgroundColor: event.extendedProps.complete_status === "true" ? "#008000" : "",
+			})
+		);
+		setToDoItems(mappedToDos);
+	}, [toDos]);
 
 	const handleEventDrop = async (info) => {
 		let updatedEvent = {
@@ -34,9 +41,9 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			end: format(info.event.start, 'yyyy-MM-dd'),
 			id: info.event.id,
 			title: info.event.title,
-			extendedProps: {...info.event.extendedProps}
+			extendedProps: { ...info.event.extendedProps }
 		};
-		await handleItemSubmit( updatedEvent, "to-dos");
+		await handleItemSubmit(updatedEvent, "to-dos");
 	};
 
 	const handleClose = () => {
@@ -106,7 +113,7 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 							interactionPlugin,
 						]}
 						editable
-						events={mappedToDos}
+						events={toDoItems}
 						eventResize={handleEventResize}
 						eventDrop={handleEventDrop}
 						eventClick={handleEventClick}
@@ -138,8 +145,9 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+		fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
+		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ToDosPage);

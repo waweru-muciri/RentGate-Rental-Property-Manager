@@ -83,7 +83,7 @@ const SignUpLayout = () => {
                 )}
                 {status && status.success && (
                   <Grid item>
-                    <Alert severity="success">Account created successfully!
+                    <Alert severity="success">Account created successfully.
                     Please verify your email address. A link to verify your email has been sent to the
                     email provided. </Alert>
                     <Alert severity="success">If you do not receive the confirmation message within a

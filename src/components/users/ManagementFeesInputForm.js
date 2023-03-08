@@ -18,12 +18,16 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const ManagmentFeeSchema = Yup.object().shape({
   from_date: Yup.date().required("From Date Required"),
   to_date: Yup.date().required("To Date Required"),
+  collection_date: Yup.date().required("Collection Date is Required"),
   property_id: Yup.string().required("Property is Required"),
+  fees_amount: Yup.number().typeError('Amount must be a number')
+    .positive("Amount must be greater than 0")
+    .required("Fees amount is required"),
   management_fees_notes: Yup.string().default(""),
 });
 
 const ManagmentFeeInputForm = (props) => {
-  const { properties, transactions, handleItemSubmit, history } = props
+  const { properties, currentUser, handleItemSubmit, history } = props
   const classes = commonStyles();
   const managmentFeeToEdit = props.managmentFeeToEdit || {}
   const managmentFeeValues = {
@@ -31,6 +35,7 @@ const ManagmentFeeInputForm = (props) => {
     management_fees_notes: managmentFeeToEdit.management_fees_notes || '',
     from_date: managmentFeeToEdit.from_date || defaultDate,
     to_date: managmentFeeToEdit.to_date || defaultDate,
+    collection_date: managmentFeeToEdit.collection_date || defaultDate,
     fees_amount: managmentFeeToEdit.fees_amount || '',
     property_id: managmentFeeToEdit.property_id || '',
   }
@@ -42,20 +47,30 @@ const ManagmentFeeInputForm = (props) => {
       validationSchema={ManagmentFeeSchema}
       onSubmit={async (values, { resetForm, setStatus }) => {
         try {
-          const expense = {
+          const managementFeesRecord = {
             id: values.id,
-            fees_amount: values.fees_amount,
             property_id: values.property_id,
-            from_date: values.from_date,
             to_date: values.to_date,
+            from_date: values.from_date,
+            collection_date: values.collection_date,
+            user_id: currentUser.id,
+            fees_amount: values.fees_amount,
             management_fees_notes: values.management_fees_notes,
           };
-          await handleItemSubmit(expense, "management-fees")
+          await handleItemSubmit(managementFeesRecord, "management-fees")
+          const managementFeesExpense = {
+            type: 'management_fees',
+            amount: values.fees_amount,
+            property_id: values.property_id,
+            expense_date: values.collection_date,
+            expense_notes: values.management_fees_notes,
+          };
+          await handleItemSubmit(managementFeesExpense, "expenses")
           resetForm({});
           if (values.id) {
             history.goBack();
           }
-          setStatus({ sent: true, msg: "Fees Generated Successfully!" })
+          setStatus({ sent: true, msg: "Fees Recorded successfully." })
         } catch (error) {
           setStatus({ sent: false, msg: `Error! ${error}.` })
         }
@@ -122,6 +137,22 @@ const ManagmentFeeInputForm = (props) => {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
+                id="collection_date"
+                name="collection_date"
+                label="Collection Date"
+                value={values.collection_date}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.collection_date && touched.collection_date}
+                helperText={touched.collection_date && errors.collection_date}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                fullWidth
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                variant="outlined"
                 id="from_date"
                 name="from_date"
                 label="From Date"
@@ -151,8 +182,23 @@ const ManagmentFeeInputForm = (props) => {
             <Grid item>
               <TextField
                 fullWidth
+                type="text"
+                variant="outlined"
+                name="fees_amount"
+                id="fees_amount"
+                label="Fees Amount"
+                value={values.fees_amount}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.fees_amount && touched.fees_amount}
+                helperText={touched.fees_amount && errors.fees_amount}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                fullWidth
                 multiline
-                rows={4}
+                rows={2}
                 variant="outlined"
                 id="management_fees_notes"
                 name="management_fees_notes"
@@ -186,7 +232,7 @@ const ManagmentFeeInputForm = (props) => {
                   form="managementFeesInputForm"
                   disabled={isSubmitting}
                 >
-                  Get Fees
+                  Save
                   </Button>
               </Grid>
             </Grid>

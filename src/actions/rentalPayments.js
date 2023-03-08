@@ -1,9 +1,9 @@
 import * as actionTypes from "../assets/actionTypes";
 
-export function transactionsFetchDataSuccess(transactions) {
+export function rentalPaymentsFetchDataSuccess(rentalPayments) {
     return {
         type: actionTypes.TRANSACTIONS_FETCH_DATA_SUCCESS,
-        transactions,
+        rentalPayments,
     };
 }
 

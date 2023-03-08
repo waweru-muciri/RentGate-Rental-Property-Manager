@@ -58,12 +58,10 @@ const propertiesColumns = [
     { field: "address", headerName: "Property Address" },
     { field: "city", headerName: "Location" },
     { field: "units", headerName: "Number of Units" },
-    { field: "floorArea", headerName: "Floor Area" },
 ];
 
 
 let UserDetailsPage = ({
-    totalPortfolioFloorArea,
     totalAssetsRentValue,
     activeLeasesNumber,
     propertyUnits,
@@ -114,6 +112,10 @@ let UserDetailsPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the management fees according to the search criteria here
+        const managementFeesForProperty = 
+        managementFeesItems
+        .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+        setFilteredManagementFeesItems(managementFeesForProperty);
 
     };
 
@@ -168,7 +170,7 @@ let UserDetailsPage = ({
                                             ID Number: {userDetails.id_number || '-'}
                                         </Typography>
                                         <Typography variant="body2" component="p">
-                                            Personal Phone Number: {userDetails.phone_number || '-'}
+                                            Personal Phone Number: {userDetails.personal_phone_number || '-'}
                                         </Typography>
                                         <Typography variant="body2" component="p">
                                             Work Phone Number: {userDetails.work_mobile_number || '-'}
@@ -199,7 +201,6 @@ let UserDetailsPage = ({
                     <Grid container direction="row" item alignItems="stretch" justify="center" spacing={4}>
                         <Grid item xs={12} md={4} container spacing={2} direction="column" alignItems="center" justify="center">
                             <InfoDisplayPaper xs={12} title={"Total Rental Units"} value={totalPropertyUnits} />
-                            <InfoDisplayPaper xs={12} title={"Total Floor Area"} value={totalPortfolioFloorArea} />
                             <InfoDisplayPaper xs={12} title={"Total Units Rent Value"} value={totalAssetsRentValue} />
                             <InfoDisplayPaper xs={12} title={"Total Active Rental Agreements"} value={activeLeasesNumber} />
                         </Grid>
@@ -276,8 +277,8 @@ let UserDetailsPage = ({
                         <Grid item>
                             <PrintArrayToPdf
                                 disabled={!selected.length}
-                                reportName={'Rental Units Records'}
-                                reportTitle={'Rental Units Data'}
+                                reportName={'Management Fees Records'}
+                                reportTitle={'Management Fees Data'}
                                 headCells={headCells}
                                 dataToPrint={managementFeesItems.filter(({ id }) => selected.includes(id))}
                             />
@@ -285,8 +286,8 @@ let UserDetailsPage = ({
                         <Grid item>
                             <ExportToExcelBtn
                                 disabled={!selected.length}
-                                reportName={'Rental Units Records'}
-                                reportTitle={'Rental Units Data'}
+                                reportName={'Management Fees Records'}
+                                reportTitle={'Management Fees Data'}
                                 headCells={headCells}
                                 dataToPrint={managementFeesItems.filter(({ id }) => selected.includes(id))}
                             />
@@ -325,7 +326,7 @@ let UserDetailsPage = ({
                                             }}
                                             value={propertyFilter}
                                         >
-                                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {properties.map(
                                                 (property, index) => (
                                                     <MenuItem
@@ -377,12 +378,7 @@ const mapStateToProps = (state, ownProps) => {
             property,
             {
                 units: state.propertyUnits.filter(({ property_id }) => property_id === property.id).length,
-                floorArea: state.propertyUnits.reduce((total, currentValue) => {
-                    return total + parseFloat(currentValue.sqm) || 0
-                }, 0)
             }));
-    const totalPropertiesFloorArea = propertiesAssignedToUser
-        .reduce((total, currentValue) => total + parseFloat(currentValue.floorArea) || 0, 0)
     //map ids of properties assigned to user to enable for a quick search
     const idsOfPropertiesAssignedToUser = propertiesAssignedToUser.map(({ id }) => id)
     //get all active leases assigned to user's properties
@@ -390,7 +386,6 @@ const mapStateToProps = (state, ownProps) => {
         .filter(({ property_id }) => idsOfPropertiesAssignedToUser.includes(property_id))
         .filter(({ terminated }) => terminated !== true);
     return {
-        totalPortfolioFloorArea: totalPropertiesFloorArea,
         managementFees: state.managementFees
             .filter(({ user_id }) => user_id === ownProps.match.params.userId),
         properties: propertiesAssignedToUser,

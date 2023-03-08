@@ -21,7 +21,7 @@ const expensesTableHeadCells = [
     { id: "property_ref", numeric: false, disablePadding: true, label: "Property" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
-    { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
+    { id: "amount", numeric: true, disablePadding: true, label: "Expenditure Amount(Ksh)" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
@@ -51,20 +51,16 @@ let ExpensesPage = ({
         event.preventDefault();
         //filter the expenses here according to search criteria
         let filteredExpenses = expenseItems
-            .filter(({ expense_date }) =>
-                !fromDateFilter ? true : expense_date >= fromDateFilter
+            .filter(({ expense_date, property_id }) =>
+                (!fromDateFilter ? true : expense_date >= fromDateFilter)
+                && (!toDateFilter ? true : expense_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
             )
-            .filter(({ expense_date }) =>
-                !toDateFilter ? true : expense_date <= toDateFilter
-            )
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-
         setFilteredExpenseItems(filteredExpenses);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredExpenseItems(expenseItems);
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("all");
@@ -207,7 +203,7 @@ let ExpensesPage = ({
                                         }}
                                         value={propertyFilter}
                                     >
-                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                        <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                         {properties.map(
                                             (property, index) => (
                                                 <MenuItem
@@ -280,12 +276,12 @@ let ExpensesPage = ({
 const mapStateToProps = (state) => {
     return {
         expenses: state.expenses
-        .map(expense => {
-            const unitWithExpense = state.propertyUnits.find(({id}) => id === expense.unit_id) || {}
-            const propertyWithUnit = state.properties.find(({id}) => id === expense.property_id) || {}
-            return Object.assign({}, expense, { unit_ref: unitWithExpense.ref, property_ref: propertyWithUnit.ref })
-        })
-        .sort((expense1, expense2) => parse(expense2.expense_date, 'yyyy-MM-dd', new Date()) -
+            .map(expense => {
+                const unitWithExpense = state.propertyUnits.find(({ id }) => id === expense.unit_id) || {}
+                const propertyWithUnit = state.properties.find(({ id }) => id === expense.property_id) || {}
+                return Object.assign({}, expense, { unit_ref: unitWithExpense.ref, property_ref: propertyWithUnit.ref })
+            })
+            .sort((expense1, expense2) => parse(expense2.expense_date, 'yyyy-MM-dd', new Date()) -
                 parse(expense1.expense_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
     };

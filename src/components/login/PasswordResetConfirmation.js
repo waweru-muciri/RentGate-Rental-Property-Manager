@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import firebase from "../../firebase";
+import {auth} from "../../firebase";
 import PageHeading from "../PageHeading";
 import {
     Grid,
@@ -27,7 +27,7 @@ const ResetPasswordSchema = Yup.object().shape({
 });
 
 let PasswordResetConfirmation = (props) => {
-    const auth = firebase.auth();
+    
     const { actionCode, setUser, history } = props
 
     const [codeVerificationError, setCodeVerificationError] = useState(undefined)
@@ -49,23 +49,21 @@ let PasswordResetConfirmation = (props) => {
 
     verifyPasswordResetCode()
 
-    const signInWithEmailAndPassword = (email, password) => {
-        return auth
-            .signInWithEmailAndPassword(email, password)
-            .then((authCredential) => {
-                const user = authCredential.user;
-                const userDetails = {
-                    displayName: user.displayName,
-                    email: user.email,
-                    emailVerified: user.emailVerified,
-                    photoURL: user.photoURL,
-                    uid: user.uid,
-                    id: user.uid,
-                    phoneNumber: user.phoneNumber,
-                    providerData: user.providerData,
-                };
-                setUser(userDetails);
-            });
+    const signInUserWithEmailAndPassword = async (email, password) => {
+        const authCredential = await auth
+            .signInWithEmailAndPassword(email, password);
+        const user = authCredential.user;
+        const userDetails = {
+            displayName: user.displayName,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            photoURL: user.photoURL,
+            uid: user.uid,
+            id: user.uid,
+            phoneNumber: user.phoneNumber,
+            providerData: user.providerData,
+        };
+        setUser(userDetails);
     };
 
     return (
@@ -84,7 +82,7 @@ let PasswordResetConfirmation = (props) => {
                     // Password reset has been confirmed and new password updated.
                     //sign-in the user directly
                     try {
-                        await signInWithEmailAndPassword(userEmail, newPassword);
+                        await signInUserWithEmailAndPassword(userEmail, newPassword);
                         history.push('/')
                     } catch (error) {
                         console.log('Cannot sign in user with password change')

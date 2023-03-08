@@ -42,7 +42,7 @@ const mapStateToProps = (state, ownProps) => {
 	return {
 		maintenanceRequestToEdit: state.maintenanceRequests.find(({ id }) => id === ownProps.match.params.maintenanceRequestId) || {},
 		properties: state.properties,
-        propertyUnits: unitsWithActiveLeases,
+        propertyUnits: unitsWithActiveLeases.sort((unit1, unit2) => unit1.ref < unit2.ref ? -1 : unit1.ref > unit2.ref ? 1 : 0),
 	};
 };
 

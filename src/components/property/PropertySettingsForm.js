@@ -45,17 +45,17 @@ let PropertySettingsInputForm = (props) => {
 	const propertyValues = {
 		id: propertySettings.id,
 		property_id: propertySettings.property_id || propertyToShowDetails.id,
-		late_fee_max_amount: propertySettings.late_fee_max_amount || "",
+		late_fee_max_amount: propertySettings.late_fee_max_amount || 0,
 		grace_period: propertySettings.grace_period || 0,
 		late_fee_frequency: propertySettings.late_fee_frequency || "one_time_fee",
-		late_fee_amount: propertySettings.late_fee_amount || "",
+		late_fee_amount: propertySettings.late_fee_amount || 0,
 		email_residents_on_charges_posted: propertySettings.email_residents_on_charges_posted || false,
 		late_fees_charges_activated: propertySettings.late_fees_charges_activated || false,
 		automatically_end_agreement_on_move_out_date: propertySettings.automatically_end_agreement_on_move_out_date || false,
 		email_residents_on_late_fees: propertySettings.email_residents_on_late_fees || false,
 		management_fee_type: propertySettings.management_fee_type || 'flat_fee',
-		management_fee_income_percentage: propertySettings.management_fee_income_percentage || '',
-		management_fee_flat_fee: propertySettings.management_fee_flat_fee || '',
+		management_fee_income_percentage: propertySettings.management_fee_income_percentage || 0,
+		management_fee_flat_fee: propertySettings.management_fee_flat_fee || 0,
 		unit_or_property_to_charge: propertySettings.unit_or_property_to_charge || 'per_property',
 	};
 
@@ -154,6 +154,7 @@ let PropertySettingsInputForm = (props) => {
 										value={values.grace_period}
 										error={errors.grace_period && touched.grace_period}
 										helperText={touched.grace_period && errors.grace_period}
+										disabled={!values.late_fees_charges_activated}
 									/>
 									<Typography variant="body2" color="textSecondary">
 										Number of days after which late fees will be charged on resident accounts.
@@ -175,6 +176,7 @@ let PropertySettingsInputForm = (props) => {
 										value={values.late_fee_frequency}
 										error={errors.late_fee_frequency && touched.late_fee_frequency}
 										helperText={touched.late_fee_frequency && errors.late_fee_frequency}
+										disabled={!values.late_fees_charges_activated}
 									>
 										<MenuItem key={"one_time_fee"} value={"one_time_fee"}>One-time fee</MenuItem>
 										<MenuItem key={"daily"} value={"daily"}>Daily</MenuItem>
@@ -193,6 +195,7 @@ let PropertySettingsInputForm = (props) => {
 										value={values.late_fee_amount}
 										error={errors.late_fee_amount && touched.late_fee_amount}
 										helperText={touched.late_fee_amount && errors.late_fee_amount}
+										disabled={!values.late_fees_charges_activated}
 									/>
 								</Grid>
 								<Grid item>
@@ -211,13 +214,14 @@ let PropertySettingsInputForm = (props) => {
 										onBlur={handleBlur}
 										error={errors.late_fee_max_amount && touched.late_fee_max_amount}
 										helperText={touched.late_fee_max_amount && errors.late_fee_max_amount}
+										disabled={!values.late_fees_charges_activated}
 									/>
 									<Typography variant="body2" color="textSecondary">
 										Set maximmum monthly charge (per month)
 										</Typography>
 								</Grid>
 							</Grid>
-							<Grid container item xs spacing={2} direction="column">
+							<Grid container item xs spacing={2} direction="column" d>
 								<Grid item>
 									<Typography variant="subtitle1">
 										Management Fee Policy
@@ -353,7 +357,7 @@ let PropertySettingsInputForm = (props) => {
 									form="propertyUnitInputForm"
 									disabled={isSubmitting}
 								>
-									Apply Changes
+									Save
 								</Button>
 							</Grid>
 						</Grid>

@@ -116,7 +116,7 @@ let ContactsPage = ({
                             to={`${match.url}/new`}
                         >
                             NEW
-                            </Button>
+                        </Button>
                     </Grid>
                     <Grid item>
                         <Button
@@ -130,7 +130,7 @@ let ContactsPage = ({
                             to={`${match.url}/${selected[0]}/edit`}
                         >
                             Edit
-                            </Button>
+                        </Button>
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
@@ -276,7 +276,7 @@ let ContactsPage = ({
                                         startIcon={<SearchIcon />}
                                     >
                                         SEARCH
-                                        </Button>
+                                    </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button
@@ -291,7 +291,7 @@ let ContactsPage = ({
                                         startIcon={<UndoIcon />}
                                     >
                                         RESET
-                                        </Button>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </form>
@@ -316,7 +316,7 @@ let ContactsPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        contacts: state.contacts,
+        contacts: state.contacts.sort((contact1, contact2) => contact2.date_created - contact1.date_created),
     };
 };
 

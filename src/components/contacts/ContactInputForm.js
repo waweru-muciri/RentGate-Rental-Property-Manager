@@ -101,6 +101,7 @@ let ContactInputForm = (props) => {
 						emergency_contact_relationship: values.emergency_contact_relationship,
 						emergency_contact_phone_number: values.emergency_contact_phone_number,
 						emergency_contact_email: values.emergency_contact_email,
+						date_created: new Date().getTime(),
 					};
 					//first upload the image to firebase
 					if (values.contact_image && values.contact_image.data) {
@@ -120,7 +121,7 @@ let ContactInputForm = (props) => {
 					if (values.id) {
 						history.goBack();
 					}
-					setStatus({ sent: true, msg: "Details saved successfully!" })
+					setStatus({ sent: true, msg: "Details saved successfully." })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
 				}

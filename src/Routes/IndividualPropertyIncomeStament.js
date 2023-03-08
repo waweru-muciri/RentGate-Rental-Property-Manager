@@ -9,13 +9,13 @@ import UndoIcon from "@material-ui/icons/Undo";
 import { ExportStatementToExcelBtn } from "../components/ExportToExcelBtn";
 import { commonStyles } from "../components/commonStyles";
 import Typography from "@material-ui/core/Typography";
-import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
-import { startOfToday, parse, subMonths, addMonths, getMonth, format, isSameMonth } from 'date-fns'
+import { getTransactionsFilterOptions, currencyFormatter, getMonthlyDatesFromPeriod } from "../assets/commonAssets";
+import { parse, format, isSameMonth } from 'date-fns'
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 let PropertyIncomeStatement = ({
-    transactions,
+    rentalPayments,
     expenses,
     propertyUnits,
 }) => {
@@ -31,27 +31,7 @@ let PropertyIncomeStatement = ({
 
     useEffect(() => {
         //go back [numMonths] months from current date
-        let eachPastMonthDate;
-        switch (fromFilter) {
-            case 'last-month':
-                eachPastMonthDate = [getLastMonthFromToDates()[0]]
-                break;
-            case 'year-to-date':
-                eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(getYearToDateFromToDates()[0], value))
-                break;
-            case 'last-year':
-                eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(getLastYearFromToDates()[0], value))
-                break;
-            case 'month-to-date':
-                eachPastMonthDate = [...Array(1).keys()].reverse().map((value) => subMonths(startOfToday(), value))
-                break;
-            case '3-months-to-date':
-                eachPastMonthDate = [...Array(3).keys()].reverse().map((value) => subMonths(startOfToday(), value))
-                break;
-            default:
-                eachPastMonthDate = [getLastMonthFromToDates()[0]]
-
-        }
+        const eachPastMonthDate = getMonthlyDatesFromPeriod(fromFilter);
         const headCellsForMonths = [...eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')), `Total as of ${format(eachPastMonthDate[eachPastMonthDate.length - 1], 'MMMM yyyy')}`]
         // calculate income from rent
         const incomeMappedByMonth = []
@@ -59,7 +39,7 @@ let PropertyIncomeStatement = ({
         const totalIncomeObject = { income_type: 'Total Income' }
         let totalRentalIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
-            //get transactions recorded in the same month and year as monthDate
+            //get rentalPayments recorded in the same month and year as monthDate
             const totalRentalIncome = paymentItems.filter(({ payment_type }) => payment_type === 'rent')
                 .filter((payment) => {
                     const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
@@ -74,7 +54,7 @@ let PropertyIncomeStatement = ({
         const otherIncomeObject = { income_type: 'Other Income' }
         let totalOtherIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
-            //get transactions recorded in the same month and year as monthDate
+            //get rentalPayments recorded in the same month and year as monthDate
             const totalOtherIncome = paymentItems.filter(({ payment_type }) => payment_type !== 'rent')
                 .filter((payment) => {
                     const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
@@ -152,14 +132,14 @@ let PropertyIncomeStatement = ({
     }, [expenses])
 
     useEffect(() => {
-        setPaymentItems(transactions)
-    }, [transactions])
+        setPaymentItems(rentalPayments)
+    }, [rentalPayments])
 
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactions according to the search criteria here
-        let filteredTransactions = transactions
+        //filter the rentalPayments according to the search criteria here
+        let filteredTransactions = rentalPayments
             .filter(({ unit_id }) => !propertyUnitFilter ? true : unit_id === propertyUnitFilter)
         setPaymentItems(filteredTransactions)
         const filteredExpenses = expenses
@@ -171,8 +151,6 @@ let PropertyIncomeStatement = ({
         event.preventDefault();
         setPropertyUnitFilter("");
         setFromDateFilter("month-to-date");
-        setExpensesItems(expenses)
-        setPaymentItems(transactions)
     };
 
     return (

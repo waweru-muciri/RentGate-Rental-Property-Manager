@@ -4,18 +4,18 @@ import * as propertyUnitChargesReducers from "./propertyUnitCharges";
 import * as propertyUnitsReducers from "./propertyUnits";
 import * as managementFeesReducers from "./managementFees";
 import * as contactsReducers from "./contacts";
-import * as transactionsReducers from "./transactions";
-import * as logsReducers from "./logs";
+import * as rentalPaymentsReducers from "./rentalPayments";
 import * as propertySettingsReducers from "./propertySettings";
 import * as maintenanceRequestsReducers from "./maintenanceRequests";
 import * as usersReducers from "./users";
 import * as communicationEmailsReducers from "./CommunicationEmails";
-import * as transactionChargesReducers from "./transactionsCharges";
+import * as rentalChargesReducers from "./rentalCharges";
 import * as leaseReducers from "./leases";
 import * as noticesReducers from "./notices";
 import * as companyProfileReducers from "./companyProfile";
 import * as accountBillingsReducers from "./accountBilling";
 import * as expensesReducers from "./expenses";
+import * as creditNotesReducers from "./CreditNotes";
 import * as toDosReducers from "./toDos";
 import * as meterReadingsReducers from "./meterReadings";
 import * as emailTemplatesReducers from "./emailTemplates";
@@ -76,14 +76,15 @@ function reducers(state = {}, action) {
         users: usersReducers.users(state.users, action),
         propertySettings: propertySettingsReducers.propertySettings(state.propertySettings, action),
         expenses: expensesReducers.expenses(state.expenses, action),
+        creditNotes: creditNotesReducers.creditNotes(state.creditNotes, action),
         contacts: contactsReducers.contacts(state.contacts, action),
         leases: leaseReducers.leases(state.leases, action),
-        transactionsCharges: transactionChargesReducers.transactionsCharges(
-            state.transactionsCharges,
+        rentalCharges: rentalChargesReducers.rentalCharges(
+            state.rentalCharges,
             action
         ),
-        transactions: transactionsReducers.transactions(
-            state.transactions,
+        rentalPayments: rentalPaymentsReducers.rentalPayments(
+            state.rentalPayments,
             action
         ),
         maintenanceRequests: maintenanceRequestsReducers.maintenanceRequests(
@@ -96,7 +97,6 @@ function reducers(state = {}, action) {
         notices: noticesReducers.notices(state.notices, action),
         accountBillings: accountBillingsReducers.accountBillings(state.accountBillings, action),
         currentUser: setCurrentUser(state.currentUser, action),
-        auditLogs: logsReducers.auditLogs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),
         error: itemsHasErrored(state.itemsHasErrored, action),
         selectedTab: setPaginationPage(state.selectedTab, action),

@@ -15,8 +15,8 @@ import {
 import DashBoard from "./DashBoard";
 import LoadingBackdrop from '../components/LoadingBackdrop'
 import ErrorBoundary from '../components/ErrorBoundary'
+import NotFound from "./NotFound"
 import { auth } from '../firebase'
-const PaymentEditForm = lazy(() => import('../components/payments/PaymentEditForm'));
 const PropertyUnitPage = lazy(() => import('./PropertyUnitPage'));
 const TenantDetailsPage = lazy(() => import('./TenantDetailsPage'));
 const PropertyPage = lazy(() => import('./PropertyPage'));
@@ -26,12 +26,12 @@ const ExpensePage = lazy(() => import('./ExpensePage'));
 const UsersPage = lazy(() => import('./Users'));
 const LeasePage = lazy(() => import('./LeasePage'));
 const LeasesPage = lazy(() => import('./Leases'));
-const AuditLogsPage = lazy(() => import('./AuditLogs'));
 const RentRollPage = lazy(() => import('./RentRoll'));
 const ContactsPage = lazy(() => import('./Contacts'));
 const ContactPage = lazy(() => import('./ContactPage'));
-const PaymentPage = lazy(() => import('./PaymentPage'));
 const PaymentsPage = lazy(() => import('./Payments'));
+const CreditNotesPage = lazy(() => import('./CreditNotes'));
+const AddChargeForm = lazy(() => import('../components/charges/AddChargeForm'));
 const MaintenancesPage = lazy(() => import('./Maintenances'));
 const PropertyDetailsPage = lazy(() => import('./PropertyDetails'));
 const UserPage = lazy(() => import('./UserPage'));
@@ -52,6 +52,7 @@ const AccountSettingsPage = lazy(() => import('./AccountSettings'));
 const MeterReadingPage = lazy(() => import('./MeterReadingPage'));
 const MeterReadingsPage = lazy(() => import('./MeterReadings'));
 const OtherChargesPage = lazy(() => import('./OtherCharges'));
+const ChargeOnDeposit = lazy(() => import('./ChargeOnDeposits'));
 const OutstandingBalancesPage = lazy(() => import('./OutstandingBalances'));
 
 
@@ -92,27 +93,21 @@ let MainPage = ({
       fetchData([
         "properties",
         "property_units",
-        "unit-charges",
         "transactions-charges",
-        "charge-payments",
-        "maintenance-requests",
-        "communication_emails",
         "contacts",
-        "notices",
+        "charge-payments",
         "leases",
-        "to-dos",
-        "users",
+        "credit-notes",
         "expenses",
+        "unit-charges",
+        "users",
+        "property-settings",
+        "management-fees",
         "company_profile",
         "account-billing",
-        "meter_readings",
-        "property-settings",
-        "email-templates",
-        "management-fees",
-        "audit-logs",
       ]);
     }
-  }, [currentUser]);
+  });
 
   return (
     <React.Fragment>
@@ -148,11 +143,6 @@ let MainPage = ({
                 <Route exact path={`${match.path}documents-templates/new`} component={DocumentTemplatePage} />
                 <Route
                   exact
-                  path={`${match.path}audit-logs`}
-                  component={AuditLogsPage}
-                />
-                <Route
-                  exact
                   path={`${match.path}properties/new`}
                   component={PropertyPage}
                 />
@@ -165,11 +155,6 @@ let MainPage = ({
                   exact
                   path={`${match.path}leases/new`}
                   component={LeasePage}
-                />
-                <Route
-                  exact
-                  path={`${match.path}payments/:chargeId/new`}
-                  component={PaymentPage}
                 />
                 <Route
                   exact
@@ -228,8 +213,18 @@ let MainPage = ({
                 />
                 <Route
                   exact
-                  path={`${match.path}payments/:paymentId/edit`}
-                  component={PaymentEditForm}
+                  path={`${match.path}charges/:leaseId/new`}
+                  component={AddChargeForm}
+                />
+                <Route
+                  exact
+                  path={`${match.path}rent-roll/charge-on-deposit/:chargeId/new`}
+                  component={ChargeOnDeposit}
+                />
+                <Route
+                  exact
+                  path={`${match.path}other-charges/charge-on-deposit/:chargeId/new`}
+                  component={ChargeOnDeposit}
                 />
                 <Route
                   exact
@@ -289,6 +284,8 @@ let MainPage = ({
                 <Route exact path={`${match.path}reports/tenant-statements`} component={TenantsStatementsPage} />
                 <Route exact path={`${match.path}leases`} component={LeasesPage} />
                 <Route exact path={`${match.path}payments`} component={PaymentsPage} />
+                <Route exact path={`${match.path}credit-notes`} component={CreditNotesPage} />
+                <Route path="*" component={NotFound} />
               </Switch>
             </Suspense>
           </ErrorBoundary>
@@ -300,14 +297,13 @@ let MainPage = ({
 
 const mapStateToProps = (state) => {
   return {
-    properties: state.properties,
     currentUser: state.currentUser,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    fetchData: (tenant, url) => dispatch(itemsFetchData(tenant, url)),
+    fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
     setUser: (user) => dispatch(setCurrentUser(user)),
     setError: (error) => dispatch(itemsHasErrored(error)),
   };

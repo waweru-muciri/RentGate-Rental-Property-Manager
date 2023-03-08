@@ -8,7 +8,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, itemsFetchData } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -31,6 +31,7 @@ const maintenanceRequestsTableHeadCells = [
 ];
 
 let MaintenanceRequestsPage = ({
+	fetchData,
 	maintenanceRequests,
 	contacts,
 	match,
@@ -49,29 +50,25 @@ let MaintenanceRequestsPage = ({
 		setFilteredMaintenanceRequestItems(maintenanceRequests);
 	}, [maintenanceRequests]);
 
+	useEffect(() => {
+		fetchData(['maintenance-requests']);
+	}, [fetchData]);
+
 	const handleSearchFormSubmit = (event) => {
 		event.preventDefault();
 		//filter the maintenanceRequests here according to search criteria
-		let filteredMaintenanceRequests = maintenanceRequests
-			.filter(({ date_created }) =>
-				!fromDateFilter ? true : date_created >= fromDateFilter
+		const filteredMaintenanceRequests = maintenanceRequests
+			.filter(({ date_created, tenant_id, status }) =>
+				(!fromDateFilter ? true : date_created >= fromDateFilter)
+				&& (!toDateFilter ? true : date_created === toDateFilter)
+				&& (!statusFilter ? true : status === statusFilter)
+				&& (!contactFilter ? true : tenant_id === contactFilter.id)
 			)
-			.filter(({ date_created }) =>
-				!toDateFilter ? true : date_created === toDateFilter
-			)
-			.filter(({ tenant_id }) =>
-				!contactFilter ? true : tenant_id === contactFilter.id
-			)
-			.filter(({ status }) =>
-				!statusFilter ? true : status === statusFilter
-			);
-
 		setFilteredMaintenanceRequestItems(filteredMaintenanceRequests);
 	};
 
 	const resetSearchForm = (event) => {
 		event.preventDefault();
-		setFilteredMaintenanceRequestItems(maintenanceRequests);
 		setContactFilter("");
 		setStatusFilter("");
 		setFromDateFilter("");
@@ -312,6 +309,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
+		fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 	};
 };

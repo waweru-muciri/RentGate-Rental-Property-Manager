@@ -10,12 +10,12 @@ export function setCompanyProfile(companyProfileData) {
 }
 
 export function readXlsxFile(fileData) {
-    let readData = XLSX.read(fileData, { type: 'binary' });
+    let readData = XLSX.read(fileData, { type: 'binary', cellDates: true });
     const wsname = readData.SheetNames[0];
     const ws = readData.Sheets[wsname];
 
     /* Convert array to json*/
-    const dataParse = XLSX.utils.sheet_to_json(ws, { defval: "" });
+    const dataParse = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false});
     return dataParse
 }
 
@@ -30,6 +30,7 @@ const thl = (content, rowIndex = -1, options = {}) => {
 const tdl = (content, rowIndex = -1, options = {}) => {
     return makeCell(content, rowIndex, Object.assign({ bold: false, alignment: 'left', fontSize: 9 }, options));
 }
+
 const getReportDate = () => {
     return new Date().toDateString()
 }
@@ -111,6 +112,17 @@ export function printDataRows(reportName, reportTitle, headCells, dataToPrint) {
             });
             body.push(tableRow);
         });
+        const tableTotalsRow = headCellsToPrint.map((headCell) => {
+            let columnTotal = 0;
+            if (headCell.numeric) {
+                columnTotal = dataRows.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue[headCell.id]) || 0
+                }, 0)
+            }
+            return thl(`${columnTotal}`, -1, { rowSpan: 1, fontSize: fontSize })
+        })
+        body.push(tableTotalsRow);
+        
         return body;
     }
 
@@ -156,13 +168,20 @@ export function exportDataUploadTemplate(title, subject, headCells, fileName) {
 export default function exportDataToXSL(title, subject, headCells, dataRows, fileName) {
     const headCellsToPrint = headCells.filter(({ id }) => id !== 'edit' && id !== 'delete' && id !== 'details')
     const dataToExport = [];
+    const columnTotalObject = {}
     dataRows.forEach((row) => {
         const tableRow = {};
         headCellsToPrint.forEach((headCell) => {
             tableRow[headCell.label] = row[headCell.id]
+            if (headCell.numeric) {
+                const columnTotal = (parseFloat(columnTotalObject[headCell.label]) || 0) + (parseFloat(row[headCell.id]) || 0)
+                columnTotalObject[headCell.label] = columnTotal
+            }
         });
         dataToExport.push(tableRow);
     });
+    dataToExport.push(columnTotalObject);
+
     printDataToExcel(title, subject, dataToExport, fileName)
 }
 export function exportPropertyStatementDataToXSL(title, subject, headCells, dataRows, fileName) {
@@ -501,4 +520,4 @@ export function printReceipt(tenantDetails, items) {
     const my_window = window.open('', 'mywindow', 'status=1');
     my_window.document.write(text);
     my_window.print();
-} 
+}

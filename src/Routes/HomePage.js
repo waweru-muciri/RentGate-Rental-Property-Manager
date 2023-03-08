@@ -94,7 +94,7 @@ const appFeatures = [
         and reconcile property income statments.`},
     {
         icon: <WorkIcon style={{ color: "#3f51b5" }} fontSize="large" />, title: "Rental Agreements",
-        description: `Track and manage rental agreements, payment schedules, record payment transactions on agreements, 
+        description: `Track and manage rental agreements, payment schedules, record payment rentalPayments on agreements, 
         outstanding rent balances, unit deposits and charges on deposits.`},
 ]
 
@@ -119,8 +119,9 @@ const appModules = [
 
 const appCustomers = [
     {
-        image: "/propertyDetails.png", name: "Evans Rugara", title: "Growth Marketer, Prime PM", review: `Connect in spaces designed
-     to bring incredible people together. Learn with them and take your project to new heights.`},
+        image: "/propertyDetails.png", name: "Waweru Muciri", title: "Manager , Kefa Realtors",
+        review: `Stop worrying about record keeping & inefficiency problems. Focus on your business.
+        RentGate provides the support you deserve.`},
     {
         image: "/rentalUnits.png", name: "John Njoroge", title: "Lead Generation, Gallant PM", review: `Stay as little as 3 months with rolling contracts. 
     Like it here? This is your space, so stay as long as you want.`},
@@ -139,18 +140,18 @@ const appServices = [
 const pricingTiers = [
     {
         title: 'Starter',
-        price: '3500',
-        description: ['10 users included', '2 GB of storage', 'Help center access', 'Email support'],
+        price: '100/unit',
+        description: ['For less than 200 units', 'Unlimited storage', 'Help center access', 'Email support'],
         buttonText: 'Sign up',
         buttonVariant: 'contained',
     },
     {
         title: 'Growing',
         subheader: 'Most popular',
-        price: '5000',
+        price: '80/unit',
         description: [
-            '20 users included',
-            '10 GB of storage',
+            'For 200 - 300 units',
+            'Unlimited storage',
             'Help center access',
             'Priority email support',
         ],
@@ -159,10 +160,11 @@ const pricingTiers = [
     },
     {
         title: 'Enterprise',
-        price: '10000',
+        price: '50/unit',
         description: [
-            '50 users included',
+            'For 500 units and more',
             'Unlimited Storage',
+            'Custom upload templates',
             'Help center access',
             'Phone & email support',
         ],
@@ -173,7 +175,7 @@ const pricingTiers = [
 const footers = [
     {
         title: 'Company',
-        description: ['Team', 'History', 'Contact us', 'Locations'],
+        description: ['Team', 'History', 'Contact us'],
     },
     {
         title: 'Features',
@@ -181,7 +183,7 @@ const footers = [
     },
     {
         title: 'Resources',
-        description: ['Guide', 'FAQs', 'Contacts', 'Referral Programme'],
+        description: ['Guide', 'FAQs', 'Contacts'],
     },
     {
         title: 'Legal',
@@ -299,7 +301,7 @@ export default function HomePage() {
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="h6" color="textSecondary">
-                                            For property managers, owners, and management startups.
+                                            For property managers, owners, and management startups in Kenya.
                                             Choose the property management software designed to inspire and power
                                             you to manage your rental properties.
                                 </Typography>
@@ -614,7 +616,7 @@ export default function HomePage() {
                                         body: JSON.stringify(data)
                                     }).then(response => {
                                         resetForm({});
-                                        setStatus({ success: "Message sent successfully! We will get back to you soonest." });
+                                        setStatus({ success: "Message sent successfully. We will get back to you soonest." });
                                     }).catch(error => {
                                         setStatus({ error: "Message sending failed!" });
                                     })

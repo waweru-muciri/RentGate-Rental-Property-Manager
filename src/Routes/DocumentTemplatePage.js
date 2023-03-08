@@ -91,7 +91,7 @@ let DocumentTemplatePage = ({ emailTemplateToEdit, history, handleItemSubmit }) 
 									if (values.id) {
 										history.goBack();
 									}
-									setStatus({ sent: true, msg: "Template saved successfully!" })
+									setStatus({ sent: true, msg: "Template saved successfully." })
 								} catch (error) {
 									setStatus({ sent: false, msg: `Error! ${error}.` })
 								}

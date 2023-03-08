@@ -19,11 +19,16 @@ import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { getTransactionsFilterOptions, currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getYearToDateFromToDates } from "../assets/commonAssets";
-import { parse, isWithinInterval, format, startOfToday } from "date-fns";
-const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+import AddPaymentToChargesModal from "../components/charges/AddPaymentToChargesModal";
+import {
+    getTransactionsFilterOptions, currencyFormatter, getStartEndDatesForPeriod
+} from "../assets/commonAssets";
+import { parse, isWithinInterval } from "date-fns";
+import ChargeEditForm from "../components/charges/ChargeEditForm";
+import PaymentInputForm from "../components/payments/PaymentInputForm";
 
-const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
+
+const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 
 const headCells = [
@@ -31,160 +36,116 @@ const headCells = [
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type", },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "charge_amount", numeric: true, disablePadding: false, label: "Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
-    { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
-    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "payed_amount", numeric: true, disablePadding: false, label: "Total Amounts Paid" },
+    { id: "balance", numeric: true, disablePadding: false, label: "Balance" },
+    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
 let TenantChargesStatementPage = ({
+    match,
     properties,
     contacts,
-    transactions,
-    leases,
-    transactionsCharges,
+    rentalPayments,
+    rentalCharges,
     handleItemSubmit,
     handleItemDelete,
 }) => {
     const classes = commonStyles()
-    let [tenantChargesItems, setTenantChargesItems] = useState([]);
-    let [filteredChargeItems, setFilteredChargeItems] = useState([]);
+    let [allNonRentCharges, setAllNonRentCharges] = useState([]);
+    let [filteredAllNonRentCharges, setFilteredAllNonRentCharges] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState('');
     let [toDateFilter, setToDateFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState("month-to-date");
     let [contactFilter, setContactFilter] = useState(null);
     let [propertyFilter, setPropertyFilter] = useState("all");
+    const [addFullPaymentsToChargesModalState, setAddFullPaymentsToChargesModalState] = useState(false);
+    const [editChargeModalState, setEditChargeModalState] = useState(false);
+    const [addPaymentToChargeModalState, setAddPaymentToChargesModalState] = useState(false);
 
     const [selected, setSelected] = useState([]);
+    const [chargeToEditId, setChargeToEditId] = useState();
 
-    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
+    const CHARGE_TYPES = Array.from(new Set(allNonRentCharges
         .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
         .map(chargeType => JSON.parse(chargeType))
 
+    const filterChargesByCriteria = (chargesToFilter) => {
+        let filteredStatements = chargesToFilter
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            filteredStatements = filteredStatements.filter((chargeItem) => {
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startDate, end: endDate })
+            })
+        }
+        filteredStatements = filteredStatements
+            .filter(({ charge_date, property_id, tenant_id, charge_type }) =>
+                (!fromDateFilter ? true : charge_date >= fromDateFilter)
+                && (!toDateFilter ? true : charge_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                && (!chargeType ? true : charge_type === chargeType.value)
+                && (!contactFilter ? true : tenant_id === contactFilter.id)
+            )
+        return filteredStatements;
+    }
+
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setTenantChargesItems(chargesForCurrentMonth);
-        setFilteredChargeItems(chargesForCurrentMonth);
-    }, [transactionsCharges]);
+        setAllNonRentCharges(rentalCharges);
+        setFilteredAllNonRentCharges(filterChargesByCriteria(rentalCharges));
+    }, [rentalCharges]);
 
-    const totalNumOfCharges = filteredChargeItems.length
+    const totalNumOfCharges = filteredAllNonRentCharges.length
 
-    const totalChargesAmount = filteredChargeItems
+    const totalChargesAmount = filteredAllNonRentCharges
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.charge_amount) || 0
         }, 0)
 
-    const chargesWithPayments = filteredChargeItems.filter(charge => charge.payed_status === true).length
+    const chargesWithPayments = filteredAllNonRentCharges.filter(charge => charge.payed_status === true).length
 
-    const totalPaymentsAmount = filteredChargeItems
+    const totalPaymentsAmount = filteredAllNonRentCharges
         .reduce((total, currentValue) => {
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
 
+    const toggleAddFullPaymentsToChargesModalState = () => {
+        setAddFullPaymentsToChargesModalState(!addFullPaymentsToChargesModalState)
+    }
+
+    const toggleAddPaymentToChargeModal = () => {
+        setAddPaymentToChargesModalState(!addPaymentToChargeModalState)
+    }
+
+    const toggleEditChargeModalState = () => {
+        setEditChargeModalState(!editChargeModalState)
+    }
+
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactionsCharges according to the search criteria here
-        let filteredStatements = transactionsCharges
-        let dateRange = []
-        let startOfPeriod;
-        let endOfPeriod;
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                default:
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-            }
-            filteredStatements = filteredStatements.filter((chargeItem) => {
-                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-            })
-        }
-        filteredStatements = filteredStatements
-            .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
-            .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
-            .filter(({ charge_type }) => !chargeType ? true : charge_type === chargeType.value)
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-        setFilteredChargeItems(filteredStatements);
+        //filter the rentalCharges according to the search criteria here
+        setFilteredAllNonRentCharges(filterChargesByCriteria(allNonRentCharges));
     };
 
     const handleChargeDelete = async (chargeId, url) => {
-        transactions.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
-            await handleItemDelete(payment.id, "charge-payments")
-            if (payment.security_deposit_charge_id) {
-                const leaseWithChargeOnDeposit = leases.find(({ id }) => id === payment.security_deposit_charge_id)
-                if (leaseWithChargeOnDeposit) {
-                    const securityDepositBeforePayment = parseFloat(leaseWithChargeOnDeposit.security_deposit) + parseFloat(payment.payment_amount)
-                    const leaseToEdit = {
-                        id: payment.security_deposit_charge_id,
-                        security_deposit: securityDepositBeforePayment
-                    }
-                    await handleItemSubmit(leaseToEdit, 'leases')
-                }
-            }
-        });
-        await handleItemDelete(chargeId, url)
-    }
-
-    const setChargesPaidInFull = async () => {
-        const chargesToAddPayments = transactionsCharges.filter(({ id }) => selected.includes(id))
-            .filter(({ payed_status }) => payed_status === false)
-        //post the charges here to show that they are payed
-        chargesToAddPayments.forEach(async (charge) => {
-            const chargePayment = {
-                charge_id: charge.id,
-                payment_amount: charge.charge_amount,
-                payment_date: defaultDate,
-                tenant_id: charge.tenant_id,
-                unit_id: charge.unit_id,
-                property_id: charge.property_id,
-                payment_label: charge.charge_label,
-                memo: `${charge.charge_label} Payment`,
-                payment_type: charge.charge_type,
-            };
-            await handleItemSubmit(chargePayment, 'charge-payments')
-            await handleItemSubmit({ id: charge.id, payed: true }, 'transactions-charges')
-        })
+        try {
+            //delete all payments for this charge
+            rentalPayments.filter((payment) => payment.charge_id === chargeId).forEach(async payment => {
+                await handleItemDelete(payment.id, "charge-payments")
+            });
+            //finally delete the charge itself
+            await handleItemDelete(chargeId, url);
+        } catch (error) {
+            console.log("Error deleting charge => ", error)
+        }
     }
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
         setFromDateFilter("");
         setToDateFilter("");
@@ -219,7 +180,7 @@ let TenantChargesStatementPage = ({
                             size="medium"
                             startIcon={<AddIcon />}
                             disabled={!selected.length}
-                            onClick={() => setChargesPaidInFull()}
+                            onClick={() => toggleAddFullPaymentsToChargesModalState()}
                         >
                             Receive Full Payments
                             </Button>
@@ -232,8 +193,7 @@ let TenantChargesStatementPage = ({
                             size="medium"
                             disabled={!selected.length}
                             startIcon={<AddIcon />}
-                            component={Link}
-                            to={`/app/payments/${selected[0]}/new`}
+                            onClick={() => toggleAddPaymentToChargeModal()}
                         >
                             Receive Payment
                         </Button>
@@ -246,7 +206,7 @@ let TenantChargesStatementPage = ({
                             size="medium"
                             disabled={!selected.length}
                             startIcon={<AddIcon />}
-                            to={`/app/payments/${selected[0]}/new?charge_deposit=1`}
+                            to={`${match.url}/charge-on-deposit/${selected[0]}/new`}
                             component={Link}
                         >
                             Charge on Deposit
@@ -258,7 +218,7 @@ let TenantChargesStatementPage = ({
                             reportName={`Tenants Charges Records`}
                             reportTitle={'Tenant Charges Data'}
                             headCells={headCells}
-                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={allNonRentCharges.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -267,7 +227,7 @@ let TenantChargesStatementPage = ({
                             reportName={'Tenant Charges Data'}
                             reportTitle={`Tenant Charges Records`}
                             headCells={headCells}
-                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={allNonRentCharges.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -368,7 +328,7 @@ let TenantChargesStatementPage = ({
                                                     }}
                                                     value={propertyFilter}
                                                 >
-                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem
@@ -499,15 +459,37 @@ let TenantChargesStatementPage = ({
                         </Box>
                     </Grid>
                 </Grid>
+                {
+                    addFullPaymentsToChargesModalState ?
+                        <AddPaymentToChargesModal open={addFullPaymentsToChargesModalState}
+                            chargesToAddPayments={rentalCharges.filter(({ id }) => selected.includes(id))
+                                .filter(({ payed_status }) => payed_status === false)}
+                            handleClose={toggleAddFullPaymentsToChargesModalState}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
+                {
+                    editChargeModalState ?
+                        <ChargeEditForm open={editChargeModalState}
+                            chargeToEdit={rentalCharges.find(({ id }) => id === chargeToEditId)}
+                            handleClose={toggleEditChargeModalState}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
+                {
+                    addPaymentToChargeModalState ?
+                        <PaymentInputForm open={addPaymentToChargeModalState}
+                            chargeToAddPaymentTo={rentalCharges.find(({ id }) => selected.includes(id))}
+                            handleClose={toggleAddPaymentToChargeModal}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
                 <Grid item container>
                     <Grid item sm={12}>
                         <CommonTable
                             selected={selected}
                             setSelected={setSelected}
-                            rows={filteredChargeItems}
+                            rows={filteredAllNonRentCharges}
                             headCells={headCells}
                             noDetailsCol={true}
-                            noEditCol={true}
+                            optionalEditHandler={(selectedRowIndex) => {setChargeToEditId(selectedRowIndex); toggleEditChargeModalState()}}
                             deleteUrl={'transactions-charges'}
                             handleDelete={handleChargeDelete}
                         />
@@ -520,8 +502,8 @@ let TenantChargesStatementPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions.filter((payment) => payment.payment_type !== 'rent'),
-        transactionsCharges: state.transactionsCharges
+        rentalPayments: state.rentalPayments.filter((payment) => payment.payment_type !== 'rent'),
+        rentalCharges: state.rentalCharges
             .filter((charge) => charge.charge_type !== 'rent')
             .map((charge) => {
                 const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
@@ -531,7 +513,7 @@ const mapStateToProps = (state) => {
                 chargeDetails.tenant_id_number = tenant.id_number
                 chargeDetails.unit_ref = unitWithCharge.ref
                 //get payments with this charge id
-                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                const chargePayments = state.rentalPayments.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
                 const payed_amount = chargePayments.reduce((total, currentValue) => {
                     return total + parseFloat(currentValue.payment_amount) || 0
@@ -542,7 +524,6 @@ const mapStateToProps = (state) => {
             }).sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
                 parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         contacts: state.contacts,
-        leases: state.leases,
         properties: state.properties,
     };
 };

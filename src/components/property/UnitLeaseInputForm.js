@@ -38,9 +38,14 @@ const UnitLeaseSchema = Yup.object().shape({
 	rent_cycle: Yup.string().trim().required("Rent Cycle is Required"),
 	tenants: Yup.array().required("Unit Tenant is Required"),
 	start_date: Yup.date().required('Start Date is Required'),
-	rent_amount: Yup.number().typeError('Rent Amount must be number').positive("Amount must be a positive number").required('Rent Amount is Required'),
-	security_deposit: Yup.number().typeError('Security Deposit must be number').positive("Amount must be a positive number"),
-	water_deposit: Yup.number().typeError('Water Deposit must be number').positive("Amount must be a positive number"),
+	rent_amount: Yup.number().typeError('Rent Amount must be number')
+		.min(0, "Amount must be a greater than 0").required('Rent Amount is Required').default(0),
+	security_deposit: Yup.number().typeError('Security Deposit must be number')
+		.min(0, "Amount must be a greater than 0").default(0),
+	water_deposit: Yup.number().typeError('Water Deposit must be number')
+		.min(0, "Amount must be a greater than 0").default(0),
+	electricity_deposit: Yup.number().typeError('Water Deposit must be number')
+		.min(0, "Amount must be a greater than 0").default(0),
 	property_id: Yup.string().trim().required('Property is Required'),
 	unit_id: Yup.string().trim().required('Unit is Required'),
 	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
@@ -67,6 +72,7 @@ let UnitLeaseInputForm = (props) => {
 		terminated: leaseToEdit.terminated || false,
 		security_deposit: leaseToEdit.security_deposit || '',
 		water_deposit: leaseToEdit.water_deposit || '',
+		electricity_deposit: leaseToEdit.electricity_deposit || '',
 		lease_type: leaseToEdit.lease_type || LEASE_TYPES[1],
 		rent_cycle: leaseToEdit.rent_cycle || "Monthly",
 		unit_charges: leaseUnitCharges
@@ -109,6 +115,7 @@ let UnitLeaseInputForm = (props) => {
 						rent_due_date: values.rent_due_date,
 						security_deposit: values.security_deposit,
 						water_deposit: values.water_deposit,
+						electricity_deposit: values.electricity_deposit,
 						security_deposit_due_date: values.security_deposit_due_date,
 						rent_amount: values.rent_amount,
 						terminated: values.terminated
@@ -128,37 +135,60 @@ let UnitLeaseInputForm = (props) => {
 							unit_id: values.unit_id,
 							property_id: values.property_id,
 						}
-						const newSecurityDepositCharge = {
-							payed: false,
-							charge_amount: values.security_deposit,
-							charge_date: values.start_date,
-							charge_label: "Security Deposit",
-							charge_type: "security_deposit",
-							due_date: values.security_deposit_due_date,
-							tenant_id: tenant.id,
-							unit_id: values.unit_id,
-							property_id: values.property_id,
-						}
-						const newWaterDepositCharge = {
-							payed: false,
-							charge_amount: values.water_deposit,
-							charge_date: values.start_date,
-							charge_label: "Water Deposit",
-							charge_type: "water_deposit",
-							due_date: values.security_deposit_due_date,
-							tenant_id: tenant.id,
-							unit_id: values.unit_id,
-							property_id: values.property_id,
-						}
+						//charge rent on tenant first moving into the unit
 						await handleItemSubmit(newRentCharge, 'transactions-charges')
-						await handleItemSubmit(newWaterDepositCharge, 'transactions-charges')
-						await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
+						//if the security deposit is not zero then post it as a charge
+						if (parseFloat(values.security_deposit)) {
+							const newSecurityDepositCharge = {
+								payed: false,
+								charge_amount: values.security_deposit,
+								charge_date: values.start_date,
+								charge_label: "Security Deposit",
+								charge_type: "security_deposit",
+								due_date: values.security_deposit_due_date,
+								tenant_id: tenant.id,
+								unit_id: values.unit_id,
+								property_id: values.property_id,
+							}
+							await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
+						}
+						//if the water deposit is not zero then post it as a charge
+						if (parseFloat(values.water_deposit)) {
+							const newWaterDepositCharge = {
+								payed: false,
+								charge_amount: values.water_deposit,
+								charge_date: values.start_date,
+								charge_label: "Water Deposit",
+								charge_type: "water_deposit",
+								due_date: values.security_deposit_due_date,
+								tenant_id: tenant.id,
+								unit_id: values.unit_id,
+								property_id: values.property_id,
+							}
+							await handleItemSubmit(newWaterDepositCharge, 'transactions-charges')
+
+						}
+						//if the electric deposit is not zero then post it as a charge
+						if (parseFloat(values.electricity_deposit)) {
+							const newElectricDepositCharge = {
+								payed: false,
+								charge_amount: values.water_deposit,
+								charge_date: values.start_date,
+								charge_label: "Electricity Deposit",
+								charge_type: "electricity_deposit",
+								due_date: values.security_deposit_due_date,
+								tenant_id: tenant.id,
+								unit_id: values.unit_id,
+								property_id: values.property_id,
+							}
+							await handleItemSubmit(newElectricDepositCharge, 'transactions-charges')
+						}
 					}
 					resetForm({});
 					if (values.id) {
 						history.goBack()
 					}
-					setStatus({ sent: true, msg: "Agreement saved successfully!" })
+					setStatus({ sent: true, msg: "Agreement saved successfully." })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
 				}
@@ -378,7 +408,7 @@ let UnitLeaseInputForm = (props) => {
 							<Grid item container md={6} direction="column" justify="center" spacing={2}>
 								<Grid item>
 									<Typography variant="subtitle1" paragraph>
-										Security Deposit
+										Rent Security Deposit
 									</Typography>
 								</Grid>
 								<Grid item xs={12}>
@@ -401,7 +431,7 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										id="security_deposit"
-										label="Security Deposit Amount"
+										label="Rent Security Deposit"
 										name="security_deposit"
 										value={values.security_deposit}
 										onChange={handleChange}
@@ -412,7 +442,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 								<Grid item>
 									<Typography variant="subtitle1" paragraph>
-										Water Deposit
+										Water &amp; Electricity Deposits
 									</Typography>
 								</Grid>
 								<Grid item xs={12}>
@@ -420,13 +450,27 @@ let UnitLeaseInputForm = (props) => {
 										fullWidth
 										variant="outlined"
 										id="water_deposit"
-										label="Water Deposit Amount"
+										label="Water Deposit"
 										name="water_deposit"
 										value={values.water_deposit}
 										onChange={handleChange}
 										onBlur={handleBlur}
 										error={errors.water_deposit && touched.water_deposit}
 										helperText={touched.water_deposit && errors.water_deposit}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										fullWidth
+										variant="outlined"
+										id="electricity_deposit"
+										label="Electricity Deposit"
+										name="electricity_deposit"
+										value={values.electricity_deposit}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={errors.electricity_deposit && touched.electricity_deposit}
+										helperText={touched.electricity_deposit && errors.electricity_deposit}
 									/>
 								</Grid>
 								<Grid item>

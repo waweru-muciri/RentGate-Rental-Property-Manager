@@ -39,15 +39,14 @@ let NoticePage = (props) => {
 const mapStateToProps = (state, ownProps) => {
     return {
         noticeToEdit: state.notices.find(({ id }) => id === ownProps.match.params.noticeId) || {},
-        activeMappedLeases: state.leases.filter(({ terminated }) => terminated !== true)
+        activeMappedLeases: state.leases
         .map((lease) => {
             const tenantDetails = state.contacts.find(({ id }) => Array.isArray(lease.tenants) ? lease.tenants.includes(id) : false) || {}
-            return Object.assign({}, lease, {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`})
-        })
-        .map((lease) => {
             const unitDetails = state.propertyUnits.find(({ id }) => lease.unit_id === id) || {}
-            return Object.assign({}, lease, {unit_ref: `${unitDetails.ref}`})
-        }),
+            return Object.assign({}, lease, 
+                {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`},
+                {unit_ref: `${unitDetails.ref}`})
+        }).sort((unit1, unit2) => unit1.unit_ref < unit2.unit_ref ? -1 : unit1.unit_ref > unit2.unit_ref ? 1 : 0),
     };
 };
 

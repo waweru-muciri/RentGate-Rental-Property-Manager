@@ -12,8 +12,8 @@ import { parse } from "date-fns";
 const TenantsPaymentsStatement = lazy(() => import('./TenantsPaymentsStatement'));
 
 let TenantStatementsPage = ({
-    transactions,
-    transactionsCharges,
+    rentalPayments,
+    rentalCharges,
     contacts,
     properties,
 }) => {
@@ -33,10 +33,10 @@ let TenantStatementsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
-                <TenantsChargesStatement contacts={contacts} transactionsCharges={transactionsCharges} properties={properties} classes={classes} />
+                <TenantsChargesStatement contacts={contacts} rentalCharges={rentalCharges} properties={properties} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <TenantsPaymentsStatement contacts={contacts} transactions={transactions} properties={properties} classes={classes} />
+                <TenantsPaymentsStatement contacts={contacts} rentalPayments={rentalPayments} properties={properties} classes={classes} />
             </TabPanel>
         </Layout>
     );
@@ -44,7 +44,7 @@ let TenantStatementsPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        transactionsCharges: state.transactionsCharges
+        rentalCharges: state.rentalCharges
             .map(charge => {
                 const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
                 const tenantUnit = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
@@ -56,7 +56,7 @@ const mapStateToProps = (state) => {
             })
             .sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
                 parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
-        transactions: state.transactions
+        rentalPayments: state.rentalPayments
             .map(transaction => {
                 const tenant = state.contacts.find(({ id }) => id === transaction.tenant_id) || {};
                 const tenantUnit = state.propertyUnits.find(({ id }) => id === transaction.unit_id) || {};

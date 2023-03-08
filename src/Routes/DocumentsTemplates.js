@@ -10,7 +10,7 @@ import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, itemsFetchData } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import PageHeading from "../components/PageHeading";
@@ -32,14 +32,15 @@ const emailsTableHeadCells = [
 ];
 
 let DocumentsTemplatesPage = ({
+    fetchData,
     emailTemplates,
     match,
     handleItemDelete
 }) => {
+    let classes = commonStyles();
     const [emailItems, setEmailItems] = useState([]);
     const [selected, setSelected] = useState([]);
     const [itemToGenerateTemplate, setItemToGenerateTemplate] = useState("");
-    let classes = commonStyles();
 
     const generateItemTemplate = (event) => {
         event.preventDefault();
@@ -49,7 +50,7 @@ let DocumentsTemplatesPage = ({
             case "contacts":
                 docTitle = "Contacts Upload Template"
                 headCellsToPrint = ["title", "gender", "id_number", "first_name", "last_name",
-                    "personal_phone_number", "contact_email"]
+                    "personal_phone_number"]
                 break;
 
             case "properties":
@@ -73,6 +74,10 @@ let DocumentsTemplatesPage = ({
         }
         exportDataUploadTemplate(docTitle, docTitle, headCellsToPrint, docTitle)
     }
+
+    useEffect(() => {
+		fetchData(['email-templates']);
+	}, [fetchData]);
 
     useEffect(() => {
         setEmailItems(emailTemplates);
@@ -215,9 +220,11 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
+        fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
 	};
 };
+
 DocumentsTemplatesPage = connect(mapStateToProps, mapDispatchToProps)(DocumentsTemplatesPage);
 
 export default withRouter(DocumentsTemplatesPage);

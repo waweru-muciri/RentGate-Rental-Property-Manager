@@ -9,6 +9,7 @@ import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
+import AddIcon from "@material-ui/icons/Add";
 import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
@@ -17,9 +18,12 @@ import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { currencyFormatter, getTransactionsFilterOptions, getStartEndDatesForPeriod } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import { printInvoice } from "../assets/PrintingHelper";
+import PaymentInputForm from "../components/payments/PaymentInputForm";
+import CreditNoteInputForm from "../components/charges/AddCreditNote";
+import { handleItemFormSubmit } from '../actions/actions'
 
 
 const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -30,43 +34,43 @@ const headCells = [
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type", },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "charge_amount", numeric: true, disablePadding: true, label: "Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
-    { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
-    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "payed_amount", numeric: true, disablePadding: true, label: "Total Amounts Paid" },
+    { id: "balance", numeric: false, disablePadding: true, label: "Balance After Payments" },
+    { id: "total_credit_amounts", numeric: true, disablePadding: true, label: "Total Credit Amount" },
+    { id: "balance_after_credits", numeric: false, disablePadding: true, label: "Balance After Credit" },
 
 ];
 
 let TenantChargesStatementPage = ({
     properties,
     contacts,
-    transactionsCharges,
+    rentalCharges,
+    handleItemSubmit
 }) => {
     const classes = commonStyles()
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState('month-to-date');
+    let [fromDateFilter, setFromDateFilter] = useState('');
+    let [toDateFilter, setToDateFilter] = useState("");
     let [contactFilter, setContactFilter] = useState(null);
     let [propertyFilter, setPropertyFilter] = useState("all");
+    const [addPaymentToChargeModalState, setAddPaymentToChargesModalState] = useState(false);
+    const [addCreditNoteToChargeModalState, setAddCreditNoteToChargeModalState] = useState(false);
 
     const [selected, setSelected] = useState([]);
 
-    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
+    const CHARGE_TYPES = Array.from(new Set(filteredChargeItems
         .map((chargeItem) => (JSON.stringify({ label: chargeItem.charge_label, value: chargeItem.charge_type })))))
         .map(chargeType => JSON.parse(chargeType))
 
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setTenantChargesItems(chargesForCurrentMonth);
-        setFilteredChargeItems(chargesForCurrentMonth);
-    }, [transactionsCharges]);
+        setTenantChargesItems(rentalCharges);
+        setFilteredChargeItems(filterChargesByCriteria(rentalCharges));
+    }, [rentalCharges]);
 
     const totalNumOfCharges = filteredChargeItems.length
 
@@ -82,61 +86,53 @@ let TenantChargesStatementPage = ({
             return total + parseFloat(currentValue.payed_amount) || 0
         }, 0)
 
+    const totalCreditAmount = filteredChargeItems
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.total_credit_amounts) || 0
+        }, 0)
+
+    const filterChargesByCriteria = (chargesToFilter) => {
+        let filteredStatements = chargesToFilter
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            filteredStatements = filteredStatements.filter((chargeItem) => {
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startDate, end: endDate })
+            })
+        }
+        filteredStatements = filteredStatements
+            .filter(({ charge_type, charge_date, property_id, tenant_id }) =>
+                (!fromDateFilter ? true : charge_date >= fromDateFilter)
+                && (!toDateFilter ? true : charge_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                && (!chargeType ? true : charge_type === chargeType.value)
+                && (!contactFilter ? true : tenant_id === contactFilter.id)
+            )
+        return filteredStatements;
+    }
+
+    const toggleAddPaymentToChargeModal = () => {
+        setAddPaymentToChargesModalState(!addPaymentToChargeModalState)
+    }
+
+    const toggleAddCreditNoteToChargeModal = () => {
+        setAddCreditNoteToChargeModalState(!addCreditNoteToChargeModalState)
+    }
+
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactionsCharges according to the search criteria here
-        let filteredStatements = transactionsCharges
-        let dateRange = []
-        let startOfPeriod;
-        let endOfPeriod;
-        switch (periodFilter) {
-            case 'last-month':
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'year-to-date':
-                dateRange = getYearToDateFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'last-year':
-                dateRange = getLastYearFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'month-to-date':
-                dateRange = getCurrentMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case '3-months-to-date':
-                dateRange = getLastThreeMonthsFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            default:
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-        }
-        filteredStatements = filteredStatements.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        filteredStatements = filteredStatements
-            .filter(({ charge_type }) => !chargeType ? true : charge_type === chargeType)
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-        setFilteredChargeItems(filteredStatements);
+        //filter the rentalCharges according to the search criteria here
+        setFilteredChargeItems(filterChargesByCriteria(tenantChargesItems));
+        setSelected([]);
     };
 
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
         setPeriodFilter("month-to-date");
+        setFromDateFilter("");
+        setToDateFilter("");
         setContactFilter(null)
         setPropertyFilter("all")
     };
@@ -161,6 +157,32 @@ let TenantChargesStatementPage = ({
                 >
                     <Grid item>
                         <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={!selected.length}
+                            startIcon={<AddIcon />}
+                            onClick={() => toggleAddPaymentToChargeModal()}
+                        >
+                            Receive Payment
+                            </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length !== 1}
+                            startIcon={<AddIcon />}
+                            onClick={() => toggleAddCreditNoteToChargeModal()}
+                        >
+                            Add Credit Note
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
                             aria-label="Print Invoice"
                             variant="contained"
                             size="medium"
@@ -170,7 +192,7 @@ let TenantChargesStatementPage = ({
                                 const tenantDetails = contacts.find(({ id }) => id === contactFilter.id)
                                 printInvoice(
                                     tenantDetails,
-                                    tenantChargesItems.filter(({ id }) => selected.includes(id))
+                                    filteredChargeItems.filter(({ id }) => selected.includes(id))
                                 )
                             }}
                             startIcon={<PrintIcon />}>
@@ -183,7 +205,7 @@ let TenantChargesStatementPage = ({
                             reportName={'Tenants Outstanding Balances Data'}
                             reportTitle={`Tenants Outstanding Balances Records`}
                             headCells={headCells}
-                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={filteredChargeItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -192,7 +214,7 @@ let TenantChargesStatementPage = ({
                             reportName={`Tenants Outstanding Balances Records`}
                             reportTitle={'Tenants Outstanding Balances Data'}
                             headCells={headCells}
-                            dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={filteredChargeItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -216,7 +238,7 @@ let TenantChargesStatementPage = ({
                                 >
                                     <Grid item container direction="column" spacing={2}>
                                         <Grid item container direction="row" spacing={2}>
-                                            <Grid item md={6} xs={12}>
+                                            <Grid item md={4} xs={12}>
                                                 <TextField
                                                     fullWidth
                                                     variant="outlined"
@@ -241,36 +263,43 @@ let TenantChargesStatementPage = ({
                                                     ))}
                                                 </TextField>
                                             </Grid>
-                                            <Grid item md={6} xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    select
-                                                    variant="outlined"
-                                                    name="chargeType"
-                                                    label="Charge Type"
-                                                    id="chargeType"
-                                                    onChange={(event) => {
-                                                        setChargeTypeFilter(
-                                                            event.target.value
-                                                        );
-                                                    }}
-                                                    value={chargeType}
-                                                >
-                                                    {CHARGE_TYPES.map(
-                                                        (charge_type, index) => (
-                                                            <MenuItem
-                                                                key={index}
-                                                                value={charge_type.value}
-                                                            >
-                                                                {charge_type.label}
-                                                            </MenuItem>
-                                                        )
-                                                    )}
-                                                </TextField>
+                                            <Grid item container xs={12} md={8} direction="row" spacing={2}>
+                                                <Grid item xs={12} md={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        type="date"
+                                                        id="from_date_filter"
+                                                        name="from_date_filter"
+                                                        label="From Date"
+                                                        value={fromDateFilter}
+                                                        onChange={(event) => {
+                                                            setFromDateFilter(
+                                                                event.target.value
+                                                            );
+                                                        }}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} md={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        type="date"
+                                                        name="to_date_filter"
+                                                        label="To Date"
+                                                        id="to_date_filter"
+                                                        onChange={(event) => {
+                                                            setToDateFilter(event.target.value);
+                                                        }}
+                                                        value={toDateFilter}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
+                                                </Grid>
                                             </Grid>
                                         </Grid>
                                         <Grid item container direction="row" spacing={2}>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item xs={12} md={4}>
                                                 <TextField
                                                     fullWidth
                                                     select
@@ -285,7 +314,7 @@ let TenantChargesStatementPage = ({
                                                     }}
                                                     value={propertyFilter}
                                                 >
-                                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                                     {properties.map(
                                                         (property, index) => (
                                                             <MenuItem
@@ -298,21 +327,50 @@ let TenantChargesStatementPage = ({
                                                     )}
                                                 </TextField>
                                             </Grid>
-                                            <Grid item xs={12} md={6}>
-                                                <Autocomplete
-                                                    id="contact_filter"
-                                                    options={contacts}
-                                                    getOptionSelected={(option, value) => option.id === value.id}
-                                                    name="contact_filter"
-                                                    defaultValue=""
-                                                    onChange={(event, newValue) => {
-                                                        setContactFilter(newValue);
-                                                    }}
-                                                    value={contactFilter}
-                                                    getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
-                                                    style={{ width: "100%" }}
-                                                    renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
-                                                />
+                                            <Grid item container xs={12} md={8} direction="row" spacing={2}>
+                                                <Grid item md={6} xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        select
+                                                        variant="outlined"
+                                                        name="chargeType"
+                                                        label="Charge Type"
+                                                        id="chargeType"
+                                                        onChange={(event) => {
+                                                            setChargeTypeFilter(
+                                                                event.target.value
+                                                            );
+                                                        }}
+                                                        value={chargeType}
+                                                    >
+                                                        {CHARGE_TYPES.map(
+                                                            (charge_type, index) => (
+                                                                <MenuItem
+                                                                    key={index}
+                                                                    value={charge_type.value}
+                                                                >
+                                                                    {charge_type.label}
+                                                                </MenuItem>
+                                                            )
+                                                        )}
+                                                    </TextField>
+                                                </Grid>
+                                                <Grid item xs={12} md={6}>
+                                                    <Autocomplete
+                                                        id="contact_filter"
+                                                        options={contacts}
+                                                        getOptionSelected={(option, value) => option.id === value.id}
+                                                        name="contact_filter"
+                                                        defaultValue=""
+                                                        onChange={(event, newValue) => {
+                                                            setContactFilter(newValue);
+                                                        }}
+                                                        value={contactFilter}
+                                                        getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
+                                                        style={{ width: "100%" }}
+                                                        renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+                                                    />
+                                                </Grid>
                                             </Grid>
                                         </Grid>
                                     </Grid>
@@ -393,7 +451,7 @@ let TenantChargesStatementPage = ({
                                     </Grid>
                                     <Grid item sm={12}>
                                         <Typography variant="subtitle1" align="center">
-                                            Charges Without Payments: {(totalNumOfCharges - chargesWithPayments)}
+                                            Total Credit Issued: {totalCreditAmount}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -401,6 +459,20 @@ let TenantChargesStatementPage = ({
                         </Box>
                     </Grid>
                 </Grid>
+                {
+                    addPaymentToChargeModalState ?
+                        <PaymentInputForm open={addPaymentToChargeModalState}
+                            chargeToAddPaymentTo={tenantChargesItems.find(({ id }) => selected.includes(id)) || {}}
+                            handleClose={toggleAddPaymentToChargeModal}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
+                {
+                    addCreditNoteToChargeModalState ?
+                        <CreditNoteInputForm open={addCreditNoteToChargeModalState}
+                            chargeToAddCreditNote={tenantChargesItems.find(({ id }) => selected.includes(id)) || {}}
+                            handleClose={toggleAddCreditNoteToChargeModal}
+                            handleItemSubmit={handleItemSubmit} /> : null
+                }
                 <Grid item container>
                     <Grid item sm={12}>
                         <CommonTable
@@ -420,9 +492,10 @@ let TenantChargesStatementPage = ({
 };
 
 const mapStateToProps = (state) => {
+    console.log(state.creditNotes)
     return {
-        transactions: state.transactions,
-        transactionsCharges: state.transactionsCharges
+        rentalPayments: state.rentalPayments,
+        rentalCharges: state.rentalCharges
             .map((charge) => {
                 const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
                 const unitWithCharge = state.propertyUnits.find(({ id }) => id === charge.unit_id) || {};
@@ -431,13 +504,22 @@ const mapStateToProps = (state) => {
                 chargeDetails.tenant_id_number = tenant.id_number
                 chargeDetails.unit_ref = unitWithCharge.ref
                 //get payments with this charge id
-                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                const chargePayments = state.rentalPayments.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
                 const payed_amount = chargePayments.reduce((total, currentValue) => {
                     return total + parseFloat(currentValue.payment_amount) || 0
                 }, 0)
                 chargeDetails.payed_amount = payed_amount
+                //get all credit notes issued under this charge
+                const chargeCreditNotes = state.creditNotes.filter((creditNote) => creditNote.charge_id === charge.id)
+                const totalCreditNoteAmounts = chargeCreditNotes.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue.credit_amount) || 0
+                }, 0)
+                //get total of all credit notes issued
+                chargeDetails.total_credit_amounts = totalCreditNoteAmounts
+                //get charge balance by subtracting payments + total credits from charge amount
                 chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
+                chargeDetails.balance_after_credits = parseFloat(charge.charge_amount) - (payed_amount + totalCreditNoteAmounts)
                 return Object.assign({}, charge, chargeDetails);
             })
             .filter((charge) => charge.balance > 0)
@@ -448,6 +530,11 @@ const mapStateToProps = (state) => {
     };
 };
 
-TenantChargesStatementPage = connect(mapStateToProps)(TenantChargesStatementPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+    }
+};
+TenantChargesStatementPage = connect(mapStateToProps, mapDispatchToProps)(TenantChargesStatementPage);
 
 export default withRouter(TenantChargesStatementPage);

@@ -41,7 +41,7 @@ const UserSchema = Yup.object().shape({
 	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
 	primary_email: Yup.string().trim().email("Invalid Email").required("Primary Email is Required"),
 	other_email: Yup.string().trim().email("Invalid Email"),
-	phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
+	personal_phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
 	work_mobile_number: Yup.string().trim().min(10, 'Too Short'),
 	password: Yup.string().trim().min(6, "Too Short!")
 		.max(20, "We prefer an insecure system, try a shorter password.")
@@ -64,7 +64,7 @@ let UserInputForm = (props) => {
 		last_name: userToEdit.last_name || '',
 		primary_email: userToEdit.primary_email || '',
 		other_email: userToEdit.other_email || '',
-		phone_number: userToEdit.phone_number || '',
+		personal_phone_number: userToEdit.personal_phone_number || '',
 		work_mobile_number: userToEdit.work_mobile_number || '',
 		user_avatar_url: userToEdit.user_avatar_url || '',
 		user_image: '',
@@ -90,7 +90,7 @@ let UserInputForm = (props) => {
 						last_name: values.last_name,
 						primary_email: values.primary_email,
 						other_email: values.other_email,
-						phone_number: values.phone_number,
+						personal_phone_number: values.personal_phone_number,
 						work_mobile_number: values.work_mobile_number,
 					};
 					//first upload the image to firebase
@@ -138,10 +138,9 @@ let UserInputForm = (props) => {
 						history.goBack();
 					}
 					// show that everything is successfully done
-					setStatus({ sent: true, msg: "Details saved successfully!" })
+					setStatus({ sent: true, msg: "Details saved successfully." })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
-					console.log("Error while saving user => ", error)
 				}
 			}}
 		>
@@ -179,7 +178,7 @@ let UserInputForm = (props) => {
 							)
 						}
 						{
-							isSubmitting && (<CustomCircularProgress open={true} />)
+							isSubmitting && (<CustomCircularProgress open={true} dialogTitle="Saving user info"/>)
 						}
 						<Grid
 							justify="center"
@@ -328,14 +327,14 @@ let UserInputForm = (props) => {
 										fullWidth
 										required
 										variant="outlined"
-										id="phone_number"
-										name="phone_number"
+										id="personal_phone_number"
+										name="personal_phone_number"
 										label="Personal Phone Number"
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={errors.phone_number && touched.phone_number}
-										helperText={touched.phone_number && errors.phone_number}
-										value={values.phone_number}
+										error={errors.personal_phone_number && touched.personal_phone_number}
+										helperText={touched.personal_phone_number && errors.personal_phone_number}
+										value={values.personal_phone_number}
 									/>
 								</Grid>
 								<Grid item xs={12} sm>

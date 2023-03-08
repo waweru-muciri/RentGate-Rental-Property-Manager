@@ -41,7 +41,6 @@ const FilterYearSchema = Yup.object().shape({
   filter_year: Yup.number()
     .typeError("Year must be a number!")
     .required("Year is required")
-    .positive()
     .min(2000, "Sorry, were not present then.")
     .max(2100, "Sorry, but we won't be here during those times.")
     .integer(),
@@ -56,51 +55,69 @@ const currentYear = new Date().getFullYear()
 
 let DashBoardPage = (props) => {
   const classes = commonStyles()
-  const { propertyUnits, transactions, transactionsCharges, leases, properties } = props;
+  const { propertyUnits, rentalPayments, rentalCharges, leases, properties } = props;
   const [transactionItems, setTransactionItems] = useState([]);
-  let [propertyFilter, setPropertyFilter] = useState("all");
+  const [propertyUnitItems, setPropertyUnitItems] = useState([]);
+  const [leaseItems, setLeaseItems] = useState([]);
+  const [propertyFilter, setPropertyFilter] = useState("all");
   const [chargesItems, setChargesItems] = useState([]);
-  const propertyActiveLeases = leases.filter(({ terminated }) => terminated !== true)
+  const propertyActiveLeases = leaseItems.filter(({ terminated }) => terminated !== true)
 
   useEffect(() => {
-    const transactionChargesForCurrentYear = transactionsCharges
+    setPropertyUnitItems(propertyUnits);
+  }, [propertyUnits]);
+
+  useEffect(() => {
+    setLeaseItems(leases);
+  }, [leases]);
+
+  useEffect(() => {
+    const rentalChargesForCurrentYear = rentalCharges
       .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === currentYear)
-    setChargesItems(transactionChargesForCurrentYear);
-  }, [transactionsCharges]);
+    setChargesItems(rentalChargesForCurrentYear);
+  }, [rentalCharges]);
 
   useEffect(() => {
-    const transactionsPaymentsForCurrentYear = transactions
+    const rentalPaymentsPaymentsForCurrentYear = rentalPayments
       .filter(({ payment_date }) => getYear(parse(payment_date, 'yyyy-MM-dd', new Date())) === currentYear)
-    setTransactionItems(transactionsPaymentsForCurrentYear);
-  }, [transactions]);
+    setTransactionItems(rentalPaymentsPaymentsForCurrentYear);
+  }, [rentalPayments]);
 
   const setFilteredTransactionItemsByYear = (filterYear) => {
     setTransactionItems(
-      transactions
-        .filter(({ payment_date }) => getYear(parse(payment_date, 'yyyy-MM-dd', new Date())) === filterYear)
+      rentalPayments
+        .filter(({ payment_date, property_id }) =>
+          (getYear(parse(payment_date, 'yyyy-MM-dd', new Date())) === filterYear)
+          && (propertyFilter === "all" ? true : property_id === propertyFilter)
+        )
     );
     setChargesItems(
-      transactionsCharges
-        .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
+      rentalCharges
+        .filter(({ charge_date, property_id }) =>
+          (getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === filterYear)
+          && (propertyFilter === "all" ? true : property_id === propertyFilter)
+        )
     );
+    setPropertyUnitItems(propertyUnits.filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter))
+    setLeaseItems(leases.filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter))
   };
 
-  const totalProperties = propertyUnits.length;
+  const totalProperties = propertyUnitItems.length;
   //get the number of the different units by category
-  const bedSitterUnits = propertyUnits.filter((property) => property.unit_type === 'Bed Sitter').length;
-  const oneBedUnits = propertyUnits.filter((property) => property.unit_type === 'One Bedroom').length;
-  const twoBedUnits = propertyUnits.filter((property) => property.unit_type === 'Two Bedroom').length;
-  const singleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Single Room').length;
-  const doubleRoomUnits = propertyUnits.filter((property) => property.unit_type === 'Double Room').length;
-  const shopUnits = propertyUnits.filter((property) => property.unit_type === 'Shop').length;
-  const otherUnits = propertyUnits.filter((property) => property.unit_type === 'Other').length;
+  const bedSitterUnits = propertyUnitItems.filter((property) => property.unit_type === 'Bed Sitter').length;
+  const oneBedUnits = propertyUnitItems.filter((property) => property.unit_type === 'One Bedroom').length;
+  const twoBedUnits = propertyUnitItems.filter((property) => property.unit_type === 'Two Bedroom').length;
+  const singleRoomUnits = propertyUnitItems.filter((property) => property.unit_type === 'Single Room').length;
+  const doubleRoomUnits = propertyUnitItems.filter((property) => property.unit_type === 'Double Room').length;
+  const shopUnits = propertyUnitItems.filter((property) => property.unit_type === 'Shop').length;
+  const otherUnits = propertyUnitItems.filter((property) => property.unit_type === 'Other').length;
   //get the current number of occupied houses
   const occupiedHouses = propertyActiveLeases.length;
   //get months in an year in short format
   const rentIncomeData = { datasets: [] }
   rentIncomeData.labels = monthsInYear.map((monthDate) => format(monthDate, 'MMMM'));
   const totalEachMonthPayments = monthsInYear.map((monthDate) => {
-    //get transactions recorded in the same month and year as monthDate
+    //get rentalPayments recorded in the same month and year as monthDate
     return transactionItems
       .filter((payment) => {
         const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
@@ -117,7 +134,7 @@ let DashBoardPage = (props) => {
   })
 
   const totalEachMonthCharges = monthsInYear.map((monthDate) => {
-    //get transactions recorded in the same month and year as monthDate
+    //get rentalPayments recorded in the same month and year as monthDate
     return chargesItems
       .filter((charge) => {
         const chargeDate = parse(charge.charge_date, 'yyyy-MM-dd', new Date())
@@ -190,7 +207,7 @@ let DashBoardPage = (props) => {
                             }}
                             value={propertyFilter}
                           >
-                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                             {properties.map(
                               (property, index) => (
                                 <MenuItem
@@ -264,9 +281,9 @@ let DashBoardPage = (props) => {
           justify="space-around"
           key={2}
         >
-          <InfoDisplayPaper xs={12} title={"Total Rentals"} value={totalProperties} />
-          <InfoDisplayPaper xs={12} title={"Currently Occupied Rentals"} value={occupiedHouses} />
-          <InfoDisplayPaper xs={12} title={"Currently Unoccupied Rentals"} value={totalProperties - occupiedHouses} />
+          <InfoDisplayPaper xs={12} title={"Total Units"} value={totalProperties} />
+          <InfoDisplayPaper xs={12} title={"Currently Occupied Units"} value={occupiedHouses} />
+          <InfoDisplayPaper xs={12} title={"Currently Unoccupied Units"} value={totalProperties - occupiedHouses} />
           <InfoDisplayPaper xs={12} title={"Current Month Occupancy Rate"} value={((occupiedHouses / totalProperties) * 100) | 0} />
         </Grid>
         <Grid item>
@@ -288,8 +305,8 @@ const mapStateToProps = (state) => {
     leases: state.leases,
     properties: state.properties,
     propertyUnits: state.propertyUnits,
-    transactionsCharges: state.transactionsCharges,
-    transactions: state.transactions,
+    rentalCharges: state.rentalCharges,
+    rentalPayments: state.rentalPayments,
   };
 };
 

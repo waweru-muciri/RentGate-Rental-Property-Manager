@@ -8,7 +8,7 @@ import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import PageHeading from "../components/PageHeading";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { getStartEndDatesForPeriod, getTransactionsFilterOptions } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 
 const headCells = [
@@ -18,18 +18,17 @@ const headCells = [
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
     { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "charge_amount", numeric: true, disablePadding: true, label: "Charge Amount", },
 ];
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 let TenantStatementsPage = ({
-    transactionsCharges,
+    rentalCharges,
     properties,
     contacts,
     classes
 }) => {
-    const [tenantChargesItems, setTenantChargesItems] = useState([]);
     const [filteredChargeItems, setFilteredChargeItems] = useState([]);
     const [contactFilter, setContactFilter] = useState(null);
     const [periodFilter, setPeriodFilter] = useState("month-to-date");
@@ -39,72 +38,36 @@ let TenantStatementsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const chargesForCurrentMonth = transactionsCharges.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setTenantChargesItems(chargesForCurrentMonth);
-        setFilteredChargeItems(chargesForCurrentMonth);
-    }, [transactionsCharges]);
+        setFilteredChargeItems(filterChargesByCriteria(rentalCharges));
+    }, [rentalCharges]);
+
+    const filterChargesByCriteria = (statementsToFilter) => {
+        let statementsWithinDateRange = statementsToFilter;
+        //filter the rentalCharges according to the search criteria here
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            statementsWithinDateRange = statementsWithinDateRange.filter((chargeItem) => {
+                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(chargeItemDate, { start: startDate, end: endDate })
+            })
+        }
+        const filteredStatements = statementsWithinDateRange
+            .filter(({ charge_date, property_id, tenant_id }) =>
+                (!fromDateFilter ? true : charge_date >= fromDateFilter)
+                && (!toDateFilter ? true : charge_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                && (!contactFilter ? true : tenant_id === contactFilter.id)
+            )
+        return filteredStatements;
+    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactionsCharges according to the search criteria here
-        let statementsWithinDateRange = [];
-        let dateRange = []
-        let startOfPeriod;
-        let endOfPeriod;
-        switch (periodFilter) {
-            case 'last-month':
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'year-to-date':
-                dateRange = getYearToDateFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'last-year':
-                dateRange = getLastYearFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'month-to-date':
-                dateRange = getCurrentMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case '3-months-to-date':
-                dateRange = getLastThreeMonthsFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            default:
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-        }
-        statementsWithinDateRange = transactionsCharges.filter((chargeItem) => {
-            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        const filteredStatements = statementsWithinDateRange
-            .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
-            .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-
-
-        setFilteredChargeItems(filteredStatements);
+        setFilteredChargeItems(filterChargesByCriteria(rentalCharges));
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(tenantChargesItems);
         setPropertyFilter("all");
         setPeriodFilter("month-to-date");
         setContactFilter(null);
@@ -132,10 +95,10 @@ let TenantStatementsPage = ({
                 <Grid item>
                     <PrintArrayToPdf
                         disabled={!selected.length}
-                        reportName={'Tenants Payments Records'}
-                        reportTitle={'Tenants Payments Data'}
+                        reportName={'Tenants Charges Records'}
+                        reportTitle={'Tenants Charges Data'}
                         headCells={headCells}
-                        dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={rentalCharges.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
                 <Grid item>
@@ -144,7 +107,7 @@ let TenantStatementsPage = ({
                         reportName={'Tenants Charges Records'}
                         reportTitle={'Tenants Charges Records'}
                         headCells={headCells}
-                        dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={rentalCharges.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
             </Grid>
@@ -221,7 +184,7 @@ let TenantStatementsPage = ({
                                     }}
                                     value={propertyFilter}
                                 >
-                                    <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                    <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                     {properties.map(
                                         (property, index) => (
                                             <MenuItem

@@ -18,11 +18,11 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 
 const MeterReadingSchema = Yup.object().shape({
-  meter_type: Yup.string().trim().required("Meter Reading is required"),
-  prior_value: Yup.number().required("Prior Value is required").positive("Amount must be a positive number"),
+  meter_type: Yup.string().trim().required("Meter Type is required"),
+  prior_value: Yup.number().required("Prior Value is required").min(0,"Amount must be greater than 0"),
   current_value: Yup.number().min(Yup.ref('prior_value'), 'Current Value must be greater than prior value').required("Current Value is required"),
-  unit_charge: Yup.number().positive("Amount must be a positive number").required("Unit Charge is Required"),
-  base_charge: Yup.number().positive("Amount must be a positive number").default(0),
+  unit_charge: Yup.number().min(0,"Amount must be greater than 0").required("Unit Charge is Required"),
+  base_charge: Yup.number().min(0,"Amount must be greater than 0").default(0),
   reading_date: Yup.date().required("Reading Date Required"),
   property_id: Yup.string().trim().required("Property is Required"),
   unit_id: Yup.string().trim().required("Unit is Required"),
@@ -72,10 +72,10 @@ const MeterReadingInputForm = ({ properties, unitsWithActiveLeases, history, met
           if (!values.id) {
             const newMeterReadingCharge = {
               charge_amount: meterReading.amount,
-              charge_date: defaultDate,
-              charge_label: `${values.meter_type} Charge`,
-              charge_type: "meter_type",
-              due_date: defaultDate,
+              charge_date: values.reading_date,
+              charge_label: `${values.meter_type} meter charge`,
+              charge_type: values.meter_type,
+              due_date: values.reading_date,
               tenant_id: meterReading.tenant_id,
               unit_id: values.unit_id,
               property_id: values.property_id,
@@ -206,8 +206,8 @@ const MeterReadingInputForm = ({ properties, unitsWithActiveLeases, history, met
                 helperText={touched.meter_type && errors.meter_type}
               >
                 {METER_OPTIONS.map((meter_type, meterTypeIndex) => (
-                  <MenuItem key={meterTypeIndex} value={meter_type}>
-                    {meter_type}
+                  <MenuItem key={meterTypeIndex} value={meter_type.id}>
+                    {meter_type.displayValue}
                   </MenuItem>
                 ))}
               </TextField>

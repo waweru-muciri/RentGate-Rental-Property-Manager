@@ -10,7 +10,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { getStartEndDatesForPeriod, getTransactionsFilterOptions } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
@@ -23,7 +23,7 @@ const headCells = [
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
     { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
     { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
-    { id: "payment_amount", numeric: false, disablePadding: true, label: "Payment Amount" },
+    { id: "payment_amount", numeric: true, disablePadding: true, label: "Payment Amount" },
     { id: "memo", numeric: false, disablePadding: true, label: "Payment Notes/Memo" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -31,12 +31,11 @@ const headCells = [
 
 
 let TenantsPaymentsPage = ({
-    transactions,
+    rentalPayments,
     contacts,
     properties,
     classes,
 }) => {
-    let [paymentsItems, setPaymentsItems] = useState([]);
     let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("all");
     let [periodFilter, setPeriodFilter] = useState("month-to-date");
@@ -47,74 +46,37 @@ let TenantsPaymentsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const paymentsForCurrentMonth = transactions.filter((payment) => {
-            const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setPaymentsItems(paymentsForCurrentMonth);
-        setFilteredPaymentsItems(paymentsForCurrentMonth);
-    }, [transactions]);
+        setFilteredPaymentsItems(filterPaymentsByCriteria(rentalPayments));
+    }, [rentalPayments]);
+
+    const filterPaymentsByCriteria = (paymentsToFilter) => {
+        //filter the payments according to the search criteria here
+        let filteredPayments = paymentsToFilter;
+        //filter the payments according to the search criteria here
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            filteredPayments = filteredPayments.filter((payment) => {
+                const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(paymentDate, { start: startDate, end: endDate })
+            })
+        }
+        filteredPayments = filteredPayments
+            .filter(({ payment_date, tenant_id, property_id }) =>
+                (!fromDateFilter ? true : payment_date >= fromDateFilter)
+                && (!toDateFilter ? true : payment_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+                && (!contactFilter ? true : tenant_id === contactFilter.id)
+            )
+        return filteredPayments;
+    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the payments according to the search criteria here
-        let filteredPayments = transactions
-        let dateRange = []
-        let startOfPeriod;
-        let endOfPeriod;
-        switch (periodFilter) {
-            case 'all':
-                startOfPeriod = new Date(1990, 1, 1)
-                endOfPeriod = new Date(2100, 1, 1)
-                break;
-            case 'last-month':
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'year-to-date':
-                dateRange = getYearToDateFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'last-year':
-                dateRange = getLastYearFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case 'month-to-date':
-                dateRange = getCurrentMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            case '3-months-to-date':
-                dateRange = getLastThreeMonthsFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-                break;
-            default:
-                dateRange = getLastMonthFromToDates()
-                startOfPeriod = dateRange[0]
-                endOfPeriod = dateRange[1]
-        }
-        filteredPayments = filteredPayments.filter((paymentItem) => {
-            const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        filteredPayments = filteredPayments
-            .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
-            .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-        setFilteredPaymentsItems(filteredPayments);
+        setFilteredPaymentsItems(filterPaymentsByCriteria(rentalPayments));
     }
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredPaymentsItems(paymentsItems);
         setPropertyFilter("all");
         setPeriodFilter("month-to-date");
         setFromDateFilter("");
@@ -145,7 +107,7 @@ let TenantsPaymentsPage = ({
                         reportName={'Tenants Payments Records'}
                         reportTitle={'Tenants Payments Data'}
                         headCells={headCells}
-                        dataToPrint={paymentsItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={rentalPayments.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
                 <Grid item>
@@ -154,7 +116,7 @@ let TenantsPaymentsPage = ({
                         reportName={'Tenants Payments Records'}
                         reportTitle={'Tenants Payments Data'}
                         headCells={headCells}
-                        dataToPrint={paymentsItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={rentalPayments.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
             </Grid>
@@ -253,7 +215,7 @@ let TenantsPaymentsPage = ({
                                             }}
                                             value={propertyFilter}
                                         >
-                                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {properties.map(
                                                 (property, index) => (
                                                     <MenuItem

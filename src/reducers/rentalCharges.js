@@ -1,9 +1,9 @@
 import * as actionTypes from "../assets/actionTypes";
 
-export function transactionsCharges(state = [], action) {
+export function rentalCharges(state = [], action) {
     switch (action.type) {
         case actionTypes.TRANSACTION_CHARGES_FETCH_DATA_SUCCESS:
-            return action.transactionCharges;
+            return action.rentalCharges;
 
         case actionTypes.EDIT_TRANSACTION_CHARGE:
             return state.map((transactionCharge) =>

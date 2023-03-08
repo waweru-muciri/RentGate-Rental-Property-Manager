@@ -11,7 +11,7 @@ import Button from "@material-ui/core/Button";
 import MenuItem from "@material-ui/core/MenuItem";
 import Box from "@material-ui/core/Box";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { handleDelete } from "../actions/actions";
+import { handleDelete, itemsFetchData } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
@@ -22,7 +22,7 @@ import { startOfToday, parse, differenceInDays } from "date-fns";
 
 
 const noticesTableHeadCells = [
-    { id: "days_left", numeric: true, disablePadding: true, label: "Days Left" },
+    { id: "days_left", numeric: false, disablePadding: true, label: "Days Left" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
@@ -35,6 +35,7 @@ const noticesTableHeadCells = [
 ];
 
 let VacatingNoticesPage = ({
+    fetchData,
     notices,
     properties,
     contacts,
@@ -42,32 +43,36 @@ let VacatingNoticesPage = ({
     match,
 }) => {
     const classes = commonStyles();
-    let [filteredNoticeItems, setFilteredNoticeItems] = useState([]);
-    let [fromDateFilter, setFromDateFilter] = useState("");
-    let [toDateFilter, setToDateFilter] = useState("");
-    let [propertyFilter, setPropertyFilter] = useState("all");
-    let [tenantFilter, setTenantFilter] = useState(null);
+    const [vacatingNotices, setVacatingNotices] = useState([]);
+    const [fromDateFilter, setFromDateFilter] = useState("");
+    const [toDateFilter, setToDateFilter] = useState("");
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [tenantFilter, setTenantFilter] = useState(null);
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setFilteredNoticeItems(notices);
+		fetchData(['notices']);
+	}, [fetchData]);
+
+    useEffect(() => {
+        setVacatingNotices(notices);
     }, [notices]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the notices here according to search criteria
-        let filteredNotices = notices
-            .filter(({ notification_date }) => !fromDateFilter ? true : notification_date >= fromDateFilter)
-            .filter(({ notification_date }) => !toDateFilter ? true : notification_date <= toDateFilter)
-            .filter(({ tenant_id }) => !tenantFilter ? true : tenant_id === tenantFilter.id)
-            .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
-
-        setFilteredNoticeItems(filteredNotices);
+        const filteredNotices = notices
+            .filter(({ notification_date, tenant_id, property_id }) =>
+                (!fromDateFilter ? true : notification_date >= fromDateFilter)
+                && (!toDateFilter ? true : notification_date <= toDateFilter)
+                && (!tenantFilter ? true : tenant_id === tenantFilter.id)
+                && (propertyFilter === "all" ? true : property_id === propertyFilter)
+            )
+        setVacatingNotices(filteredNotices);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredNoticeItems(notices);
         setFromDateFilter("");
         setToDateFilter("");
         setPropertyFilter("all");
@@ -200,7 +205,7 @@ let VacatingNoticesPage = ({
                                             );
                                         }}
                                     >
-                                        <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                        <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                         {properties.map((property, index) => (
                                             <MenuItem
                                                 key={index}
@@ -272,7 +277,7 @@ let VacatingNoticesPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={filteredNoticeItems}
+                        rows={vacatingNotices}
                         headCells={noticesTableHeadCells}
                         handleDelete={handleItemDelete}
                         deleteUrl={"notices"}
@@ -296,7 +301,7 @@ const mapStateToProps = (state) => {
             noticeDetails.unit_ref = tenantUnit.ref
             return Object.assign({}, notice, noticeDetails);
         }).sort((notice1, notice2) => parse(notice2.notification_date, 'yyyy-MM-dd', new Date()) -
-        parse(notice1.notification_date, 'yyyy-MM-dd', new Date())),
+            parse(notice1.notification_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         contacts: state.contacts,
     };
@@ -304,6 +309,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
         handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };

@@ -42,7 +42,7 @@ const mapStateToProps = (state, ownProps) => {
 
     return {
         properties: state.properties,
-        unitsWithActiveLeases: unitsWithActiveLeases,
+        unitsWithActiveLeases: unitsWithActiveLeases.sort((unit1, unit2) => unit1.ref < unit2.ref ? -1 : unit1.ref > unit2.ref ? 1 : 0),
         meterReadingToEdit: state.meterReadings.find(({ id }) => id === ownProps.match.params.meterReadingId) || {},
     };
 };

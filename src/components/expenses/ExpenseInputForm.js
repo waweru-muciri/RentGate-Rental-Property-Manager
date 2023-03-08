@@ -60,7 +60,7 @@ const ExpenseInputForm = (props) => {
           if (values.id) {
             history.goBack();
           }
-          setStatus({ sent: true, msg: "Details saved successfully!" })
+          setStatus({ sent: true, msg: "Details saved successfully." })
         } catch (error) {
           setStatus({ sent: false, msg: `Error! ${error}.` })
         }
@@ -102,7 +102,7 @@ const ExpenseInputForm = (props) => {
               isSubmitting && (<CustomCircularProgress open={true} />)
             }
             <Grid item container direction="row" spacing={2}>
-              <Grid item sm={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   select
@@ -126,7 +126,7 @@ const ExpenseInputForm = (props) => {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item sm={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   select
@@ -202,7 +202,7 @@ const ExpenseInputForm = (props) => {
               <TextField
                 fullWidth
                 multiline
-                rows={4}
+                rows={2}
                 variant="outlined"
                 id="expense_notes"
                 name="expense_notes"

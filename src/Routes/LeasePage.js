@@ -60,7 +60,7 @@ const mapStateToProps = (state, ownProps) => {
 	return {
 		leaseToEdit: state.leases.find(({ id }) => id === ownProps.match.params.leaseId) || {},
 		properties: state.properties,
-		propertyUnitsToShow: propertyUnitsToShow,
+		propertyUnitsToShow: propertyUnitsToShow.sort((unit1, unit2) => unit1.ref < unit2.ref ? -1 : unit1.ref > unit2.ref ? 1 : 0),
 		tenantsToShow: tenantsToShow,
 		leaseUnitCharges: state.propertyUnitCharges.filter(({ unit_id }) => unit_id === leaseToEdit.unit_id),
 	};

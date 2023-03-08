@@ -5,7 +5,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, itemsFetchData } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -14,7 +14,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
-import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
+import { getStartEndDatesForPeriod, getTransactionsFilterOptions } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 
 
@@ -29,15 +29,16 @@ const meterReadingsTableHeadCells = [
     { id: "meter_type", numeric: false, disablePadding: true, label: "Meter Type" },
     { id: "prior_value", numeric: false, disablePadding: true, label: "Prior Value" },
     { id: "current_value", numeric: false, disablePadding: true, label: "Curent Value" },
-    { id: "usage", numeric: false, disablePadding: true, label: "Usage" },
+    { id: "usage", numeric: true, disablePadding: true, label: "Usage" },
     { id: "base_charge", numeric: false, disablePadding: true, label: "Base Charge" },
     { id: "unit_charge", numeric: false, disablePadding: true, label: "Unit Charge" },
-    { id: "amount", numeric: false, disablePadding: true, label: "Amount(Ksh)" },
+    { id: "amount", numeric: true, disablePadding: true, label: "Amount(Ksh)" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let MeterReadingsPage = ({
+    fetchData,
     meterReadings,
     handleItemDelete,
     properties,
@@ -56,67 +57,37 @@ let MeterReadingsPage = ({
     const METER_TYPE_OPTIONS = Array.from(new Set(meterReadingItems.map((meterReading) => meterReading.meter_type)))
 
     useEffect(() => {
-        const dateRange = getCurrentMonthFromToDates()
-        const startOfPeriod = dateRange[0]
-        const endOfPeriod = dateRange[1]
-        const currentMonthMeterReadings = meterReadings.filter((meterReading) => {
-            const readingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
-            return isWithinInterval(readingDate, { start: startOfPeriod, end: endOfPeriod })
-        })
-        setMeterReadingItems(currentMonthMeterReadings);
-        setFilteredMeterReadingItems(currentMonthMeterReadings);
+		fetchData(['meter_readings']);
+	}, [fetchData]);
+
+    useEffect(() => {
+        setMeterReadingItems(meterReadings);
+        setFilteredMeterReadingItems(filterMeterReadingsByCriteria(meterReadings));
     }, [meterReadings]);
+
+    const filterMeterReadingsByCriteria = (meterReadingsToFilter) => {
+        let filteredMeterReadings = meterReadingsToFilter
+        if (periodFilter) {
+            const { startDate, endDate } = getStartEndDatesForPeriod(periodFilter)
+            filteredMeterReadings = filteredMeterReadings.filter((meterReading) => {
+                const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
+                return isWithinInterval(meterReadingDate, { start: startDate, end: endDate })
+            })
+        }
+        filteredMeterReadings = filteredMeterReadings
+            .filter(({ meter_type, property, reading_date }) =>
+                (!fromDateFilter ? true : reading_date >= fromDateFilter)
+                && (!toDateFilter ? true : reading_date <= toDateFilter)
+                && (propertyFilter === "all" ? true : property === propertyFilter)
+                && (!meterTypeFilter ? true : meter_type === meterTypeFilter)
+            )
+        return filteredMeterReadings;
+    }
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the meterReadings here according to search criteria
-        let filteredMeterReadings = meterReadings
-        if (periodFilter) {
-            let dateRange = []
-            let startOfPeriod;
-            let endOfPeriod;
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                default:
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-            }
-            filteredMeterReadings = filteredMeterReadings.filter((meterReading) => {
-                const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(meterReadingDate, { start: startOfPeriod, end: endOfPeriod })
-            })
-        }
-        filteredMeterReadings = filteredMeterReadings
-            .filter(({ meter_type }) => !meterTypeFilter ? true : meter_type === meterTypeFilter)
-            .filter(({ property }) => propertyFilter === "all" ? true : property === propertyFilter)
-            .filter(({ reading_date }) => !fromDateFilter ? true : reading_date >= fromDateFilter)
-            .filter(({ reading_date }) => !toDateFilter ? true : reading_date <= toDateFilter)
-        setFilteredMeterReadingItems(filteredMeterReadings);
+        setFilteredMeterReadingItems(filterMeterReadingsByCriteria(meterReadingItems));
     };
 
     const resetSearchForm = (event) => {
@@ -126,7 +97,6 @@ let MeterReadingsPage = ({
         setToDateFilter("");
         setMeterTypeFilter("");
         setPropertyFilter("all");
-        setFilteredMeterReadingItems(meterReadingItems);
     };
 
     return (
@@ -266,7 +236,7 @@ let MeterReadingsPage = ({
                                             }}
                                             value={propertyFilter}
                                         >
-                                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                                            <MenuItem key={"all"} value={"all"}>All</MenuItem>
                                             {properties.map(
                                                 (property, index) => (
                                                     <MenuItem
@@ -410,6 +380,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
+        fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
         handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };

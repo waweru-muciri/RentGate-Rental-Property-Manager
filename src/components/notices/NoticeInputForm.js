@@ -8,7 +8,10 @@ import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import Switch from '@material-ui/core/Switch';
 import CancelIcon from "@material-ui/icons/Cancel";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import * as Yup from "yup";
 import { format, startOfToday } from "date-fns";
 import CustomCircularProgress from "../CustomCircularProgress";
@@ -18,8 +21,10 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const VacatingNoticeSchema = Yup.object().shape({
   lease_details: Yup.object().typeError("Rental agreement is required")
     .required("Rental agreement is required"),
+  vacated: Yup.boolean(),
   notification_date: Yup.date().required("Vacating Date Required"),
   vacating_date: Yup.date().required("Move Out Date is Required"),
+  actual_vacated_date: Yup.date().when('vacated', { is: true, then: Yup.date().required("Actual Date Vacated is Required") }),
 });
 
 const NoticeInputForm = (props) => {
@@ -31,7 +36,9 @@ const NoticeInputForm = (props) => {
     id: noticeToEdit.id,
     notification_date: noticeToEdit.notification_date || defaultDate,
     vacating_date: noticeToEdit.vacating_date || defaultDate,
+    actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate,
     lease_id: noticeToEdit.lease_id || '',
+    vacated: noticeToEdit.vacated || false,
     lease_details: activeLeases.find(({ id }) => id === noticeToEdit.lease_id) || null,
   };
 
@@ -46,17 +53,26 @@ const NoticeInputForm = (props) => {
             id: values.id,
             lease_id: values.lease_details.id,
             vacating_date: values.vacating_date,
+            actual_vacated_date: values.actual_vacated_date,
             notification_date: values.notification_date,
             unit_id: values.lease_details.unit_id,
             property_id: values.lease_details.property_id,
-            tenant_id: values.lease_details.tenants[0]
+            tenant_id: values.lease_details.tenants[0],
+            vacated: values.vacated,
           };
           await submitForm(vacatingNotice, "notices")
+          //if lease tenant is already terminated then automatically terminate lease
+          const leaseToEdit = {
+            id: values.lease_id,
+            end_date: values.vacated ? values.actual_vacated_date : '',
+            terminated: values.vacated
+          }
+          await submitForm(leaseToEdit, "leases")
           resetForm({});
           if (values.id) {
             history.goBack()
           }
-          setStatus({ sent: true, msg: "Notice saved successfully!" })
+          setStatus({ sent: true, msg: "Notice saved successfully." })
         } catch (error) {
           setStatus({ sent: false, msg: `Error! ${error}.` })
         }
@@ -101,10 +117,10 @@ const NoticeInputForm = (props) => {
               <Typography color="textSecondary" component="p">
                 Recording every tenant's intention to move out will automatically end the agreement
                 on the last move-out date.
-                </Typography>
+              </Typography>
             </Grid>
             <Grid item container spacing={2} direction="row">
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <Autocomplete
                   id="lease_details"
                   value={values.lease_details}
@@ -134,7 +150,7 @@ const NoticeInputForm = (props) => {
                   )}
                 />
               </Grid>
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   disabled
@@ -148,7 +164,7 @@ const NoticeInputForm = (props) => {
               </Grid>
             </Grid>
             <Grid item container spacing={2} direction="row">
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <TextField
                   disabled
                   fullWidth
@@ -160,7 +176,7 @@ const NoticeInputForm = (props) => {
                   value={values.lease_details ? values.lease_details.lease_type : ""}
                 />
               </Grid>
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <TextField
                   disabled
                   fullWidth
@@ -174,7 +190,7 @@ const NoticeInputForm = (props) => {
               </Grid>
             </Grid>
             <Grid item container spacing={2} direction="row">
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   type="date"
@@ -190,7 +206,7 @@ const NoticeInputForm = (props) => {
                   helperText={errors.notification_date}
                 />
               </Grid>
-              <Grid item sm>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   type="date"
@@ -204,6 +220,43 @@ const NoticeInputForm = (props) => {
                   onBlur={handleBlur}
                   error={"vacating_date" in errors}
                   helperText={errors.vacating_date}
+                />
+              </Grid>
+            </Grid>
+            <Grid item container spacing={2} direction="row">
+              <Grid item xs={12} md={6}>
+                <FormControl error={errors.vacated && touched.vacated}>
+                  <FormControlLabel
+                    control={<Switch
+                      checked={values.vacated}
+                      onChange={handleChange}
+                      color="primary"
+                      name="vacated"
+                      inputProps={{ 'aria-label': 'vacated status checkbox' }}
+                    />}
+                    label="Tenant Has Moved Out"
+                    labelPlacement="start"
+                  />
+                </FormControl>
+                <Typography variant="body2" color="textSecondary">
+                  Select if tenant has moved out.
+							  </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  id="actual_vacated_date"
+                  name="actual_vacated_date"
+                  label="Actual Date Vacated"
+                  value={values.actual_vacated_date}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={"actual_vacated_date" in errors}
+                  helperText={errors.actual_vacated_date}
+                  disabled={!values.vacated}
                 />
               </Grid>
             </Grid>

@@ -72,7 +72,7 @@ export default function RentAdjustModal(props) {
                                 await handleItemSubmit(leaseWithAdjustedRentAmount, 'leases')
                             });
                             resetForm({});
-                            setStatus({ sent: true, msg: "Rent Amounts Adjusted Successfully!" })
+                            setStatus({ sent: true, msg: "Rent Amounts Adjusted successfully." })
                             handleClose()
                         } catch (error) {
                             setStatus({ sent: false, msg: `Error! ${error}.` })

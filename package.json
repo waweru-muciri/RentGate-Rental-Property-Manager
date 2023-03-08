@@ -1,5 +1,5 @@
 {
-  "name": "yarra_property_manager",
+  "name": "rentgate_property_manager",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -15,7 +15,6 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/pickers": "^3.2.10",
     "@material/drawer": "^4.0.0",
-    "axios": "^0.19.2",
     "caniuse-lite": "^1.0.30001204",
     "chart.js": "^2.9.3",
     "date-fns": "^2.16.1",

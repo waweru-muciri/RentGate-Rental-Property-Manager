@@ -47,7 +47,7 @@ let PropertyDetailsPage = ({
     propertyUnits,
     propertyActiveLeasesNumber,
     propertySettings,
-    transactions,
+    rentalPayments,
     expenses,
     propertyToShowDetails,
     users,
@@ -111,12 +111,12 @@ let PropertyDetailsPage = ({
                     handleItemSubmit={handleItemSubmit} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
-                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} transactions={transactions}
+                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} rentalPayments={rentalPayments}
                     propertyUnits={propertyUnitsItems} users={users} propertyActiveLeasesNumber={propertyActiveLeasesNumber} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
                 <IndividualPropertyIncomeStatement propertyUnits={propertyUnits}
-                    transactions={transactions} expenses={expenses} classes={classes} />
+                    rentalPayments={rentalPayments} expenses={expenses} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
                 <Grid
@@ -329,7 +329,7 @@ const mapStateToProps = (state, ownProps) => {
         .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
         .filter(({ terminated }) => terminated !== true)
     return {
-        transactions: state.transactions.filter(({ unit_id }) => unitsInProperty.includes(unit_id)),
+        rentalPayments: state.rentalPayments.filter(({ unit_id }) => unitsInProperty.includes(unit_id)),
         expenses: state.expenses.filter(({ property_id }) => property_id === ownProps.match.params.propertyId),
         propertyToShowDetails: state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
         propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id))
@@ -348,7 +348,7 @@ const mapStateToProps = (state, ownProps) => {
                         rent_amount: latestUnitLease.rent_amount,
                     });
             }
-            ),
+            ).sort((unit1, unit2) => unit1.ref < unit2.ref ? -1 : unit1.ref > unit2.ref ? 1 : 0),
         propertyActiveLeasesNumber: propertyActiveLeases.length,
         propertySettings: state.propertySettings.find(({ property_id }) => property_id === ownProps.match.params.propertyId) || {},
         users: state.users,

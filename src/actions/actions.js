@@ -7,16 +7,16 @@ import * as propertyUnitChargeActions from "./propertyUnitCharges";
 import * as propertyUnitActions from "./propertyUnits";
 import * as managementFeesActions from "./managementFees";
 import * as contactsActions from "./contacts";
-import * as transactionsActions from "./transactions";
-import * as logActions from "./logs";
+import * as rentalPaymentsActions from "./rentalPayments";
 import * as companyProfileActions from "./companyProfile";
 import * as accountBillingActions from "./accountBilling";
 import * as usersActions from "./users";
-import * as transactionChargesActions from "./transactionsCharges";
+import * as rentalChargesActions from "./rentalCharges";
 import * as communicationEmailsActions from "./CommunicationEmails";
 import * as leaseActions from "./leases";
 import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
+import * as creditNotesActions from "./CreditNotes";
 import * as meterReadingsActions from "./meterReadings";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import { auth, firebaseStorage, firebaseFunctions } from "../firebase";
@@ -143,7 +143,7 @@ export async function uploadFilesToFirebase(fileToUpload) {
     try {
         const snapshot = await fileRef
             .putString(fileToUpload.data, "data_url");
-        // console.log("Uploaded files successfully!");
+        // console.log("Uploaded files successfully.");
         try {
             const url = await snapshot.ref.getDownloadURL();
             return url;
@@ -228,11 +228,11 @@ export function itemsFetchData(collectionsUrls) {
                         break;
 
                     case "transactions-charges":
-                        dispatch(transactionChargesActions.transactionChargesFetchDataSuccess(fetchedItems));
+                        dispatch(rentalChargesActions.rentalChargesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "charge-payments":
-                        dispatch(transactionsActions.transactionsFetchDataSuccess(fetchedItems));
+                        dispatch(rentalPaymentsActions.rentalPaymentsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "to-dos":
@@ -241,10 +241,6 @@ export function itemsFetchData(collectionsUrls) {
 
                     case "maintenance-requests":
                         dispatch(maintenanceRequestsActions.maintenanceRequestsFetchDataSuccess(fetchedItems));
-                        break;
-
-                    case "audit-logs":
-                        dispatch(logActions.auditLogsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "notices":
@@ -261,6 +257,10 @@ export function itemsFetchData(collectionsUrls) {
 
                     case "expenses":
                         dispatch(expensesActions.expensesFetchDataSuccess(fetchedItems));
+                        break;
+
+                    case "credit-notes":
+                        dispatch(creditNotesActions.creditNotesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "meter_readings":
@@ -348,7 +348,7 @@ export function handleDelete(itemId, url) {
                     break;
 
                 case "transactions-charges":
-                    dispatch(transactionChargesActions.deleteTransactionCharge(itemId)
+                    dispatch(rentalChargesActions.deleteTransactionCharge(itemId)
                     );
                     break;
 
@@ -357,7 +357,7 @@ export function handleDelete(itemId, url) {
                     break;
 
                 case "charge-payments":
-                    dispatch(transactionsActions.deleteTransaction(itemId)
+                    dispatch(rentalPaymentsActions.deleteTransaction(itemId)
                     );
                     break;
 
@@ -394,6 +394,10 @@ export function handleDelete(itemId, url) {
                     );
                     break;
 
+                case "credit-notes":
+                    dispatch(creditNotesActions.deleteCreditNote(itemId));
+                    break;
+
                 case "users":
                     dispatch(usersActions.deleteUser(itemId)
                     );
@@ -427,6 +431,7 @@ export function handleItemFormSubmit(data, url) {
     }
     return (dispatch) => {
         return new Promise(function (resolve, reject) {
+            dispatch(itemsIsLoading(true))
             typeof data.id !== "undefined"
                 ? //send post request to edit the item
                 getDatabaseRef()
@@ -463,7 +468,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "transactions-charges":
-                                dispatch(transactionChargesActions.editTransactionCharge(modifiedObject));
+                                dispatch(rentalChargesActions.editTransactionCharge(modifiedObject));
                                 break;
 
                             case "leases":
@@ -471,7 +476,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "charge-payments":
-                                dispatch(transactionsActions.editTransaction(modifiedObject));
+                                dispatch(rentalPaymentsActions.editTransaction(modifiedObject));
                                 break;
 
                             case "to-dos":
@@ -498,6 +503,10 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(expensesActions.editExpense(modifiedObject));
                                 break;
 
+                            case "credit-notes":
+                                dispatch(creditNotesActions.editCreditNote(modifiedObject));
+                                break;
+
                             case "users":
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
@@ -517,9 +526,10 @@ export function handleItemFormSubmit(data, url) {
                     })
                     .catch((error) => {
                         dispatch(itemsHasErrored(error.message))
-                        dispatch(itemsIsLoading(false));
                         console.log("Error updating document => ", error.response);
                         reject(error)
+                    }).finally(() => {
+                        dispatch(itemsIsLoading(false));
                     })
                 : //send post to create item
                 getDatabaseRef()
@@ -530,12 +540,15 @@ export function handleItemFormSubmit(data, url) {
                             id: docRef.id,
                         });
                         switch (url) {
+                            
                             case "property-settings":
                                 dispatch(propertySettingsActions.addPropertySetting(addedItem));
                                 break;
+
                             case "company_profile":
                                 dispatch(companyProfileActions.addCompanyProfile(addedItem));
                                 break;
+
                             case "properties":
                                 dispatch(propertyActions.addProperty(addedItem));
                                 break;
@@ -553,7 +566,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "transactions-charges":
-                                dispatch(transactionChargesActions.addTransactionCharge(addedItem));
+                                dispatch(rentalChargesActions.addTransactionCharge(addedItem));
                                 break;
 
                             case "leases":
@@ -561,7 +574,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "charge-payments":
-                                dispatch(transactionsActions.addTransaction(addedItem));
+                                dispatch(rentalPaymentsActions.addTransaction(addedItem));
                                 break;
 
                             case "to-dos":
@@ -588,6 +601,10 @@ export function handleItemFormSubmit(data, url) {
                                 dispatch(expensesActions.addExpense(addedItem));
                                 break;
 
+                            case "credit-notes":
+                                dispatch(creditNotesActions.addCreditNote(addedItem));
+                                break;
+
                             case "users":
                                 dispatch(usersActions.addUser(addedItem));
                                 break;
@@ -607,9 +624,10 @@ export function handleItemFormSubmit(data, url) {
                     })
                     .catch((error) => {
                         dispatch(itemsHasErrored(error.message))
-                        dispatch(itemsIsLoading(false));
                         console.log("Error adding document => ", error.response);
                         reject(error)
+                    }).finally(() => {
+                        dispatch(itemsIsLoading(false));
                     });
         })
     }

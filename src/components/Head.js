@@ -13,7 +13,7 @@ const Head = (props) => {
     return (
         <CustomHead>
             <meta charSet="utf-8" />
-            <title>{props.title}</title>
+            <title>RentGate PM - {props.title}</title>
             <meta
                 name="description"
                 content="DigitalDairy Dairy Farm Management Services. DigitalDairy offers the best dairy farm management technologies including software applications, digital devices and instruments, automation services and equipment and other I.T solutions. "

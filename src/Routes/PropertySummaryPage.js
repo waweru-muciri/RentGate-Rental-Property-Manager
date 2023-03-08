@@ -25,19 +25,19 @@ const legendOpts = {
 };
 
 let PropertySummaryPage = (props) => {
-    let { classes, propertyActiveLeasesNumber, propertyToShowDetails, propertyUnits, transactions, users } = props
+    let { classes, propertyActiveLeasesNumber, propertyToShowDetails, propertyUnits, rentalPayments, users } = props
     //get current month income data
     const curentMonthIncomeData = { datasets: [] }
     const totalPaymentsByType = []
-    const transactionsForCurrentMonth = transactions
+    const rentalPaymentsForCurrentMonth = rentalPayments
         .filter(payment => {
             return isWithinInterval(parse(payment.payment_date, 'yyyy-MM-dd', new Date()),
                 { start: startOfMonth(startOfToday()), end: endOfMonth(startOfToday()) })
         })
-    const totalCurrentMonthRentPayments = transactionsForCurrentMonth
+    const totalCurrentMonthRentPayments = rentalPaymentsForCurrentMonth
         .filter(payment => payment.payment_type === 'rent')
         .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
-    const totalCurrentMonthOtherPayments = transactionsForCurrentMonth
+    const totalCurrentMonthOtherPayments = rentalPaymentsForCurrentMonth
         .filter(payment => payment.payment_type !== 'rent')
         .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
     totalPaymentsByType.push({ type: "rent", totalAmount: totalCurrentMonthRentPayments, label: "Rent" })
@@ -94,13 +94,13 @@ let PropertySummaryPage = (props) => {
                         </CardActionArea>
                         <CardContent>
                             <Typography gutterBottom variant="subtitle1" component="h2">
-                                Address
-                                </Typography>
-                            <Typography variant="body2" component="p">
-                                {propertyToShowDetails.address}
+                                Name: {propertyToShowDetails.ref}
                             </Typography>
                             <Typography variant="body2" component="p">
-                                {propertyToShowDetails.city}
+                                Address: {propertyToShowDetails.address}
+                            </Typography>
+                            <Typography variant="body2" component="p">
+                                City: {propertyToShowDetails.city}
                             </Typography>
                         </CardContent>
                     </Card>

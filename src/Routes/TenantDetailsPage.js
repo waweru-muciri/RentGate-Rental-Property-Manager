@@ -31,8 +31,8 @@ const paymentsColumns = [
 ]
 
 let TenantDetailsPage = ({
-    transactions,
-    transactionsCharges,
+    rentalPayments,
+    rentalCharges,
     tenantUnit,
     tenantDetails,
     handleItemDelete,
@@ -50,11 +50,11 @@ let TenantDetailsPage = ({
         setTabValue(newValue);
     };
 
-    const currentMonthCharges = transactionsCharges.filter((chargeItem) => {
+    const currentMonthCharges = rentalCharges.filter((chargeItem) => {
         const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
         return isWithinInterval(chargeItemDate, { start: startOfMonth(startOfToday()), end: endOfMonth(startOfToday()) })
     })
-    const currentMonthPayments = transactions.filter((paymentItem) => {
+    const currentMonthPayments = rentalPayments.filter((paymentItem) => {
         const paymentItemDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
         return isWithinInterval(paymentItemDate, { start: startOfMonth(startOfToday()), end: endOfMonth(startOfToday()) })
     })
@@ -68,7 +68,7 @@ let TenantDetailsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={1}>
-                <IndividualTenantChargesStatement tenantTransactionCharges={transactionsCharges}
+                <IndividualTenantChargesStatement tenantTransactionCharges={rentalCharges}
                     tenantDetails={tenantDetails} handleItemDelete={handleItemDelete} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
@@ -172,12 +172,12 @@ const mapStateToProps = (state, ownProps) => {
         .find(({ tenants }) => Array.isArray(tenants) ? tenants.includes(ownProps.match.params.contactId) : false) || {}
     const unitInLease = state.propertyUnits.find(({ id }) => id === currentTenantActiveLease.unit_id) || {}
     return {
-        transactionsCharges: state.transactionsCharges
+        rentalCharges: state.rentalCharges
             .filter((charge) => charge.tenant_id === ownProps.match.params.contactId).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
             .map((charge) => {
                 const chargeDetails = {}
                 //get payments with this charge id
-                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                const chargePayments = state.rentalPayments.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
                 const payed_amount = chargePayments.reduce((total, currentValue) => {
                     return total + parseFloat(currentValue.payment_amount) || 0
@@ -189,7 +189,7 @@ const mapStateToProps = (state, ownProps) => {
             .sort((charge1, charge2) => parse(charge2.charge_date, 'yyyy-MM-dd', new Date()) -
                 parse(charge1.charge_date, 'yyyy-MM-dd', new Date())),
         tenantUnit: Object.assign({}, unitInLease, currentTenantActiveLease),
-        transactions: state.transactions.filter((payment) => payment.tenant_id === ownProps.match.params.contactId),
+        rentalPayments: state.rentalPayments.filter((payment) => payment.tenant_id === ownProps.match.params.contactId),
         tenantDetails: state.contacts.find(({ id }) => id === ownProps.match.params.contactId) || {}
     }
 };

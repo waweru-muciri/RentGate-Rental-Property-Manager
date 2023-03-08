@@ -88,7 +88,7 @@ let PropertyUnitInputForm = (props) => {
 					//save the unit details
 					await handleItemSubmit(property_unit, 'property_units')
 					resetForm({});
-					setStatus({ sent: true, msg: "Unit saved successfully!" })
+					setStatus({ sent: true, msg: "Unit saved successfully." })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
 

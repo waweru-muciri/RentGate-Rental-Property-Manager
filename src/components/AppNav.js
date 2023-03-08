@@ -29,7 +29,6 @@ import TimelineIcon from "@material-ui/icons/Timeline";
 import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ContactMailIcon from "@material-ui/icons/ContactMail";
-import HistoryIcon from "@material-ui/icons/History";
 import MoneyIcon from "@material-ui/icons/Money";
 import ContactsIcon from "@material-ui/icons/Contacts";
 import DashboardIcon from "@material-ui/icons/Dashboard";
@@ -43,6 +42,7 @@ import NoteIcon from '@material-ui/icons/Note';
 import LockIcon from '@material-ui/icons/Lock';
 import ApartmentIcon from '@material-ui/icons/Apartment';
 import PaymentIcon from '@material-ui/icons/Payment';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ScheduleIcon from '@material-ui/icons/Schedule';
@@ -59,8 +59,8 @@ const navigationLinks = [
     { text: "Email", to: "/app/emails", icon: <ContactMailIcon /> },
     { text: "Account Settings", to: "/app/account-settings", icon: <SettingsIcon /> },
     { text: "Documents Templates", to: "/app/documents-templates", icon: <ImportExportIcon /> },
-    { text: "Audit Logs", to: "/app/audit-logs", icon: <HistoryIcon /> },
 ];
+
 const othersLinkNestedLinks = [
     { text: "Vacating Notices", to: "/app/notices", icon: <NoteIcon /> },
     { text: "Maintenance Requests", to: "/app/maintenance-requests", icon: <EventNoteIcon /> },
@@ -108,6 +108,7 @@ const accountsLinkNestedLinks = [
     { text: "Rent Roll", to: "/app/rent-roll", icon: <ScheduleIcon /> },
     { text: "Other Charges", to: "/app/other-charges", icon: <MoneyIcon /> },
     { text: "Payments", to: "/app/payments", icon: <PaymentIcon /> },
+    { text: "Credit Notes", to: "/app/credit-notes", icon: <CreditCardIcon /> },
     {
         text: "Property Expenses",
         to: "/app/property_expenditure",

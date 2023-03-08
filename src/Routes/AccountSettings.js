@@ -3,7 +3,6 @@ import { Grid } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
-import AccountSettings from "../components/users/AccountSettingsInputForm";
 import { withRouter } from "react-router-dom";
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
@@ -13,6 +12,8 @@ import TabPanel from "../components/TabPanel";
 import TextField from "@material-ui/core/TextField";
 import SaveIcon from "@material-ui/icons/Save";
 import CommonTable from "../components/table/commonTable";
+import CustomSnackbar from '../components/CustomSnackbar'
+import CustomCircularProgress from "../components/CustomCircularProgress";
 import { commonStyles } from "../components/commonStyles";
 import { handleItemFormSubmit } from '../actions/actions'
 import { Formik } from "formik";
@@ -20,19 +21,19 @@ import * as Yup from "yup";
 
 
 const CompanyInfoSchema = Yup.object().shape({
-	company_name: Yup.string().trim(),
-	company_address: Yup.string().trim(),
-	company_phone_number: Yup.string().trim(),
+	company_name: Yup.string().trim().required("Name is required"),
+	company_address: Yup.string().trim().required("Company address required"),
+	company_phone_number: Yup.string().trim().required("Company contacts required"),
 	company_other_phone_number: Yup.string().trim(),
-	company_primary_email: Yup.string().trim().email("Invalid Email"),
+	company_primary_email: Yup.string().trim().email("Invalid Email").required("Company contacts required"),
 	company_other_email: Yup.string().trim().email("Invalid Email"),
 });
 
 const BillingInfoSchema = Yup.object().shape({
-	billing_company: Yup.string().trim(),
-	billing_address: Yup.string().trim(),
-	billing_phone_number: Yup.string().trim(),
-	billing_email: Yup.string().trim().email("Invalid Email"),
+	billing_company: Yup.string().trim().required("Name is required"),
+	billing_address: Yup.string().trim().required("Billing address required"),
+	billing_phone_number: Yup.string().trim().required("Billing contacts required"),
+	billing_email: Yup.string().trim().email("Invalid Email").required("Billing contacts required"),
 });
 
 const billingTableHeadCells = [
@@ -70,30 +71,14 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 	};
 
 	return (
-		<Layout pageTitle={"Admin Account Details"}>
+		<Layout pageTitle={"Profile"}>
 			<AppBar position="static">
 				<Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example">
-					<Tab label="Account Profile" />
-					<Tab label="Company Details" />
+					<Tab label="Profile" />
 					<Tab label="Billing &amp; Payments" />
 				</Tabs>
 			</AppBar>
 			<TabPanel value={tabValue} index={0}>
-				<Grid container justify="center" direction="column">
-					<Grid item >
-						<Typography variant="h6">Account Details</Typography>
-					</Grid>
-					<Grid
-						container
-						direction="column"
-						justify="center"
-						item
-					>
-						<AccountSettings userToShow={userToShow} handleItemSubmit={handleItemSubmit} />
-					</Grid>
-				</Grid>
-			</TabPanel>
-			<TabPanel value={tabValue} index={1}>
 				<Grid container justify="center" direction="column">
 					<Grid item>
 						<Typography variant="h6">Company Information</Typography>
@@ -109,24 +94,31 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 							initialValues={CompanyInfoInitialValues}
 							enableReinitialize
 							validationSchema={CompanyInfoSchema}
-							onSubmit={async (values, { resetForm }) => {
-								const companyInfoValues = {
-									id: values.id,
-									company_address: values.company_address,
-									company_name: values.company_name,
-									company_primary_email: values.company_primary_email,
-									company_phone_number: values.company_phone_number,
-									company_other_phone_number: values.company_other_phone_number,
-									company_other_email: values.company_other_email,
-								};
-								await handleItemSubmit(companyInfoValues, "company_profile")
-								resetForm({});
+							onSubmit={async (values, { resetForm, setStatus }) => {
+								try {
+									const companyInfoValues = {
+										id: values.id,
+										company_address: values.company_address,
+										company_name: values.company_name,
+										company_primary_email: values.company_primary_email,
+										company_phone_number: values.company_phone_number,
+										company_other_phone_number: values.company_other_phone_number,
+										company_other_email: values.company_other_email,
+									};
+									await handleItemSubmit(companyInfoValues, "company_profile")
+									resetForm({});
+									// show that everything is successfully done
+									setStatus({ sent: true, msg: "Profile saved successfully." })
+								} catch (error) {
+									setStatus({ sent: false, msg: `Error! ${error}.` })
+								}
 							}}
 						>
 							{({
 								values,
 								touched,
 								errors,
+								status,
 								handleChange,
 								handleBlur,
 								handleSubmit,
@@ -151,6 +143,17 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 											item
 											direction="column"
 										>
+											{
+												status && status.msg && (
+													<CustomSnackbar
+														variant={status.sent ? "success" : "error"}
+														message={status.msg}
+													/>
+												)
+											}
+											{
+												isSubmitting && (<CustomCircularProgress open={true} dialogTitle="Saving user info" />)
+											}
 											<Grid item container direction="row" spacing={2}>
 												<Grid item xs={12} sm>
 													<TextField
@@ -268,7 +271,7 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 					</Grid>
 				</Grid>
 			</TabPanel>
-			<TabPanel value={tabValue} index={2}>
+			<TabPanel value={tabValue} index={1}>
 				<Grid container justify="center" direction="column" spacing={2}>
 					<Grid item>
 						<Typography>Billing Info</Typography>

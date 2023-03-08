@@ -21,9 +21,9 @@ export function deleteTransactionCharge(transactionChargeId) {
     };
 }
 
-export function transactionChargesFetchDataSuccess(transactionCharges) {
+export function rentalChargesFetchDataSuccess(rentalCharges) {
     return {
         type: actionTypes.TRANSACTION_CHARGES_FETCH_DATA_SUCCESS,
-        transactionCharges,
+        rentalCharges,
     };
 }

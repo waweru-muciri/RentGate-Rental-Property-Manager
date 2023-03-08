@@ -20,7 +20,7 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 const usersTableHeadCells = [
 	{ id: "first_name", numeric: false, disablePadding: true, label: "First Name" },
 	{ id: "last_name", numeric: false, disablePadding: true, label: "Last Name" },
-	{ id: "phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
+	{ id: "personal_phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
 	{ id: "primary_email", numeric: false, disablePadding: true, label: "Primary Email" },
 	{ id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
 	{ id: "details", numeric: false, disablePadding: true, label: "Details" },
@@ -238,7 +238,6 @@ let UsersPage = ({
 						handleDelete={deleteUserAuthentication}
 					/>
 				</Grid>
-
 			</Grid>
 		</Layout>
 	);

@@ -6,7 +6,7 @@ import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Grid, TextField, Button, Box } from "@material-ui/core";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, itemsFetchData } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
 import { withRouter } from "react-router-dom";
@@ -19,6 +19,7 @@ const emailsTableHeadCells = [
 ];
 
 let EmailsPage = ({
+    fetchData,
     communicationEmails,
     match,
 }) => {
@@ -26,6 +27,10 @@ let EmailsPage = ({
     let [selected, setSelected] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
+
+    useEffect(() => {
+		fetchData(['communication_emails']);
+	}, [fetchData]);
 
     const classes = commonStyles();
 
@@ -187,7 +192,7 @@ let EmailsPage = ({
                         rows={emailItems}
                         headCells={emailsTableHeadCells}
                         handleDelete={handleDelete}
-                        deleteUrl={"communicationEmails"}
+                        deleteUrl={"communication_emails"}
                         noDetailsCol
                         noEditCol
                         noDeleteCol
@@ -199,16 +204,18 @@ let EmailsPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
         users: state.users,
         currentUser: state.currentUser,
         communicationEmails: state.communicationEmails,
-        isLoading: state.isLoading,
-        match: ownProps.match,
     };
 };
-
-EmailsPage = connect(mapStateToProps)(EmailsPage);
+const mapDispatchToProps = (dispatch) => {
+	return {
+		fetchData: (collectionsUrls) => dispatch(itemsFetchData(collectionsUrls)),
+	};
+};
+EmailsPage = connect(mapStateToProps, mapDispatchToProps)(EmailsPage);
 
 export default withRouter(EmailsPage);
