@@ -73,8 +73,6 @@ const SignUpLayout = ({ setUser }) => {
               .then(() => history.push("/"))
               .catch(function (error) {
                 // Handle Errors here.
-              resetForm({});
-              setSubmitting(false);
                 var errorCode = error.code;
                 var errorMessage =
                   errorCode === "auth/weak-password"
@@ -86,10 +84,12 @@ const SignUpLayout = ({ setUser }) => {
                     : errorCode === "auth/email-already-in-use"
                     ? "Email is already in Use"
                     : "May God help Us";
+                setSubmitting(false);
                 setStatus({ error: errorMessage });
                 console.log("Error code => ", errorCode);
                 console.log("Error message => ", errorMessage);
               });
+            resetForm({});
           }}
           render={({
             values,
@@ -99,7 +99,7 @@ const SignUpLayout = ({ setUser }) => {
             errors,
             handleChange,
             handleBlur,
-            isSubmitting
+            isSubmitting,
           }) => (
             <form
               className={classes.form}
@@ -112,11 +112,9 @@ const SignUpLayout = ({ setUser }) => {
                   <PageHeading paddingLeft={2} text={"Sign Up"} />
                 </Grid>
                 <FormControl fullWidth>
-                  {status && 
-                    <FormHelperText error={true}>
-                      {status.error}
-                    </FormHelperText>
-                  }
+                  {status && (
+                    <FormHelperText error={true}>{status.error}</FormHelperText>
+                  )}
                 </FormControl>
                 <Grid item key={3}>
                   <TextField
@@ -166,14 +164,25 @@ const SignUpLayout = ({ setUser }) => {
                   />
                 </Grid>
                 <Grid item>
-                  <Button type="submit" variant="outlined" color="primary" form="signUpForm">
+                  <Button
+                    disabled={isSubmitting}
+                    type="submit"
+                    variant="outlined"
+                    color="primary"
+                    form="signUpForm"
+                  >
                     Sign Up
                   </Button>
                 </Grid>
                 <Grid item>
                   <Typography variant="subtitle1">
                     Have an account?
-                    <Button color="primary" component={Link} to={"/login"}>
+                    <Button
+                      disabled={isSubmitting}
+                      color="primary"
+                      component={Link}
+                      to={"/login"}
+                    >
                       Sign In
                     </Button>
                   </Typography>

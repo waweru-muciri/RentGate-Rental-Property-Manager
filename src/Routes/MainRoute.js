@@ -362,9 +362,6 @@ function AppNavLayout(props) {
 
   return (
     <React.Fragment>
-    {
-      console.log(currentUser)
-    }
    <Router>
     <AppNavLayout selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} pageTitle={"Yarra Property Management"}/>
         <Switch>
