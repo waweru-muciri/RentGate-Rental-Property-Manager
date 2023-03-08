@@ -157,7 +157,7 @@ let MainPage = ({
                 />
                 <Route
                   exact
-                  path={`${match.path}payments/new`}
+                  path={`${match.path}payments/:chargeId/new`}
                   component={PaymentPage}
                 />
                 <Route

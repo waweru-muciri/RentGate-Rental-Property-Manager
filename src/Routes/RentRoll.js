@@ -11,24 +11,27 @@ import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import moment from "moment";
+import { handleItemFormSubmit } from '../actions/actions'
+
+const defaultDate = moment().format('YYYY-MM-DD')
 
 const headCells = [
     { id: "lease_details", numeric: false, disablePadding: true, label: "Lease Details", },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
-    { id: "status", numeric: false, disablePadding: true, label: "Status", },
-    { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
-    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
+    { id: "due_date", numeric: false, disablePadding: true, label: "Rent Due Date", },
+    { id: "charge_amount", numeric: false, disablePadding: true, label: "Rent Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
-    { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
+    { id: "balance", numeric: false, disablePadding: true, label: "Rent Balance" },
 ];
 
 let RentRollPage = ({
-    transactions,
     transactionsCharges,
     properties,
     contacts,
-    users
+    users,
+    handleItemSubmit
 }) => {
     let [chargeItems, setChargeItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
@@ -78,6 +81,25 @@ let RentRollPage = ({
         setToDateFilter("");
     };
 
+    const setPayedChargesPayedInFull = () => {
+        console.log('Selected Charges => ', selected)
+        const chargesToAddPayments = transactionsCharges.filter(({ id }) => selected.includes(id))
+        //post the charges here to show that they are payed
+        chargesToAddPayments.forEach(async(charge) => {
+            const chargePayment = {
+                charge_id: charge.id,
+                amount: charge.charge_amount,
+                payment_date: defaultDate,
+                tenant_id: charge.tenant_id,
+                unit_ref: charge.unit_ref,
+                unit_id: charge.unit_id,
+                payment_label: charge.charge_label,
+                payment_type: charge.charge_type,
+            };
+            await handleItemSubmit(chargePayment, 'charge-payments')
+        })
+    }
+
     return (
         <Layout pageTitle="Rent Roll">
             <Grid
@@ -96,6 +118,18 @@ let RentRollPage = ({
                     direction="row"
                     key={1}
                 >
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            onClick={() => setPayedChargesPayedInFull()}
+                        >
+                            Receive Full Payments
+                        </Button>
+                    </Grid>
                     <Grid item>
                         <PrintArrayToPdf
                             disabled={selected.length <= 0}
@@ -224,7 +258,7 @@ let RentRollPage = ({
                                         >
                                             {users.map((user, index) => (
                                                 <MenuItem key={index} value={user.id}>
-                                                    {user.first_name + ' ' + user.last_name}
+                                                    {user.first_name} {user.last_name}
                                                 </MenuItem>
                                             ))}
                                         </TextField>
@@ -246,7 +280,7 @@ let RentRollPage = ({
                                         >
                                             {contacts.map((contact, contactIndex) => (
                                                 <MenuItem key={contactIndex} value={contact.id}>
-                                                    {contact.first_name + ' ' + contact.last_name}
+                                                    {contact.first_name} {contact.last_name}
                                                 </MenuItem>
                                             ))}
                                         </TextField>
@@ -310,12 +344,15 @@ let RentRollPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions.filter((payment) => payment.payment_type === 'rent_income'),
+        transactions: state.transactions.filter((payment) => payment.payment_type === 'rent'),
         properties: state.properties,
         transactionsCharges: state.transactionsCharges
-            .filter((charge) => charge.charge_type === 'rent_income').sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
+            .filter((charge) => charge.charge_type === 'rent').sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
             .map((charge) => {
+                const tenant = state.contacts.find((contact) => contact.id === charge.tenant_id) || {};
                 const chargeDetails = {}
+                chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
+                chargeDetails.tenant_id_number = tenant.id_number
                 chargeDetails.lease_details = `${charge.property_ref} - ${charge.unit_ref}`;
                 chargeDetails.status = moment(charge.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
                 // const daysLeft = moment(charge.lease_end).diff(moment(), 'days')
@@ -323,10 +360,11 @@ const mapStateToProps = (state) => {
                 //get payments with this charge id
                 const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
-                chargeDetails.payed_amount = 0
+                let payed_amount = 0
                 chargePayments.forEach(chargePayment => {
-                    chargeDetails.payed_amount += chargePayment.amount
+                    payed_amount += parseFloat(chargePayment.amount) || 0
                 });
+                chargeDetails.payed_amount = payed_amount
                 chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
                 return Object.assign({}, charge, chargeDetails);
             }),
@@ -335,4 +373,11 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps)(RentRollPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+    }
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(RentRollPage);

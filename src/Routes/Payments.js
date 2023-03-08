@@ -11,7 +11,6 @@ import {
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
@@ -21,72 +20,27 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import { getTransactionsFilterOptions } from "../assets/commonAssets";
+
+
+const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    {
-        id: "payment_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Payment Date",
-    },
-    {
-        id: "payment_label",
-        numeric: false,
-        disablePadding: true,
-        label: "Payment Type",
-    },
-    {
-        id: "tenant_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Tenant Name",
-    },
-    {
-        id: "unit_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Number/Ref",
-    },
-    {
-        id: "amount",
-        numeric: false,
-        disablePadding: true,
-        label: "Payment Amount",
-    }, {
-        id: "balances",
-        numeric: false,
-        disablePadding: true,
-        label: "Balance",
-    },
+    { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
+    { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
+    { id: "amount", numeric: false, disablePadding: true, label: "Payment Amount" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box m={2}>{children}</Box>}
-        </div>
-    );
-}
 
 let TransactionPage = ({
-    currentUser,
-    isLoading,
     transactions,
     properties,
-    contacts,
     match,
-    users,
     handleItemDelete,
     error,
 }) => {
@@ -94,65 +48,29 @@ let TransactionPage = ({
     let [transactionItems, setTransactionItems] = useState([]);
     let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [periodFilter, setPeriodFilter] = useState();
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {};
-            transactionDetails.tenant =
-                typeof tenant !== "undefined"
-                    ? tenant.first_name + " " + tenant.last_name
-                    : "";
-            transactionDetails.landlord_name =
-                typeof landlord !== "undefined"
-                    ? landlord.first_name + " " + landlord.last_name
-                    : "";
-            if (typeof property !== "undefined") {
-                transactionDetails.property_ref = property.ref
-                transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
-            }
-            transactionDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setTransactionItems(mappedTransactions);
-        setFilteredTransactionItems(mappedTransactions);
-    }, [transactions, contacts, properties, users]);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
-
+        setTransactionItems(transactions);
+        setFilteredTransactionItems(transactions);
+    }, [transactions]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
         let filteredTransactions = transactionItems
-            .filter(({ transaction_date }) =>
-                !fromDateFilter ? true : transaction_date >= fromDateFilter
+            .filter(({ payment_date }) =>
+                !fromDateFilter ? true : payment_date >= fromDateFilter
             )
-            .filter(({ transaction_date }) =>
-                !toDateFilter ? true : transaction_date <= toDateFilter
+            .filter(({ payment_date }) =>
+                !toDateFilter ? true : payment_date <= toDateFilter
             )
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
-            .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord === assignedToFilter
-            );
         setFilteredTransactionItems(filteredTransactions);
     };
 
@@ -160,7 +78,7 @@ let TransactionPage = ({
         event.preventDefault();
         setFilteredTransactionItems(transactionItems);
         setPropertyFilter("");
-        setAssignedToFilter("");
+        setPeriodFilter("");
         setFromDateFilter("");
         setToDateFilter("");
     };
@@ -183,19 +101,7 @@ let TransactionPage = ({
                     direction="row"
                     key={1}
                 >
-                    <Grid item>
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<AddIcon />}
-                            component={Link}
-                            to={`${match.url}/new`}
-                        >
-                            NEW
-                        </Button>
-                    </Grid>
+
                     <Grid item>
                         <Button
                             type="button"
@@ -251,32 +157,6 @@ let TransactionPage = ({
                                         fullWidth
                                         select
                                         variant="outlined"
-                                        id="assigned_to"
-                                        name="assigned_to"
-                                        label="Assigned To"
-                                        value={assignedToFilter}
-                                        onChange={(event) => {
-                                            setAssignedToFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                    >
-                                        {users.map((user, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={user.id}
-                                            >
-                                                {user.first_name + ' ' +
-                                                    user.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
                                         name="property_filter"
                                         label="Select Property"
                                         id="property_filter"
@@ -293,6 +173,31 @@ let TransactionPage = ({
                                                 value={property.id}
                                             >
                                                 {property.ref}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        select
+                                        id="period_filter"
+                                        name="period_filter"
+                                        label="Period"
+                                        value={periodFilter}
+                                        onChange={(event) => {
+                                            setPeriodFilter(
+                                                event.target.value
+                                            );
+                                        }}
+                                    >
+                                        {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
+                                            <MenuItem
+                                                key={index}
+                                                value={filterOption.id}
+                                            >
+                                                {filterOption.text}
                                             </MenuItem>
                                         ))}
                                     </TextField>
@@ -390,34 +295,32 @@ let TransactionPage = ({
                         setSelected={setSelected}
                         rows={filteredTransactionItems}
                         headCells={headCells}
-                        
+
                         handleDelete={handleItemDelete}
                         deleteUrl={"transactions"}
                     />
                 </Grid>
-                
+
             </Grid>
         </Layout>
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions,
-        users: state.users,
-        currentUser: state.currentUser,
-        expenses: state.expenses,
+        transactions: state.transactions.map((payment) => {
+            const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
+            return Object.assign({}, payment, {
+                tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+            })
+        }).sort((payment1, payment2) => payment2.payment_date > payment1.payment_date),
         properties: state.properties,
-        contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

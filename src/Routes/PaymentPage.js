@@ -3,20 +3,24 @@ import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
+import { handleItemFormSubmit } from '../actions/actions'
 import PaymentInputForm from "../components/transactions/PaymentInputForm";
 import { withRouter } from "react-router-dom";
 
-let TransactionPage = (props) => {
+let PaymentPage = ({ history, match, transactions, transactionsCharges, contacts, handleItemSubmit }) => {
 	// Get the action to complete.
-	let transactionToEditId = props.match.params.transactionId;
-	let paymentToEdit = props.transactions.find(
-		({ id }) => id === transactionToEditId
-	);
-	paymentToEdit = typeof paymentToEdit !== 'undefined' ? paymentToEdit : {}
-	let pageTitle = transactionToEditId ? "Edit Payment" : "New Payment";
-
+	const chargeToAddPaymentId = match.params.chargeId;
+	const chargeToAddPayment = transactionsCharges.find(({ id }) => id === chargeToAddPaymentId) || {};
+	const chargePayments = transactions.filter((payment) => payment.charge_id === chargeToAddPaymentId)
+	chargeToAddPayment.payed_amount = 0
+	chargePayments.forEach(chargePayment => {
+		chargeToAddPayment.payed_amount += chargePayment.amount
+	});
+	chargeToAddPayment.balance = chargeToAddPayment.charge_amount - chargeToAddPayment.payed_amount
+	const contactWithCharge = contacts.find((contact) => contact.id === chargeToAddPayment.tenant_id) || {}
+	const pageTitle = `Receive Payment for - ${chargeToAddPayment.unit_ref} • ${contactWithCharge.first_name} ${contactWithCharge.last_name}`;
 	return (
-		<Layout pageTitle="Lease Details">
+		<Layout pageTitle="Payment Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading paddingLeft={2} text={pageTitle} />
@@ -29,7 +33,9 @@ let TransactionPage = (props) => {
 					key={3}
 				>
 					<PaymentInputForm
-						paymentToEdit={paymentToEdit} 
+						chargeToAddPayment={chargeToAddPayment}
+						handleItemSubmit={handleItemSubmit}
+						history={history}
 					/>
 				</Grid>
 			</Grid>
@@ -40,10 +46,17 @@ let TransactionPage = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		transactions: state.transactions,
-		error: state.error,
+		transactionsCharges: state.transactionsCharges,
+		contacts: state.contacts,
 	};
 };
 
-TransactionPage = connect(mapStateToProps)(TransactionPage);
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	}
+};
 
-export default withRouter(TransactionPage);
+PaymentPage = connect(mapStateToProps, mapDispatchToProps)(PaymentPage);
+
+export default withRouter(PaymentPage);

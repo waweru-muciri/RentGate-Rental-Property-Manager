@@ -6,12 +6,9 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
-import {
-    PieChart,
-    Pie,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import TEAL from '@material-ui/core/colors/teal';
+import PURPLE from '@material-ui/core/colors/purple';
+import { Doughnut } from 'react-chartjs-2';
 
 
 let PropertySummaryPage = (props) => {
@@ -24,32 +21,17 @@ let PropertySummaryPage = (props) => {
         { name: 'Vacant Units', value: propertyUnits.length - occupiedUnitsNumber },
     ]
     //get the number of the different units by category
-    const unitTypesData = [
-        {
-            name: "BedSitters",
-            value: propertyUnits.filter((property) => property.unit_type === 'Bedsitter').length,
-        },
-        {
-            name: "One Bedroom",
-            value: propertyUnits.filter((property) => property.unit_type === 'One Bedroom').length,
-        },
-        {
-            name: "Two Bedroom",
-            value: propertyUnits.filter((property) => property.unit_type === 'Two Bedroom').length,
-        },
-        {
-            name: "Single Room",
-            value: propertyUnits.filter((property) => property.unit_type === 'Single Room').length,
-        },
-        {
-            name: "Double Room",
-            value: propertyUnits.filter((property) => property.unit_type === 'Double Room').length,
-        },
-        {
-            name: "Shop",
-            value: propertyUnits.filter((property) => property.unit_type === 'Shop').length,
-        }
-    ]
+    const rentalUnitsDistributionData = { datasets: [] }
+    const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)))
+    rentalUnitsDistributionData.labels = unitTypes
+    rentalUnitsDistributionData.datasets.push({
+        data: unitTypes
+            .map(unit_type => {
+                return propertyUnits.filter((property) => property.unit_type === unit_type).length
+            }), 
+        backgroundColor: unitTypes.map((_unit_type, key) => TEAL[(key+ 1) * 100])
+    })
+    console.log(rentalUnitsDistributionData)
     const propertyManager = users.find((user) => user.id === propertyToShowDetails.assigned_to) ||
         { first_name: 'R', last_name: 'O' }
     const propertyOwner = users.find((user) => user.id === propertyToShowDetails.owner) ||
@@ -129,13 +111,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Rental Units Distribution
                             </Typography>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <PieChart>
-                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value"
-                                        outerRadius={80} fill="#8884d8" label />
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <Doughnut data={rentalUnitsDistributionData} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -145,13 +121,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Occupancy Data
                             </Typography>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <PieChart>
-                                    <Pie isAnimationActive={true} data={occupancyChartData} 
-                                    dataKey="value" outerRadius={80} fill="#7DB3FF" label />
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <Doughnut data={rentalUnitsDistributionData} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -161,13 +131,7 @@ let PropertySummaryPage = (props) => {
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
                                 Hello world
                             </Typography>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <PieChart>
-                                    <Pie isAnimationActive={true} data={unitTypesData} dataKey="value"
-                                        outerRadius={80} fill="#FF7C78" label />
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <Doughnut data={rentalUnitsDistributionData} />
                         </CardContent>
                     </Card>
                 </Grid>

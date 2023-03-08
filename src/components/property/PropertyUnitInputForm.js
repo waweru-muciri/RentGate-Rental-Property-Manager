@@ -173,7 +173,7 @@ let PropertyUnitInputForm = (props) => {
 						charge_amount: values.rent_amount,
 						charge_date: defaultDate,
 						charge_label: "Rent Income",
-						charge_type: "rent_income",
+						charge_type: "rent",
 						due_date: defaultDate,
 						tenant_id: tenant.id,
 						tenant_name: `${tenant.first_name} ${tenant.last_name}`,

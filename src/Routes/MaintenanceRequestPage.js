@@ -3,15 +3,14 @@ import { Grid } from "@material-ui/core";
 import PageHeading from "../components/PageHeading";
 import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
+import { handleItemFormSubmit } from '../actions/actions'
 import MaintenanceRequestInputForm from "../components/maintenance/MaintenanceInputForm";
 import { withRouter } from "react-router-dom";
 
-let MaintenanceRequestPage = (props) => {
-	let maintenanceRequestToEditId = props.match.params.maintenanceRequestId;
-	let maintenanceRequestToEdit = props.maintenanceRequests.find(
-		({ id }) => id === maintenanceRequestToEditId
-	);
-	let pageTitle = maintenanceRequestToEditId
+let MaintenanceRequestPage = ({match, history, contacts, maintenanceRequests, handleItemSubmit}) => {
+	let maintenanceRequestToEditId = match.params.maintenanceRequestId;
+	let maintenanceRequestToEdit = maintenanceRequests.find(({ id }) => id === maintenanceRequestToEditId) || {};
+	let pageTitle = maintenanceRequestToEdit.id
 		? "Edit Maintenance Request"
 		: "New Maintenance Request";
 
@@ -24,6 +23,9 @@ let MaintenanceRequestPage = (props) => {
 				<Grid item key={2}>
 					<MaintenanceRequestInputForm
 						maintenanceRequestToEdit={maintenanceRequestToEdit}
+						contacts={contacts}
+						handleItemSubmit={handleItemSubmit}
+						history={history}
 					/>
 				</Grid>
 			</Grid>
@@ -34,10 +36,17 @@ let MaintenanceRequestPage = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		maintenanceRequests: state.maintenanceRequests,
-		error: state.error,
+		contacts: state.contacts,
 	};
 };
 
-MaintenanceRequestPage = connect(mapStateToProps)(MaintenanceRequestPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
+    }
+};
+
+
+MaintenanceRequestPage = connect(mapStateToProps, mapDispatchToProps)(MaintenanceRequestPage);
 
 export default withRouter(MaintenanceRequestPage);

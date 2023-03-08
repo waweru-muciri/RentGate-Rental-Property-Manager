@@ -10,10 +10,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
-import { connect } from "react-redux";
 import { Formik } from "formik";
-import { handleItemFormSubmit } from "../../actions/actions";
-import { withRouter } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import moment from "moment";
 import * as Yup from "yup";
@@ -29,8 +26,8 @@ const defaultDate = moment().format("YYYY-MM-DD");
 
 let MaintenanceRequestInputForm = (props) => {
 	let classes = commonStyles();
-	const {currentUser, handleItemSubmit, history, contacts } = props
-	let maintenanceRequest = typeof props.maintenanceRequestToEdit !== 'undefined' ? props.maintenanceRequestToEdit : {};
+	const { handleItemSubmit, history, maintenanceRequestToEdit, contacts } = props
+	let maintenanceRequest = maintenanceRequestToEdit;
 	let maintenanceRequestValues = {
 		id: maintenanceRequest.id,
 		contact: maintenanceRequest.contact || "",
@@ -64,17 +61,18 @@ let MaintenanceRequestInputForm = (props) => {
 					issue_urgency: values.issue_urgency,
 					status: values.status,
 				};
-				handleItemSubmit( maintenanceRequest, "maintenance-requests").then(
+				handleItemSubmit(maintenanceRequest, "maintenance-requests").then(
 					(response) => {
-				resetForm({});
-				if (values.id) {
-					history.goBack();
-				}
+						resetForm({});
+						if (values.id) {
+							history.goBack();
+						}
 					}
 				);
 			}}
 		>
 			{({ values,
+				touched,
 				errors,
 				handleChange,
 				handleBlur,
@@ -104,8 +102,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.contact}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'contact' in errors}
-									helperText={errors.contact}
+									error={errors.contact && touched.contact}
+									helperText={touched.contact && errors.contact}
 								>
 									{contacts.map((contact, index) => (
 										<MenuItem key={index} value={contact.id}>
@@ -124,8 +122,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.date_created}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'date_created' in errors}
-									helperText={errors.date_created}
+									error={errors.date_created && touched.date_created}
+									helperText={touched.date_created && errors.date_created}
 								/>
 								<TextField
 									fullWidth
@@ -138,8 +136,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.expected_completion_date}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'expected_completion_date' in errors}
-									helperText={errors.expected_completion_date}
+									error={errors.expected_completion_date && touched.expected_completion_date}
+									helperText={touched.expected_completion_date && errors.expected_completion_date}
 								/>
 								<TextField
 									fullWidth
@@ -152,8 +150,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.actual_completion_date}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'actual_completion_date' in errors}
-									helperText={errors.actual_completion_date}
+									error={errors.actual_completion_date && touched.actual_completion_date}
+									helperText={touched.actual_completion_date && errors.actual_completion_date}
 								/>
 								<TextField
 									fullWidth
@@ -166,10 +164,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.maintenance_details}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'maintenance_details' in errors}
-									helperText={
-										errors.maintenance_details
-									}
+									error={errors.maintenance_details && touched.maintenance_details}
+									helperText={touched.maintenance_details && errors.maintenance_details}
 								/>
 								<TextField
 									fullWidth
@@ -182,10 +178,8 @@ let MaintenanceRequestInputForm = (props) => {
 									value={values.other_details}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'other_details' in errors}
-									helperText={
-										errors.other_details
-									}
+									error={errors.other_details && touched.other_details}
+									helperText={touched.other_details && errors.other_details}
 								/>
 								<FormControl fullWidth component="fieldset">
 									<FormLabel component="legend">
@@ -260,27 +254,31 @@ let MaintenanceRequestInputForm = (props) => {
 							{/** end of maintenance request details grid **/}
 
 							<Grid item className={classes.buttonBox}>
-								<Button
-									color="secondary"
-									variant="contained"
-									size="medium"
-									startIcon={<CancelIcon />}
-									onClick={() => history.goBack()}
-									disableElevation
-								>
-									Cancel
-					</Button>
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="maintenanceRequestInputForm"
-									disabled={isSubmitting}
-								>
-									Save
-					</Button>
+								<Grid item>
+									<Button
+										color="secondary"
+										variant="contained"
+										size="medium"
+										startIcon={<CancelIcon />}
+										onClick={() => history.goBack()}
+										disableElevation
+									>
+										Cancel
+									</Button>
+								</Grid>
+								<Grid item>
+									<Button
+										type="submit"
+										color="primary"
+										variant="contained"
+										size="medium"
+										startIcon={<SaveIcon />}
+										form="maintenanceRequestInputForm"
+										disabled={isSubmitting}
+									>
+										Save
+									</Button>
+								</Grid>
 							</Grid>
 						</Grid>
 					</form>
@@ -289,20 +287,4 @@ let MaintenanceRequestInputForm = (props) => {
 	);
 };
 
-const mapStateToProps = (state, ownProps) => {
-	return {
-		currentUser: state.currentUser,
-		contacts: state.contacts,
-	};
-};
-const mapDispatchToProps = (dispatch) => {
-	return {
-		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
-	};
-};
-
-MaintenanceRequestInputForm = connect(mapStateToProps, mapDispatchToProps)(
-	MaintenanceRequestInputForm
-);
-
-export default withRouter(MaintenanceRequestInputForm);
+export default MaintenanceRequestInputForm;

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import Grid from "@material-ui/core/Grid";
+import AddIcon from "@material-ui/icons/Add";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import { Link } from "react-router-dom";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
@@ -16,29 +18,13 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 
 
-const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
+const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    {
-        id: "tenant_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Tenant",
-    },
-    {
-        id: "unit_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Ref/Number",
-    },
-    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
-    {
-        id: "charge_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Charge Date",
-    },
-    { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant", },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number", },
+    { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type", },
+    { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
     { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
@@ -49,7 +35,6 @@ const headCells = [
 ];
 
 let TenantChargesStatementPage = ({
-    transactions,
     transactionsCharges,
     handleItemDelete,
 }) => {
@@ -59,26 +44,14 @@ let TenantChargesStatementPage = ({
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems.map((chargeItem) => chargeItem.charge_type)))
 
+    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
+        .map((chargeItem) => ({ label: chargeItem.charge_label, value: chargeItem.charge_type }))))
 
     useEffect(() => {
-        const mappedCharges = transactionsCharges.sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
-            .map((charge) => {
-                const chargeDetails = {}
-                //get payments with this charge id
-                const chargePayments = transactions.filter((payment) => payment.charge_id === charge.id)
-                chargeDetails.payed_status = chargePayments.length ? true : false;
-                chargeDetails.payed_amount = 0
-                chargePayments.forEach(chargePayment => {
-                    chargeDetails.payed_amount += chargePayment.amount
-                });
-                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
-                return Object.assign({}, charge, chargeDetails);
-            });
-        setTenantChargesItems(mappedCharges);
-        setFilteredChargeItems(mappedCharges);
-    }, [transactionsCharges, transactions]);
+        setTenantChargesItems(transactionsCharges);
+        setFilteredChargeItems(transactionsCharges);
+    }, [transactionsCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -142,6 +115,20 @@ let TenantChargesStatementPage = ({
                     key={1}
                 >
                     <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            startIcon={<AddIcon />}
+                            component={Link}
+                            to={`/payments/${selected[0]}/new`}
+                        >
+                            Add Payment
+                        </Button>
+                    </Grid>
+                    <Grid item>
                         <ExportToExcelBtn
                             disabled={selected.length <= 0}
                             reportName={`Tenants Charges Records`}
@@ -191,9 +178,8 @@ let TenantChargesStatementPage = ({
                                                 event.target.value
                                             );
                                         }}
-                                        InputLabelProps={{ shrink: true }}
                                     >
-                                        {TRANSACTIONS_FILTER_OPTIONS.map((filterOption, index) => (
+                                        {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
                                             <MenuItem
                                                 key={index}
                                                 value={filterOption.id}
@@ -222,9 +208,9 @@ let TenantChargesStatementPage = ({
                                             (charge_type, index) => (
                                                 <MenuItem
                                                     key={index}
-                                                    value={charge_type}
+                                                    value={charge_type.value}
                                                 >
-                                                    {charge_type}
+                                                    {charge_type.label}
                                                 </MenuItem>
                                             )
                                         )}
@@ -292,15 +278,28 @@ let TenantChargesStatementPage = ({
 
 const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions.filter((payment) => payment.payment_type !== 'rent_income'),
-        transactionsCharges: state.transactionsCharges.filter((charge) => charge.charge_type !== 'rent_income'),
+        transactions: state.transactions.filter((payment) => payment.payment_type !== 'rent'),
+        transactionsCharges: state.transactionsCharges
+            .filter((charge) => charge.charge_type !== 'rent').map((charge) => {
+                const chargeDetails = {}
+                //get payments with this charge id
+                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                chargeDetails.payed_status = chargePayments.length ? true : false;
+                let payed_amount = 0
+                chargePayments.forEach(chargePayment => {
+                    payed_amount += parseFloat(chargePayment.amount) || 0
+                });
+                chargeDetails.payed_amount = payed_amount
+                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                return Object.assign({}, charge, chargeDetails);
+            }).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
         contacts: state.contacts,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 
