@@ -27,33 +27,12 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 const GENDERS_LIST = getGendersList();
 
 const contactsTableHeadCells = [
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Assigned To",
-    },
     { id: "title", numeric: false, disablePadding: true, label: "Title" },
-    {
-        id: "first_name",
-        numeric: false,
-        disablePadding: true,
-        label: "First Name",
-    },
-    {
-        id: "last_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Last Name",
-    },
+    { id: "first_name", numeric: false, disablePadding: true, label: "First Name" },
+    { id: "last_name", numeric: false, disablePadding: true, label: "Last Name" },
     { id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
     { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
-    {
-        id: "date_of_birth",
-        numeric: false,
-        disablePadding: true,
-        label: "Date of Birth",
-    },
+    { id: "date_of_birth", numeric: false, disablePadding: true, label: "Date of Birth" },
     { id: "personal_mobile_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
@@ -63,8 +42,6 @@ const contactsTableHeadCells = [
 
 
 let ContactsPage = ({
-    currentUser,
-    isLoading,
     contacts,
     users,
     match,
@@ -75,22 +52,16 @@ let ContactsPage = ({
     let [filteredContactItems, setFilteredContactItems] = useState([]);
     let [firstNameFilter, setFirstNameFilter] = useState("");
     let [lastNameFilter, setLastNameFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState('');
+    let [idFilter, setIdFilter] = useState('');
     let [genderFilter, setGenderFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
     const classes = commonStyles();
 
     useEffect(() => {
-        const mappedContacts = contacts.map((contact) => {
-            const landlord = users.find((user) => user.id === contact.assigned_to)
-            const landlordDetails = {}
-            landlordDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            return Object.assign({}, contact, landlordDetails);
-        });
-        setContactItems(mappedContacts);
-        setFilteredContactItems(mappedContacts);
-    }, [contacts, users]);
+        setContactItems(contacts);
+        setFilteredContactItems(contacts);
+    }, [contacts]);
 
 
     const handleSearchFormSubmit = (event) => {
@@ -106,8 +77,8 @@ let ContactsPage = ({
             .filter(({ gender }) =>
                 !genderFilter ? true : gender === genderFilter
             )
-            .filter(({ assigned_to }) =>
-                !assignedToFilter ? true : assigned_to === assignedToFilter
+            .filter(({ id_number }) =>
+                !idFilter ? true : new String(id_number).includes(idFilter)
             );
 
         setFilteredContactItems(filteredContacts);
@@ -118,7 +89,7 @@ let ContactsPage = ({
         setFilteredContactItems(contactItems);
         setFirstNameFilter("");
         setLastNameFilter("");
-        setAssignedToFilter("");
+        setIdFilter("");
         setGenderFilter("");
     };
 
@@ -243,24 +214,17 @@ let ContactsPage = ({
                                 <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
-                                        select
                                         variant="outlined"
-                                        id="assigned_to"
-                                        name="assigned_to"
-                                        label="Assinged To"
-                                        value={assignedToFilter}
+                                        id="idFilter"
+                                        name="idFilter"
+                                        label="ID Number"
+                                        value={idFilter}
                                         onChange={(event) => {
-                                            setAssignedToFilter(
+                                            setIdFilter(
                                                 event.target.value
                                             );
                                         }}
-                                    >
-                                        {users.map((user, index) => (
-                                            <MenuItem key={index} value={user.id}>
-                                                {user.first_name + " " + user.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <TextField

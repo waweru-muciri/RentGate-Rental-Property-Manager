@@ -6,7 +6,6 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
@@ -16,35 +15,25 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
 const headCells = [
-    {
-        id: "address",
-        numeric: false,
-        disablePadding: true,
-        label: "Property",
-    },
+    { id: "ref", numeric: false, disablePadding: true, label: "Property Name/Ref" },
+    { id: "address", numeric: false, disablePadding: true, label: "Property Address" },
     { id: "property_location", numeric: false, disablePadding: true, label: "Location" },
     { id: "owner_details", numeric: false, disablePadding: true, label: "Rental Owner" },
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Rental Manager",
-    },
+    { id: "landlord_name", numeric: false, disablePadding: true, label: "Rental Manager" },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
+    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let PropertyPage = ({
-    isLoading,
     properties,
-    history,
     users,
     match,
-    error, handleItemDelete
+    handleItemDelete
 }) => {
     const classes = commonStyles();
     let [propertyUnitsItems, setPropertyUnitItems] = useState([])
@@ -54,32 +43,16 @@ let PropertyPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedProperties = properties.map(
-            (property) => {
-                const landlord = users.find(
-                    (user) => user.id === property.assigned_to
-                );
-                const owner = users.find(
-                    (user) => user.id === property.owner
-                );
-                const propertyDetails = {}
-                propertyDetails.property_location = `${property.city}, ${property.county}`
-                propertyDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-                propertyDetails.owner_details = typeof owner !== 'undefined' ? owner.first_name + ' ' + owner.last_name : ''
-                return Object.assign({}, property, propertyDetails);
-            }
-        );
-
-        setPropertyUnitItems(mappedProperties)
-        setFilteredPropertiesItems(mappedProperties)
-    }, [properties, users])
+        setPropertyUnitItems(properties)
+        setFilteredPropertiesItems(properties)
+    }, [properties])
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
         let filteredProperties = propertyUnitsItems
             .filter(({ id }) => !propertyRefFilter ? true : id === propertyRefFilter)
-            .filter((property) => !assignedToFilter ? true : property.assigned_to === assignedToFilter)
+            .filter((property) => !assignedToFilter ? true : property.assigned_to === assignedToFilter.id)
 
         setFilteredPropertiesItems(filteredProperties);
     };
@@ -174,26 +147,21 @@ let PropertyPage = ({
                                 direction="row"
                             >
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
+                                    <Autocomplete
                                         id="assigned_to"
                                         name="assigned_to"
                                         label="Rental Manager"
+                                        options={users}
                                         value={assignedToFilter}
-                                        onChange={(event) => {
+                                        getOptionLabel={(option) => option ? `${option.first_name} ${option.last_name}` : ''}
+                                        style={{ width: "100%" }}
+                                        onChange={(event, newValue) => {
                                             setAssignedToFilter(
-                                                event.target.value
+                                                newValue
                                             );
                                         }}
-                                    >
-                                        {users.map((user, index) => (
-                                            <MenuItem key={index} value={user.id}>
-                                                {user.first_name + ' ' + user.last_name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                        renderInput={(params) => <TextField {...params} label="Rental Manager" variant="outlined" />}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <TextField
@@ -258,14 +226,6 @@ let PropertyPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
@@ -276,26 +236,31 @@ let PropertyPage = ({
                         handleDelete={handleItemDelete}
                     />
                 </Grid>
-                
+
             </Grid>
         </Layout>
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        properties: state.properties,
-        currentUser: state.currentUser,
+        properties: state.properties.map((property) => {
+            const landlord = state.users.find((user) => user.id === property.assigned_to) || {};
+            const owner = state.users.find((user) => user.id === property.owner) || {};
+            const propertyDetails = {}
+            propertyDetails.property_location = `${property.city}`
+            propertyDetails.landlord_name = `${landlord.first_name} ${landlord.last_name}`
+            propertyDetails.owner_details = `${owner.first_name} ${owner.last_name}`
+            return Object.assign({}, property, propertyDetails);
+        }
+        ),
         users: state.users,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

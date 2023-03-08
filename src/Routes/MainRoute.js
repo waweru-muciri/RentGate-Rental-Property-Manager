@@ -20,6 +20,7 @@ import PropertiesPage from "./Properties";
 import PropertyPage from "./PropertyPage";
 import PropertyUnitPage from "./PropertyUnitPage";
 import TenantDetailsPage from "./TenantDetailsPage";
+import PaymentEditForm from "../components/transactions/PaymentEditForm";
 const ReportsPage = lazy(() => import('./Reports'));
 const ExpensesPage = lazy(() => import('./Expenses'));
 const ExpensePage = lazy(() => import('./ExpensePage'));
@@ -203,7 +204,7 @@ let MainPage = ({
                 <Route
                   exact
                   path={`${match.path}payments/:paymentId/edit`}
-                  component={PaymentPage}
+                  component={PaymentEditForm}
                 />
                 <Route
                   exact

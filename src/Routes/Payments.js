@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import { getTransactionsFilterOptions } from "../assets/commonAssets";
+import moment from "moment";
 
 
 const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -28,16 +29,16 @@ const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
 const headCells = [
     { id: "payment_date", numeric: false, disablePadding: true, label: "Payment Date" },
     { id: "payment_label", numeric: false, disablePadding: true, label: "Payment Type" },
-    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Number/Ref" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "amount", numeric: false, disablePadding: true, label: "Payment Amount" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
-
 ];
 
 
-let TransactionPage = ({
+let PaymentsPage = ({
     transactions,
     properties,
     match,
@@ -45,8 +46,8 @@ let TransactionPage = ({
     error,
 }) => {
     const classes = commonStyles();
-    let [transactionItems, setTransactionItems] = useState([]);
-    let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
+    let [paymentsItems, setPaymentsItems] = useState([]);
+    let [filteredPaymentsItems, setFilteredPaymentsItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState();
     let [fromDateFilter, setFromDateFilter] = useState("");
@@ -54,29 +55,52 @@ let TransactionPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        setTransactionItems(transactions);
-        setFilteredTransactionItems(transactions);
+        setPaymentsItems(transactions);
+        setFilteredPaymentsItems(transactions);
     }, [transactions]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactions according to the search criteria here
-        let filteredTransactions = transactionItems
+        //filter the payments according to the search criteria here
+        let filteredPayments = paymentsItems
+        let startOfPeriod;
+        let endOfPeriod;
+        if (periodFilter) {
+            switch (periodFilter) {
+                case 'last-month':
+                    startOfPeriod = moment().subtract(1, 'months').startOf('month')
+                    endOfPeriod = moment().subtract(1, 'months').endOf('month')
+                    break;
+                case 'year-to-date':
+                    startOfPeriod = moment().startOf('year')
+                    endOfPeriod = moment()
+                    break;
+                case 'last-year':
+                    startOfPeriod = moment().subtract(1, 'years').startOf('year')
+                    endOfPeriod = moment().subtract(1, 'years').endOf('year')
+                    break;
+                default:
+                    startOfPeriod = moment().subtract(periodFilter, 'months').startOf('month')
+                    endOfPeriod = moment()
+                    break;
+            }
+            filteredPayments = filteredPayments.filter((paymentItem) => {
+                const paymentDate = moment(paymentItem.payment_date)
+                return paymentDate.isSameOrAfter(startOfPeriod) && paymentDate.isSameOrBefore(endOfPeriod)
+            })
+        };
+        filteredPayments = filteredPayments.filter(({ payment_date }) =>
+            !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) =>
-                !fromDateFilter ? true : payment_date >= fromDateFilter
-            )
-            .filter(({ payment_date }) =>
-                !toDateFilter ? true : payment_date <= toDateFilter
-            )
-            .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
-            )
-        setFilteredTransactionItems(filteredTransactions);
-    };
+                !toDateFilter ? true : payment_date <= toDateFilter)
+            .filter(({ property_id }) =>
+                !propertyFilter ? true : property_id === propertyFilter)
+        setFilteredPaymentsItems(filteredPayments);
+    }
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredTransactionItems(transactionItems);
+        setFilteredPaymentsItems(paymentsItems);
         setPropertyFilter("");
         setPeriodFilter("");
         setFromDateFilter("");
@@ -122,7 +146,7 @@ let TransactionPage = ({
                             reportName={'Rental Payments Records'}
                             reportTitle={'Rental Payments Data'}
                             headCells={headCells}
-                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={paymentsItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -131,7 +155,7 @@ let TransactionPage = ({
                             reportName={'Rental Payments Records'}
                             reportTitle={'Rental Payments Data'}
                             headCells={headCells}
-                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={paymentsItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -293,11 +317,10 @@ let TransactionPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={filteredTransactionItems}
+                        rows={filteredPaymentsItems}
                         headCells={headCells}
-
                         handleDelete={handleItemDelete}
-                        deleteUrl={"transactions"}
+                        deleteUrl={"charge-payments"}
                     />
                 </Grid>
 
@@ -312,8 +335,9 @@ const mapStateToProps = (state) => {
             const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
             return Object.assign({}, payment, {
                 tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                tenant_id_number: tenant.id_number,
             })
-        }).sort((payment1, payment2) => payment2.payment_date > payment1.payment_date),
+        }).sort((payment1, payment2) => payment1.payment_date > payment2.payment_date),
         properties: state.properties,
     };
 };
@@ -324,6 +348,6 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-TransactionPage = connect(mapStateToProps, mapDispatchToProps)(TransactionPage);
+PaymentsPage = connect(mapStateToProps, mapDispatchToProps)(PaymentsPage);
 
-export default withRouter(TransactionPage);
+export default withRouter(PaymentsPage);

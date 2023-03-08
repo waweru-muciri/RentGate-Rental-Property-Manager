@@ -35,7 +35,6 @@ const ContactSchema = Yup.object().shape({
 	title: Yup.string().trim().required("Title is required"),
 	gender: Yup.string().trim().required("Gender is required"),
 	id_number: Yup.string().trim().required("ID Number is required"),
-	assigned_to: Yup.string().trim().required("Assigned To is required"),
 	contact_email: Yup.string().trim().email(),
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
@@ -46,7 +45,7 @@ const currentDate = moment().format("YYYY-MM-DD");
 
 let ContactInputForm = (props) => {
 
-	const { currentUser, users, history, handleItemSubmit } = props;
+	const {history, handleItemSubmit } = props;
 	let classes = commonStyles();
 	const [imageDialogState, toggleImageDialogState] = React.useState(false);
 
@@ -54,7 +53,8 @@ let ContactInputForm = (props) => {
 		toggleImageDialogState(!imageDialogState);
 	};
 
-	let contactToEdit = typeof props.contactToEdit !== 'undefined' ? props.contactToEdit : {};
+	let contactToEdit = props.contactToEdit || {};
+	
 	const contactValues = {
 		id: contactToEdit.id,
 		gender: contactToEdit.gender || "",
@@ -191,8 +191,8 @@ let ContactInputForm = (props) => {
 												color="primary"
 												onClick={() => toggleImageDialog()}
 											>
-												Add Image
-								</Button>
+												{values.contact_avatar_url || values.contact_images[0] ? "Change Photo": "Add Photo"}
+											</Button>
 
 											<DropzoneDialogBase
 												filesLimit={1}
@@ -219,27 +219,6 @@ let ContactInputForm = (props) => {
 											/>
 										</Grid>
 									</Grid>
-									<TextField
-										select
-										error={errors.assigned_to && touched.assigned_to}
-										helperText={
-											touched.assigned_to && errors.assigned_to
-										}
-										variant="outlined"
-										type="text"
-										name="assigned_to"
-										id="assigned_to"
-										label="Assigned To"
-										value={values.assigned_to}
-										onChange={handleChange}
-										onBlur={handleBlur}
-									>
-										{users.map((user, index) => (
-											<MenuItem key={index} value={user.id}>
-												{user.first_name + ' ' + user.last_name}
-											</MenuItem>
-										))}
-									</TextField>
 									<TextField
 										variant="outlined"
 										select
@@ -602,12 +581,6 @@ let ContactInputForm = (props) => {
 };
 
 
-const mapStateToProps = (state) => {
-	return {
-		currentUser: state.currentUser,
-		users: state.users,
-	};
-};
 
 const mapDispatchToProps = (dispatch) => {
 	return {
@@ -615,6 +588,6 @@ const mapDispatchToProps = (dispatch) => {
 	}
 };
 
-ContactInputForm = connect(mapStateToProps, mapDispatchToProps)(ContactInputForm);
+ContactInputForm = connect(mapDispatchToProps)(ContactInputForm);
 
 export default withRouter(ContactInputForm);

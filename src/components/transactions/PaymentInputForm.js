@@ -36,7 +36,7 @@ let PaymentInputForm = (props) => {
 		charge_type: chargeToAddPayment.charge_type || 0,
 		payment_amount: "",
 		payment_date: defaultDate,
-		tenant_id: chargeToAddPayment.tenant_id || "",
+		tenant_id: chargeToAddPayment.tenant_id,
 	};
 
 	return (

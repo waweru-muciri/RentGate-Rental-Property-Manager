@@ -4,6 +4,8 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
+import AddIcon from "@material-ui/icons/Add";
+import { Link } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
 import { connect } from "react-redux";
@@ -16,7 +18,7 @@ import { handleItemFormSubmit } from '../actions/actions'
 const defaultDate = moment().format('YYYY-MM-DD')
 
 const headCells = [
-    { id: "lease_details", numeric: false, disablePadding: true, label: "Lease Details", },
+    { id: "unit_details", numeric: false, disablePadding: true, label: "Unit Details", },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
     { id: "due_date", numeric: false, disablePadding: true, label: "Rent Due Date", },
@@ -65,9 +67,6 @@ let RentRollPage = ({
             .filter(({ tenant_id }) =>
                 !contactFilter ? true : tenant_id === contactFilter
             )
-            .filter((landlord) =>
-                !assignedToFilter ? true : landlord === assignedToFilter
-            );
         setFilteredChargeItems(filteredStatements);
     };
 
@@ -82,8 +81,8 @@ let RentRollPage = ({
     };
 
     const setPayedChargesPayedInFull = () => {
-        console.log('Selected Charges => ', selected)
         const chargesToAddPayments = transactionsCharges.filter(({ id }) => selected.includes(id))
+        .filter(({payed_status}) => payed_status === false)
         //post the charges here to show that they are payed
         chargesToAddPayments.forEach(async(charge) => {
             const chargePayment = {
@@ -128,6 +127,20 @@ let RentRollPage = ({
                             onClick={() => setPayedChargesPayedInFull()}
                         >
                             Receive Full Payments
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            startIcon={<AddIcon />}
+                            component={Link}
+                            to={`/payments/${selected[0]}/new`}
+                        >
+                            Add Payment
                         </Button>
                     </Grid>
                     <Grid item>
@@ -353,7 +366,6 @@ const mapStateToProps = (state) => {
                 const chargeDetails = {}
                 chargeDetails.tenant_name = `${tenant.first_name} ${tenant.last_name}`
                 chargeDetails.tenant_id_number = tenant.id_number
-                chargeDetails.lease_details = `${charge.property_ref} - ${charge.unit_ref}`;
                 chargeDetails.status = moment(charge.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
                 // const daysLeft = moment(charge.lease_end).diff(moment(), 'days')
                 // chargeDetails.days_left = daysLeft < 0 ? 0 : daysLeft
@@ -366,6 +378,8 @@ const mapStateToProps = (state) => {
                 });
                 chargeDetails.payed_amount = payed_amount
                 chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                const property = state.properties.find(property => property.id === charge.property_id) || {}
+                chargeDetails.unit_details = `${property.ref} - ${charge.unit_ref}`;
                 return Object.assign({}, charge, chargeDetails);
             }),
         contacts: state.contacts,
