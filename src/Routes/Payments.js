@@ -66,14 +66,14 @@ let PaymentsPage = ({
             const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setPaymentsItems(transactions);
+        setPaymentsItems(paymentsForCurrentMonth);
         setFilteredPaymentsItems(paymentsForCurrentMonth);
     }, [transactions]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the payments according to the search criteria here
-        let filteredPayments = paymentsItems
+        let filteredPayments = transactions
         let startOfPeriod;
         let endOfPeriod;
         let dateRange = []
@@ -166,7 +166,7 @@ let PaymentsPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -175,7 +175,7 @@ let PaymentsPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Payments Records'}
                             reportTitle={'Rental Payments Data'}
                             headCells={headCells}
@@ -187,7 +187,7 @@ let PaymentsPage = ({
                         variant="contained"
                         size="medium"
                         color="primary"
-                        disabled={!contactFilter || selected.length <= 0}
+                        disabled={!contactFilter || !selected.length}
                         onClick={() => {
                             const tenantDetails = contacts.find(({ id }) => id === contactFilter.id)
                             printReceipt(
@@ -200,7 +200,7 @@ let PaymentsPage = ({
                     </Button>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Payments Records'}
                             reportTitle={'Rental Payments Data'}
                             headCells={headCells}

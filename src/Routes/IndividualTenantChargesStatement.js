@@ -70,14 +70,14 @@ let TenantChargesStatementPage = ({
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setTenantChargesItems(tenantTransactionCharges);
+        setTenantChargesItems(chargesForCurrentMonth);
         setFilteredChargeItems(chargesForCurrentMonth);
     }, [tenantTransactionCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the tenantTransactionCharges according to the search criteria here
-        let filteredStatements = tenantChargesItems
+        let filteredStatements = tenantTransactionCharges
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -137,7 +137,7 @@ let TenantChargesStatementPage = ({
             <Grid item container spacing={2} alignItems="center" direction="row">
                 <Grid item>
                     <ExportToExcelBtn
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
                         reportTitle={'Tenant Charges Data'}
                         headCells={headCells}
@@ -146,7 +146,7 @@ let TenantChargesStatementPage = ({
                 </Grid>
                 <Grid item>
                     <PrintArrayToPdf
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenant Charges Data'}
                         reportTitle={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
                         headCells={headCells}
@@ -159,7 +159,7 @@ let TenantChargesStatementPage = ({
                         variant="contained"
                         size="medium"
                         color="primary"
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         onClick={() => {
                             printInvoice(
                                 tenantDetails,

@@ -52,7 +52,7 @@ let RentBalancesPage = ({
             .map(rentCharge => ({
                 id: rentCharge.tenant_id, tenant_id: rentCharge.tenant_id, tenant_name: rentCharge.tenant_name,
                 property_id: rentCharge.property_id,
-                unit_ref: rentCharge.unit_ref
+                unit_ref: rentCharge.unit_details
             }))
         let totalRentBalances = 0
         const mappedTenantsRentBalances = Array.from(uniqueTenantIdsWithCharges).map(tenantId => {
@@ -125,7 +125,7 @@ let RentBalancesPage = ({
             >
                 <Grid item>
                     <ExportToExcelBtn
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={`Tenants Outstanding Rent Balances Records`}
                         reportTitle={'Tenants Outstanding Rent Balances Data'}
                         headCells={headCells}
@@ -134,7 +134,7 @@ let RentBalancesPage = ({
                 </Grid>
                 <Grid item>
                     <PrintArrayToPdf
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenants Outstanding Rent Balances Data'}
                         reportTitle={`Tenants Outstanding Rent Balances Records`}
                         headCells={headCells}

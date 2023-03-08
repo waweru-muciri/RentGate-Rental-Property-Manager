@@ -23,9 +23,9 @@ const CHARGE_TYPES = [
 const UnitChargeSchema = Yup.object().shape({
     type: Yup.string().trim().required('Charge Type is Required'),
     due_date: Yup.date().required("Due Date is required"),
-    account: Yup.string().trim().required("Account is required"),
+    charge_label: Yup.string().trim().required("Charge Name is required"),
     frequency: Yup.string().trim().when('type', { is: 'recurring_charge', then: Yup.string().required('Frequency to make charge is required') }),
-    amount: Yup.number().typeError('Amount must be a number').min(0).required('Charge Amount is required'),
+    amount: Yup.number().typeError('Amount must be a number').positive("Amount must be a positive number").required('Charge Amount is required'),
 });
 
 export default function FormDialog(props) {
@@ -44,7 +44,7 @@ export default function FormDialog(props) {
             onClose={handleClose}
             aria-labelledby="form-dialog-title"
         >
-            <DialogTitle>{chargeValues.account ? 'Edit Charge' : 'Add Charge'}</DialogTitle>
+            <DialogTitle>{chargeValues.charge_label ? 'Edit Charge' : 'Add Charge'}</DialogTitle>
             <DialogContent>
                 <Formik
                     initialValues={chargeValues}
@@ -54,7 +54,7 @@ export default function FormDialog(props) {
                             let unitChargeToSave = {
                                 id: values.id,
                                 unit_id: values.unit_id,
-                                account: values.account,
+                                charge_label: values.charge_label,
                                 type: values.type,
                                 amount: values.amount,
                                 due_date: values.due_date,
@@ -62,7 +62,7 @@ export default function FormDialog(props) {
                             };
                             handleItemSubmit(unitChargeToSave)
                             resetForm({});
-                            setStatus({ sent: true, msg: "Charge added successfully!" })
+                            setStatus({ sent: true, msg: "Charge added to agreement!" })
                             if (values.id) {
                                 handleClose()
                             }
@@ -126,12 +126,12 @@ export default function FormDialog(props) {
                                             label="Charge Name"
                                             variant="outlined"
                                             type="text"
-                                            value={values.account}
-                                            name='account'
+                                            value={values.charge_label}
+                                            name='charge_label'
                                             onChange={handleChange}
                                             onBlur={handleBlur}
-                                            error={errors.account && touched.account}
-                                            helperText={touched.account && errors.account}
+                                            error={errors.charge_label && touched.charge_label}
+                                            helperText={touched.charge_label && errors.charge_label}
                                         />
                                     </Grid>
                                     <Grid item xs={12} md>

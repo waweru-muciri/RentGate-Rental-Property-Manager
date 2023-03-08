@@ -19,7 +19,7 @@ import { exportDataUploadTemplate } from "../assets/PrintingHelper";
 
 const ItemsToGenerateTemplatesFor = [
     { name: "Contacts", id: "contacts" },
-    { name: "Users", id: "users" },
+    { name: "Rent Charges", id: "rent_charges" },
     { name: "Properties", id: "properties" },
     { name: "Rental Units", id: "rental_units" },
 ]
@@ -51,11 +51,6 @@ let DocumentsTemplatesPage = ({
                 headCellsToPrint = ["title", "gender", "id_number", "first_name", "last_name",
                     "personal_phone_number", "contact_email"]
                 break;
-            case "users":
-                docTitle = "Users Upload Template"
-                headCellsToPrint = ["title", "gender", "id_number", "first_name", "last_name",
-                    "phone_number", "primary_email"]
-                break;
 
             case "properties":
                 docTitle = "Properties Upload Template"
@@ -64,7 +59,12 @@ let DocumentsTemplatesPage = ({
 
             case "rental_units":
                 docTitle = "Rental Units Upload Template"
-                headCellsToPrint = ["ref", "unit_type", "beds", "sqft", "baths"]
+                headCellsToPrint = ["ref", "unit_type", "beds", "sqm", "baths"]
+                break;
+
+            case "rent_charges":
+                docTitle = "Rent Charges Upload Template"
+                headCellsToPrint = ["charge_amount", "charge_date", "due_date"]
                 break;
 
             default:
@@ -117,7 +117,7 @@ let DocumentsTemplatesPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -126,7 +126,7 @@ let DocumentsTemplatesPage = ({
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography>Items Upload Templates</Typography>
+                    <Typography variant="h6">Items Upload Templates</Typography>
                 </Grid>
                 <Grid item xs={12}>
                     <Box

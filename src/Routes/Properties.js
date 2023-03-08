@@ -15,6 +15,7 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
+import ImportItemsBtn from "../components/ImportItemsBtn";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
@@ -103,7 +104,7 @@ let PropertyPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -112,7 +113,7 @@ let PropertyPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Records'}
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
@@ -121,11 +122,16 @@ let PropertyPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Records'}
                             reportTitle={'Rentals Records'}
                             headCells={headCells}
                             dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <ImportItemsBtn
+                            savingUrl="properties"
                         />
                     </Grid>
                 </Grid>

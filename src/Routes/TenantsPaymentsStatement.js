@@ -54,14 +54,14 @@ let TenantsPaymentsPage = ({
             const paymentDate = parse(payment.payment_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setPaymentsItems(transactions);
+        setPaymentsItems(paymentsForCurrentMonth);
         setFilteredPaymentsItems(paymentsForCurrentMonth);
     }, [transactions]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the payments according to the search criteria here
-        let filteredPayments = paymentsItems
+        let filteredPayments = transactions
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -141,7 +141,7 @@ let TenantsPaymentsPage = ({
             >
                 <Grid item>
                     <PrintArrayToPdf
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenants Payments Records'}
                         reportTitle={'Tenants Payments Data'}
                         headCells={headCells}
@@ -150,7 +150,7 @@ let TenantsPaymentsPage = ({
                 </Grid>
                 <Grid item>
                     <ExportToExcelBtn
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenants Payments Records'}
                         reportTitle={'Tenants Payments Data'}
                         headCells={headCells}

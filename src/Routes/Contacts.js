@@ -19,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { getGendersList } from "../assets/commonAssets.js";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
+import ImportItemsBtn from "../components/ImportItemsBtn";
 
 const GENDERS_LIST = getGendersList();
 
@@ -124,7 +125,7 @@ let ContactsPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -133,7 +134,7 @@ let ContactsPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Tenant Records'}
                             reportTitle={'Tenant Records'}
                             headCells={contactsTableHeadCells}
@@ -142,11 +143,17 @@ let ContactsPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={"Contacts  Records"}
                             reportTitle={"Contact Data"}
                             headCells={contactsTableHeadCells}
                             dataToPrint={contactItems.filter(({ id }) => selected.includes(id))}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <ImportItemsBtn
+                            savingUrl="contacts"
+                            text="Upload Contacts"
                         />
                     </Grid>
                 </Grid>

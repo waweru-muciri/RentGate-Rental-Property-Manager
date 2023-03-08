@@ -37,7 +37,7 @@ const PropertySchema = Yup.object().shape({
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().default(''),
-		sqft: Yup.number().typeError('Square Footage must be a number').integer().min(0),
+		sqm: Yup.number().typeError('Square Footage must be a number').integer().min(0),
 	}))
 });
 
@@ -167,17 +167,17 @@ let PropertyInputForm = (props) => {
 							<Box>{property_unit.image ? property_unit.image.name : "No Image"}</Box>
 						</Box>
 					</Grid>
-					<Grid xs item key={`property_units[${propertyUnitIndex}].sqft`}>
+					<Grid xs item key={`property_units[${propertyUnitIndex}].sqm`}>
 						<TextField
-							label="Sqft"
+							label="Sqm"
 							variant="outlined"
 							type="text"
-							value={property_unit.sqft}
-							name={`property_units.${propertyUnitIndex}.sqft`}
+							value={property_unit.sqm}
+							name={`property_units.${propertyUnitIndex}.sqm`}
 							onChange={handleChange}
 							onBlur={handleBlur}
-							error={(indexInErrors && 'sqft' in indexInErrors) && (indexInTouched && indexInTouched.sqft)}
-							helperText={(indexInTouched && indexInTouched.sqft) && (indexInErrors && indexInErrors.sqft)}
+							error={(indexInErrors && 'sqm' in indexInErrors) && (indexInTouched && indexInTouched.sqm)}
+							helperText={(indexInTouched && indexInTouched.sqm) && (indexInErrors && indexInErrors.sqm)}
 						/>
 					</Grid>
 					<Grid item key={`property_units[${propertyUnitIndex}].delete`}>
@@ -196,7 +196,7 @@ let PropertyInputForm = (props) => {
 				<Button
 					variant="outlined"
 					size="medium"
-					onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqft: '', image: '' })}
+					onClick={() => push({ ref: '', unit_type: '', beds: '', baths: '', sqm: '', image: '' })}
 					disableElevation>
 					Add Unit
 			</Button>

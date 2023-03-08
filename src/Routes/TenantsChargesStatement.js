@@ -46,7 +46,7 @@ let TenantStatementsPage = ({
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setTenantChargesItems(transactionsCharges);
+        setTenantChargesItems(chargesForCurrentMonth);
         setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
@@ -88,7 +88,7 @@ let TenantStatementsPage = ({
                 startOfPeriod = dateRange[0]
                 endOfPeriod = dateRange[1]
         }
-        statementsWithinDateRange = tenantChargesItems.filter((chargeItem) => {
+        statementsWithinDateRange = transactionsCharges.filter((chargeItem) => {
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
@@ -131,7 +131,7 @@ let TenantStatementsPage = ({
             >
                 <Grid item>
                     <PrintArrayToPdf
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenants Payments Records'}
                         reportTitle={'Tenants Payments Data'}
                         headCells={headCells}
@@ -140,7 +140,7 @@ let TenantStatementsPage = ({
                 </Grid>
                 <Grid item>
                     <ExportToExcelBtn
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Tenants Charges Records'}
                         reportTitle={'Tenants Charges Records'}
                         headCells={headCells}

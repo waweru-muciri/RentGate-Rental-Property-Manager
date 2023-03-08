@@ -64,7 +64,7 @@ let TenantChargesStatementPage = ({
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setTenantChargesItems(transactionsCharges);
+        setTenantChargesItems(chargesForCurrentMonth);
         setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
@@ -85,7 +85,7 @@ let TenantChargesStatementPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
-        let filteredStatements = tenantChargesItems
+        let filteredStatements = transactionsCharges
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -165,7 +165,7 @@ let TenantChargesStatementPage = ({
                             variant="contained"
                             size="medium"
                             color="primary"
-                            disabled={!contactFilter || selected.length <= 0}
+                            disabled={!contactFilter || !selected.length}
                             onClick={() => {
                                 const tenantDetails = contacts.find(({ id }) => id === contactFilter.id)
                                 printInvoice(
@@ -179,7 +179,7 @@ let TenantChargesStatementPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Tenants Outstanding Balances Data'}
                             reportTitle={`Tenants Outstanding Balances Records`}
                             headCells={headCells}
@@ -188,7 +188,7 @@ let TenantChargesStatementPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={`Tenants Outstanding Balances Records`}
                             reportTitle={'Tenants Outstanding Balances Data'}
                             headCells={headCells}

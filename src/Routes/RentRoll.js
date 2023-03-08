@@ -87,14 +87,14 @@ let RentRollPage = ({
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setChargeItems(transactionsCharges);
+        setChargeItems(chargesForCurrentMonth);
         setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the charges according to the search criteria here
-        let filteredRentCharges = rentCharges
+        let filteredRentCharges = transactionsCharges
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -159,7 +159,7 @@ let RentRollPage = ({
             const chargePayment = {
                 charge_id: charge.id,
                 payment_amount: charge.charge_amount,
-                payment_date: defaultDate,
+                payment_date: charge.due_date,
                 tenant_id: charge.tenant_id,
                 unit_id: charge.unit_id,
                 property_id: charge.property_id,
@@ -226,7 +226,7 @@ let RentRollPage = ({
                                 variant="contained"
                                 size="medium"
                                 startIcon={<AddIcon />}
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 onClick={() => setChargesPaidInFull()}
                             >
                                 Receive Full Payments
@@ -238,7 +238,7 @@ let RentRollPage = ({
                                 color="primary"
                                 variant="contained"
                                 size="medium"
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 startIcon={<AddIcon />}
                                 component={Link}
                                 to={`/app/payments/${selected[0]}/new`}
@@ -252,7 +252,7 @@ let RentRollPage = ({
                                 color="primary"
                                 variant="contained"
                                 size="medium"
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 startIcon={<AddIcon />}
                                 to={`/app/payments/${selected[0]}/new?charge_deposit=1`}
                                 component={Link}
@@ -262,7 +262,7 @@ let RentRollPage = ({
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rent Charges Roll Records'}
                                 reportTitle={'Rent Charges Roll Data'}
                                 headCells={headCells}
@@ -271,7 +271,7 @@ let RentRollPage = ({
                         </Grid>
                         <Grid item>
                             <ExportToExcelBtn
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rent Charges Roll Records'}
                                 reportTitle={'Rent Charges Roll Data'}
                                 headCells={headCells}

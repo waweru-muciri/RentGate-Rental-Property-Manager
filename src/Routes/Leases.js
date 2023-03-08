@@ -18,6 +18,7 @@ import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
+import ImportItemsBtn from "../components/ImportItemsBtn";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import RentAdjustModal from "./RentAdjustModal";
 import { parse } from "date-fns";
@@ -81,6 +82,15 @@ let TransactionPage = ({
         setAdjustRentModalState(!adjustRentModalState)
     }
 
+    const getSelectedLeaseDetailsForRentChargesUpload = () => {
+        const { tenants, unit_id, property_id } = leaseItems.find(({ id }) => id === selected[0]) || {}
+        return {
+            unit_id, property_id,
+            tenant_id: Array.isArray(tenants) ? tenants[0] : "",
+            charge_type: "rent", charge_label: "Rent"
+        }
+    }
+
     const resetSearchForm = (event) => {
         event.preventDefault();
         setFilteredLeaseItems(leaseItems);
@@ -128,7 +138,7 @@ let TransactionPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -141,7 +151,7 @@ let TransactionPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             onClick={handleModalStateToggle}
                         >
                             Adjust Rent Amounts
@@ -154,7 +164,7 @@ let TransactionPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<BlockIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`/app/notices/new?lease=${selected[0]}`}
                         >
@@ -163,7 +173,7 @@ let TransactionPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Agreements Records'}
                             reportTitle={'Rental Agreements Data'}
                             headCells={headCells}
@@ -172,11 +182,19 @@ let TransactionPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Rental Agreements Records'}
                             reportTitle={'Rental Agreements Data'}
                             headCells={headCells}
                             dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <ImportItemsBtn
+                            disabled={!selected.length}
+                            savingUrl="transactions-charges"
+                            text="Upload Rent Charges"
+                            baseObjectToAddProperties={getSelectedLeaseDetailsForRentChargesUpload()}
                         />
                     </Grid>
                 </Grid>

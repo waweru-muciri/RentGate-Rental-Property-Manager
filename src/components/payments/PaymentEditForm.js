@@ -20,7 +20,8 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 const PaymentSchema = Yup.object().shape({
 	tenant_id: Yup.string().trim().required('Tenant is required'),
 	memo: Yup.string().trim().max(50, "Memo details should be less than 50").default(''),
-	payment_amount: Yup.number().typeError('Amount must be a number').required("Payment amount is required"),
+	payment_amount: Yup.number().typeError('Amount must be a number').positive("Amount must be a positive number")
+	.required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
 });
 

@@ -14,7 +14,7 @@ import { Bar, HorizontalBar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, parse, getMonth, isWithinInterval, startOfToday, addDays } from "date-fns";
+import { format, getYear, parse, getMonth, isWithinInterval, startOfToday, addDays, isSameDay } from "date-fns";
 import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 
 
@@ -271,7 +271,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
             const endOfNextNinetyDays = addDays(rentChargeDueDate, 90);
             const endOfNextThreeMonths = new Date(2100, 0, 1);
             //check if payment was made on the due date
-            if (rentChargeLastPaymentDate === rentChargeDueDate) {
+            if (isSameDay(rentChargeLastPaymentDate, rentChargeDueDate)) {
                 rentChargesPaymentsPeformanceData['due_date'] += 1
             }
             //check if payment was made within 7 days

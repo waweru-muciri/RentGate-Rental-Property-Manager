@@ -18,10 +18,10 @@ const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const MeterReadingSchema = Yup.object().shape({
   meter_type: Yup.string().trim().required("Meter Reading is required"),
-  prior_value: Yup.number().required("Prior Value is required").min(0),
+  prior_value: Yup.number().required("Prior Value is required").positive("Amount must be a positive number"),
   current_value: Yup.number().min(Yup.ref('prior_value'), 'Current Value must be greater than prior value').required("Current Value is required"),
-  unit_charge: Yup.number().min(0).required("Unit Charge is Required"),
-  base_charge: Yup.number().min(0).default(0),
+  unit_charge: Yup.number().positive("Amount must be a positive number").required("Unit Charge is Required"),
+  base_charge: Yup.number().positive("Amount must be a positive number").default(0),
   reading_date: Yup.date().required("Reading Date Required"),
   property_id: Yup.string().trim().required("Property is Required"),
   unit_id: Yup.string().trim().required("Unit is Required"),

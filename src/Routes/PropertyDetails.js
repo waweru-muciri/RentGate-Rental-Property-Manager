@@ -24,6 +24,7 @@ import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getUnitTypes } from "../assets/commonAssets.js";
 import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
+import ImportItemsBtn from "../components/ImportItemsBtn";
 import PropertySummaryPage from "./PropertySummaryPage";
 import PropertySettingsForm from "../components/property/PropertySettingsForm";
 
@@ -34,7 +35,7 @@ const headCells = [
     { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
-    { id: "sqft", numeric: false, disablePadding: true, label: "Square Footage" },
+    { id: "sqm", numeric: false, disablePadding: true, label: "Floor Area" },
     { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent Amount" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
@@ -155,7 +156,7 @@ let PropertyDetailsPage = ({
                                 variant="contained"
                                 size="medium"
                                 startIcon={<EditIcon />}
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 component={Link}
                                 to={`${match.url}/${selected[0]}/edit`}
                             >
@@ -164,7 +165,7 @@ let PropertyDetailsPage = ({
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rental Units Records'}
                                 reportTitle={'Rental Units Data'}
                                 headCells={headCells}
@@ -173,11 +174,18 @@ let PropertyDetailsPage = ({
                         </Grid>
                         <Grid item>
                             <ExportToExcelBtn
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rental Units Records'}
                                 reportTitle={'Rental Units Data'}
                                 headCells={headCells}
                                 dataToPrint={propertyUnitsItems.filter(({ id }) => selected.includes(id))}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <ImportItemsBtn
+                                baseObjectToAddProperties={{ property_id: propertyToShowDetails.id }}
+                                savingUrl="property_units"
+                                text="Upload Units"
                             />
                         </Grid>
                     </Grid>

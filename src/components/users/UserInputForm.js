@@ -42,10 +42,10 @@ const UserSchema = Yup.object().shape({
 	other_email: Yup.string().trim().email("Invalid Email"),
 	phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
 	work_mobile_number: Yup.string().trim().min(10, 'Too Short'),
-	password: Yup.string().min(6, "Too Short!")
+	password: Yup.string().trim().min(6, "Too Short!")
 		.max(20, "We prefer an insecure system, try a shorter password.")
 		.required("Pasword is Required"),
-	confirm_password: Yup.string()
+	confirm_password: Yup.string().trim()
 		.test("passwords-match", "Passwords must match", function (value) {
 			return this.parent.password === value;
 		}).required("Please Confirm Password")

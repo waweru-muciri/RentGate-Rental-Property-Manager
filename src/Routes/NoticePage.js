@@ -41,7 +41,7 @@ const mapStateToProps = (state, ownProps) => {
         noticeToEdit: state.notices.find(({ id }) => id === ownProps.match.params.noticeId) || {},
         activeMappedLeases: state.leases.filter(({ terminated }) => terminated !== true)
         .map((lease) => {
-            const tenantDetails = state.contacts.find(({ id }) => lease.tenants ? lease.tenants.includes(id) : false) || {}
+            const tenantDetails = state.contacts.find(({ id }) => Array.isArray(lease.tenants) ? lease.tenants.includes(id) : false) || {}
             return Object.assign({}, lease, {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`})
         })
         .map((lease) => {

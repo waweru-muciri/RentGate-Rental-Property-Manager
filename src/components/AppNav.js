@@ -165,6 +165,7 @@ let AppNavLayout = ({
                 classes={{
                     paper: classes.drawerPaper,
                 }}
+                ModalProps={{ onBackdropClick: handleDrawerToggle }}
                 BackdropProps={{ invisible: true }}
             >
                 <div className={classes.drawerHeader}>
@@ -442,7 +443,7 @@ let AppNavLayout = ({
                             handleUserSignOut();
                         }}
                     >
-                        <ListItemIcon><LockIcon/></ListItemIcon>
+                        <ListItemIcon><LockIcon /></ListItemIcon>
                         <ListItemText primary="Sign Out" />
                     </ListItem>
                 </List>

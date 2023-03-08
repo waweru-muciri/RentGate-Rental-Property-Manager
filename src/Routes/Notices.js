@@ -22,12 +22,13 @@ import { startOfToday, parse, differenceInDays } from "date-fns";
 
 
 const noticesTableHeadCells = [
-    { id: "days_left", numeric: false, disablePadding: true, label: "Days Left" },
+    { id: "days_left", numeric: true, disablePadding: true, label: "Days Left" },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
     { id: "notification_date", numeric: false, disablePadding: true, label: "Notification Date" },
     { id: "vacating_date", numeric: false, disablePadding: true, label: "Move Out Date" },
+    { id: "vacated", numeric: false, disablePadding: true, label: "Vacated Status" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
@@ -111,7 +112,7 @@ let VacatingNoticesPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -120,7 +121,7 @@ let VacatingNoticesPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Notices Records'}
                             reportTitle={'Notices Data'}
                             headCells={noticesTableHeadCells}
@@ -294,7 +295,8 @@ const mapStateToProps = (state) => {
             noticeDetails.days_left = days_left >= 0 ? days_left : 0
             noticeDetails.unit_ref = tenantUnit.ref
             return Object.assign({}, notice, noticeDetails);
-        }),
+        }).sort((notice1, notice2) => parse(notice2.notification_date, 'yyyy-MM-dd', new Date()) -
+        parse(notice1.notification_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         contacts: state.contacts,
     };

@@ -18,7 +18,7 @@ const PaymentSchema = Yup.object().shape({
 	memo: Yup.string().trim().max(50, "Memo details should be less than 50 characters").default(''),
 	charge_balance: Yup.number().typeError('Charge Balance must be a number').required("Charge balance is required"),
 	payment_amount: Yup.number().typeError('Amount must be a number')
-		.min(1, 'Give a good amount to the payment')
+		.positive("Amount must be a positive number")
 		.max(Yup.ref('charge_balance'), 'Payment Amount Cannot be greater than remaining balance')
 		.required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
@@ -90,114 +90,114 @@ let PaymentInputForm = (props) => {
 				handleBlur,
 				isSubmitting,
 			}) => (
-					<form
-						className={classes.form}
-						method="post"
-						id="paymentInputForm"
-						onSubmit={handleSubmit}
-					>
-						<Grid container spacing={2} direction="column">
-							{
-								status && status.msg && (
-									<CustomSnackbar
-										variant={status.sent ? "success" : "error"}
-										message={status.msg}
-									/>
-								)
-							}
-							<Grid item>
-								<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1">Total Charge Amount : {values.charge_amount}</Typography>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1">Charge Balance: {values.charge_balance}</Typography>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									variant="outlined"
-									id="payment_date"
-									type="date"
-									name="payment_date"
-									label="Payment Date"
-									value={values.payment_date}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									InputLabelProps={{ shrink: true }}
-									error={errors.payment_date && touched.payment_date}
-									helperText={touched.payment_date && errors.payment_date}
+				<form
+					className={classes.form}
+					method="post"
+					id="paymentInputForm"
+					onSubmit={handleSubmit}
+				>
+					<Grid container spacing={2} direction="column">
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
 								/>
-							</Grid>
+							)
+						}
+						<Grid item>
+							<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>
+						</Grid>
+						<Grid item>
+							<Typography variant="subtitle1">Total Charge Amount : {values.charge_amount}</Typography>
+						</Grid>
+						<Grid item>
+							<Typography variant="subtitle1">Charge Balance: {values.charge_balance}</Typography>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								variant="outlined"
+								id="payment_date"
+								type="date"
+								name="payment_date"
+								label="Payment Date"
+								value={values.payment_date}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								InputLabelProps={{ shrink: true }}
+								error={errors.payment_date && touched.payment_date}
+								helperText={touched.payment_date && errors.payment_date}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								type="text"
+								variant="outlined"
+								name="payment_amount"
+								id="payment_amount"
+								label="Payment Amount"
+								value={values.payment_amount}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								error={errors.payment_amount && touched.payment_amount}
+								helperText={touched.payment_amount && errors.payment_amount}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								type="text"
+								multiline
+								rows={4}
+								variant="outlined"
+								name="memo"
+								id="memo"
+								label="Payment Details/Memo"
+								value={values.memo}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								error={errors.memo && touched.memo}
+								helperText={"Include details for the payments here (max 50)"}
+							/>
+						</Grid>
+						<Grid
+							item
+							container
+							justify="flex-start"
+							direction="row"
+							className={classes.buttonBox}
+						>
 							<Grid item>
-								<TextField
-									fullWidth
-									type="text"
-									variant="outlined"
-									name="payment_amount"
-									id="payment_amount"
-									label="Payment Amount"
-									value={values.payment_amount}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.payment_amount && touched.payment_amount}
-									helperText={touched.payment_amount && errors.payment_amount}
-								/>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									type="text"
-									multiline
-									rows={4}
-									variant="outlined"
-									name="memo"
-									id="memo"
-									label="Payment Details/Memo"
-									value={values.memo}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.memo && touched.memo}
-									helperText={"Include details for the payments here (max 50)"}
-								/>
-							</Grid>
-							<Grid
-								item
-								container
-								justify="flex-start"
-								direction="row"
-								className={classes.buttonBox}
-							>
-								<Grid item>
-									<Button
-										color="secondary"
-										variant="contained"
-										size="medium"
-										startIcon={<CancelIcon />}
-										onClick={() => history.goBack()}
-										disableElevation
-									>
-										Cancel
+								<Button
+									color="secondary"
+									variant="contained"
+									size="medium"
+									startIcon={<CancelIcon />}
+									onClick={() => history.goBack()}
+									disableElevation
+								>
+									Cancel
 									</Button>
-								</Grid>
-								<Grid item>
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										size="medium"
-										startIcon={<SaveIcon />}
-										form="paymentInputForm"
-										disabled={isSubmitting}
-									>
-										Save Payment
+							</Grid>
+							<Grid item>
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									size="medium"
+									startIcon={<SaveIcon />}
+									form="paymentInputForm"
+									disabled={isSubmitting}
+								>
+									Save Payment
 								</Button>
-								</Grid>
 							</Grid>
 						</Grid>
-					</form>
-				)
+					</Grid>
+				</form>
+			)
 			}
 		</Formik >
 	);

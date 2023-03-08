@@ -74,7 +74,7 @@ let AuditLogsPage = ({
                 </Grid>
                 <Grid item>
                     <ExportToExcelBtn
-                        disabled={selected.length <= 0}
+                        disabled={!selected.length}
                         reportName={'Audit Log Records'}
                         reportTitle={'Audit Log Data'}
                         headCells={auditLogsTableHeadCells}

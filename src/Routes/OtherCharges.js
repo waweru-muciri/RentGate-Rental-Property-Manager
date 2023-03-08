@@ -72,7 +72,7 @@ let TenantChargesStatementPage = ({
             const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setTenantChargesItems(transactionsCharges);
+        setTenantChargesItems(chargesForCurrentMonth);
         setFilteredChargeItems(chargesForCurrentMonth);
     }, [transactionsCharges]);
 
@@ -93,7 +93,7 @@ let TenantChargesStatementPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
-        let filteredStatements = tenantChargesItems
+        let filteredStatements = transactionsCharges
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
@@ -218,7 +218,7 @@ let TenantChargesStatementPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<AddIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             onClick={() => setChargesPaidInFull()}
                         >
                             Receive Full Payments
@@ -230,7 +230,7 @@ let TenantChargesStatementPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             startIcon={<AddIcon />}
                             component={Link}
                             to={`/app/payments/${selected[0]}/new`}
@@ -244,7 +244,7 @@ let TenantChargesStatementPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             startIcon={<AddIcon />}
                             to={`/app/payments/${selected[0]}/new?charge_deposit=1`}
                             component={Link}
@@ -254,7 +254,7 @@ let TenantChargesStatementPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={`Tenants Charges Records`}
                             reportTitle={'Tenant Charges Data'}
                             headCells={headCells}
@@ -263,7 +263,7 @@ let TenantChargesStatementPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Tenant Charges Data'}
                             reportTitle={`Tenant Charges Records`}
                             headCells={headCells}

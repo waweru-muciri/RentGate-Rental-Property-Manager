@@ -16,7 +16,7 @@ const EXPENSE_CATEGORIES = getExpensesCategories();
 
 const PropertyExpenseSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
-  amount: Yup.number().min(0).required("Expenditure Amount is required"),
+  amount: Yup.number().positive("Amount must be a positive number").required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
   property_id: Yup.string().required("Property is Required"),
   unit_id: Yup.string().required("Unit is Required"),

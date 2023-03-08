@@ -59,21 +59,15 @@ export function getUnitTypes() {
 export function getPropertyBaths() {
 	let baths = [];
 	for (let i = 1; i <= 5; i++) {
-		i === 1 ? baths.push(i + " Bath") : baths.push(i + " Baths");
+		baths.push(i);
 	}
-	return baths.concat([
-		"1.5 Baths",
-		"2.5 Baths",
-		"3.5 Baths",
-		"4.5 Baths",
-		"5.5 Baths",
-	]);
+	return baths.concat("5+");
 }
 
 export function getPropertyBeds() {
 	let beds = ["Studio"];
 	for (let i = 1; i <= 5; i++) {
-		i === 1 ? beds.push(i + " Bed") : beds.push(i + " Beds");
+		beds.push(i);
 	}
 	return beds;
 }
@@ -105,27 +99,27 @@ export function getTransactionsFilterOptions() {
 		{ id: 'last-year', text: 'Last Year' },];
 }
 
-export function getLastMonthFromToDates(){
+export function getLastMonthFromToDates() {
 	return [startOfMonth(subMonths(startOfToday(), 1)), endOfMonth(subMonths(startOfToday(), 1))]
 }
 
-export function getLastYearFromToDates(){
+export function getLastYearFromToDates() {
 	return [startOfYear(subYears(startOfToday(), 1)), endOfYear(subYears(startOfToday(), 1))]
 }
 
-export function getYearToDateFromToDates(){
+export function getYearToDateFromToDates() {
 	return [startOfYear(startOfToday()), startOfToday()]
 }
 
-export function getCurrentMonthFromToDates(){
+export function getCurrentMonthFromToDates() {
 	return [startOfMonth(startOfToday()), endOfMonth(startOfToday())]
 }
 
-export function getLastThreeMonthsFromToDates(){
+export function getLastThreeMonthsFromToDates() {
 	return [startOfMonth(subMonths(startOfToday(), 2)), endOfMonth(startOfToday())]
 }
 
-export function getMonthsInYear () {
+export function getMonthsInYear() {
 	return monthsInYear
 }
 

@@ -26,6 +26,15 @@ const options = {
       fill: false
     }
   },
+  scales: {
+    yAxes: [
+      {
+        ticks: {
+          min: 0,
+        }
+      }
+    ],
+  }
 };
 
 const FilterYearSchema = Yup.object().shape({
@@ -33,8 +42,8 @@ const FilterYearSchema = Yup.object().shape({
     .typeError("Year must be a number!")
     .required("Year is required")
     .positive()
-    .min(0, "Must be greater than 0")
-    .max(2100, "Sorry but we won't be here during those times.")
+    .min(2000, "Sorry, were not present then.")
+    .max(2100, "Sorry, but we won't be here during those times.")
     .integer(),
 });
 
@@ -42,6 +51,8 @@ var monthsInYear = eachMonthOfInterval({
   start: startOfYear(startOfToday()),
   end: endOfYear(startOfToday()),
 })
+
+const currentYear = new Date().getFullYear()
 
 let DashBoardPage = (props) => {
   const classes = commonStyles()
@@ -52,11 +63,15 @@ let DashBoardPage = (props) => {
   const propertyActiveLeases = leases.filter(({ terminated }) => terminated !== true)
 
   useEffect(() => {
-    setChargesItems(transactionsCharges);
+    const transactionChargesForCurrentYear = transactionsCharges
+      .filter(({ charge_date }) => getYear(parse(charge_date, 'yyyy-MM-dd', new Date())) === currentYear)
+    setChargesItems(transactionChargesForCurrentYear);
   }, [transactionsCharges]);
 
   useEffect(() => {
-    setTransactionItems(transactions);
+    const transactionsPaymentsForCurrentYear = transactions
+      .filter(({ payment_date }) => getYear(parse(payment_date, 'yyyy-MM-dd', new Date())) === currentYear)
+    setTransactionItems(transactionsPaymentsForCurrentYear);
   }, [transactions]);
 
   const setFilteredTransactionItemsByYear = (filterYear) => {
@@ -134,7 +149,7 @@ let DashBoardPage = (props) => {
                 borderColor="grey.400"
               >
                 <Formik
-                  initialValues={{ filter_year: getYear(startOfToday()) }}
+                  initialValues={{ filter_year: currentYear }}
                   validationSchema={FilterYearSchema}
                   onSubmit={(values) => {
                     setFilteredTransactionItemsByYear(parseInt(values.filter_year));
@@ -148,76 +163,76 @@ let DashBoardPage = (props) => {
                     handleChange,
                     handleBlur,
                   }) => (
-                      <form
-                        className={classes.form}
-                        id="yearFilterForm"
-                        onSubmit={handleSubmit}
+                    <form
+                      className={classes.form}
+                      id="yearFilterForm"
+                      onSubmit={handleSubmit}
+                    >
+                      <Grid
+                        container
+                        spacing={2}
+                        alignItems="center"
+                        justify="center"
+                        direction="row"
                       >
-                        <Grid
-                          container
-                          spacing={2}
-                          alignItems="center"
-                          justify="center"
-                          direction="row"
-                        >
-                          <Grid item sm={3}>
-                            <TextField
-                              fullWidth
-                              select
-                              variant="outlined"
-                              name="property_filter"
-                              label="Property"
-                              id="property_filter"
-                              onChange={(event) => {
-                                setPropertyFilter(
-                                  event.target.value
-                                );
-                              }}
-                              value={propertyFilter}
-                            >
-                              <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
-                              {properties.map(
-                                (property, index) => (
-                                  <MenuItem
-                                    key={index}
-                                    value={property.id}
-                                  >
-                                    {property.ref}
-                                  </MenuItem>
-                                )
-                              )}
-                            </TextField>
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              variant="outlined"
-                              id="filter_year"
-                              name="filter_year"
-                              label="Year"
-                              value={values.filter_year}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              error={errors.filter_year && touched.filter_year}
-                              helperText={
-                                touched.filter_year && errors.filter_year
-                              }
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Button
-                              type="submit"
-                              form="yearFilterForm"
-                              color="primary"
-                              variant="contained"
-                              size="medium"
-                              startIcon={<SearchIcon />}
-                            >
-                              SEARCH
-                            </Button>
-                          </Grid>
+                        <Grid item sm={3}>
+                          <TextField
+                            fullWidth
+                            select
+                            variant="outlined"
+                            name="property_filter"
+                            label="Property"
+                            id="property_filter"
+                            onChange={(event) => {
+                              setPropertyFilter(
+                                event.target.value
+                              );
+                            }}
+                            value={propertyFilter}
+                          >
+                            <MenuItem key={"all"} value={"all"}>All Properties</MenuItem>
+                            {properties.map(
+                              (property, index) => (
+                                <MenuItem
+                                  key={index}
+                                  value={property.id}
+                                >
+                                  {property.ref}
+                                </MenuItem>
+                              )
+                            )}
+                          </TextField>
                         </Grid>
-                      </form>
-                    )}
+                        <Grid item>
+                          <TextField
+                            variant="outlined"
+                            id="filter_year"
+                            name="filter_year"
+                            label="Year"
+                            value={values.filter_year}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.filter_year && touched.filter_year}
+                            helperText={
+                              touched.filter_year && errors.filter_year
+                            }
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Button
+                            type="submit"
+                            form="yearFilterForm"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<SearchIcon />}
+                          >
+                            SEARCH
+                            </Button>
+                        </Grid>
+                      </Grid>
+                    </form>
+                  )}
                 </Formik>
               </Box>
             </Grid>

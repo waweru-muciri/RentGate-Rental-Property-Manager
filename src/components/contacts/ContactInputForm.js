@@ -39,10 +39,15 @@ const ContactSchema = Yup.object().shape({
 	title: Yup.string().trim().required("Title is required"),
 	gender: Yup.string().trim().required("Gender is required"),
 	id_number: Yup.string().trim().required("ID Number is required"),
+	personal_phone_number: Yup.string().trim().min(10, "Phone Number must be >= 10")
+	.required('Phone Number is Required'),
 	contact_email: Yup.string().trim().email(),
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
-	personal_phone_number: Yup.string().trim().required('Phone Number is Required'),
+	emergency_contact_email: Yup.string().trim().email(),
+	emergency_contact_name: Yup.string().trim().default(''),
+	emergency_contact_phone_number: Yup.string().trim().default(''),
+	emergency_contact_relationship: Yup.string().trim().default(''),
 });
 
 

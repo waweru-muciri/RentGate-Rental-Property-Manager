@@ -8,6 +8,17 @@ let companyProfile = {};
 export function setCompanyProfile(companyProfileData) {
     companyProfile = companyProfileData
 }
+
+export function readXlsxFile(fileData) {
+    let readData = XLSX.read(fileData, { type: 'binary' });
+    const wsname = readData.SheetNames[0];
+    const ws = readData.Sheets[wsname];
+
+    /* Convert array to json*/
+    const dataParse = XLSX.utils.sheet_to_json(ws, { defval: "" });
+    return dataParse
+}
+
 const makeCell = (content, rowIndex = -1, options = {}) => {
     return Object.assign({ text: content, fillColor: rowIndex % 2 ? 'white' : '#e8e8e8' }, options);
 }
@@ -260,7 +271,7 @@ export function printInvoice(tenantDetails, items) {
                                 <td class="title">
                                 </td>
                                 <td>
-                                    Invoice #: ${new Date().toISOString().slice(0,10)}-${tenantDetails.id_number}<br>
+                                    Invoice #: ${new Date().toISOString().slice(0, 10)}-${tenantDetails.id_number}<br>
                                     Created: ${new Date().toLocaleString()}<br>
                                 </td>
                             </tr>
@@ -327,7 +338,7 @@ export function printInvoice(tenantDetails, items) {
     my_window.document.write(text);
     my_window.print();
 
-} 
+}
 
 export function printReceipt(tenantDetails, items) {
     const text = `
@@ -424,7 +435,7 @@ export function printReceipt(tenantDetails, items) {
                                 </td>
                                 
                                 <td>
-                                    Receipt #: ${new Date().toISOString().slice(0,10)}-${tenantDetails.id_number}<br>
+                                    Receipt #: ${new Date().toISOString().slice(0, 10)}-${tenantDetails.id_number}<br>
                                     Created: ${new Date().toLocaleString()}<br>
                                 </td>
                             </tr>

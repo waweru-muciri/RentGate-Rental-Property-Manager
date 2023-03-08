@@ -33,7 +33,7 @@ const PropertyUnitSchema = Yup.object().shape({
 	baths: Yup.string().trim(),
 	beds: Yup.string().trim().required("Beds is required"),
 	ref: Yup.string().trim().required("Unit Ref Required"),
-	sqft: Yup.number().typeError('Sqft must be a number').min(0).default(0),
+	sqm: Yup.number().typeError('Square meters must be a number').min(0).default(0),
 });
 
 
@@ -50,7 +50,7 @@ let PropertyUnitInputForm = (props) => {
 		unit_type: propertyUnitToEdit.unit_type || "",
 		beds: propertyUnitToEdit.beds || "",
 		baths: propertyUnitToEdit.baths || "",
-		sqft: propertyUnitToEdit.sqft || '',
+		sqm: propertyUnitToEdit.sqm || '',
 		unit_image_url: propertyUnitToEdit.unit_image_url || '',
 		file_to_load_url: '',
 	};
@@ -69,7 +69,7 @@ let PropertyUnitInputForm = (props) => {
 						unit_type: values.unit_type,
 						beds: values.beds,
 						baths: values.baths,
-						sqft: values.sqft,
+						sqm: values.sqm,
 					};
 					//check if the unit has an image to upload
 					if (values.unit_image && values.unit_image.data) {
@@ -86,11 +86,8 @@ let PropertyUnitInputForm = (props) => {
 					}
 					//save the unit details
 					await handleItemSubmit(property_unit, 'property_units')
-					resetForm({ property_id: values.property_id });
-					if (values.id) {
-						history.goBack();
-					}
-					setStatus({ sent: true, msg: "Details saved successfully!" })
+					resetForm({});
+					setStatus({ sent: true, msg: "Unit saved successfully!" })
 				} catch (error) {
 					setStatus({ sent: false, msg: `Error! ${error}.` })
 
@@ -237,14 +234,14 @@ let PropertyUnitInputForm = (props) => {
 									<TextField
 										fullWidth
 										variant="outlined"
-										name="sqft"
-										id="sqft"
-										label="Square Footage"
-										value={values.sqft}
+										name="sqm"
+										id="sqm"
+										label="Square meters"
+										value={values.sqm}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={errors.sqft && touched.sqft}
-										helperText={touched.sqft && errors.sqft}
+										error={errors.sqm && touched.sqm}
+										helperText={touched.sqm && errors.sqm}
 									/>
 								</Grid>
 							</Grid>

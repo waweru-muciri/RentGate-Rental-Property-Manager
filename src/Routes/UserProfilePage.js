@@ -266,7 +266,7 @@ let UserDetailsPage = ({
                                 variant="contained"
                                 size="medium"
                                 startIcon={<EditIcon />}
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 component={Link}
                                 to={`${match.url}/management-fees/${selected[0]}/edit`}
                             >
@@ -275,7 +275,7 @@ let UserDetailsPage = ({
                         </Grid>
                         <Grid item>
                             <PrintArrayToPdf
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rental Units Records'}
                                 reportTitle={'Rental Units Data'}
                                 headCells={headCells}
@@ -284,7 +284,7 @@ let UserDetailsPage = ({
                         </Grid>
                         <Grid item>
                             <ExportToExcelBtn
-                                disabled={selected.length <= 0}
+                                disabled={!selected.length}
                                 reportName={'Rental Units Records'}
                                 reportTitle={'Rental Units Data'}
                                 headCells={headCells}
@@ -378,7 +378,7 @@ const mapStateToProps = (state, ownProps) => {
             {
                 units: state.propertyUnits.filter(({ property_id }) => property_id === property.id).length,
                 floorArea: state.propertyUnits.reduce((total, currentValue) => {
-                    return total + parseFloat(currentValue.sqft) || 0
+                    return total + parseFloat(currentValue.sqm) || 0
                 }, 0)
             }));
     const totalPropertiesFloorArea = propertiesAssignedToUser

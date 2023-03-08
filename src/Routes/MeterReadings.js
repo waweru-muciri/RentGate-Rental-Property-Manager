@@ -63,14 +63,14 @@ let MeterReadingsPage = ({
             const readingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())
             return isWithinInterval(readingDate, { start: startOfPeriod, end: endOfPeriod })
         })
-        setMeterReadingItems(meterReadings);
+        setMeterReadingItems(currentMonthMeterReadings);
         setFilteredMeterReadingItems(currentMonthMeterReadings);
     }, [meterReadings]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the meterReadings here according to search criteria
-        let filteredMeterReadings = meterReadingItems
+        let filteredMeterReadings = meterReadings
         if (periodFilter) {
             let dateRange = []
             let startOfPeriod;
@@ -112,13 +112,10 @@ let MeterReadingsPage = ({
             })
         }
         filteredMeterReadings = filteredMeterReadings
+            .filter(({ meter_type }) => !meterTypeFilter ? true : meter_type === meterTypeFilter)
             .filter(({ property }) => propertyFilter === "all" ? true : property === propertyFilter)
-            .filter(({ reading_date }) =>
-                !fromDateFilter ? true : reading_date >= fromDateFilter
-            )
-            .filter(({ reading_date }) =>
-                !toDateFilter ? true : reading_date <= toDateFilter
-            )
+            .filter(({ reading_date }) => !fromDateFilter ? true : reading_date >= fromDateFilter)
+            .filter(({ reading_date }) => !toDateFilter ? true : reading_date <= toDateFilter)
         setFilteredMeterReadingItems(filteredMeterReadings);
     };
 
@@ -170,7 +167,7 @@ let MeterReadingsPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -179,7 +176,7 @@ let MeterReadingsPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Meter Readings Records'}
                             reportTitle={'Meter Readings Records'}
                             headCells={meterReadingsTableHeadCells}
@@ -188,7 +185,7 @@ let MeterReadingsPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Meter Readings Records'}
                             reportTitle={'Meter Readings Records'}
                             headCells={meterReadingsTableHeadCells}
@@ -393,9 +390,8 @@ let MeterReadingsPage = ({
 };
 
 const mapStateToProps = (state) => {
-    console.log(state.meterReadings)
     return {
-        meterReadings: [...state.meterReadings]
+        meterReadings: state.meterReadings
             .map(reading => {
                 const tenant = state.contacts.find((contact) => contact.id === reading.tenant_id) || {};
                 const unit = state.propertyUnits.find((unit) => unit.id === reading.unit_id) || {};

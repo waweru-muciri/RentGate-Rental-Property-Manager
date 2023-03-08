@@ -118,7 +118,7 @@ let MaintenanceRequestsPage = ({
 							variant="contained"
 							size="medium"
 							startIcon={<EditIcon />}
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 							component={Link}
 							to={`${match.url}/${selected[0]}/edit`}
 						>
@@ -128,7 +128,7 @@ let MaintenanceRequestsPage = ({
 					</Grid>
 					<Grid item>
 						<ExportToExcelBtn
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 							reportName={'Maintenance Requests Records'}
 							reportTitle={'Maintenance Requests Data'}
 							headCells={maintenanceRequestsTableHeadCells}

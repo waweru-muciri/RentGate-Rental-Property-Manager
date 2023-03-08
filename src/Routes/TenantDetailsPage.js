@@ -169,8 +169,8 @@ let TenantDetailsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     const currentTenantActiveLease = state.leases.filter(({ terminated }) => terminated !== true)
-        .find(({ tenants }) => tenants ? tenants.includes(ownProps.match.params.contactId) : false) || {}
-    const unitInLease = state.propertyUnits.find(({ id }) => id === currentTenantActiveLease.unit_id)
+        .find(({ tenants }) => Array.isArray(tenants) ? tenants.includes(ownProps.match.params.contactId) : false) || {}
+    const unitInLease = state.propertyUnits.find(({ id }) => id === currentTenantActiveLease.unit_id) || {}
     return {
         transactionsCharges: state.transactionsCharges
             .filter((charge) => charge.tenant_id === ownProps.match.params.contactId).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)

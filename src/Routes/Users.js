@@ -105,7 +105,7 @@ let UsersPage = ({
 							variant="contained"
 							size="medium"
 							startIcon={<EditIcon />}
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 							component={Link}
 							to={`${match.url}/${selected[0]}/edit`}
 						>
@@ -119,7 +119,7 @@ let UsersPage = ({
 							variant="contained"
 							size="medium"
 							startIcon={<BlockIcon />}
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 							onClick={async () => {
 								try {
 									await updateFirebaseUser({
@@ -144,14 +144,14 @@ let UsersPage = ({
 							size="medium"
 							component={Link}
 							to={`/app/emails/new?contact=${selected[0]}&contactSource=Users`}
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 						>
 							Compose Email
 						</Button>
 					</Grid>
 					<Grid item>
 						<ExportToExcelBtn
-							disabled={selected.length <= 0}
+							disabled={!selected.length}
 							reportName={'Users Records'}
 							reportTitle={'Users Data'}
 							headCells={usersTableHeadCells}

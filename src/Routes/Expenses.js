@@ -108,7 +108,7 @@ let ExpensesPage = ({
                             variant="contained"
                             size="medium"
                             startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
@@ -117,7 +117,7 @@ let ExpensesPage = ({
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Expenses Records'}
                             reportTitle={'Expenses Data'}
                             headCells={expensesTableHeadCells}
@@ -126,7 +126,7 @@ let ExpensesPage = ({
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
-                            disabled={selected.length <= 0}
+                            disabled={!selected.length}
                             reportName={'Expenses Records'}
                             reportTitle={'Expenses Data'}
                             headCells={expensesTableHeadCells}
