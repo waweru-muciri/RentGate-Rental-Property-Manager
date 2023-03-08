@@ -205,7 +205,7 @@ let MainPage = ({
         } else {
           // User is signed out.
           setUser(null);
-          history.goBack('/login');
+          history.push('/login');
         }
       },
       function (error) {
@@ -362,6 +362,9 @@ function AppNavLayout(props) {
 
   return (
     <React.Fragment>
+    {
+      console.log(currentUser)
+    }
    <Router>
     <AppNavLayout selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} pageTitle={"Yarra Property Management"}/>
         <Switch>
