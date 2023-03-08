@@ -4,7 +4,6 @@ import {
     firebaseSignOutUser, setPaginationPage, toggleDrawer
 } from "../actions/actions";
 import {
-    useHistory,
     withRouter,
     Link,
 } from "react-router-dom";
@@ -50,6 +49,7 @@ import ShowChartIcon from '@material-ui/icons/ShowChart';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
+import MoneyOffIcon from '@material-ui/icons/MoneyOff';
 import Head from "../components/Head";
 import {commonStyles} from '../components/commonStyles'
 
@@ -72,8 +72,7 @@ const othersLinkNestedLinks = [
 
 const propertyLinkNestedLinks = [
     { text: "Rentals Properties", to: "/properties", icon: <ApartmentIcon /> },
-    { text: "Rental Agreements", to: "/leases", icon: <AttachMoneyIcon /> },
-    // { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
+    { text: "Rental Agreements", to: "/leases", icon: <WorkIcon /> },
     { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
 ];
 
@@ -82,20 +81,30 @@ const reportLinkNestedLinks = [
     //show income here from all charges and provide a way to filter the charges according to type, 
     //show payments received from these charges and any outstanding balances
     {
+        text: "Outstanding Balances",
+        to: "/reports/outstanding-balances",
+        icon: <MoneyOffIcon/>,
+    }, 
+    {
         text: "Property Performance",
+        to: "/reports/property-income",
+        icon: <ShowChartIcon />,
+    }, 
+    {
+        text: "Properties Income Statement",
         to: "/reports/property-income",
         icon: <AssessmentIcon />,
     }, 
-    //show income and expenses received from each property and show net income for each of the expenses
-    //show property occupancy rate over periods of time and provide for filtering criteria by property, unit, 
-    //generate tenant statements and filtering criteria by each property and others
-    //show total of values and other relevant data points
-    //show outstanding balances on tenant statements
     {
         text: "Tenant Statements",
         to: "/reports/tenant-statements",
         icon: <AttachMoneyIcon />,
     },
+    //show income and expenses received from each property and show net income for each of the expenses
+    //show property occupancy rate over periods of time and provide for filtering criteria by property, unit, 
+    //generate tenant statements and filtering criteria by each property and others
+    //show total of values and other relevant data points
+    //show outstanding balances on tenant statements
 ];
 
 const accountsLinkNestedLinks = [
