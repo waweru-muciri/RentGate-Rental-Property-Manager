@@ -29,7 +29,8 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.7.2",
-    "xlsx": "^0.15.3"
+    "xlsx": "^0.15.3",
+    "yup": "^0.29.1"
   },
   "scripts": {
     "start": "react-scripts start",

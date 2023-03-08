@@ -183,8 +183,8 @@ let MainPage = ({
     fetchData,
   ]);
 
-  const initApp = () => {
-   if (!currentUser) {
+  useEffect (() => {
+    if(!currentUser){
        firebase.auth().onAuthStateChanged(
       function (user) {
         if (user) {
@@ -201,21 +201,20 @@ let MainPage = ({
           user.getIdToken().then(function (accessToken) {
             userDetails.accessToken = accessToken;
           });
-          history.push("/login");
           setUser(userDetails);
         } else {
           // User is signed out.
-          setUser(user);
+          setUser(null);
+          history.goBack('/login');
         }
       },
       function (error) {
         console.log(error);
       }
     );
-   }
-  };
+     }
+  }, [currentUser]);
 
-  initApp();
 
 function AppNavLayout(props) {
   let { currentUser, pageTitle } = props;
