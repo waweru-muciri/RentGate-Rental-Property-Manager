@@ -10,6 +10,7 @@ import * as emailsReducers from "./emails";
 import * as phoneNumbersReducers from "./phoneNumbers";
 import * as addressesReducers from "./addresses";
 import * as faxesReducers from "./faxes";
+import * as noticesReducers from "./notices";
 
 export function itemsHasErrored(state = null, action) {
     switch (action.type) {
@@ -71,6 +72,7 @@ function reducers(state = {}, action) {
             state.maintenanceRequests,
             action
         ),
+        notices : noticesReducers.notices(state.notices, action),
         currentUser : setCurrentUser(state.currentUser, action),
         auditLogs: logsReducers.logs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),

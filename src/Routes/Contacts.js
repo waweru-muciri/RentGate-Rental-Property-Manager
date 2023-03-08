@@ -24,6 +24,7 @@ import { commonStyles } from "../components/commonStyles";
 import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import VacatingNoticesPage from "../components/notices/VacatingNotices";
 import { getGendersList } from "../assets/commonAssets.js";
 
 const GENDERS_LIST = getGendersList();
@@ -60,6 +61,10 @@ const contactsTableHeadCells = [
 let ContactsPage = ({
     isLoading,
     contacts,
+    properties,
+    users, 
+    currentUser,
+    notices,
     contact_emails,
     contact_addresses,
     match,
@@ -157,7 +162,7 @@ let ContactsPage = ({
                     centered
                 >
                     <Tab label="Contacts" />
-                    <Tab label="Contact Statements" />
+                    <Tab label="Vacating Notices"></Tab>
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
@@ -295,7 +300,7 @@ let ContactsPage = ({
                                                     event.target.value
                                                 );
                                             }}
-                                            value={genderFilter || ""}
+                                            value={genderFilter}
                                         >
                                             {GENDERS_LIST.map(
                                                 (gender_type, index) => (
@@ -321,6 +326,9 @@ let ContactsPage = ({
                                 >
                                     <Grid item>
                                         <Button
+                                            onClick={(event) =>
+                                                handleSearchFormSubmit(event)
+                                            }
                                             type="submit"
                                             form="contactSearchForm"
                                             color="primary"
@@ -371,13 +379,21 @@ let ContactsPage = ({
                     {isLoading && <LoadingBackdrop open={isLoading} />}
                 </Grid>
             </TabPanel>
-            <TabPanel value={tabValue} index={1}></TabPanel>
+            <TabPanel value={tabValue} index={1}>
+             <VacatingNoticesPage properties={properties}
+             users={users} currentUser={currentUser} notices={notices}
+             contact_addresses={contact_addresses} contacts={contacts} contact_emails={contact_emails} match={match}/>
+            </TabPanel>
         </Layout>
     );
 };
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        notices: state.notices,
+        properties: state.properties,
+        users: state.users, 
+        currentUser: state.currentUser,
         contacts: state.contacts,
         contact_phone_numbers: state.contact_phone_numbers,
         contact_emails: state.contact_emails,
