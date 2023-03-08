@@ -13,10 +13,10 @@ import PageHeading from "../components/PageHeading";
 
 const headCells = [
     {
-        id: "tenant",
+        id: "tenant_name",
         numeric: false,
         disablePadding: true,
-        label: "Tenant's Name",
+        label: "Tenant",
     },
     {
         id: "transaction_date",
@@ -25,10 +25,10 @@ const headCells = [
         label: "Transaction Date",
     },
     {
-        id: "landlord",
+        id: "landlord_name",
         numeric: false,
         disablePadding: true,
-        label: "Landlord Name",
+        label: "Landlord",
     },
     {
         id: "property_ref",
@@ -64,20 +64,16 @@ const headCells = [
         numeric: false,
         disablePadding: true,
         label: "Transaction Balance",
-    },{
+    }, {
         id: "security_deposit",
         numeric: false,
         disablePadding: true,
         label: "Security Deposit",
-    },{
-        id: "water_deposit",
-        numeric: false,
-        disablePadding: true,
-        label: "Water deposit",
-    },
+    }
 ];
 
 let TenantStatementsPage = ({
+    currentUser,
     transactions,
     properties,
     contacts,
@@ -86,7 +82,7 @@ let TenantStatementsPage = ({
     let [statementItems, setStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
@@ -100,24 +96,24 @@ let TenantStatementsPage = ({
     const getMappedStatements = () => {
         const mappedTransactions = transactions.map((transaction) => {
             const tenant = contacts.find(
-                    (contact) => contact.id === transaction.tenant
-                );
-            const landlord = contacts.find(
-                    (contact) => contact.id === transaction.landlord
-                );
+                (contact) => contact.id === transaction.tenant
+            );
+            const landlord = users.find(
+                (user) => user.id === transaction.landlord
+            );
             const property = properties.find(
-                    (property) => property.id === transaction.property
-                );
+                (property) => property.id === transaction.property
+            );
             const transactionDetails = {}
-            transactionDetails.tenant = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
+            transactionDetails.tenant_name = typeof tenant !== 'undefined' ? tenant.first_name + ' ' + tenant.last_name : ''
             transactionDetails.tenantId = typeof tenant !== 'undefined' ? tenant.id : ''
-            transactionDetails.landlord = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            transactionDetails.property_ref = typeof property !== 'undefined' ?  property.ref : null
-            transactionDetails.property = typeof property !== 'undefined' ?  property.id : null
-            transactionDetails.property_price = typeof property !== 'undefined' ?  property.price : null
-            transactionDetails.security_deposit = typeof transaction !== 'undefined' ?  transaction.security_deposit : null
-            transactionDetails.water_deposit = typeof transaction !== 'undefined' ?  transaction.water_deposit : null
-            transactionDetails.transaction_balance = typeof property !== 'undefined' ?  property.price - transaction.transaction_price : null
+            transactionDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
+            transactionDetails.property_ref = typeof property !== 'undefined' ? property.ref : null
+            transactionDetails.property = typeof property !== 'undefined' ? property.id : null
+            transactionDetails.property_price = typeof property !== 'undefined' ? property.price : null
+            transactionDetails.security_deposit = typeof transaction !== 'undefined' ? transaction.security_deposit : null
+            transactionDetails.water_deposit = typeof transaction !== 'undefined' ? transaction.water_deposit : null
+            transactionDetails.transaction_balance = typeof property !== 'undefined' ? property.price - transaction.transaction_price : null
             return Object.assign({}, transaction, transactionDetails);
         });
         return mappedTransactions;
@@ -149,8 +145,8 @@ let TenantStatementsPage = ({
             .filter(({ tenantId }) =>
                 !contactFilter ? true : tenantId === contactFilter
             )
-            .filter(({ assigned_to }) =>
-                !assignedToFilter ? true : assigned_to === assignedToFilter
+            .filter(({ landlord }) =>
+                !assignedToFilter ? true : landlord === assignedToFilter
             );
         setStatementItems(filteredStatements);
     };
@@ -172,7 +168,7 @@ let TenantStatementsPage = ({
                 spacing={3}
                 justify="center" direction="column"
             >
-            <Grid item key={2}>
+                <Grid item key={2}>
                     <PageHeading paddingLeft={2} text={"Tenant Statements"} />
                 </Grid>
                 <Grid
@@ -210,47 +206,47 @@ let TenantStatementsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                            <Grid
-                                container
-                                item
-                                lg={6} md={12} xs={12}
-                                spacing={1}
-                                justify="center"
-                                direction="row"
-                            >
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        id="from_date_filter"
-                                        name="from_date_filter"
-                                        label="From Date"
-                                        value={fromDateFilter}
-                                        onChange={(event) => {
-                                            setFromDateFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
+                                <Grid
+                                    container
+                                    item
+                                    lg={6} md={12} xs={12}
+                                    spacing={1}
+                                    justify="center"
+                                    direction="row"
+                                >
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            id="from_date_filter"
+                                            name="from_date_filter"
+                                            label="From Date"
+                                            value={fromDateFilter}
+                                            onChange={(event) => {
+                                                setFromDateFilter(
+                                                    event.target.value
+                                                );
+                                            }}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type="date"
+                                            name="to_date_filter"
+                                            label="To Date"
+                                            id="to_date_filter"
+                                            onChange={(event) => {
+                                                setToDateFilter(event.target.value);
+                                            }}
+                                            value={toDateFilter}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item lg={6} md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        type="date"
-                                        name="to_date_filter"
-                                        label="To Date"
-                                        id="to_date_filter"
-                                        onChange={(event) => {
-                                            setToDateFilter(event.target.value);
-                                        }}
-                                        value={toDateFilter}
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                            </Grid>
                                 <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
@@ -285,7 +281,7 @@ let TenantStatementsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                            <Grid item lg={6} md={12} xs={12}>
+                                <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
                                         select
@@ -300,14 +296,14 @@ let TenantStatementsPage = ({
                                             );
                                         }}
                                     >
-                                    {users.map((user, index) => (
-                                <MenuItem key={index} value={user.id}>
-                                    {user.first_name + user.last_name}
-                                </MenuItem>
-                            ))}
+                                        {users.map((user, index) => (
+                                            <MenuItem key={index} value={user.id}>
+                                                {user.first_name + " " + user.last_name}
+                                            </MenuItem>
+                                        ))}
                                     </TextField>
                                 </Grid>
-                            <Grid item lg={6} md={12} xs={12}>
+                                <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         select
                                         fullWidth
@@ -322,11 +318,11 @@ let TenantStatementsPage = ({
                                         value={contactFilter}
                                         InputLabelProps={{ shrink: true }}
                                     >
-                                    {contacts.map((contact, contactIndex) => (
-                                <MenuItem key={contactIndex} value={contact.id}>
-                                    {contact.first_name + ' '+ contact.last_name}
-                                </MenuItem>
-                            ))}
+                                        {contacts.map((contact, contactIndex) => (
+                                            <MenuItem key={contactIndex} value={contact.id}>
+                                                {contact.first_name + ' ' + contact.last_name}
+                                            </MenuItem>
+                                        ))}
                                     </TextField>
                                 </Grid>
                             </Grid>
@@ -341,7 +337,7 @@ let TenantStatementsPage = ({
                             >
                                 <Grid item>
                                     <Button
-                                    onClick={(event) => handleSearchFormSubmit(event)}
+                                        onClick={(event) => handleSearchFormSubmit(event)}
                                         type="submit"
                                         form="contactSearchForm"
                                         color="primary"
@@ -385,13 +381,14 @@ let TenantStatementsPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    properties: state.properties,
-    transactions: state.transactions,
-    contacts: state.contacts,
-    users: state.users,
-  };
+const mapStateToProps = (state) => {
+    return {
+        currentUser: state.currentUser,
+        properties: state.properties,
+        transactions: state.transactions,
+        contacts: state.contacts,
+        users: state.users,
+    };
 };
 
 export default connect(mapStateToProps)(TenantStatementsPage);

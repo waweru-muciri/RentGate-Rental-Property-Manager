@@ -165,7 +165,7 @@ let RentRollPage = ({
                             disabled={selected.length <= 0}
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`transactions/${selected[0]}/edit`}
+                            to={`/transactions/${selected[0]}/edit`}
                         >
                             RENEW LEASE
                         </Button>

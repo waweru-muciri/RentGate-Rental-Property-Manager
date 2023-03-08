@@ -82,6 +82,7 @@ import NoteIcon from '@material-ui/icons/Note';
 import ApartmentIcon from '@material-ui/icons/Apartment';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
 import Head from "../components/Head";
 
@@ -174,7 +175,7 @@ const othersLinkNestedLinks = [
 const propertyLinkNestedLinks = [
   { text: "Rentals", to: "/properties", icon: <ApartmentIcon /> },
   { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
-  { text: "Rent Roll", to: "/rent-roll", icon: <AccountBalanceIcon /> },
+  { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
   { text: "Meter Readings", to: "/properties/meter-reading", icon: <PaymentIcon /> },
 ];
 
