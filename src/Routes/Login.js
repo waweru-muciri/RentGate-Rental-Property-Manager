@@ -6,10 +6,11 @@ import PageHeading from "../components/PageHeading";
 import { Grid, Button } from "@material-ui/core";
 import { connect } from "react-redux";
 import { setCurrentUser } from "../actions/actions";
+import * as firebaseui from 'firebaseui'
+import "../../node_modules/firebaseui/dist/firebaseui.css"
 
 let LoginPage = ({ setUser }) => {
   // Initialize the FirebaseUI Widget using Firebase.
-  var firebaseui = require("firebaseui");
   var ui = new firebaseui.auth.AuthUI(app.auth());
   var uiConfig = {
     callbacks: {

@@ -11,7 +11,10 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
-import { handleItemFormSubmit } from "../../actions/actions";
+import {
+	handleItemFormSubmit,
+	uploadFilesToFirebase,
+} from "../../actions/actions";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import {
@@ -38,17 +41,13 @@ let InputForm = ({
 	handleChange,
 	handleBlur,
 	handleSubmit,
+	setFieldValue,
 	isSubmitting,
 }) => {
-	const contactId = "f5t5sYom3sDPrTPBI568";
 
 	let styles = commonStyles();
 
 	const [imageDialogState, toggleImageDialogState] = React.useState(false);
-	const [contactPhoneNumbers, setContactPhoneNumbers] = React.useState([{}]);
-	const [contactAddresses, setContactAddresses] = React.useState([{}]);
-	const [contactEmails, setContactEmails] = React.useState([{}]);
-	const [contactFaxes, setContactFaxes] = React.useState([{}]);
 
 	const toggleImageDialog = () => {
 		toggleImageDialogState(!imageDialogState);
@@ -70,8 +69,8 @@ let InputForm = ({
 					direction="row"
 				>
 					<Grid
-						md={6}
-						lg={6}
+						md={5}
+						lg={5}
 						justify="center"
 						container
 						item
@@ -88,7 +87,7 @@ let InputForm = ({
 							<Grid key={1} item>
 								<Avatar
 									alt="Contact Image"
-									src={values.contact_avatar}
+									src={values.contact_avatar_url}
 									className={styles.largeAvatar}
 								/>
 							</Grid>
@@ -102,7 +101,7 @@ let InputForm = ({
 								</Button>
 
 								<DropzoneDialog
-									filesLimit={3}
+									filesLimit={1}
 									acceptedFiles={["image/*"]}
 									cancelButtonText={"cancel"}
 									submitButtonText={"submit"}
@@ -110,10 +109,11 @@ let InputForm = ({
 									open={imageDialogState}
 									onClose={() => toggleImageDialog()}
 									onSave={(files) => {
-										console.log("Files:", files);
+										console.log("Files:", files[0].data);
+										setFieldValue('contact_image', files[0])
 										toggleImageDialog();
 									}}
-									showPreviews={true}
+									showPreviews={false}
 									showFileNamesInPreview={true}
 								/>
 							</Grid>
@@ -149,7 +149,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.contact_type}
-							
 							error={errors.contact_type && touched.contact_type}
 							helperText={
 								touched.contact_type && errors.contact_type
@@ -170,7 +169,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.title}
-							
 							error={errors.title && touched.title}
 							helperText={touched.title && errors.title}
 						>
@@ -181,7 +179,6 @@ let InputForm = ({
 							))}
 						</TextField>
 						<TextField
-							
 							variant="outlined"
 							id="first_name"
 							name="first_name"
@@ -193,7 +190,6 @@ let InputForm = ({
 							helperText={touched.first_name && errors.first_name}
 						/>
 						<TextField
-							
 							variant="outlined"
 							id="last_name"
 							name="last_name"
@@ -222,7 +218,6 @@ let InputForm = ({
 							onBlur={handleBlur}
 							onChange={handleChange}
 							value={values.gender}
-							
 							error={errors.gender && touched.gender}
 							helperText={touched.gender && errors.gender}
 						>
@@ -233,7 +228,6 @@ let InputForm = ({
 							))}
 						</TextField>
 						<TextField
-							
 							variant="outlined"
 							id="date_of_birth"
 							name="date_of_birth"
@@ -290,8 +284,8 @@ let InputForm = ({
 					</Grid>
 					{/* start of Contact Details column */}
 					<Grid
-						md={6}
-						lg={6}
+						md={7}
+						lg={7}
 						container
 						justify="flex-start"
 						item
@@ -300,112 +294,213 @@ let InputForm = ({
 						<Typography variant="h6">Contact Details</Typography>
 						<Grid item container spacing={2}>
 							{/* start of mobile textfield and types row */}
-							{contactPhoneNumbers.map((phone_number, index) => (
-								<Grid
-									item
-									container
-									key={index}
-									spacing={2}
-									justify="flex-start"
-									direction="row"
-								>
-									<Grid item md={7}>
-										<TextField
-											fullWidth
-											
-											variant="outlined"
-											id="mobile_number"
-											name="mobile_number"
-											label="Mobile"
-											value={values.mobile_number}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Mobile"
-										/>
+							{values.contactPhoneNumbers.map(
+								(phoneNumber, mobileNumberIndex) => (
+									<Grid
+										item
+										container
+										key={mobileNumberIndex}
+										spacing={2}
+										justify="flex-start"
+										direction="row"
+									>
+										<Grid item md={7}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={`mobile_number${mobileNumberIndex}`}
+												name={`mobile_number${mobileNumberIndex}`}
+												label="Mobile"
+												value={
+													phoneNumber.phone_number ||
+													""
+												}
+												onChange={(event) => {
+													let editedPhoneNumbers = values.contactPhoneNumbers.map(
+														(
+															contactPhoneNumber,
+															index
+														) =>
+															index ===
+															mobileNumberIndex
+																? Object.assign(
+																		contactPhoneNumber,
+																		{
+																			phone_number:
+																				event
+																					.target
+																					.value,
+																		}
+																  )
+																: contactPhoneNumber
+													);
+													setFieldValue(
+														"contactPhoneNumbers",
+														editedPhoneNumbers
+													);
+												}}
+												onBlur={handleBlur}
+												helperText="Mobile"
+											/>
+										</Grid>
+										<Grid item md={5}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												select
+												name="phone_type"
+												label="Mobile Type"
+												id="phone_type"
+												onBlur={handleBlur}
+												onChange={(
+													mobileTypeChangeEvent
+												) => {
+													const changedPhoneNumbers = values.contactPhoneNumbers.map(
+														(
+															phoneNumberObject,
+															index
+														) =>
+															index ===
+															mobileNumberIndex
+																? Object.assign(
+																		phoneNumberObject,
+																		{
+																			phone_type:
+																				mobileTypeChangeEvent
+																					.target
+																					.value,
+																		}
+																  )
+																: phoneNumberObject
+													);
+													setFieldValue(
+														"contactPhoneNumbers",
+														changedPhoneNumbers
+													);
+												}}
+												value={
+													phoneNumber.phone_type || ""
+												}
+												helperText="Mobile Type"
+											>
+												{MOBILE_TYPES.map(
+													(phone_type, index) => (
+														<MenuItem
+															key={index}
+															value={phone_type}
+														>
+															{phone_type}
+														</MenuItem>
+													)
+												)}
+											</TextField>
+										</Grid>
 									</Grid>
-									<Grid item md={5}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											select
-											name="mobile_type"
-											label="Mobile Type"
-											id="mobile_type"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.mobile_type || ""}
-											helperText="Mobile Type"
-										>
-											{MOBILE_TYPES.map(
-												(mobile_type, index) => (
-													<MenuItem
-														key={index}
-														value={mobile_type}
-													>
-														{mobile_type}
-													</MenuItem>
-												)
-											)}
-										</TextField>
-									</Grid>
-								</Grid>
-							))}
+								)
+							)}
 							{/* start of contact emails column */}
-							{contactEmails.map((email, index) => (
-								<Grid
-									item
-									key={index}
-									container
-									spacing={2}
-									justify="flex-start"
-									direction="row"
-								>
-									<Grid item md={7}>
-										<TextField
-											fullWidth
-											type="email"
-											variant="outlined"
-											id="email"
-											name="email"
-											label="Email"
-											value={values.email}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Email"
-										/>
+							{values.contactEmails.map(
+								(contactEmail, emailIndex) => (
+									<Grid
+										item
+										key={emailIndex}
+										container
+										spacing={2}
+										justify="flex-start"
+										direction="row"
+									>
+										<Grid item md={7}>
+											<TextField
+												fullWidth
+												type="email"
+												variant="outlined"
+												id={`email${emailIndex}`}
+												name={`email${emailIndex}`}
+												label="Email"
+												value={contactEmail.email}
+												onChange={(
+													emailValueChangeEvent
+												) => {
+													const changedEmails = values.contactEmails.map(
+														(emailObject, index) =>
+															index === emailIndex
+																? Object.assign(
+																		emailObject,
+																		{
+																			email:
+																				emailValueChangeEvent
+																					.target
+																					.value,
+																		}
+																  )
+																: emailObject
+													);
+													setFieldValue(
+														"contactEmails",
+														changedEmails
+													);
+												}}
+												onBlur={handleBlur}
+												helperText="Email"
+											/>
+										</Grid>
+										<Grid item md={5}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												select
+												name="email_type"
+												label="Email Type"
+												id="email_type"
+												onBlur={handleBlur}
+												onChange={(
+													emailTypeChangeEvent
+												) => {
+													const changedEmails = values.contactEmails.map(
+														(emailObject, index) =>
+															index === emailIndex
+																? Object.assign(
+																		emailObject,
+																		{
+																			email_type:
+																				emailTypeChangeEvent
+																					.target
+																					.value,
+																		}
+																  )
+																: emailObject
+													);
+													setFieldValue(
+														"contactEmails",
+														changedEmails
+													);
+												}}
+												value={
+													contactEmail.email_type ||
+													""
+												}
+												helperText="Email Type"
+											>
+												{MOBILE_TYPES.map(
+													(phone_type, index) => (
+														<MenuItem
+															key={index}
+															value={phone_type}
+														>
+															{phone_type}
+														</MenuItem>
+													)
+												)}
+											</TextField>
+										</Grid>
 									</Grid>
-									<Grid item md={5}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											select
-											name="email_type"
-											label="Email Type"
-											id="email_type"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.email_type || ""}
-											helperText="Email Type"
-										>
-											{MOBILE_TYPES.map(
-												(mobile_type, index) => (
-													<MenuItem
-														key={index}
-														value={mobile_type}
-													>
-														{mobile_type}
-													</MenuItem>
-												)
-											)}
-										</TextField>
-									</Grid>
-								</Grid>
-							))}
+								)
+							)}
 							{/* Start of contact faxes column */}
-							{contactFaxes.map((fax, index) => (
+							{values.contactFaxes.map((contactFax, faxIndex) => (
 								<Grid
 									item
-									key={index}
+									key={faxIndex}
 									container
 									spacing={2}
 									justify="flex-start"
@@ -415,11 +510,30 @@ let InputForm = ({
 										<TextField
 											fullWidth
 											variant="outlined"
-											id="fax"
-											name="fax"
+											id={`fax${faxIndex}`}
+											name={`fax${faxIndex}`}
 											label="Fax"
-											value={values.fax}
-											onChange={handleChange}
+											value={contactFax.fax || ""}
+											onChange={(faxValueChangeEvent) => {
+												const changedFaxes = values.contactFaxes.map(
+													(faxObject, index) =>
+														index === faxIndex
+															? Object.assign(
+																	faxObject,
+																	{
+																		fax:
+																			faxValueChangeEvent
+																				.target
+																				.value,
+																	}
+															  )
+															: faxObject
+												);
+												setFieldValue(
+													"contactFaxes",
+													changedFaxes
+												);
+											}}
 											onBlur={handleBlur}
 											helperText="Fax"
 										/>
@@ -433,17 +547,36 @@ let InputForm = ({
 											label="Fax Type"
 											id="fax_type"
 											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.fax_type || ""}
+											onChange={(faxTypeChangeEvent) => {
+												const changedFaxes = values.contactFaxes.map(
+													(faxObject, index) =>
+														index === faxIndex
+															? Object.assign(
+																	faxObject,
+																	{
+																		fax_type:
+																			faxTypeChangeEvent
+																				.target
+																				.value,
+																	}
+															  )
+															: faxObject
+												);
+												setFieldValue(
+													"contactFaxes",
+													changedFaxes
+												);
+											}}
+											value={contactFax.fax_type || ""}
 											helperText="Fax Type"
 										>
 											{MOBILE_TYPES.map(
-												(mobile_type, index) => (
+												(phone_type, index) => (
 													<MenuItem
 														key={index}
-														value={mobile_type}
+														value={phone_type}
 													>
-														{mobile_type}
+														{phone_type}
 													</MenuItem>
 												)
 											)}
@@ -453,55 +586,112 @@ let InputForm = ({
 							))}
 							{/* Start of contact addresses row */}
 
-							{contactAddresses.map((address, index) => (
-								<Grid
-									item
-									key={index}
-									container
-									spacing={2}
-									justify="flex-start"
-									direction="row"
-								>
-									<Grid item md={7}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id="address"
-											name="address"
-											label="Address"
-											value={values.address}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Address"
-										/>
+							{values.contactAddresses.map(
+								(contactAddress, addressIndex) => (
+									<Grid
+										item
+										key={addressIndex}
+										container
+										spacing={2}
+										justify="flex-start"
+										direction="row"
+									>
+										<Grid item md={7}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id={`address${addressIndex}`}
+												name={`address${addressIndex}`}
+												label="Address"
+												value={
+													contactAddress.address || ""
+												}
+												onChange={(
+													addressChangeEvent
+												) => {
+													const changedAddresses = values.contactAddresses.map(
+														(
+															addressObject,
+															index
+														) =>
+															index ===
+															addressIndex
+																? Object.assign(
+																		addressObject,
+																		{
+																			address:
+																				addressChangeEvent
+																					.target
+																					.value,
+																		}
+																  )
+																: addressObject
+													);
+													setFieldValue(
+														"contactAddresses",
+														changedAddresses
+													);
+												}}
+												onBlur={handleBlur}
+												helperText="Address"
+											/>
+										</Grid>
+										<Grid item md={5}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												select
+												name="address_type"
+												label="Address Type"
+												id="address_type"
+												onBlur={handleBlur}
+												onChange={(
+													addressChangeEvent
+												) => {
+													const changedAddresses = values.contactAddresses.map(
+														(
+															addressObject,
+															index
+														) =>
+															index ===
+															addressIndex
+																? Object.assign(
+																		addressObject,
+																		{
+																			address_type:
+																				addressChangeEvent
+																					.target
+																					.value,
+																		}
+																  )
+																: addressObject
+													);
+													setFieldValue(
+														"contactAddresses",
+														changedAddresses
+													);
+												}}
+												value={
+													contactAddress.address_type ||
+													""
+												}
+												helperText="Address Type"
+											>
+												{ADDRESS_TYPES.map(
+													(phone_type, index) => (
+														<MenuItem
+															key={index}
+															value={phone_type}
+														>
+															{phone_type}
+														</MenuItem>
+													)
+												)}
+											</TextField>
+										</Grid>
 									</Grid>
-									<Grid item md={5}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											select
-											name="address_type"
-											label="Address Type"
-											id="address_type"
-											onBlur={handleBlur}
-											onChange={handleChange}
-											value={values.address_type || ""}
-											helperText="Address Type"
-										>
-											{ADDRESS_TYPES.map(
-												(mobile_type, index) => (
-													<MenuItem
-														key={index}
-														value={mobile_type}
-													>
-														{mobile_type}
-													</MenuItem>
-												)
-											)}
-										</TextField>
-									</Grid>
-								</Grid>
-							))}
+								)
+							)}
 						</Grid>
 						{/* end of phone textfield and types row */}
 						<Typography variant="h6">
@@ -589,10 +779,28 @@ let ContactInputForm = withFormik({
 		if (!contactToEdit) {
 			contactToEdit = {};
 		}
+		let contactPhoneNumbers = props.contact_phone_numbers.filter(
+			({ contact }) => contact === contactToEdit.id
+		);
+		contactPhoneNumbers = contactPhoneNumbers.length
+			? contactPhoneNumbers
+			: [{}];
+		let contactEmails = props.contact_emails.filter(
+			({ contact }) => contact === contactToEdit.id
+		);
+		contactEmails = contactEmails.length ? contactEmails : [{}];
+		let contactAddresses = props.contact_addresses.filter(
+			({ contact }) => contact === contactToEdit.id
+		);
+		contactAddresses = contactAddresses.length ? contactAddresses : [{}];
+		let contactFaxes = props.contact_faxes.filter(
+			({ contact }) => contact === contactToEdit.id
+		);
+		contactFaxes = contactFaxes.length ? contactFaxes : [{}];
 		return {
 			id: contactToEdit.id,
 			assigned_to: contactToEdit.assigned_to || "",
-			contact_avatar: contactToEdit.contact_avatar || "",
+			contact_avatar_url: contactToEdit.contact_avatar_url || "",
 			id_number: contactToEdit.id_number || "",
 			id_issue_date: contactToEdit.id_issue_date || currentDate,
 			id_issue_place: contactToEdit.id_issue_place || "",
@@ -606,10 +814,10 @@ let ContactInputForm = withFormik({
 			linkedin_url: contactToEdit.linkedin_url || "",
 			skype_url: contactToEdit.skype_url || "",
 			facebook_url: contactToEdit.facebook_url || "",
-			contact_emails: props.contact_emails,
-			contact_phone_numbers: props.contact_phone_numbers,
-			contact_faxes: props.contact_faxes,
-			contact_addresses: props.contact_addresses,
+			contactEmails: contactEmails,
+			contactPhoneNumbers: contactPhoneNumbers,
+			contactFaxes: contactFaxes,
+			contactAddresses: contactAddresses,
 			history: props.history,
 			match: props.match,
 			error: props.error,
@@ -646,8 +854,7 @@ let ContactInputForm = withFormik({
 	handleSubmit: (values, { resetForm }) => {
 		let contact = {
 			id: values.id,
-			assigned_to: values.assigned_to || null,
-			contact_avatar: values.contact_avatar,
+			assigned_to: values.assigned_to || "",
 			id_number: values.id_number,
 			id_issue_date: values.id_issue_date,
 			id_issue_place: values.id_issue_place,
@@ -663,12 +870,52 @@ let ContactInputForm = withFormik({
 			facebook_url: values.facebook_url,
 		};
 		console.log("Contact object => ", contact);
-		handleItemFormSubmit(contact, "contacts").then((response) => {
-			console.log('Saved contact successfully => ', response)
+		//first upload the image to firebase
+		if (values.contact_image) {
+			uploadFilesToFirebase(values.contact_image).then(
+				(fileDownloadUrl) => {
+					contact.contact_avatar_url = fileDownloadUrl;
+				}
+			);
+		}
+
+		handleItemFormSubmit(contact, "contacts").then((contactId) => {
+			values.contactPhoneNumbers.forEach((contactPhoneNumber) => {
+				if (contactPhoneNumber.phone_number) {
+					handleItemFormSubmit(
+						{ ...contactPhoneNumber, contact: contactId },
+						"contact_phone_numbers"
+					);
+				}
+			});
+			values.contactEmails.forEach((contactEmail) => {
+				if (contactEmail.email) {
+					handleItemFormSubmit(
+						{ ...contactEmail, contact: contactId },
+						"contact_emails"
+					);
+				}
+			});
+			values.contactFaxes.forEach((contactFax) => {
+				if (contactFax.fax) {
+					handleItemFormSubmit(
+						{ ...contactFax, contact: contactId },
+						"contact_faxes"
+					);
+				}
+			});
+			values.contactAddresses.forEach((contactAddress) => {
+				if (contactAddress.address) {
+					handleItemFormSubmit(
+						{ ...contactAddress, contact: contactId },
+						"contact_addresses"
+					);
+				}
+			});
 		});
 		resetForm({});
 		if (values.id) {
-			values.history.goBack()
+			values.history.goBack();
 		}
 	},
 	enableReinitialize: false,

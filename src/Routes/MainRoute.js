@@ -18,7 +18,7 @@ import ContactsPage from "./Contacts";
 import TransactionPage from "./TransactionPage";
 import DashBoard from "./DashBoard";
 
-let DashboardPage = ({
+let MainPage = ({
     properties,
     maintenanceRequests,
     transactions,
@@ -125,6 +125,6 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-DashboardPage = connect(mapStateToProps, mapDispatchToProps)(DashboardPage);
+MainPage = connect(mapStateToProps, mapDispatchToProps)(MainPage);
 
-export default withRouter(DashboardPage);
+export default withRouter(MainPage);
