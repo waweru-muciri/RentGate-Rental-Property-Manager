@@ -2,15 +2,13 @@ import React from "react";
 import Layout from "../components/GeneralLayout";
 import PageHeading from "../components/PageHeading";
 import { useHistory, Link } from "react-router-dom";
-import {
-  Grid,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  FormControl,
-  FormHelperText,
-} from "@material-ui/core";
+import Typography from "@material-ui/core/Typography"
+import TextField from "@material-ui/core/TextField"
+import Button from "@material-ui/core/Button"
+import Grid from "@material-ui/core/Grid"
+import FormHelperText from "@material-ui/core/FormHelperText"
+import Box from "@material-ui/core/Box"
+import FormControl from "@material-ui/core/FormControl"
 import { connect } from "react-redux";
 import { Formik } from "formik";
 import {
@@ -54,7 +52,7 @@ const SignUpLayout = ({ setUser }) => {
               const createdUser = await signUpWithEmailAndPassword(email, password);
               setUser(createdUser)
               resetForm({});
-              history.push("/");
+              history.push("/app");
             } catch (error) {
               setSubmitting(false);
               setStatus({ error: error.message });
@@ -71,95 +69,105 @@ const SignUpLayout = ({ setUser }) => {
             handleBlur,
             isSubmitting,
           }) => (
-            <form
-              className={classes.form}
-              method="post"
-              id="signUpForm"
-              onSubmit={handleSubmit}
-            >
-              <Grid container justify="center" direction="column" spacing={3}>
-                <Grid item key={2}>
-                  <PageHeading  text={"Sign Up"} />
-                </Grid>
-                <FormControl fullWidth>
+              <form
+                className={classes.form}
+                method="post"
+                id="signUpForm"
+                onSubmit={handleSubmit}
+              >
+                <Grid container justify="center" direction="column" spacing={3}>
+                  <Grid item key={2}>
+                    <PageHeading text={"Sign Up"} />
+                  </Grid>
                   {status && (
-                    <FormHelperText error={true}>{status.error}</FormHelperText>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <FormHelperText error={true}>{status.error}</FormHelperText>
+                      </FormControl>
+                    </Grid>
                   )}
-                </FormControl>
-                <Grid item key={3}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    autoFocus
-                    margin="dense"
-                    id="email"
-                    label="Email Address"
-                    value={values.email}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    helperText={touched.email && errors.email}
-                    error={errors.email && touched.email}
-                    type="email"
-                    InputLabelProps={{ shrink: true }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    margin="dense"
-                    id="password"
-                    label="Password"
-                    type="password"
-                    value={values.password}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    helperText={touched.password && errors.password}
-                    error={errors.password && touched.password}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    margin="dense"
-                    id="confirmPassword"
-                    label="Confirm Password"
-                    type="password"
-                    value={values.confirmPassword}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    helperText={
-                      touched.confirmPassword && errors.confirmPassword
-                    }
-                    error={errors.confirmPassword && touched.confirmPassword}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item>
-                  <Button
-                    disabled={isSubmitting}
-                    type="submit"
-                    variant="outlined"
-                    color="primary"
-                    form="signUpForm"
-                  >
-                    Sign Up
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Typography variant="subtitle1">
-                    Have an account?
+                  <Grid item>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      autoFocus
+                      margin="dense"
+                      id="email"
+                      label="Email Address"
+                      value={values.email}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      helperText={touched.email && errors.email}
+                      error={errors.email && touched.email}
+                      type="email"
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="dense"
+                      id="password"
+                      label="Password"
+                      type="password"
+                      value={values.password}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      helperText={touched.password && errors.password}
+                      error={errors.password && touched.password}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      margin="dense"
+                      id="confirmPassword"
+                      label="Confirm Password"
+                      type="password"
+                      value={values.confirmPassword}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      helperText={
+                        touched.confirmPassword && errors.confirmPassword
+                      }
+                      error={errors.confirmPassword && touched.confirmPassword}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item>
                     <Button
                       disabled={isSubmitting}
+                      type="submit"
+                      variant="outlined"
                       color="primary"
-                      component={Link}
-                      to={"/login"}
+                      form="signUpForm"
                     >
-                      Sign In
+                      Sign Up
+                  </Button>
+                  </Grid>
+                  <Grid item container direction="row" alignItems="center">
+                    <Grid item>
+                      <Typography variant="subtitle1">
+                        Have an account?
+                    </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        disabled={isSubmitting}
+                        color="primary"
+                        component={Link}
+                        to={"/login"}
+                      >
+                        Sign In
                     </Button>
-                  </Typography>
+                    </Grid>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </form>
-          )}
+              </form>
+            )}
         </Formik>
       </Box>
     </Layout>

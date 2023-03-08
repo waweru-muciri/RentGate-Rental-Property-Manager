@@ -1,12 +1,9 @@
 import React from "react";
 import Layout from "../components/GeneralLayout";
-import PageHeading from "../components/PageHeading";
-import {
-  Grid,
-  Button,
-  TextField,
-  Typography,
-} from "@material-ui/core";
+import Typography from "@material-ui/core/Typography"
+import TextField from "@material-ui/core/TextField"
+import Button from "@material-ui/core/Button"
+import Grid from "@material-ui/core/Grid"
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Avatar from '@material-ui/core/Avatar';
 import { connect } from "react-redux";
@@ -71,7 +68,7 @@ let SignInLayout = ({ setUser }) => {
             const signedInUser = await signInUserWithEmailAndPassword(email, password)
             setUser(signedInUser)
             resetForm({});
-            history.push("/")
+            history.push("/app")
           } catch (error) {
             setSubmitting(false);
             setStatus({ error: error.message });
@@ -102,12 +99,12 @@ let SignInLayout = ({ setUser }) => {
                   onSubmit={handleSubmit}
                 >
                   <Grid container justify="center" direction="column" spacing={3}>
-                    <Grid item key={2}>
+                    <Grid item>
                       <Typography align="center" component="h1" variant="h5">
                         Sign in
                       </Typography>
                     </Grid>
-                    <Grid item key={3}>
+                    <Grid item>
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -123,6 +120,8 @@ let SignInLayout = ({ setUser }) => {
                         type="email"
                         InputLabelProps={{ shrink: true }}
                       />
+                    </Grid>
+                    <Grid item xs={12}>
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -147,19 +146,23 @@ let SignInLayout = ({ setUser }) => {
                         form="signInForm"
                       >
                         Sign In
-                  </Button>
+                      </Button>
                     </Grid>
-                    <Grid item>
-                      <Typography variant="subtitle1">
-                        Forgot your Password?
-                    <Button
+                    <Grid item container direction="row" alignItems="center">
+                      <Grid item>
+                        <Typography variant="subtitle1">
+                          Forgot your Password?
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Button
                           disabled={isSubmitting}
                           color="primary"
                           onClick={handleClickOpen}
                         >
                           Reset Password
-                    </Button>
-                      </Typography>
+                      </Button>
+                      </Grid>
                     </Grid>
                   </Grid>
                 </form>

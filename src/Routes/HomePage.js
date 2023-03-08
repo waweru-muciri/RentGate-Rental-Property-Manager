@@ -70,12 +70,6 @@ const theme = createMuiTheme({
         fontFamily: "Lato"
     },
     palette: {
-        primary: {
-            main: "#121037",
-        },
-        secondary: {
-            main: "#546e7a"
-        },
         text: {
             primary: "#121037",
             secondary: "#546e7a",
@@ -190,25 +184,29 @@ const appFeatures = [
 
 const appModules = [
     {
-        image: "/propertyDetails.png", title: "Property Details & Summary", description: `Monthly fee covers everything you need hassle free. 
-    Keep cool and focus on what matters to you.    `},
+        image: "/propertyDetails.png", title: "Property Details & Summary", 
+        description: `Get detailed summaries for each property including such details as units distribution,
+        occupancy, rent charges and payments through smart analytics, summaries and charts`},
     {
-        image: "/tenantDetails.png", title: "Tenant Details & Summary", description: `Stay as little as 3 months with rolling contracts. 
-    Like it here? This is your space, so stay as long as you want.`},
+        image: "/tenantDetails.png", title: "Tenant Details & Summary", 
+        description: `Track individual tenant details, charges and payments statements, units history, rental agreements
+        start and end dates through smart analytics, summaries and charts etc.`},
     {
-        image: "/rentRoll.png", title: "Rent Roll", description: `Connect in spaces designed
-     to bring incredible people together. Learn with them and take your project to new heights.`},
+        image: "/rentRoll.png", title: "Rent Roll", 
+        description: `Get a detailed view of each property rental agreements rent charges, rent payments, 
+        rent outstanding balances, monthly and yearly rent income statements.`},
     {
-        image: "/rentalAgreements.png", title: "Property Performance", description: `24/7 support. No more hidden prices. 
-    It is your workingplace, playground, relax room.`},
+        image: "/rentalAgreements.png", title: "Property Performance", 
+        description: `Generate property performance reports including income statements, expenses statements,
+        for such periods as current-month, 3 months to-date, year-to-date, last-year etc.`},
 ]
 
 const appCustomers = [
     {
-        image: "/propertyDetails.png", name: "Veronica Adams", title: "Growth Marketer, Dunhill", review: `Connect in spaces designed
+        image: "/propertyDetails.png", name: "Evans Rugara", title: "Growth Marketer, Prime PM", review: `Connect in spaces designed
      to bring incredible people together. Learn with them and take your project to new heights.`},
     {
-        image: "/rentalUnits.png", name: "Akachi Luccini", title: "Lead Generation, Gallant PM", review: `Stay as little as 3 months with rolling contracts. 
+        image: "/rentalUnits.png", name: "John Njoroge", title: "Lead Generation, Gallant PM", review: `Stay as little as 3 months with rolling contracts. 
     Like it here? This is your space, so stay as long as you want.`},
 ]
 
@@ -228,7 +226,7 @@ const tiers = [
         price: '3500',
         description: ['10 users included', '2 GB of storage', 'Help center access', 'Email support'],
         buttonText: 'Sign up',
-        buttonVariant: 'outlined',
+        buttonVariant: 'contained',
     },
     {
         title: 'Growing',
@@ -241,7 +239,7 @@ const tiers = [
             'Priority email support',
         ],
         buttonText: 'Sign up',
-        buttonVariant: 'outlined',
+        buttonVariant: 'contained',
     },
     {
         title: 'Enterprise',
@@ -253,7 +251,7 @@ const tiers = [
             'Phone & email support',
         ],
         buttonText: 'Contact Us',
-        buttonVariant: 'outlined',
+        buttonVariant: 'contained',
     },
 ];
 const footers = [
@@ -267,7 +265,7 @@ const footers = [
     },
     {
         title: 'Resources',
-        description: ['Resource', 'Resource name', 'Another resource', 'Final resource'],
+        description: ['Guide', 'FAQs', 'Contacts', 'Referral Programme'],
     },
     {
         title: 'Legal',
@@ -507,7 +505,7 @@ export default function HomePage() {
                                             <Typography gutterBottom variant="h6" component="h4">
                                                 {module.title}
                                             </Typography>
-                                            <Typography variant="body2" color="textSecondary" component="p">
+                                            <Typography variant="body1" color="textSecondary" component="p">
                                                 {module.description}
                                             </Typography>
                                         </CardContent>
@@ -529,7 +527,7 @@ export default function HomePage() {
                             </Typography>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained">EXPLORE OUR PACKAGES</Button>
+                            <Button variant="contained" color="primary" href="#pricing">EXPLORE OUR PACKAGES</Button>
                         </Grid>
                     </Grid>
                     <Grid container item xs={12} md={8} spacing={3} justify="space-between" alignItems="center" direction="row">
@@ -792,7 +790,7 @@ export default function HomePage() {
                                                     <Button
                                                         disabled={isSubmitting}
                                                         type="submit"
-                                                        variant="outlined"
+                                                        variant="contained"
                                                         color="primary"
                                                         form="sendMessageForm"
                                                     >
