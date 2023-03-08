@@ -172,17 +172,17 @@ const othersLinkNestedLinks = [
 
 const propertyLinkNestedLinks = [
   { text: "Rentals", to: "/properties", icon: <ApartmentIcon /> },
-  { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
+  { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
   { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
-  { text: "Meter Readings", to: "/properties/meter-reading", icon: <PaymentIcon /> },
 ];
 
 const reportLinkNestedLinks = [
-  {
-    text: "Property Performance",
-    to: "/reports/property-performance",
-    icon: <AssessmentIcon />,
-  }, {
+  //{
+   // text: "Property Performance",
+    //to: "/reports/property-performance",
+   // icon: <AssessmentIcon />,
+  //},
+{
     text: "Property Income",
     to: "/reports/property-income",
     icon: <PaymentIcon />,
@@ -194,7 +194,8 @@ const reportLinkNestedLinks = [
 ];
 
 const accountsLinkNestedLinks = [
-  { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
+  { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
+  { text: "Meter Readings", to: "/properties/meter-reading", icon: <AccountBalanceIcon /> },
   {
     text: "Property Expenses",
     to: "/property_expenditure",
@@ -397,7 +398,7 @@ let MainPage = ({
           </div>
           <Divider />
           <List component="div" disablePadding>
-            {navigationLinks.map((linkItem, parentIndex) => (
+            {navigationLinks.slice(0,2).map((linkItem, parentIndex) => (
               <React.Fragment key={parentIndex}>
                 <ListItem
                   component={Link}
@@ -473,59 +474,6 @@ let MainPage = ({
             {/*accounts tab here*/}
             <ListItem
               button
-              key={10}
-              onClick={(event) => {
-                event.preventDefault();
-                if (selectedTab.parent === 10) {
-                  handleListItemClick({ parent: -1 });
-                }
-                else {
-                  handleListItemClick({ parent: 10 });
-                }
-              }}
-            >
-              <ListItemIcon>
-                <EventNoteIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Events"} />
-              {selectedTab.parent === 10 ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse
-              in={selectedTab.parent === 10}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {othersLinkNestedLinks.map(
-                  (innerLinkItem, innerLinkItemIndex) => (
-                    <ListItem
-                      component={Link}
-                      to={innerLinkItem.to}
-                      button
-                      className={classes.nested}
-                      key={innerLinkItem.text}
-                      selected={
-                        selectedTab.parent === 10 &&
-                        selectedTab.nestedLink === 'other' + innerLinkItemIndex
-                      }
-                      onClick={(event) => {
-                        handleDrawerToggle();
-                        handleListItemClick({
-                          parent: 10,
-                          nestedLink: 'other' + innerLinkItemIndex,
-                        });
-                      }}
-                    >
-                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
-                      <ListItemText primary={innerLinkItem.text} />
-                    </ListItem>
-                  )
-                )}
-              </List>
-            </Collapse>
-            {/*accounts tab here*/}
-            <ListItem
-              button
               key={20}
               onClick={(event) => {
                 event.preventDefault();
@@ -566,6 +514,59 @@ let MainPage = ({
                         handleListItemClick({
                           parent: 20,
                           nestedLink: 'account' + innerLinkItemIndex,
+                        });
+                      }}
+                    >
+                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
+                      <ListItemText primary={innerLinkItem.text} />
+                    </ListItem>
+                  )
+                )}
+              </List>
+            </Collapse>
+            {/* others  tab here*/}
+            <ListItem
+              button
+              key={10}
+              onClick={(event) => {
+                event.preventDefault();
+                if (selectedTab.parent === 10) {
+                  handleListItemClick({ parent: -1 });
+                }
+                else {
+                  handleListItemClick({ parent: 10 });
+                }
+              }}
+            >
+              <ListItemIcon>
+                <EventNoteIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Events"} />
+              {selectedTab.parent === 10 ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse
+              in={selectedTab.parent === 10}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {othersLinkNestedLinks.map(
+                  (innerLinkItem, innerLinkItemIndex) => (
+                    <ListItem
+                      component={Link}
+                      to={innerLinkItem.to}
+                      button
+                      className={classes.nested}
+                      key={innerLinkItem.text}
+                      selected={
+                        selectedTab.parent === 10 &&
+                        selectedTab.nestedLink === 'other' + innerLinkItemIndex
+                      }
+                      onClick={(event) => {
+                        handleDrawerToggle();
+                        handleListItemClick({
+                          parent: 10,
+                          nestedLink: 'other' + innerLinkItemIndex,
                         });
                       }}
                     >
@@ -630,6 +631,29 @@ let MainPage = ({
                 )}
               </List>
             </Collapse>
+			{navigationLinks.slice(2).map((linkItem, listIndex) =>{
+			const parentIndex = listIndex + 2;
+					return (
+              <React.Fragment key={parentIndex}>
+                <ListItem
+                  component={Link}
+                  to={linkItem.to}
+                  button
+                  key={linkItem.text}
+                  selected={selectedTab.parent === parentIndex}
+                  onClick={(event) => {
+                    handleListItemClick({
+                      parent: parentIndex,
+                    });
+                    handleDrawerToggle();
+                  }}
+                >
+                  <ListItemIcon>{linkItem.icon}</ListItemIcon>
+                  <ListItemText primary={linkItem.text} />
+                </ListItem>
+              </React.Fragment>
+            )})}
+
           </List>
         </Drawer>
         <div className={classes.drawerHeader} />

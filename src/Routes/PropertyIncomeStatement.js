@@ -41,18 +41,23 @@ let PropertyIncomeStatement = ({
     users,
 }) => {
     const classes = commonStyles();
+    let [userItems, setUserItems] = useState([]);
+    let [expensesItems, setExpensesItems] = useState([]);
+    let [transactionItems, setTransactionItems] = useState([]);
+    let [meterReadingItems, setMeterReadingItems] = useState([]);
+    let [propertiesItems, setPropertiesItems] = useState([]);
     let [incomeStatements, setIncomeStatements] = useState([]);
     let [headCells, setHeadCells] = useState([]);
     let [expensesStatements, setExpensesStatements] = useState([]);
-    let [propertyFilter, setPropertyFilter] = useState("");
+    let [propertyAddressFilter, setPropertyAddressFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
 
     const getIncomeStatementThreeMonthsBack = () => {
         //go back [numMonths] months from current date
-		const numberOfMonthsBack = 12;
-        const eachPastMonthDate = Array.from(Array(numberOfMonthsBack), (_, i) => i + 1).map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
+        const numberOfMonthsBack = 12;
+        const eachPastMonthDate = [...Array(numberOfMonthsBack).keys()].map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
         setHeadCells(eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')))
         const incomeMappedByMonth = []
         const expensesMappedByMonth = []
@@ -62,7 +67,7 @@ let PropertyIncomeStatement = ({
         eachPastMonthDate.forEach((monthDate) => {
             //get transactions recorded in the same month and year
             //as monthDate
-            const totalRentalIncome = transactions.filter((transaction) => {
+            const totalRentalIncome = transactionItems.filter((transaction) => {
                 const momentTransactionDate = moment(transaction.transaction_date)
                 return momentTransactionDate.isSame(monthDate, 'year') && momentTransactionDate.isSame(monthDate, 'month')
             }).reduce((total, currentTransaction) => total + parseFloat(currentTransaction.transaction_price), 0)
@@ -73,7 +78,7 @@ let PropertyIncomeStatement = ({
         eachPastMonthDate.forEach((monthDate) => {
             //get utility bills recorded in the same month and year
             //as monthDate
-            const totalUtilityIncome = meterReadings.filter((meterReading) => {
+            const totalUtilityIncome = meterReadingItems.filter((meterReading) => {
                 const momentMeterReadingDate = moment(meterReading.reading_date)
                 return momentMeterReadingDate.isSame(monthDate, 'year') && momentMeterReadingDate.isSame(monthDate, 'month')
             }).reduce((total, currentMeterReading) => {
@@ -86,7 +91,7 @@ let PropertyIncomeStatement = ({
         incomeMappedByMonth.forEach((incomeObject) => {
             headCells.forEach((headCell) => {
                 const incomeAmount = parseFloat(incomeObject[headCell]) || 0
-                totalIncomeObject[headCell] = (parseFloat(totalIncomeObject[headCell]) || 0 ) + incomeAmount
+                totalIncomeObject[headCell] = (parseFloat(totalIncomeObject[headCell]) || 0) + incomeAmount
             })
         })
         incomeMappedByMonth.push(totalIncomeObject)
@@ -94,7 +99,7 @@ let PropertyIncomeStatement = ({
         eachPastMonthDate.forEach((monthDate) => {
             //get expenses recorded in the same month and year
             //as monthDate
-            expenses.filter((expense) => {
+            expensesItems.filter((expense) => {
                 const momentExpenseDate = moment(expense.expense_date)
                 return momentExpenseDate.isSame(monthDate, 'year') && momentExpenseDate.isSame(monthDate, 'month')
             }).forEach((monthExpense) => {
@@ -107,25 +112,25 @@ let PropertyIncomeStatement = ({
             })
         })
         const expensesTypesSet = new Set(expenseObjectsInMonth.map((expenseObject) => expenseObject.expense_type))
-            expensesTypesSet.forEach((expenseType) => {
-        expenseObjectsInMonth.filter((expenseObject) => expenseObject.expense_type === expenseType).forEach((expenseObject) => {
-                    //make or obtain an object and push it to the expenses array
-                    const expenseObjectByType = expensesMappedByMonth.find((expense) => expense.expense_type === expenseType)
-                    if (typeof expenseObjectByType !== 'undefined') {
-                        expenseObjectByType[expenseObject.month] = (parseFloat(expenseObjectByType[expenseObject.month]) || 0) + parseFloat(expenseObject.amount)
-                    } else {
-                        const totalExpensesByTypeObject = {}
-                        totalExpensesByTypeObject['expense_type'] = expenseType
-                        totalExpensesByTypeObject[expenseObject.month] = parseFloat(expenseObject.amount
-) || 0
-					   expensesMappedByMonth.push(totalExpensesByTypeObject)
-                    }
+        expensesTypesSet.forEach((expenseType) => {
+            expenseObjectsInMonth.filter((expenseObject) => expenseObject.expense_type === expenseType).forEach((expenseObject) => {
+                //make or obtain an object and push it to the expenses array
+                const expenseObjectByType = expensesMappedByMonth.find((expense) => expense.expense_type === expenseType)
+                if (typeof expenseObjectByType !== 'undefined') {
+                    expenseObjectByType[expenseObject.month] = (parseFloat(expenseObjectByType[expenseObject.month]) || 0) + parseFloat(expenseObject.amount)
+                } else {
+                    const totalExpensesByTypeObject = {}
+                    totalExpensesByTypeObject['expense_type'] = expenseType
+                    totalExpensesByTypeObject[expenseObject.month] = parseFloat(expenseObject.amount
+                    ) || 0
+                    expensesMappedByMonth.push(totalExpensesByTypeObject)
+                }
             })
         })
         expensesMappedByMonth.forEach((expenseObject) => {
             headCells.forEach((headCell) => {
                 const expenseAmount = parseFloat(expenseObject[headCell]) || 0
-                totalExpensesObject[headCell] = (parseFloat(totalExpensesObject[headCell]) || 0 ) + expenseAmount
+                totalExpensesObject[headCell] = (parseFloat(totalExpensesObject[headCell]) || 0) + expenseAmount
             })
         })
         expensesMappedByMonth.push(totalExpensesObject)
@@ -134,8 +139,12 @@ let PropertyIncomeStatement = ({
     }
 
     useEffect(() => {
-        getIncomeStatementThreeMonthsBack()
-    }, [expenses, transactions, meterReadings])
+        setUserItems(users)
+        setExpensesItems(expenses)
+        setTransactionItems(transactions)
+        setMeterReadingItems(meterReadings)
+        setPropertiesItems(properties)
+    }, [expenses, transactions, properties, meterReadings, users])
 
     const exportTransactionsRecordsToExcel = () => {
         exportDataToXSL(
@@ -155,7 +164,7 @@ let PropertyIncomeStatement = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = incomeStatements
+        let filteredTransactions = transactionItems
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -163,16 +172,17 @@ let PropertyIncomeStatement = ({
                 !toDateFilter ? true : transaction_date <= toDateFilter
             )
             .filter(({ property }) =>
-                !propertyFilter ? true : property === propertyFilter
+                !propertyAddressFilter ? true : property.address.trim().toLowerCase().includes(propertyAddressFilter.trim().toLowerCase())
             )
             .filter(({ assigned_to }) =>
                 !assignedToFilter ? true : assigned_to === assignedToFilter
             );
+        setTransactionItems(filteredTransactions)
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setPropertyFilter("");
+        setPropertyAddressFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
         setToDateFilter("");
@@ -257,11 +267,11 @@ let PropertyIncomeStatement = ({
                                         label="Select Property"
                                         id="property_filter"
                                         onChange={(event) => {
-                                            setPropertyFilter(
+                                            setPropertyAddressFilter(
                                                 event.target.value
                                             );
                                         }}
-                                        value={propertyFilter}
+                                        value={propertyAddressFilter}
                                     >
                                         {properties.map((property, index) => (
                                             <MenuItem
@@ -401,7 +411,7 @@ let PropertyIncomeStatement = ({
                             expensesStatements.map((expenseStatement, incomeIndex) => {
                                 const otherColumns = headCells.map((headCell, index) =>
                                     <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
-                                        Ksh: {expenseStatement[headCell] || 0 }
+                                        Ksh: {expenseStatement[headCell] || 0}
                                     </Box>
                                 )
                                 return (

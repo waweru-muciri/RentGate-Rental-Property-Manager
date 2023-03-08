@@ -46,16 +46,25 @@ const createDocumentDefinition = (reportDate, reportTitle, ...contentParts) => {
             title: {
                 fontSize: 14,
                 alignment: 'center',
-                margin: [0, 0, 0, 20],
+                margin: [0, 0, 0, 8],
+            },
+            titleSub: {
+                fontSize: 12,
+                alignment: 'center',
+                margin: [0, 0, 0, 5],
             },
             titleDate: {
                 fontSize: 10,
-                alignment: 'left',
+                alignment: 'right',
+                margin: [0, 0, 0, 2],
             }
         },
 
         content: [
-            { text: reportTitle, style: 'title', width: '*' },
+            {
+                text: `Company Name Here`, style: 'title', width: '*'
+            },
+            { text: reportTitle, style: 'titleSub', width: '*' },
             { text: `Created: ${reportDate}`, style: 'titleDate', width: '*' },
         ],
     };
@@ -74,7 +83,7 @@ export const printDocument = (reportName, reportTitle, documentContent) => {
 
 
 // -- Generate the Underlying Transactions Summary report.
-export function printTenantTransactions(reportName,reportTitle, headCells, dataToPrint) {
+export function printTenantTransactions(reportName, reportTitle, headCells, dataToPrint) {
 
     const fontSize = 9;
 

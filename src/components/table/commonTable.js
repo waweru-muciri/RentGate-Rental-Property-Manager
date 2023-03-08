@@ -28,10 +28,10 @@ function CommonTable(props) {
         setSelected,
         deleteUrl,
         handleDelete,
-        noDetailsCol,
         noEditCol,
         noDeleteCol,
     } = props;
+    const  noDetailsCol = true;
     const { match } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState("asc");
