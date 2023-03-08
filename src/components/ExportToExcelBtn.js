@@ -1,10 +1,10 @@
 import Button from "@material-ui/core/Button";
 import React from "react";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
-import exportDataToXSL, {exportPropertyStatementDataToXSL} from "../assets/PrintToExcel";
+import exportDataToXSL, { exportPropertyStatementDataToXSL } from "../assets/PrintingHelper";
 import PropTypes from 'prop-types';
 
-function ExportToExcelBtn (props) {
+function ExportToExcelBtn(props) {
 	const { disabled, reportName, reportTitle, headCells, dataToPrint } = props
 	return (
 		<Button
@@ -23,15 +23,15 @@ function ExportToExcelBtn (props) {
 }
 
 ExportToExcelBtn.propTypes = {
-    reportName: PropTypes.string.isRequired,
-    reportTitle: PropTypes.string.isRequired,
-    headCells: PropTypes.array.isRequired,
-    dataToPrint: PropTypes.array.isRequired,
+	reportName: PropTypes.string.isRequired,
+	reportTitle: PropTypes.string.isRequired,
+	headCells: PropTypes.array.isRequired,
+	dataToPrint: PropTypes.array.isRequired,
 }
 
 export default ExportToExcelBtn;
 
-export function ExportStatementToExcelBtn (props) {
+export function ExportStatementToExcelBtn(props) {
 	const { displayText, disabled, reportName, reportTitle, headCells, dataToPrint } = props
 	return (
 		<Button
@@ -44,14 +44,14 @@ export function ExportStatementToExcelBtn (props) {
 			onClick={() => exportPropertyStatementDataToXSL(reportName, reportTitle, headCells, dataToPrint, reportName)}
 			startIcon={<ImportExportIcon />}
 		>
-			{ displayText ? displayText : "Excel" }
+			{ displayText ? displayText : "Excel"}
 		</Button >
 	);
 }
 
 ExportStatementToExcelBtn.propTypes = {
-    reportName: PropTypes.string.isRequired,
-    reportTitle: PropTypes.string.isRequired,
-    headCells: PropTypes.array.isRequired,
-    dataToPrint: PropTypes.array.isRequired,
+	reportName: PropTypes.string.isRequired,
+	reportTitle: PropTypes.string.isRequired,
+	headCells: PropTypes.array.isRequired,
+	dataToPrint: PropTypes.array.isRequired,
 }

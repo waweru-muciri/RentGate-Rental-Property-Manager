@@ -9,9 +9,7 @@ import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
-
 import { withRouter } from "react-router-dom";
-import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PageHeading from "../components/PageHeading";
 
 const emailsTableHeadCells = [
@@ -44,10 +42,7 @@ const emailsTableHeadCells = [
 ];
 
 let EmailsPage = ({
-    isLoading,
     communicationEmails,
-    users,
-    currentUser,
     match,
 }) => {
     let [emailItems, setEmailItems] = useState([]);
@@ -111,17 +106,8 @@ let EmailsPage = ({
                             component={Link}
                             to={`${match.url}/new`}
                         >
-                            NEW
+                            Compose Email
                         </Button>
-                    </Grid>
-                    <Grid item>
-                    <ExportToExcelBtn
-                            disabled={selected.length <= 0}
-                            reportName={'Emails Records'}
-                            reportTitle={'Emails Records'}
-                            headCells={emailsTableHeadCells}
-                            dataToPrint={emailItems.filter(({ id }) => selected.includes(id))}
-                        />
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>

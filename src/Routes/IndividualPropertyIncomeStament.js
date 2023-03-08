@@ -177,7 +177,7 @@ let PropertyIncomeStatement = ({
             container
             spacing={3}
             alignItems="center">
-            <Grid item key={2}>
+            <Grid item>
                 <Typography variant="h6">Property Statement</Typography>
             </Grid>
             <Grid
@@ -186,7 +186,6 @@ let PropertyIncomeStatement = ({
                 item
                 alignItems="center"
                 direction="row"
-                key={1}
             >
                 <Grid item>
                     <ExportStatementToExcelBtn
@@ -207,7 +206,7 @@ let PropertyIncomeStatement = ({
                     />
                 </Grid>
             </Grid>
-            <Grid item sm>
+            <Grid item xs={12}>
                 <Box
                     border={1}
                     borderRadius="borderRadius"

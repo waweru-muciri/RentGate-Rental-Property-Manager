@@ -14,7 +14,7 @@ import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 

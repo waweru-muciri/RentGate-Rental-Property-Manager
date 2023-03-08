@@ -46,7 +46,7 @@ const billingTableHeadCells = [
 let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handleItemSubmit }) => {
 	let classes = commonStyles();
 	const CompanyInfoInitialValues = {
-		id: companyProfile.id || "",
+		id: companyProfile.id,
 		company_name: companyProfile.company_name || "",
 		company_address: companyProfile.company_address || "",
 		company_phone_number: companyProfile.company_phone_number || '',
@@ -56,7 +56,7 @@ let AccountSettingsPage = ({ userToShow, accountBillings, companyProfile, handle
 	}
 
 	const BillingInfoInitialValues = {
-		id: companyProfile.id || "",
+		id: companyProfile.id,
 		billing_address: companyProfile.billing_address || companyProfile.company_address || "",
 		billing_company: companyProfile.billing_company || companyProfile.company_name || "",
 		billing_phone_number: companyProfile.billing_phone_number || companyProfile.company_phone_number || '',

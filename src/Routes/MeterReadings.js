@@ -13,7 +13,7 @@ import { connect } from "react-redux";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 

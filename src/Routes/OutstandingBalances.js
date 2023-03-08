@@ -9,8 +9,9 @@ import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
+import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
@@ -18,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { currencyFormatter, getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
+import { printInvoice } from "../assets/PrintingHelper";
 
 
 const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -152,6 +154,24 @@ let TenantChargesStatementPage = ({
                     direction="row"
                     key={1}
                 >
+                    <Grid item>
+                        <Button
+                            aria-label="Print Invoice"
+                            variant="contained"
+                            size="medium"
+                            color="primary"
+                            disabled={!contactFilter || selected.length <= 0}
+                            onClick={() => {
+                                const tenantDetails = contacts.find(({ id }) => id === contactFilter.id)
+                                printInvoice(
+                                    tenantDetails,
+                                    tenantChargesItems.filter(({ id }) => selected.includes(id))
+                                )
+                            }}
+                            startIcon={<PrintIcon />}>
+                            Print Invoice
+                        </Button>
+                    </Grid>
                     <Grid item>
                         <ExportToExcelBtn
                             disabled={selected.length <= 0}

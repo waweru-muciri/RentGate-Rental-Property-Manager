@@ -17,13 +17,14 @@ import {
 	getContactTitles,
 	getGendersList,
 } from "../../assets/commonAssets.js";
-import * as Yup from "yup";
 import {
 	createFirebaseUser,
 	setDatabaseRefCustomClaim,
 	uploadFilesToFirebase,
 	deleteUploadedFileByUrl,
+	updateFirebaseUser,
 } from "../../actions/actions";
+import * as Yup from "yup";
 import { Formik } from "formik";
 import ImageCropper from '../ImageCropper';
 
@@ -105,13 +106,27 @@ let UserInputForm = (props) => {
 					}
 					//create new user who can log in
 					try {
-						const returnData = await createFirebaseUser({
-							email: values.primary_email,
-							password: values.password, phoneNumber: values.phone_number
-						})
-						const newUserData = returnData.data
-						if (newUserData) {
-							await setDatabaseRefCustomClaim({ userId: newUserData.uid })
+						if (values.id) {
+							//this means we should update the user
+							await updateFirebaseUser({
+								uid: values.id,
+								userProfile: {
+									email: values.primary_email,
+									password: values.password, phoneNumber: values.phone_number
+								}
+							})
+						} else {
+							//create new user and store profile info
+							const returnData = await createFirebaseUser({
+								email: values.primary_email,
+								password: values.password, phoneNumber: values.phone_number
+							})
+							const newUserData = returnData.data
+							//asign new user uid to user profile
+							Object.assign(user, { id: newUserData.uid })
+							if (newUserData) {
+								await setDatabaseRefCustomClaim({ userId: newUserData.uid })
+							}
 						}
 					} catch (error) {
 						console.log("Error while creating user => ", error)

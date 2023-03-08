@@ -34,7 +34,6 @@ const PropertySchema = Yup.object().shape({
 	city: Yup.string().default(''),
 	property_units: Yup.array().of(Yup.object().shape({
 		unit_type: Yup.string().trim().required("Unit Type is required"),
-		image: Yup.string().trim().default(''),
 		beds: Yup.string().trim().required("Beds is required").default(''),
 		ref: Yup.string().trim().required("Unit Ref/Number is required"),
 		baths: Yup.string().trim().default(''),
@@ -241,6 +240,7 @@ let PropertyInputForm = (props) => {
 							// upload path to property_unit
 							const fileUploadPath = await uploadFilesToFirebase(property_unit.image)
 							property_unit.unit_image_url = fileUploadPath
+							delete property_unit.image
 						}
 						const propertyUnitToSave = Object.assign({}, property_unit, {
 							property_id: propertyId,
@@ -271,210 +271,210 @@ let PropertyInputForm = (props) => {
 				isSubmitting,
 				setFieldValue
 			}) => (
-					<form
-						className={classes.form}
-						method="post"
-						id="propertyInputForm"
-						onSubmit={handleSubmit}
-					>
-						<Grid container spacing={2} direction="column">
-							{
-								status && status.msg && (
-									<CustomSnackbar
-										variant={status.sent ? "success" : "error"}
-										message={status.msg}
-									/>
-								)
-							}
-							<Grid item>
-								<TextField
-									fullWidth
-									variant="outlined"
-									type="text"
-									name="ref"
-									label="Property Name/Ref"
-									id="ref"
-									onBlur={handleBlur}
-									onChange={handleChange}
-									value={values.ref}
-									error={errors.ref && touched.ref}
-									helperText={touched.ref && errors.ref}
+				<form
+					className={classes.form}
+					method="post"
+					id="propertyInputForm"
+					onSubmit={handleSubmit}
+				>
+					<Grid container spacing={2} direction="column">
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
 								/>
-							</Grid>
-							<Grid item>
-								<Typography variant="subtitle1">Street Address</Typography>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									variant="outlined"
-									label="Address"
-									id="address"
-									type="text"
-									name="address"
-									value={values.address}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.address && touched.address}
-									helperText={touched.address && errors.address}
-								/>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									variant="outlined"
-									id="city"
-									type="text"
-									name="city"
-									label="City"
-									value={values.city}
-									onChange={handleChange}
-									onBlur={handleBlur}
-								/>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									label="Postal Code"
-									variant="outlined"
-									id="postal_code"
-									type="text"
-									name="postal_code"
-									value={values.postal_code}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.postal_code && touched.postal_code}
-									helperText={touched.postal_code && errors.postal_code}
-								/>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									select
-									variant="outlined"
-									id="owner"
-									name="owner"
-									label="Property Owner"
-									value={values.owner}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									helperText="Who is the Property Owner"
-								>
-									{users.map((user, index) => (
-										<MenuItem key={index} value={user.id}>
-											{user.first_name} {user.last_name}
-										</MenuItem>
-									))}
-								</TextField>
-							</Grid>
-							<Grid item>
-								<TextField
-									fullWidth
-									select
-									variant="outlined"
-									name="assigned_to"
-									id="assigned_to"
-									label="Landlord"
-									value={values.assigned_to}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									error={errors.assigned_to && touched.assigned_to}
-									helperText={touched.assigned_to && errors.assigned_to}
-								>
-									{users.map((user, index) => (
-										<MenuItem key={index} value={user.id}>
-											{user.first_name} {user.last_name}
-										</MenuItem>
-									))}
-								</TextField>
-							</Grid>
-							<Grid
-								item
-								container
-								direction="row"
-								justify="flex-start"
-								spacing={4}
-								alignItems="center"
+							)
+						}
+						<Grid item>
+							<TextField
+								fullWidth
+								variant="outlined"
+								type="text"
+								name="ref"
+								label="Property Name/Ref"
+								id="ref"
+								onBlur={handleBlur}
+								onChange={handleChange}
+								value={values.ref}
+								error={errors.ref && touched.ref}
+								helperText={touched.ref && errors.ref}
+							/>
+						</Grid>
+						<Grid item>
+							<Typography variant="subtitle1">Street Address</Typography>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								variant="outlined"
+								label="Address"
+								id="address"
+								type="text"
+								name="address"
+								value={values.address}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								error={errors.address && touched.address}
+								helperText={touched.address && errors.address}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								variant="outlined"
+								id="city"
+								type="text"
+								name="city"
+								label="City"
+								value={values.city}
+								onChange={handleChange}
+								onBlur={handleBlur}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								label="Postal Code"
+								variant="outlined"
+								id="postal_code"
+								type="text"
+								name="postal_code"
+								value={values.postal_code}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								error={errors.postal_code && touched.postal_code}
+								helperText={touched.postal_code && errors.postal_code}
+							/>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								select
+								variant="outlined"
+								id="owner"
+								name="owner"
+								label="Property Owner"
+								value={values.owner}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								helperText="Who is the Property Owner"
 							>
-								<Grid key={1} item>
+								{users.map((user, index) => (
+									<MenuItem key={index} value={user.id}>
+										{user.first_name} {user.last_name}
+									</MenuItem>
+								))}
+							</TextField>
+						</Grid>
+						<Grid item>
+							<TextField
+								fullWidth
+								select
+								variant="outlined"
+								name="assigned_to"
+								id="assigned_to"
+								label="Landlord"
+								value={values.assigned_to}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								error={errors.assigned_to && touched.assigned_to}
+								helperText={touched.assigned_to && errors.assigned_to}
+							>
+								{users.map((user, index) => (
+									<MenuItem key={index} value={user.id}>
+										{user.first_name} {user.last_name}
+									</MenuItem>
+								))}
+							</TextField>
+						</Grid>
+						<Grid
+							item
+							container
+							direction="row"
+							justify="flex-start"
+							spacing={4}
+							alignItems="center"
+						>
+							<Grid key={1} item>
+								{
+									values.file_to_load_url &&
+									<ImageCropper open={true} selectedFile={values.file_to_load_url}
+										setCroppedImageData={(croppedImage) => {
+											setFieldValue('file_to_load_url', '');
+											setFieldValue('property_image', croppedImage);
+										}} cropHeight={200} cropWidth={300} />
+								}
+								<Box>{values.property_image ? values.property_image.name : "No Image"}</Box>
+							</Grid>
+							<Grid key={2} item>
+								<Box>
+									<input onChange={(event) => {
+										const selectedFile = event.currentTarget.files[0]
+										//remove the object then push a copy of it with added image object
+										setFieldValue("file_to_load_url", selectedFile);
+									}} accept="image/*" className={classes.fileInputDisplayNone} id={"property-image-input"} type="file" />
+									<label htmlFor={"property-image-input"}>
+										<IconButton size="medium" color="primary" aria-label="upload picture" component="span">
+											<PhotoCamera />
+										</IconButton>
+									</label>
 									{
-										values.file_to_load_url &&
-										<ImageCropper open={true} selectedFile={values.file_to_load_url}
-											setCroppedImageData={(croppedImage) => {
-												setFieldValue('file_to_load_url', '');
-												setFieldValue('property_image', croppedImage);
-											}} cropHeight={200} cropWidth={300} />
+										values.property_image_url ? <Button variant="contained" onClick={async () => {
+											await deleteUploadedFileByUrl(values.property_image_url)
+											setFieldValue('property_image_url', '')
+										}}>Delete Image</Button> : null
 									}
-									<Box>{values.property_image ? values.property_image.name : "No Image"}</Box>
-								</Grid>
-								<Grid key={2} item>
-									<Box>
-										<input onChange={(event) => {
-											const selectedFile = event.currentTarget.files[0]
-											//remove the object then push a copy of it with added image object
-											setFieldValue("file_to_load_url", selectedFile);
-										}} accept="image/*" className={classes.fileInputDisplayNone} id={"property-image-input"} type="file" />
-										<label htmlFor={"property-image-input"}>
-											<IconButton size="medium" color="primary" aria-label="upload picture" component="span">
-												<PhotoCamera />
-											</IconButton>
-										</label>
-										{
-											values.property_image_url ? <Button variant="contained" onClick={async () => {
-												await deleteUploadedFileByUrl(values.property_image_url)
-												setFieldValue('property_image_url', '')
-											}}>Delete Image</Button> : null
-										}
-									</Box>
-								</Grid>
-							</Grid>
-							{
-								values.id ? null : (
-									<Grid item>
-										<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
-										<FieldArray
-											name="property_units"
-											component={UnitInputComponent}
-										/>
-									</Grid>
-								)
-							}
-							<Grid
-								item
-								container
-								justify="flex-start"
-								direction="row"
-								className={classes.buttonBox}
-							>
-								<Grid item>
-									<Button
-										color="secondary"
-										variant="contained"
-										size="medium"
-										startIcon={<CancelIcon />}
-										onClick={() => history.goBack()}
-										disableElevation
-									>
-										Cancel
-									</Button>
-								</Grid>
-								<Grid item>
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										size="medium"
-										startIcon={<SaveIcon />}
-										form="propertyInputForm"
-										disabled={isSubmitting}
-									>
-										{values.id ? "Save Details" : "Create Property"}
-									</Button>
-								</Grid>
+								</Box>
 							</Grid>
 						</Grid>
-					</form>
-				)}
+						{
+							values.id ? null : (
+								<Grid item>
+									<Typography variant="subtitle1" paragraph>Add Rental Units</Typography>
+									<FieldArray
+										name="property_units"
+										component={UnitInputComponent}
+									/>
+								</Grid>
+							)
+						}
+						<Grid
+							item
+							container
+							justify="flex-start"
+							direction="row"
+							className={classes.buttonBox}
+						>
+							<Grid item>
+								<Button
+									color="secondary"
+									variant="contained"
+									size="medium"
+									startIcon={<CancelIcon />}
+									onClick={() => history.goBack()}
+									disableElevation
+								>
+									Cancel
+									</Button>
+							</Grid>
+							<Grid item>
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									size="medium"
+									startIcon={<SaveIcon />}
+									form="propertyInputForm"
+									disabled={isSubmitting}
+								>
+									{values.id ? "Save Details" : "Create Property"}
+								</Button>
+							</Grid>
+						</Grid>
+					</Grid>
+				</form>
+			)}
 		</Formik>
 	);
 };

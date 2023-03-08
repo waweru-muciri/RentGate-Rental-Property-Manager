@@ -18,7 +18,7 @@ import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import { parse } from "date-fns";
 
 const headCells = [

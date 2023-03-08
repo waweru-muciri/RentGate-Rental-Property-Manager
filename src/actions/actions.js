@@ -26,6 +26,9 @@ const firebaseStorageRef = firebaseStorage.ref();
 const setAdminCustomClaim = firebaseFunctions.httpsCallable('setAdminCustomClaim');
 export const setDatabaseRefCustomClaim = firebaseFunctions.httpsCallable('setDatabaseRefCustomClaim');
 export const createFirebaseUser = firebaseFunctions.httpsCallable('createFirebaseUser');
+export const updateFirebaseUser = firebaseFunctions.httpsCallable('updateFirebaseUser');
+export const deleteFirebaseUsers = firebaseFunctions.httpsCallable('deleteFirebaseUsers');
+export const sendInvoice = firebaseFunctions.httpsCallable('sendInvoice');
 
 export function setCurrentUser(user) {
     return {
@@ -123,16 +126,14 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
 export async function sendEmails(subject, email, recipients) {
     var sendEmail = firebaseFunctions.httpsCallable('sendEmail');
     try {
-        const response = await sendEmail({ subject: subject, email: email, recipients: recipients })
+        await sendEmail({ subject: subject, email: email, recipients: recipients })
         // Read result of the Cloud Function.
-        var responseData = response.data;
-        console.log(responseData.message)
     } catch (error) {
         //getting the error details
         var code = error.code;
         var message = error.message;
         var details = error.details;
-        console.error(`There was an error when calling the Cloud Function.\n 
+        console.error(`There was an error when calling the sendEmails Cloud Function.\n 
         Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
     }
 }

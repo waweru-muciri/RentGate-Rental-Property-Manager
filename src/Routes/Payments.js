@@ -9,6 +9,7 @@ import Box from "@material-ui/core/Box";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
+import PrintIcon from "@material-ui/icons/Print";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
@@ -16,10 +17,11 @@ import CommonTable from "../components/table/commonTable";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import { getCurrentMonthFromToDates, getLastMonthFromToDates, getLastThreeMonthsFromToDates, getLastYearFromToDates, getTransactionsFilterOptions, getYearToDateFromToDates } from "../assets/commonAssets";
 import { parse, isWithinInterval } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { printReceipt } from "../assets/PrintingHelper";
 
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -164,6 +166,22 @@ let PaymentsPage = ({
                             dataToPrint={paymentsItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
+                    <Button
+                        aria-label="Print Receipt"
+                        variant="contained"
+                        size="medium"
+                        color="primary"
+                        disabled={!contactFilter || selected.length <= 0}
+                        onClick={() => {
+                            const tenantDetails = contacts.find(({id}) => id === contactFilter.id)
+                            printReceipt(
+                                tenantDetails,
+                                paymentsItems.filter(({ id }) => selected.includes(id))
+                            )
+                        }}
+                        startIcon={<PrintIcon />}>
+                        Print Receipt
+                    </Button>
                     <Grid item>
                         <ExportToExcelBtn
                             disabled={selected.length <= 0}
@@ -359,18 +377,18 @@ let PaymentsPage = ({
 const mapStateToProps = (state) => {
     return {
         transactions: state.transactions
-        .map((payment) => {
-            const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
-            const tenantUnit = state.propertyUnits.find(({ id }) => id === payment.unit_id) || {};
+            .map((payment) => {
+                const tenant = state.contacts.find((contact) => contact.id === payment.tenant_id) || {};
+                const tenantUnit = state.propertyUnits.find(({ id }) => id === payment.unit_id) || {};
 
-            return Object.assign({}, payment, {
-                tenant_name: `${tenant.first_name} ${tenant.last_name}`,
-                tenant_id_number: tenant.id_number,
-                unit_ref : tenantUnit.ref
+                return Object.assign({}, payment, {
+                    tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+                    tenant_id_number: tenant.id_number,
+                    unit_ref: tenantUnit.ref
+                })
             })
-        })
-        .sort((payment1, payment2) => parse(payment2.payment_date, 'yyyy-MM-dd', new Date()) -
-        parse(payment1.payment_date, 'yyyy-MM-dd', new Date())),
+            .sort((payment1, payment2) => parse(payment2.payment_date, 'yyyy-MM-dd', new Date()) -
+                parse(payment1.payment_date, 'yyyy-MM-dd', new Date())),
         properties: state.properties,
         contacts: state.contacts,
     };

@@ -23,7 +23,7 @@ function intersection(a, b) {
 
 export default function TransferList(props) {
   const classes = commonStyles();
-  const { contacts, users, submitEmailSourceValues, handleBack } = props;
+  const { contacts, users, contactToSendEmailTo, contactSource, submitEmailSourceValues, handleBack } = props;
   const [checked, setChecked] = React.useState([]);
   const [left, setLeft] = React.useState([]);
   const [right, setRight] = React.useState([]);
@@ -36,26 +36,19 @@ export default function TransferList(props) {
   }, [contacts])
 
   useEffect(() => {
+    setChecked([contactToSendEmailTo]);
+    setSelectedEmailsSource(contactSource)
+  }, [contactToSendEmailTo])
+
+  useEffect(() => {
     setLeft(users);
     setSelectedEmailsSource('Users')
   }, [users])
 
   const getEmailsFromSource = () => {
     return selectedEmailsSource === "Tenants" ? right.map(tenantDetails => tenantDetails.contact_email)
-     : right.map(userDetails => userDetails.primary_email)
+      : right.map(userDetails => userDetails.primary_email)
   }
-
-  useEffect(() => {
-    switch (selectedEmailsSource) {
-      case 'Tenants': setLeft(contacts); setRight([]); setChecked([]);
-        break;
-
-      case 'Users': setLeft(users); setRight([]); setChecked([]);
-        break;
-
-      default: break;
-    }
-  }, [selectedEmailsSource])
 
   const leftChecked = intersection(checked, left);
   const rightChecked = intersection(checked, right);
@@ -125,127 +118,138 @@ export default function TransferList(props) {
   );
 
   return (
-            <Grid
-              container
-              spacing={2}
-              direction="column"
-              className={classes.root}
-            >
-              <Grid
-                item
-                container
-                alignItems="center"
-                direction="column"
-                spacing={2}
-              >
+    <Grid
+      container
+      spacing={2}
+      direction="column"
+      className={classes.root}
+    >
+      <Grid
+        item
+        container
+        alignItems="center"
+        direction="column"
+        spacing={2}
+      >
 
-                <Grid item>
-                  <Typography variant="subtitle1">
-                    {right.length >= 1 ? `${right.length} ${selectedEmailsSource} selected`
-                      : `Select ${selectedEmailsSource} to send email`}
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <TextField
-                    fullWidth
-                    select
-                    onChange={(event) => { setSelectedEmailsSource(event.target.value) }}
-                    variant="outlined"
-                    label="Select Emails Source"
-                    value={selectedEmailsSource}>
-                    {
-                      emailsSources.map((source, index) => {
-                        return (
-                          <MenuItem key={index} value={source}>
-                            {source}
-                          </MenuItem>);
-                      })
-                    }
-                  </TextField>
-                </Grid>
-                <Grid
-                  item
-                  container
-                  direction="row"
-                  spacing={2}
-                >
-                  <Grid item sm>{customList(left)}</Grid>
-                  <Grid item sm={4} container direction="column" spacing={1} alignItems="center">
-                    <Grid item>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleAllRight}
-                        disabled={left.length === 0}
-                        aria-label="move all right"
-                      >
-                        ≫
-                    </Button>
-                    </Grid>
-                    <Grid item>
+        <Grid item>
+          <Typography variant="subtitle1">
+            {right.length >= 1 ? `${right.length} ${selectedEmailsSource} selected`
+              : `Select ${selectedEmailsSource} to send email`}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <TextField
+            fullWidth
+            select
+            onChange={(event) => {
+              setSelectedEmailsSource(event.target.value)
+              switch (event.target.value) {
+                case 'Tenants': setLeft(contacts); setRight([]); setChecked([]);
+                  break;
 
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleCheckedRight}
-                        disabled={leftChecked.length === 0}
-                        aria-label="move selected right"
-                      >
-                        &gt;
-                     </Button>
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleCheckedLeft}
-                        disabled={rightChecked.length === 0}
-                        aria-label="move selected left"
-                      >
-                        &lt;
-                    </Button>
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleAllLeft}
-                        disabled={right.length === 0}
-                        aria-label="move all left"
-                      >
-                        ≪
-                    </Button>
-                    </Grid>
-                  </Grid>
-                  <Grid item sm>{customList(right)}</Grid>
-                </Grid>
-              </Grid>
-              <Grid
-                item
-                container
-                spacing={2}
+                case 'Users': setLeft(users); setRight([]); setChecked([]);
+                  break;
+
+                default: break;
+              }
+            }}
+            variant="outlined"
+            label="Select Emails Source"
+            value={selectedEmailsSource}>
+            {
+              emailsSources.map((source, index) => {
+                return (
+                  <MenuItem key={index} value={source}>
+                    {source}
+                  </MenuItem>);
+              })
+            }
+          </TextField>
+        </Grid>
+        <Grid
+          item
+          container
+          direction="row"
+          spacing={2}
+        >
+          <Grid item sm>{customList(left)}</Grid>
+          <Grid item sm={4} container direction="column" spacing={1} alignItems="center">
+            <Grid item>
+              <Button
+                variant="outlined"
+                size="small"
+                className={classes.button}
+                onClick={handleAllRight}
+                disabled={left.length === 0}
+                aria-label="move all right"
               >
-                <Grid item>
-                  <Button
-                    onClick={handleBack}
-                    variant="contained">
-                    Back
-                      </Button>
-                </Grid>
-                <Grid item>
-                  <Button
-                    disabled={!right.length}
-                    onClick={() => { submitEmailSourceValues(getEmailsFromSource())}}
-                    variant="contained"
-                    color="primary">
-                    Send
-                  </Button>
-                </Grid>
-              </Grid>
+                ≫
+                    </Button>
             </Grid>
+            <Grid item>
+
+              <Button
+                variant="outlined"
+                size="small"
+                className={classes.button}
+                onClick={handleCheckedRight}
+                disabled={leftChecked.length === 0}
+                aria-label="move selected right"
+              >
+                &gt;
+                     </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="outlined"
+                size="small"
+                className={classes.button}
+                onClick={handleCheckedLeft}
+                disabled={rightChecked.length === 0}
+                aria-label="move selected left"
+              >
+                &lt;
+                    </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="outlined"
+                size="small"
+                className={classes.button}
+                onClick={handleAllLeft}
+                disabled={right.length === 0}
+                aria-label="move all left"
+              >
+                ≪
+                    </Button>
+            </Grid>
+          </Grid>
+          <Grid item sm>{customList(right)}</Grid>
+        </Grid>
+      </Grid>
+      <Grid
+        item
+        container
+        spacing={2}
+      >
+        <Grid item>
+          <Button
+            onClick={handleBack}
+            variant="contained">
+            Back
+                      </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            disabled={!right.length}
+            onClick={() => { submitEmailSourceValues(getEmailsFromSource()) }}
+            variant="contained"
+            color="primary">
+            Send
+                  </Button>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 }

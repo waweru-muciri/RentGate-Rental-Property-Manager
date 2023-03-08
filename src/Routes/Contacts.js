@@ -7,11 +7,10 @@ import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import TextField from "@material-ui/core/TextField";
-import  Button from "@material-ui/core/Button";
-import Grid  from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
-import  Box from "@material-ui/core/Box";
-import CustomizedSnackbar from "../components/CustomSnackbar";
+import Box from "@material-ui/core/Box";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
@@ -19,17 +18,16 @@ import { commonStyles } from "../components/commonStyles";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { getGendersList } from "../assets/commonAssets.js";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 
 const GENDERS_LIST = getGendersList();
 
 const contactsTableHeadCells = [
     { id: "title", numeric: false, disablePadding: true, label: "Title" },
+    { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
     { id: "first_name", numeric: false, disablePadding: true, label: "First Name" },
     { id: "last_name", numeric: false, disablePadding: true, label: "Last Name" },
     { id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
-    { id: "gender", numeric: false, disablePadding: true, label: "Gender" },
-    { id: "date_of_birth", numeric: false, disablePadding: true, label: "Date of Birth" },
     { id: "personal_phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
     { id: "contact_email", numeric: false, disablePadding: true, label: "Email" },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
@@ -41,7 +39,6 @@ const contactsTableHeadCells = [
 let ContactsPage = ({
     contacts,
     match,
-    error,
     handleItemDelete
 }) => {
     let [contactItems, setContactItems] = useState([]);
@@ -97,7 +94,7 @@ let ContactsPage = ({
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading  text={'Tenants'} />
+                    <PageHeading text={'Tenants'} />
                 </Grid>
                 <Grid
                     container
@@ -294,14 +291,6 @@ let ContactsPage = ({
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
@@ -318,14 +307,9 @@ let ContactsPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        currentUser: state.currentUser,
-        users: state.users,
         contacts: state.contacts,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 

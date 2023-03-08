@@ -19,7 +19,7 @@ const PaymentSchema = Yup.object().shape({
 	charge_balance: Yup.number().typeError('Charge Balance must be a number').required("Charge balance is required"),
 	payment_amount: Yup.number().typeError('Amount must be a number')
 		.min(1, 'Give a good amount to the payment')
-		.max(Yup.ref('charge_balance'), 'Payment Amount Cannot be greater than charge amount')
+		.max(Yup.ref('charge_balance'), 'Payment Amount Cannot be greater than remaining balance')
 		.required("Payment amount is required"),
 	payment_date: Yup.date().required('Payment Date is Required'),
 });
@@ -31,7 +31,6 @@ let PaymentInputForm = (props) => {
 	const paymentValues = {
 		charge_id: chargeToAddPayment.id,
 		unit_id: chargeToAddPayment.unit_id,
-		unit_ref: chargeToAddPayment.unit_ref,
 		charge_amount: chargeToAddPayment.charge_amount || 0,
 		charge_balance: chargeToAddPayment.balance || 0,
 		charge_label: chargeToAddPayment.charge_label || 0,
@@ -56,7 +55,6 @@ let PaymentInputForm = (props) => {
 						memo: values.memo,
 						payment_date: values.payment_date,
 						tenant_id: values.tenant_id,
-						unit_ref: values.unit_ref,
 						unit_id: values.unit_id,
 						property_id: values.property_id,
 						payment_label: values.charge_label,

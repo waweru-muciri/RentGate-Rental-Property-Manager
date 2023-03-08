@@ -6,9 +6,13 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import BlockIcon from "@material-ui/icons/Block";
+import TextField from "@material-ui/core/TextField";
+import Box from "@material-ui/core/Box";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
+import { handleDelete, updateFirebaseUser } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -23,25 +27,19 @@ const usersTableHeadCells = [
 	{ id: "phone_number", numeric: false, disablePadding: true, label: "Phone Number" },
 	{ id: "primary_email", numeric: false, disablePadding: true, label: "Primary Email" },
 	{ id: "id_number", numeric: false, disablePadding: true, label: "ID Number" },
-	{ id: "disabled", numeric: false, disablePadding: true, label: "Status" },
 	{ id: "details", numeric: false, disablePadding: true, label: "Details" },
 	{ id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let UsersPage = ({
-	isLoading,
 	users,
 	match,
-	error,
 	handleItemDelete,
-	currentUser,
 }) => {
 	let [userItems, setUserItems] = useState([]);
 	let [firstNameFilter, setFirstNameFilter] = useState("");
 	let [lastNameFilter, setLastNameFilter] = useState("");
-	let [roleFilter, setRoleFilter] = useState("");
-	let [statusFilter, setStatusFilter] = useState("");
 	const [selected, setSelected] = useState([]);
 
 	useEffect(() => {
@@ -60,9 +58,6 @@ let UsersPage = ({
 			.filter(({ last_name }) =>
 				!lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
 			)
-			.filter((user) =>
-				!statusFilter ? true : user.disabled === statusFilter
-			)
 
 		setUserItems(filteredUsers);
 	};
@@ -72,8 +67,6 @@ let UsersPage = ({
 		setUserItems(users);
 		setFirstNameFilter("");
 		setLastNameFilter("");
-		setRoleFilter("");
-		setStatusFilter("");
 	};
 
 	return (
@@ -128,8 +121,32 @@ let UsersPage = ({
 							color="primary"
 							variant="contained"
 							size="medium"
+							startIcon={<BlockIcon />}
+							disabled={selected.length <= 0}
+							onClick={async () => {
+								try {
+									await updateFirebaseUser({
+										uid: selected[0],
+										userProfile: {
+											disabled: true
+										}
+									})
+								} catch (error) {
+									console.log("Error during disabling user => ", error)
+								}
+							}}
+						>
+							Disable
+						</Button>
+					</Grid>
+					<Grid item>
+						<Button
+							type="button"
+							color="primary"
+							variant="contained"
+							size="medium"
 							component={Link}
-							to={`/app/emails/new`}
+							to={`/app/emails/new?contact=${selected[0]}&contactSource=Users`}
 							disabled={selected.length <= 0}
 						>
 							Compose Email
@@ -196,52 +213,6 @@ let UsersPage = ({
 							<Grid
 								container
 								spacing={2}
-								justify="center"
-								direction="row"
-							>
-								<Grid item lg={6} md={12} xs={12}>
-									<TextField
-										fullWidth
-										select
-										variant="outlined"
-										id="email"
-										name="email"
-										label="Role"
-										value={roleFilter || ""}
-										onChange={(event) => {
-											setRoleFilter(event.target.value);
-										}}
-									>
-										<MenuItem>Hello World</MenuItem>
-									</TextField>
-								</Grid>
-								<Grid item lg={6} md={12} xs={12}>
-									<TextField
-										fullWidth
-										select
-										variant="outlined"
-										name="status"
-										label="Status"
-										id="status"
-										onChange={(event) => {
-											setStatusFilter(event.target.value);
-										}}
-										value={statusFilter || ""}
-									>
-										{STATUS_LIST.map((statusObject, index) => (
-											<MenuItem
-												key={index}
-												value={statusObject.disabled}
-											>
-												{statusObject.displayName}
-											</MenuItem>
-										))}
-									</TextField>
-								</Grid>
-							</Grid>
-							<Grid
-								container
-								spacing={2}
 								item
 								justify="flex-end"
 								alignItems="center"
@@ -300,7 +271,6 @@ const mapStateToProps = (state) => {
 	return {
 		currentUser: state.currentUser,
 		users: state.users,
-		isLoading: state.isLoading,
 	};
 };
 const mapDispatchToProps = (dispatch) => {

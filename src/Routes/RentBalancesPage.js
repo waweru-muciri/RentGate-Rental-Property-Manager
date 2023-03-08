@@ -9,7 +9,7 @@ import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { currencyFormatter } from "../assets/commonAssets";

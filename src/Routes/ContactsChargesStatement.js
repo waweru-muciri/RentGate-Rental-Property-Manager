@@ -4,7 +4,7 @@ import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import PageHeading from "../components/PageHeading";
@@ -91,6 +91,7 @@ let TenantStatementsPage = ({
             .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
             .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
+            .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
             .sort((charge1, charge2) => (parse(charge1.charge_date, 'yyyy-MM-dd', new Date()) <
             parse(charge2.charge_date, 'yyyy-MM-dd', new Date())))
 
@@ -103,7 +104,7 @@ let TenantStatementsPage = ({
         setFilteredChargeItems(tenantChargesItems);
         setPropertyFilter("all");
         setPeriodFilter("all");
-        setContactFilter("");
+        setContactFilter(null);
         setFromDateFilter("");
         setToDateFilter("");
     };

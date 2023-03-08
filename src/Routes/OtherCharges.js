@@ -12,7 +12,7 @@ import AddIcon from "@material-ui/icons/Add";
 import { Link } from "react-router-dom";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import CommonTable from "../components/table/commonTable";
 import { handleItemFormSubmit, handleDelete } from "../actions/actions";
 import { commonStyles } from '../components/commonStyles'

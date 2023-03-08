@@ -38,15 +38,12 @@ let useStyles = makeStyles((theme) => ({
 		width: theme.spacing(20),
 		height: theme.spacing(20),
 	},
-	chip: {
-		margin: theme.spacing(0.5),
+	quillEditor: {
+		height: theme.spacing(50),
+		overflow: 'auto'
 	},
 	icon: {
 		color: "rgba(255, 255, 255, 0.54)",
-	},
-	formControl: {
-		margin: theme.spacing(1),
-		minWidth: 120,
 	},
 	infoDisplayPaper: {
 		paddingBottom: theme.spacing(2),
@@ -64,17 +61,6 @@ let useStyles = makeStyles((theme) => ({
 	oneMarginTopBottom: {
 		marginTop: theme.spacing(1),
 		marginBottom: theme.spacing(1),
-	},
-	selectFormControl: {
-		margin: theme.spacing(1),
-		minWidth: 120,
-	},
-	selectChips: {
-		display: 'flex',
-		flexWrap: 'wrap',
-	},
-	selectChip: {
-		margin: 2,
 	},
 	root: {
         display: "flex",
@@ -141,10 +127,6 @@ let useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen,
         }),
         marginLeft: 0,
-    },
-    profileAvatar: {
-        width: theme.spacing(16),
-        height: theme.spacing(16),
     },
 }));
 

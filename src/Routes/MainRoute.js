@@ -39,6 +39,8 @@ const UserPage = lazy(() => import('./UserPage'));
 const UserProfilePage = lazy(() => import('./UserProfilePage'));
 const MaintenanceRequestPage = lazy(() => import('./MaintenanceRequestPage'));
 const ToDosPage = lazy(() => import('./ToDos'));
+const DocumentsTemplatesPage = lazy(() => import('./DocumentsTemplates'));
+const DocumentTemplatePage = lazy(() => import('./DocumentTemplatePage'));
 const NoticePage = lazy(() => import('./NoticePage'));
 const NoticesPage = lazy(() => import('./Notices'));
 const PropertyIncomeStatement = lazy(() => import('./PropertyIncomeStatement'));
@@ -68,7 +70,6 @@ let MainPage = ({
             //get details about user
             const userDetails = await getFirebaseUserDetails(user)
             setUser(userDetails)
-            console.log("userDetails => ", userDetails)
           } else {
             // User is signed out.
             setUser(null);
@@ -98,6 +99,7 @@ let MainPage = ({
         "company_profile",
         "account-billing",
         "meter_readings",
+        "email-templates",
       ]);
     }
   }, [currentUser]);
@@ -131,6 +133,9 @@ let MainPage = ({
                   component={MaintenancesPage}
                 />
                 <Route exact path={`${match.path}to-dos`} component={ToDosPage} />
+                <Route exact path={`${match.path}documents-templates`} component={DocumentsTemplatesPage} />
+                <Route exact path={`${match.path}documents-templates/:templateId/edit`} component={DocumentTemplatePage} />
+                <Route exact path={`${match.path}documents-templates/new`} component={DocumentTemplatePage} />
                 <Route
                   exact
                   path={`${match.path}audit-logs`}

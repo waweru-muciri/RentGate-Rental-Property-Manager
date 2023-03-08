@@ -75,8 +75,8 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 								};
 								await handleItemSubmit(chargePayment, 'charge-payments')
 								resetForm({});
-								history.goBack()
 								setStatus({ sent: true, msg: "Details saved successfully!" })
+								history.goBack()
 							} catch (error) {
 								setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 							}

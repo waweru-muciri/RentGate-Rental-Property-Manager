@@ -51,6 +51,8 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
 import SettingsIcon from '@material-ui/icons/Settings';
 import MoneyOffIcon from '@material-ui/icons/MoneyOff';
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+
 
 const navigationLinks = [
     { text: "Home", to: "/app/", icon: <DashboardIcon /> },
@@ -58,6 +60,7 @@ const navigationLinks = [
     { text: "User Management", to: "/app/users", icon: <GroupAddIcon /> },
     { text: "Email", to: "/app/emails", icon: <ContactMailIcon /> },
     { text: "Account Settings", to: "/app/account-settings", icon: <SettingsIcon /> },
+    { text: "Documents Templates", to: "/app/documents-templates", icon: <ImportExportIcon /> },
     { text: "Audit Logs", to: "/app/audit-logs", icon: <HistoryIcon /> },
 ];
 const othersLinkNestedLinks = [
@@ -67,7 +70,7 @@ const othersLinkNestedLinks = [
 ];
 
 const propertyLinkNestedLinks = [
-    { text: "Rentals Properties", to: "/app/properties", icon: <ApartmentIcon /> },
+    { text: "Properties", to: "/app/properties", icon: <ApartmentIcon /> },
     { text: "Rental Agreements", to: "/app/leases", icon: <WorkIcon /> },
     { text: "Meter Readings", to: "/app/meter-reading", icon: <MonetizationOnIcon /> },
 ];
@@ -80,18 +83,18 @@ const reportLinkNestedLinks = [
     {
         text: "Outstanding Balances",
         to: "/app/reports/outstanding-balances",
-        icon: <MoneyOffIcon/>,
-    }, 
+        icon: <MoneyOffIcon />,
+    },
     {
         text: "Properties Performance",
         to: "/app/reports/property-performance",
         icon: <ShowChartIcon />,
-    }, 
+    },
     {
         text: "Properties Income Statement",
         to: "/app/reports/property-income",
         icon: <AssessmentIcon />,
-    }, 
+    },
     {
         text: "Tenant Statements",
         to: "/app/reports/tenant-statements",
@@ -121,7 +124,7 @@ let AppNavLayout = ({
     currentUser,
     selectedTab,
     setSelectedTab,
-    pageTitle,
+    companyProfile,
     classes,
 }) => {
     const theme = useTheme();
@@ -164,8 +167,8 @@ let AppNavLayout = ({
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" noWrap className={classes.title}>
-                        Yarra Property Management
-            </Typography>
+                        {companyProfile.company_name}
+                    </Typography>
                     <IconButton
                         edge="end"
                         aria-label="account of current user"
@@ -175,7 +178,7 @@ let AppNavLayout = ({
                         onClick={handleProfileMenuOpen}
                     >
                         <Avatar
-                            alt="Contact Image"
+                            alt="User Image"
                             src={currentUser ? currentUser.user_avatar_url : ""}
                         />
                     </IconButton>
@@ -193,9 +196,7 @@ let AppNavLayout = ({
                     >
                         <MenuItem
                             component={Link}
-                            to={ currentUser.isAdmin ? `/app/admin/profile` :
-                             `/app/users/${currentUser.uid}/edit`
-                            }
+                            to={`/app/users/${currentUser.uid}/edit`}
                             onClick={() => {
                                 handleProfileMenuClose();
                             }}
@@ -500,6 +501,7 @@ let AppNavLayout = ({
 
 const mapStateToProps = (state) => {
     return {
+        companyProfile: state.companyProfile[0] || {},
         drawerOpen: state.drawerOpen,
         currentUser: state.currentUser,
         selectedTab: state.selectedTab,

@@ -28,7 +28,6 @@ import ImageCropper from '../ImageCropper';
 import * as Yup from "yup";
 import { format, startOfToday } from "date-fns";
 
-
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
 
@@ -43,7 +42,6 @@ const ContactSchema = Yup.object().shape({
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
 	personal_phone_number: Yup.string().trim().required('Phone Number is Required'),
-	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 
 const currentDate = format(startOfToday(), 'yyyy-MM-dd')
@@ -64,12 +62,10 @@ let ContactInputForm = (props) => {
 		id_number: contactToEdit.id_number || "",
 		title: contactToEdit.title || "",
 		present_address: contactToEdit.present_address || "",
-		alternate_address: contactToEdit.alternate_address || "",
 		contact_email: contactToEdit.contact_email || "",
 		alternate_email: contactToEdit.alternate_email || "",
 		personal_phone_number: contactToEdit.personal_phone_number || "",
 		work_phone_number: contactToEdit.work_phone_number || "",
-		date_of_birth: contactToEdit.date_of_birth || currentDate,
 		emergency_contact_email: contactToEdit.emergency_contact_email || "",
 		emergency_contact_name: contactToEdit.emergency_contact_name || "",
 		emergency_contact_phone_number: contactToEdit.emergency_contact_phone_number || "",
@@ -91,11 +87,9 @@ let ContactInputForm = (props) => {
 						gender: values.gender,
 						first_name: values.first_name,
 						last_name: values.last_name,
-						date_of_birth: values.date_of_birth,
 						id_number: values.id_number,
 						assigned_to: values.assigned_to,
 						present_address: values.present_address,
-						alternate_address: values.alternate_address,
 						contact_email: values.contact_email,
 						alternate_email: values.alternate_email,
 						personal_phone_number: values.personal_phone_number,
@@ -148,6 +142,14 @@ let ContactInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container direction="column" justify="flex-start">
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid container spacing={4} direction="row">
 								<Grid
 									md={6}
@@ -157,14 +159,6 @@ let ContactInputForm = (props) => {
 									direction="column"
 									spacing={2}
 								>
-									{
-										status && status.msg && (
-											<CustomSnackbar
-												variant={status.sent ? "success" : "error"}
-												message={status.msg}
-											/>
-										)
-									}
 									<Grid item>
 										<Typography variant="h6">Personal Info</Typography>
 										<Box>
@@ -294,24 +288,8 @@ let ContactInputForm = (props) => {
 										<TextField
 											fullWidth
 											variant="outlined"
-											id="date_of_birth"
-											name="date_of_birth"
-											label="Date of Birth"
-											type="date"
-											value={values.date_of_birth}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={errors.date_of_birth && touched.date_of_birth}
-											helperText={touched.date_of_birth && errors.date_of_birth}
-											InputLabelProps={{ shrink: true }}
-										/>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											variant="outlined"
 											id="id_number"
-											label="ID No."
+											label="ID No"
 											type="text"
 											name="id_number"
 											required
@@ -344,8 +322,8 @@ let ContactInputForm = (props) => {
 											<TextField
 												fullWidth
 												variant="outlined"
-												id={"personal_phone_number"}
-												name={"personal_phone_number"}
+												id="personal_phone_number"
+												name="personal_phone_number"
 												label="Personal Phone Number"
 												required
 												onChange={handleChange}
@@ -381,9 +359,9 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="email"
 												variant="outlined"
-												id={'contact_email'}
-												name={'contact_email'}
-												label="Email"
+												id='contact_email'
+												name='contact_email'
+												label="Primary Email"
 												value={values.contact_email}
 												onChange={handleChange}
 												onBlur={handleBlur}
@@ -396,8 +374,8 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="email"
 												variant="outlined"
-												id={'alternate_email'}
-												name={'alternate_email'}
+												id='alternate_email'
+												name='alternate_email'
 												label="Alternate Email"
 												value={values.alternate_email}
 												onChange={handleChange}
@@ -417,27 +395,14 @@ let ContactInputForm = (props) => {
 										<TextField
 											fullWidth
 											variant="outlined"
-											id={"present_address"}
-											name={"present_address"}
+											id="present_address"
+											name="present_address"
 											label="Present Address"
 											value={values.present_address}
 											onChange={handleChange}
 											onBlur={handleBlur}
 											error={errors.present_address && touched.present_address}
 											helperText={touched.present_address && errors.present_address}
-										/>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={"alternate_address"}
-											name={"alternate_address"}
-											label="Alternate Address"
-											value={
-												values.alternate_address
-											}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Alternate Address"
 										/>
 									</Grid>
 									<Grid item>
@@ -451,8 +416,8 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="text"
 												variant="outlined"
-												id={'emergency_contact_name'}
-												name={'emergency_contact_name'}
+												id='emergency_contact_name'
+												name='emergency_contact_name'
 												label="Contact Name"
 												value={values.emergency_contact_name}
 												onChange={handleChange}
@@ -466,8 +431,8 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="text"
 												variant="outlined"
-												id={'emergency_contact_relationship'}
-												name={'emergency_contact_relationship'}
+												id='emergency_contact_relationship'
+												name='emergency_contact_relationship'
 												label="Relationship to Tenant"
 												value={values.emergency_contact_relationship}
 												onChange={handleChange}
@@ -483,8 +448,8 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="text"
 												variant="outlined"
-												id={'emergency_contact_phone_number'}
-												name={'emergency_contact_phone_number'}
+												id='emergency_contact_phone_number'
+												name='emergency_contact_phone_number'
 												label="Phone Number"
 												value={values.emergency_contact_phone_number}
 												onChange={handleChange}
@@ -498,8 +463,8 @@ let ContactInputForm = (props) => {
 												fullWidth
 												type="email"
 												variant="outlined"
-												id={'emergency_contact_email'}
-												name={'emergency_contact_email'}
+												id='emergency_contact_email'
+												name='emergency_contact_email'
 												label="Contact Email"
 												value={values.emergency_contact_email}
 												onChange={handleChange}
@@ -519,27 +484,31 @@ let ContactInputForm = (props) => {
 								direction="row"
 								className={classes.buttonBox}
 							>
-								<Button
-									color="secondary"
-									variant="contained"
-									size="medium"
-									startIcon={<CancelIcon />}
-									onClick={() => history.goBack()}
-									disableElevation
-								>
-									Cancel
-					</Button>
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="contactInputForm"
-									disabled={isSubmitting}
-								>
-									Save
-					</Button>
+								<Grid item>
+									<Button
+										color="secondary"
+										variant="contained"
+										size="medium"
+										startIcon={<CancelIcon />}
+										onClick={() => history.goBack()}
+										disableElevation
+									>
+										Cancel
+									</Button>
+								</Grid>
+								<Grid item>
+									<Button
+										type="submit"
+										color="primary"
+										variant="contained"
+										size="medium"
+										startIcon={<SaveIcon />}
+										form="contactInputForm"
+										disabled={isSubmitting}
+									>
+										Save
+										</Button>
+								</Grid>
 							</Grid >
 						</Grid >
 					</form >

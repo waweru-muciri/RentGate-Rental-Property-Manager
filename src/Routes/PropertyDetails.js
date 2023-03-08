@@ -23,7 +23,7 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getUnitTypes } from "../assets/commonAssets.js";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdfBtn";
 import PropertySummaryPage from "./PropertySummaryPage";
 import PropertySettingsForm from "../components/property/PropertySettingsForm";
 

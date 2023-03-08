@@ -104,13 +104,17 @@ const EmailDetailsForm = ({ emailValues, submitEmailValues, handleCancel, emailT
                   name="template"
                   label="Template"
                   value={values.template}
-                  onChange={handleChange}
+                  onChange={(event) => {
+                    const selectedTemplate = emailTemplates.find(({id}) => id === event.target.value) || {}
+                    setFieldValue('template', event.target.value)
+                    setFieldValue('email_message', selectedTemplate.template_contents)
+                  }}
                   onBlur={handleBlur}
                   error={errors.template && touched.template}
                   helperText={errors.template}>
-                  {emailTemplates.map((type, index) => (
-                    <MenuItem key={index} value={type.id}>
-                      {type.name}
+                  {emailTemplates.map((emailTemplate, index) => (
+                    <MenuItem key={index} value={emailTemplate.id}>
+                      {emailTemplate.template_name}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -137,6 +141,7 @@ const EmailDetailsForm = ({ emailValues, submitEmailValues, handleCancel, emailT
               <Grid item>
                 <Typography color='textSecondary' variant='body1' paragraph>Email Message</Typography>
                 <ReactQuill
+                  className={classes.quillEditor}
                   value={values.email_message}
                   onChange={(content) => {
                     setFieldValue('email_message', content)

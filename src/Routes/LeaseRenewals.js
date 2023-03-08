@@ -12,7 +12,7 @@ import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
 import { startOfToday, parse, differenceInDays } from "date-fns";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import PrintArrayToPdf from "../components/PrintArrayToPdf";
 
 const headCells = [
     {

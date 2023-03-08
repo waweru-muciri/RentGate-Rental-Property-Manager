@@ -15,14 +15,15 @@ function getSteps() {
 }
 
 export default function HorizontalLinearStepper(props) {
-  const { currentUser, users, contacts, history, emailTemplates } = props;
+  const { currentUser, contactToSendEmailTo, contactSource, 
+    users, contacts, history, emailTemplates } = props;
   const classes = commonStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const defaultEmailValues = {
-    from_user: "",
+    from_user: currentUser.email || "",
     email_subject: "",
     email_message: "",
-    template: "",
+    template: '',
   }
   //for the transfer list below
   const [emailValues, setEmailValues] = React.useState(defaultEmailValues);
@@ -84,7 +85,9 @@ export default function HorizontalLinearStepper(props) {
               submitEmailValues={submitEmailDetailsForm} emailTemplates={emailTemplates} />
           </Grid>
         ) : activeStep === 1 ? (
-          <EmailsSelect contacts={contacts} users={users} handleBack={handleBack} submitEmailSourceValues={handleSendEmailSubmit} />) : null}
+          <EmailsSelect contacts={contacts} users={users} handleBack={handleBack} 
+          contactToSendEmailTo={contactToSendEmailTo} contactSource={contactSource}
+          submitEmailSourceValues={handleSendEmailSubmit} />) : null}
       </div>
     </div>
   );

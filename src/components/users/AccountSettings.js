@@ -18,6 +18,7 @@ import {
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
 import {
+    updateFirebaseUser,
     uploadFilesToFirebase,
     deleteUploadedFileByUrl,
 } from "../../actions/actions";
@@ -383,12 +384,19 @@ let UserInputForm = (props) => {
                 initialValues={{ password: '', confirm_password: '' }}
                 enableReinitialize
                 validationSchema={UpdatePasswordSchema}
-                onSubmit={async (values, { resetForm }) => {
-                    resetForm({});
+                onSubmit={async (values, { resetForm, setStatus }) => {
+                    try {
+                        await updateFirebaseUser({ uid: userToShow.id, userProfile: { password: values.password } })
+                        resetForm({});
+                        setStatus({ sent: true, msg: "Password updated successfully!" })
+                    } catch (error) {
+                        setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+                    }
                 }}
             >
                 {({
                     values,
+                    status,
                     touched,
                     errors,
                     handleChange,
@@ -409,6 +417,14 @@ let UserInputForm = (props) => {
                                 alignItems="center"
                                 direction="column"
                             >
+                                {
+                                    status && status.msg && (
+                                        <CustomSnackbar
+                                            variant={status.sent ? "success" : "error"}
+                                            message={status.msg}
+                                        />
+                                    )
+                                }
                                 <Grid
                                     justify="center"
                                     container

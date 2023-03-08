@@ -66,7 +66,7 @@ let PropertySettingsInputForm = (props) => {
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertySettingsSchema}
 			onSubmit={async (values, { resetForm }) => {
-				let property_unit = {
+				let propertySettingsValues = {
 					id: values.id,
 					late_fee_max_amount: values.late_fee_max_amount,
 					grace_period: values.grace_period,
@@ -76,7 +76,7 @@ let PropertySettingsInputForm = (props) => {
 					late_fee_amount: values.late_fee_amount,
 					management_fee_type: values.management_fee_type,
 				};
-				await handleItemSubmit( property_unit, 'properties')
+				await handleItemSubmit( propertySettingsValues, 'properties')
 				resetForm({});
 				if (values.id) {
 					history.goBack();
@@ -102,7 +102,7 @@ let PropertySettingsInputForm = (props) => {
 							<Grid item container spacing={4} direction="row">
 								<Grid container item xs spacing={2} direction="column">
 									<Grid item>
-										<Typography variant="subtitle1">Late Fee Policy</Typography>
+										<Typography variant="subtitle1">Late Rent Payments Fee Policy</Typography>
 									</Grid>
 									<Grid item>
 										<FormControl>
@@ -118,7 +118,7 @@ let PropertySettingsInputForm = (props) => {
 												labelPlacement="start"
 											/>
 										</FormControl>
-										<Typography variant="body2" >
+										<Typography variant="body2" color="textSecondary">
 											If automatic late fees are on, we will post late fees charges
 											residents ledgers based on the settings below.
 										</Typography>
@@ -137,7 +137,7 @@ let PropertySettingsInputForm = (props) => {
 											error={errors.grace_period && touched.grace_period}
 											helperText={touched.grace_period && errors.grace_period}
 										/>
-										<Typography variant="body2">
+										<Typography variant="body2" color="textSecondary">
 											Number of days after which late fees will be charged on resident accounts.
 										</Typography>
 									</Grid>
@@ -150,7 +150,7 @@ let PropertySettingsInputForm = (props) => {
 											variant="outlined"
 											select
 											name="late_fee_frequency"
-											label="Frequency"
+											label="Charging Frequency"
 											id="late_fee_frequency"
 											onBlur={handleBlur}
 											onChange={handleChange}
@@ -171,7 +171,7 @@ let PropertySettingsInputForm = (props) => {
 											variant="outlined"
 											type="text"
 											name="late_fee_amount"
-											label="Amount"
+											label="Fee Amount"
 											id="late_fee_amount"
 											onBlur={handleBlur}
 											onChange={handleChange}
@@ -181,13 +181,13 @@ let PropertySettingsInputForm = (props) => {
 										/>
 									</Grid>
 									<Grid item>
-										<Typography variant="subtitle1">Limits</Typography>
+										<Typography variant="subtitle1">Late Fee Amount Limits</Typography>
 									</Grid>
 									<Grid item>
 										<TextField
 											fullWidth
 											variant="outlined"
-											label="Late Fee Maximmum Amount"
+											label="Fee Maximmum Amount"
 											id="late_fee_max_amount"
 											type="text"
 											name="late_fee_max_amount"
@@ -197,7 +197,7 @@ let PropertySettingsInputForm = (props) => {
 											error={errors.late_fee_max_amount && touched.late_fee_max_amount}
 											helperText={touched.late_fee_max_amount && errors.late_fee_max_amount}
 										/>
-										<Typography variant="body2">
+										<Typography variant="body2" color="textSecondary">
 											Set maximmum monthly charge (per month)
 										</Typography>
 									</Grid>
