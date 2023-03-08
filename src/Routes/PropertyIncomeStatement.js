@@ -13,7 +13,7 @@ import { withRouter } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
 import { startOfToday, parse, subMonths, addMonths, getMonth, format, isSameMonth } from 'date-fns'
-import {ExportStatementToExcelBtn} from "../components/ExportToExcelBtn";
+import { ExportStatementToExcelBtn } from "../components/ExportToExcelBtn";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
@@ -36,24 +36,24 @@ let PropertyIncomeStatement = ({
     useEffect(() => {
         //go back [numMonths] months from current date
         let eachPastMonthDate;
-        if (fromFilter) {
-            switch (fromFilter) {
-                case 'last-month':
-                    eachPastMonthDate = [getLastMonthFromToDates()[0]]
-                    break;
-                case 'year-to-date':
-                    eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(getYearToDateFromToDates()[0], value))
-                    break;
-                case 'last-year':
-                    eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(getLastYearFromToDates()[0], value))
-                    break;
-                case 'month-to-date':
-                    eachPastMonthDate = [...Array(1).keys()].reverse().map((value) => subMonths(startOfToday(), value))
-                    break;
-                case '3-months-to-date':
-                    eachPastMonthDate = [...Array(3).keys()].reverse().map((value) => subMonths(startOfToday(), value))
-                    break;
-            }
+        switch (fromFilter) {
+            case 'last-month':
+                eachPastMonthDate = [getLastMonthFromToDates()[0]]
+                break;
+            case 'year-to-date':
+                eachPastMonthDate = [...Array((getMonth(startOfToday()) + 1)).keys()].map((value) => addMonths(getYearToDateFromToDates()[0], value))
+                break;
+            case 'last-year':
+                eachPastMonthDate = [...Array(12).keys()].map((value) => addMonths(getLastYearFromToDates()[0], value))
+                break;
+            case 'month-to-date':
+                eachPastMonthDate = [...Array(1).keys()].reverse().map((value) => subMonths(startOfToday(), value))
+                break;
+            case '3-months-to-date':
+                eachPastMonthDate = [...Array(3).keys()].reverse().map((value) => subMonths(startOfToday(), value))
+                break;
+            default:
+                eachPastMonthDate = [getLastMonthFromToDates()[0]]
         }
         const headCellsForMonths = [...eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')), `Total as of ${format(eachPastMonthDate[eachPastMonthDate.length - 1], 'MMMM yyyy')}`]
         // calculate income from rent

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Layout from "../components/PrivateLayout";
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';

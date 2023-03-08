@@ -89,39 +89,41 @@ let TenantChargesStatementPage = ({
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-            }
-            filteredStatements = filteredStatements.filter((chargeItem) => {
-                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-            })
+        switch (periodFilter) {
+            case 'last-month':
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'year-to-date':
+                dateRange = getYearToDateFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'last-year':
+                dateRange = getLastYearFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'month-to-date':
+                dateRange = getCurrentMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case '3-months-to-date':
+                dateRange = getLastThreeMonthsFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            default:
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
         }
+        filteredStatements = filteredStatements.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         filteredStatements = filteredStatements
             .filter(({ charge_type }) => !chargeType ? true : charge_type === chargeType)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
@@ -176,19 +178,19 @@ let TenantChargesStatementPage = ({
                         </Button>
                     </Grid>
                     <Grid item>
-                        <ExportToExcelBtn
+                        <PrintArrayToPdf
                             disabled={selected.length <= 0}
-                            reportName={`Tenants Outstanding Balances Records`}
-                            reportTitle={'Tenants Outstanding Balances Data'}
+                            reportName={'Tenants Outstanding Balances Data'}
+                            reportTitle={`Tenants Outstanding Balances Records`}
                             headCells={headCells}
                             dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
-                        <PrintArrayToPdf
+                        <ExportToExcelBtn
                             disabled={selected.length <= 0}
-                            reportName={'Tenants Outstanding Balances Data'}
-                            reportTitle={`Tenants Outstanding Balances Records`}
+                            reportName={`Tenants Outstanding Balances Records`}
+                            reportTitle={'Tenants Outstanding Balances Data'}
                             headCells={headCells}
                             dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
                         />

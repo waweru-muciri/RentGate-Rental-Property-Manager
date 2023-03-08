@@ -124,6 +124,10 @@ let TenantChargesStatementPage = ({
                     startOfPeriod = dateRange[0]
                     endOfPeriod = dateRange[1]
                     break;
+                default:
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
             }
             filteredStatements = filteredStatements.filter((chargeItem) => {
                 const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())

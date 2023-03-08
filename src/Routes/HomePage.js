@@ -32,13 +32,12 @@ import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import { makeStyles, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Alert from "@material-ui/lab/Alert"
 import Box from '@material-ui/core/Box';
 import { Formik } from "formik";
+import { commonStyles } from "../components/commonStyles";
 import 'typeface-lato';
 import * as Yup from "yup";
 
@@ -52,14 +51,13 @@ const messageSchema = Yup.object().shape({
 });
 
 const messageValues = { first_name: '', last_name: '', email: '', subject: '', phone_number: '', message: '' }
-const drawerWidth = 240;
 
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
             <Link color="inherit" href="#">
-                Yarra Property Management
+                RentGate Property Management
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -79,87 +77,6 @@ const theme = createMuiTheme({
     },
 });
 
-const useStyles = makeStyles((theme) => ({
-    '@global': {
-        ul: {
-            margin: 0,
-            padding: 0,
-            listStyle: 'none',
-        },
-    },
-    boldFont: {
-        fontWeight: "600"
-    },
-    textWhite: {
-        color: '#ffffff',
-    },
-    drawer: {
-    },
-    appBar: {
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-        [theme.breakpoints.up('sm')]: {
-            display: 'none',
-        },
-    },
-    // necessary for content to be below app bar
-    toolbar: {
-        flexWrap: 'wrap',
-        ...theme.mixins.toolbar
-    },
-    drawerPaper: {
-        width: drawerWidth,
-    },
-    content: {
-        flexGrow: 1,
-    },
-    fullHeightWidthContainer: {
-        width: "100%",
-        height: "100%",
-    },
-    toolbarTitle: {
-        [theme.breakpoints.up('sm')]: {
-            margin: 'auto'
-        },
-    },
-    largeAvatar: {
-        width: theme.spacing(12),
-        height: theme.spacing(12),
-    },
-    link: {
-        margin: theme.spacing(1, 1.5),
-    },
-    reviewBox: {
-        padding: theme.spacing(4),
-    },
-    heroContent: {
-        padding: theme.spacing(6, 2, 6, 2),
-        [theme.breakpoints.up('md')]: {
-            paddingTop: theme.spacing(12),
-            paddingBottom: theme.spacing(12)
-        },
-    },
-    cardHeader: {
-        backgroundColor:
-            theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
-    },
-    cardPricing: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'baseline',
-    },
-    footer: {
-        borderTop: `1px solid ${theme.palette.divider}`,
-        marginTop: theme.spacing(8),
-        paddingTop: theme.spacing(3),
-        paddingBottom: theme.spacing(3),
-        [theme.breakpoints.up('sm')]: {
-            paddingTop: theme.spacing(6),
-            paddingBottom: theme.spacing(6),
-        },
-    },
-}));
 
 const appFeatures = [
     {
@@ -273,7 +190,7 @@ const footers = [
 ];
 
 export default function HomePage() {
-    const classes = useStyles();
+    const classes = commonStyles();
     const [mobileOpen, setMobileOpen] = React.useState(false);
 
     const handleDrawerToggle = () => {
@@ -282,10 +199,10 @@ export default function HomePage() {
 
     const drawer = (
         <div>
-            <div className={classes.toolbar} />
+            <div className={classes.homePageToolBar} />
             <Divider />
             <List>
-                {['About', 'Features', 'Reviews', 'Pricing', 'Contact', 'Login'].map((text, index) => (
+                {['About', 'Features', 'Reviews', 'Pricing', 'Contact'].map((text, index) => (
                     <ListItem button key={text} onClick={() => {
                         handleDrawerToggle();
                         var element = document.getElementById(text.toLowerCase())
@@ -296,6 +213,9 @@ export default function HomePage() {
                         <ListItemText primary={text} />
                     </ListItem>
                 ))}
+                <ListItem button key="login-button" component={ReactRouterLink} to="/login">
+                    <ListItemText primary="Login" />
+                </ListItem>
             </List>
         </div>
     );
@@ -304,18 +224,18 @@ export default function HomePage() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <AppBar position="fixed" color="default" className={classes.appBar}>
-                <Toolbar className={classes.toolbar}>
+                <Toolbar className={classes.homePageToolBar}>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        className={classes.menuButton}
+                        className={classes.homePageMenuButton}
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" className={classes.toolbarTitle} noWrap>
-                        Yarra PM
+                    <Typography variant="h6" className={classes.homePageToolbarTitle} noWrap>
+                        RentGate PM
                     </Typography>
                     <Hidden smDown implementation="js">
                         <nav>
@@ -330,25 +250,24 @@ export default function HomePage() {
                             </Link>
                             <Link variant="button" color="textPrimary" href="#pricing" className={classes.link}>
                                 Pricing
-                        </Link>
+                            </Link>
                             <Link variant="button" color="textPrimary" href="#contact" className={classes.link}>
                                 Support
-                        </Link>
+                            </Link>
                             <Button color="primary" variant="outlined" className={classes.link} component={ReactRouterLink}
-                                to={"/login"}>
+                                to="/login">
                                 Login
                             </Button>
                             <Button href="#contact" color="primary" variant="outlined" className={classes.link}>
                                 Sign Up
                             </Button>
-
                         </nav>
                     </Hidden>
                 </Toolbar>
             </AppBar>
             <nav className={classes.drawer} aria-label="website navigation">
                 {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                <Hidden smUp implementation="js">
+                <Hidden mdUp implementation="js">
                     <Drawer
                         variant="temporary"
                         anchor={'left'}
@@ -366,9 +285,9 @@ export default function HomePage() {
                 </Hidden>
             </nav>
             {/* Hero unit */}
-            <main className={classes.content}>
+            <main className={classes.homePageContent}>
                 <div className={classes.heroContent} id="about">
-                    <div className={classes.toolbar} />
+                    <div className={classes.homePageToolBar} />
                     <Grid container alignItems="center" justify="center">
                         <Grid item container lg={10} spacing={4} alignItems="center" justify="center" direction="row">
                             <Grid item xs={12} md={5} container spacing={2} alignItems="center" justify="center" direction="column">
@@ -397,7 +316,7 @@ export default function HomePage() {
                             </Grid>
                             <Grid item xs={12} md={7} container alignItems="center" justify="center" direction="column">
                                 <Grid item xs={12}>
-                                    <img src="/headerImage.jpg" className={classes.fullHeightWidthContainer} />
+                                    <img src="/headerImage.jpg" alt="" className={classes.fullHeightWidthContainer} />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -415,7 +334,7 @@ export default function HomePage() {
                             </Grid>
                             <Grid item xs={10}>
                                 <Typography component="p" variant="h6" color="textSecondary" align="center">
-                                    Through Yarra, you can keep up-to-date rental properties and units records, tenant
+                                    Through RentGate, you can keep up-to-date rental properties and units records, tenant
                                     details, rental agreements and occupancy records, resolve maintenance issues and
                                     update property financials, from anywhere.
                         </Typography>
@@ -466,7 +385,7 @@ export default function HomePage() {
                                 </Grid>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                                <img src="/easyManagement.jpg" className={classes.fullHeightWidthContainer} />
+                                <img src="/easyManagement.jpg" alt="advertImage" className={classes.fullHeightWidthContainer} />
                             </Grid>
                         </Grid>
                     </Grid>
@@ -625,7 +544,7 @@ export default function HomePage() {
                             </Grid>
                             <Grid item>
                                 <Typography component="p" variant="h6" align="center" color="textSecondary">
-                                    Yarra empowers property owners and managers to deliver more than ever before by
+                                    RentGate empowers property owners and managers to deliver more than ever before by
                                     enhancing up-to-date record keeping, data authenticity and transparency, smart analytics
                                     and alerts, financial statements.
                             </Typography>

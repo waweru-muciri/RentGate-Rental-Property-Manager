@@ -4,7 +4,7 @@ import { red } from '@material-ui/core/colors';
 const drawerWidth = 240;
 
 
-let useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
 	form: {
 		marginTop: theme.spacing(1),
 		marginBottom: theme.spacing(1),
@@ -127,6 +127,71 @@ let useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen,
         }),
         marginLeft: 0,
+    },
+    '@global': {
+        ul: {
+            margin: 0,
+            padding: 0,
+            listStyle: 'none',
+        },
+    },
+    boldFont: {
+        fontWeight: "600"
+    },
+    textWhite: {
+        color: '#ffffff',
+    },
+    homePageMenuButton: {
+        marginRight: theme.spacing(2),
+        [theme.breakpoints.up('md')]: {
+            display: 'none',
+        },
+    },
+    // necessary for content to be below app bar
+    homePageToolBar: {
+        flexWrap: 'wrap',
+        ...theme.mixins.toolbar
+    },
+   
+    homePageContent: {
+        flexGrow: 1,
+    },
+    homePageToolbarTitle: {
+        [theme.breakpoints.up('md')]: {
+            margin: 'auto'
+        },
+    },
+    link: {
+        margin: theme.spacing(1, 1.5),
+    },
+    reviewBox: {
+        padding: theme.spacing(4),
+    },
+    heroContent: {
+        padding: theme.spacing(6, 2, 6, 2),
+        [theme.breakpoints.up('md')]: {
+            paddingTop: theme.spacing(12),
+            paddingBottom: theme.spacing(12)
+        },
+    },
+    cardHeader: {
+        backgroundColor:
+            theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
+    },
+    cardPricing: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'baseline',
+    },
+    footer: {
+        borderTop: `1px solid ${theme.palette.divider}`,
+        marginTop: theme.spacing(8),
+        paddingTop: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+        [theme.breakpoints.up('sm')]: {
+            paddingTop: theme.spacing(6),
+            paddingBottom: theme.spacing(6),
+        },
     },
 }));
 

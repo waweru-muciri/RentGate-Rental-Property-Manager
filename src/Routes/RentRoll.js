@@ -98,39 +98,41 @@ let RentRollPage = ({
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-            }
-            filteredRentCharges = filteredRentCharges.filter((chargeItem) => {
-                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-            })
+        switch (periodFilter) {
+            case 'last-month':
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'year-to-date':
+                dateRange = getYearToDateFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'last-year':
+                dateRange = getLastYearFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'month-to-date':
+                dateRange = getCurrentMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case '3-months-to-date':
+                dateRange = getLastThreeMonthsFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            default:
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
         }
+        filteredRentCharges = filteredRentCharges.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         filteredRentCharges = filteredRentCharges
             .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
             .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)

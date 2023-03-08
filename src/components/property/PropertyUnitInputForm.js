@@ -11,12 +11,8 @@ import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import CustomSnackbar from '../CustomSnackbar'
-import { connect } from "react-redux";
 import { Formik } from "formik";
-import {
-	handleItemFormSubmit,
-	handleDelete, uploadFilesToFirebase, deleteUploadedFileByUrl
-} from "../../actions/actions";
+import { uploadFilesToFirebase, deleteUploadedFileByUrl } from "../../actions/actions";
 import { commonStyles } from "../commonStyles";
 import { withRouter } from "react-router-dom";
 import {
@@ -341,24 +337,5 @@ let PropertyUnitInputForm = (props) => {
 		</Formik>
 	);
 };
-
-const mapStateToProps = (state) => {
-	return {
-		propertyUnitCharges: state.propertyUnitCharges,
-		leases: state.leases,
-		properties: state.properties,
-		error: state.error,
-		contacts: state.contacts,
-		users: state.users,
-	};
-};
-const mapDispatchToProps = (dispatch) => {
-	return {
-		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
-	};
-};
-
-PropertyUnitInputForm = connect(mapStateToProps, mapDispatchToProps)(PropertyUnitInputForm);
 
 export default withRouter(PropertyUnitInputForm);

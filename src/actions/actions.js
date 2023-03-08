@@ -38,6 +38,10 @@ export function setCurrentUser(user) {
     };
 }
 
+const firebaseGetOptions = {
+    source: 'server'
+};
+
 export const firebaseSignOutUser = () => {
     return (dispatch) => {
         auth
@@ -177,7 +181,7 @@ export function itemsFetchData(collectionsUrls) {
         dispatch(itemsIsLoading(true));
         collectionsUrls.forEach(async (url) => {
             try {
-                const snapshot = await getDatabaseRef().collection(url).get()
+                const snapshot = await getDatabaseRef().collection(url).get(firebaseGetOptions)
                 let fetchedItems = []
                 snapshot.forEach((doc) => {
                     let fetchedObject = Object.assign(

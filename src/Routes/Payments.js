@@ -76,39 +76,41 @@ let PaymentsPage = ({
         let startOfPeriod;
         let endOfPeriod;
         let dateRange = []
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-            }
-            filteredPayments = filteredPayments.filter((paymentItem) => {
-                const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
-            })
-        };
+        switch (periodFilter) {
+            case 'last-month':
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'year-to-date':
+                dateRange = getYearToDateFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'last-year':
+                dateRange = getLastYearFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'month-to-date':
+                dateRange = getCurrentMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case '3-months-to-date':
+                dateRange = getLastThreeMonthsFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            default:
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+        }
+        filteredPayments = filteredPayments.filter((paymentItem) => {
+            const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         filteredPayments = filteredPayments
             .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)

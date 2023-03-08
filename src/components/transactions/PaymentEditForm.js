@@ -153,7 +153,7 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 													onChange={handleChange}
 													onBlur={handleBlur}
 													error={errors.memo && touched.memo}
-													helperText={touched.memo && errors.memo || "Include details for the payments here (max 50)"}
+													helperText={errors.memo || "Include details for the payments here (max 50)"}
 												/>
 											</Grid>
 										</Grid>

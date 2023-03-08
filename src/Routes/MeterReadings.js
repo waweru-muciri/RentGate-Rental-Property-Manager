@@ -101,6 +101,10 @@ let MeterReadingsPage = ({
                     startOfPeriod = dateRange[0]
                     endOfPeriod = dateRange[1]
                     break;
+                default:
+                    dateRange = getLastMonthFromToDates()
+                    startOfPeriod = dateRange[0]
+                    endOfPeriod = dateRange[1]
             }
             filteredMeterReadings = filteredMeterReadings.filter((meterReading) => {
                 const meterReadingDate = parse(meterReading.reading_date, 'yyyy-MM-dd', new Date())

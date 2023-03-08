@@ -57,46 +57,46 @@ let TenantStatementsPage = ({
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-            }
-            statementsWithinDateRange = tenantChargesItems.filter((chargeItem) => {
-                const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
-            })
+        switch (periodFilter) {
+            case 'last-month':
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'year-to-date':
+                dateRange = getYearToDateFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'last-year':
+                dateRange = getLastYearFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'month-to-date':
+                dateRange = getCurrentMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case '3-months-to-date':
+                dateRange = getLastThreeMonthsFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            default:
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
         }
+        statementsWithinDateRange = tenantChargesItems.filter((chargeItem) => {
+            const chargeItemDate = parse(chargeItem.charge_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(chargeItemDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         const filteredStatements = statementsWithinDateRange
             .filter(({ charge_date }) => !fromDateFilter ? true : charge_date >= fromDateFilter)
             .filter(({ charge_date }) => !toDateFilter ? true : charge_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-            .sort((charge1, charge2) => (parse(charge1.charge_date, 'yyyy-MM-dd', new Date()) <
-                parse(charge2.charge_date, 'yyyy-MM-dd', new Date())))
 
 
         setFilteredChargeItems(filteredStatements);

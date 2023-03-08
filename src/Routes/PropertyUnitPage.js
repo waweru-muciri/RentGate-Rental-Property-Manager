@@ -5,36 +5,50 @@ import Layout from "../components/PrivateLayout";
 import { connect } from "react-redux";
 import PropertyUnitInputForm from "../components/property/PropertyUnitInputForm";
 import { withRouter } from "react-router-dom";
+import { handleItemFormSubmit } from "../actions/actions";
 
-let PropertyPage = (props) => {
-	let propertyUnitToEditId = props.match.params.propertyUnitId;
+let PropertyUnitPage = ({ propertyUnitToEdit, properties, handleItemSubmit }) => {
 
-	let propertyUnitToEdit = props.propertyUnits.find(({ id }) => id === propertyUnitToEditId);
-
-	let pageTitle = propertyUnitToEdit ? "Edit Unit" : "Add Unit";
+	let pageTitle = propertyUnitToEdit.id ? "Edit Unit" : "Add Unit";
 
 	return (
 		<Layout pageTitle={pageTitle}>
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
-					<PageHeading  text={pageTitle} />
+					<PageHeading text={pageTitle} />
 				</Grid>
 				<Grid
 					item
 				>
-					<PropertyUnitInputForm propertyUnitToEdit={propertyUnitToEdit} />
+					<PropertyUnitInputForm handleItemSubmit={handleItemSubmit}
+						propertyUnitToEdit={propertyUnitToEdit} properties={properties} />
 				</Grid>
 			</Grid>
 		</Layout>
 	);
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+	let propertyUnitToEdit = state.propertyUnits.find(({ id }) => id === ownProps.match.params.propertyUnitId);
+	if (!propertyUnitToEdit) {
+		const propertyToAddUnit = state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {};
+		propertyUnitToEdit = {
+			property_id: propertyToAddUnit.id
+		}
+	}
+
 	return {
-		propertyUnits: state.propertyUnits,
+		propertyUnitToEdit: propertyUnitToEdit,
+		properties: state.properties,
 	};
 };
 
-PropertyPage = connect(mapStateToProps)(PropertyPage);
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
+	};
+};
 
-export default withRouter(PropertyPage);
+PropertyUnitPage = connect(mapStateToProps, mapDispatchToProps)(PropertyUnitPage);
+
+export default withRouter(PropertyUnitPage);

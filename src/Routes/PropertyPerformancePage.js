@@ -12,12 +12,30 @@ import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
 import { Bar, HorizontalBar } from 'react-chartjs-2';
 import { commonStyles } from '../components/commonStyles'
-import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { format, getYear, parse, getMonth } from "date-fns";
+import { format, getYear, parse, getMonth, isWithinInterval, startOfToday, addDays } from "date-fns";
+import { getMonthsInYear, currencyFormatter } from "../assets/commonAssets";
 
-const options = {
+
+const chargesPerformanceGraphsOptions = {
+    responsive: true,
+    tooltips: {
+        mode: 'label'
+    },
+    scales: {
+        xAxes: [
+            {
+                ticks: {
+                    min: 0,
+                    max: 100,
+                }
+            }
+        ]
+    }
+};
+
+const graphOptions = {
     responsive: true,
     tooltips: {
         mode: 'label'
@@ -97,7 +115,6 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                 return total + parseFloat(currentValue.payed_amount) || 0
             }, 0)
     })
-
     const paymentsTypesForDisplay = paymentsTypes.map(paymentType => {
         let result;
         switch (paymentType) {
@@ -109,6 +126,9 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                 break;
             case 'recurring_charge':
                 result = "Recurring Charges"
+                break;
+            case 'meter_type' || "meter":
+                result = "Utility Charge"
                 break;
             case 'one_time_charge':
                 result = "Recurring Charges"
@@ -227,11 +247,150 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
         pointHoverBorderColor: '#EC932F',
     })
 
+    const rentChargesPaymentsPeformanceData = {
+        due_date: 0,
+        next_thirty: 0,
+        next_sixty: 0,
+        next_ninety: 0,
+        next_three_months: 0,
+    }
+    const otherChargesPaymentsPeformanceData = {
+        due_date: 0,
+        next_thirty: 0,
+        next_sixty: 0,
+        next_ninety: 0,
+        next_three_months: 0,
+    }
+
+    chargesItems.filter(({ charge_type, payed_status }) => charge_type === "rent" && payed_status)
+        .forEach(rentCharge => {
+            const rentChargeLastPaymentDate = parse(rentCharge.last_payment_date, 'yyyy-MM-dd', new Date())
+            const rentChargeDueDate = parse(rentCharge.due_date, 'yyyy-MM-dd', new Date())
+            const endOfNextThirtyDays = addDays(rentChargeDueDate, 30);
+            const endOfNextSixtyDays = addDays(rentChargeDueDate, 60);
+            const endOfNextNinetyDays = addDays(rentChargeDueDate, 90);
+            const endOfNextThreeMonths = new Date(2100, 0, 1);
+            //check if payment was made on the due date
+            if (rentChargeLastPaymentDate === rentChargeDueDate) {
+                rentChargesPaymentsPeformanceData['due_date'] += 1
+            }
+            //check if payment was made within 7 days
+            else if (isWithinInterval(rentChargeLastPaymentDate, { start: rentChargeDueDate, end: endOfNextThirtyDays })) {
+                rentChargesPaymentsPeformanceData['next_thirty'] += 1
+            }
+            //check if payment was made within 14 days
+            else if (isWithinInterval(rentChargeLastPaymentDate, { start: endOfNextThirtyDays, end: endOfNextSixtyDays })) {
+                rentChargesPaymentsPeformanceData['next_sixty'] += 1
+            }
+            //check if payment was made within 30 days
+            else if (isWithinInterval(rentChargeLastPaymentDate, { start: endOfNextSixtyDays, end: endOfNextNinetyDays })) {
+                rentChargesPaymentsPeformanceData['next_ninety'] += 1
+            }
+            //check if payment was made within 120+ days
+            else if (isWithinInterval(rentChargeLastPaymentDate, { start: endOfNextNinetyDays, end: endOfNextThreeMonths })) {
+                rentChargesPaymentsPeformanceData['next_three_months'] += 1
+            }
+        })
+    chargesItems.filter(({ charge_type, payed_status }) => charge_type != "rent" && payed_status)
+        .forEach(otherCharge => {
+            const otherChargeLastPaymentDate = parse(otherCharge.last_payment_date, 'yyyy-MM-dd', new Date())
+            const otherChargeDueDate = parse(otherCharge.due_date, 'yyyy-MM-dd', new Date())
+            const endOfNextThirtyDays = addDays(otherChargeDueDate, 30);
+            const endOfNextSixtyDays = addDays(otherChargeDueDate, 60);
+            const endOfNextNinetyDays = addDays(otherChargeDueDate, 90);
+            const endOfNextThreeMonths = new Date(2100, 0, 1);
+            //check if payment was made on the due date
+            if (otherChargeLastPaymentDate === otherChargeDueDate) {
+                otherChargesPaymentsPeformanceData['due_date'] += 1
+            }
+            //check if payment was made within 7 days
+            else if (isWithinInterval(otherChargeLastPaymentDate, { start: otherChargeDueDate, end: endOfNextThirtyDays })) {
+                otherChargesPaymentsPeformanceData['next_thirty'] += 1
+            }
+            //check if payment was made within 14 days
+            else if (isWithinInterval(otherChargeLastPaymentDate, { start: endOfNextThirtyDays, end: endOfNextSixtyDays })) {
+                otherChargesPaymentsPeformanceData['next_sixty'] += 1
+            }
+            //check if payment was made within 30 days
+            else if (isWithinInterval(otherChargeLastPaymentDate, { start: endOfNextSixtyDays, end: endOfNextNinetyDays })) {
+                otherChargesPaymentsPeformanceData['next_ninety'] += 1
+            }
+            //check if payment was made within 120+ days
+            else if (isWithinInterval(otherChargeLastPaymentDate, { start: endOfNextNinetyDays, end: endOfNextThreeMonths })) {
+                otherChargesPaymentsPeformanceData['next_three_months'] += 1
+            }
+        })
+
+    const getPeriodDisplayValue = (objectKeys) => {
+        return Array.from(objectKeys).map(key => {
+            let displayName;
+            switch (key) {
+                case "due_date":
+                    displayName = "Due Date"
+                    break;
+                case "next_thirty":
+                    displayName = "Due Date + 30 days"
+                    break;
+                case "next_sixty":
+                    displayName = "Due Date + 60 days"
+                    break;
+                case "next_ninety":
+                    displayName = "Due Date + 90 days"
+                    break;
+                case "next_three_months":
+                    displayName = "Due Date + 120 days"
+                    break;
+                default:
+                    break;
+            }
+            return displayName;
+        })
+    }
+
+    const getPerformanceDataFromObject = (performanceObject) => {
+        const totalPerformanceDataPoints = Object.values(performanceObject)
+            .reduce((total, dataPoint) => total + dataPoint, 0)
+        return Object.values(performanceObject)
+            .map(performanceDataPoint => (performanceDataPoint / totalPerformanceDataPoints) * 100)
+    }
+
+    //get charges payments performance graph data
+    const rentCollectionPerformanceData = {
+        labels: getPeriodDisplayValue(Object.keys(rentChargesPaymentsPeformanceData)),
+        datasets: [
+            {
+                label: 'Rent',
+                backgroundColor: "rgba(174, 184, 191,0.6)",
+                borderColor: 'rgba(174, 184, 191,1)',
+                borderWidth: 1,
+                hoverBackgroundColor: 'rgba(174, 184, 191, 1)',
+                hoverBorderColor: 'rgba(174, 184, 191,1)',
+                data: getPerformanceDataFromObject(rentChargesPaymentsPeformanceData)
+            }
+        ]
+    }
+
+    //get charges payments performance graph data
+    const otherChargesCollectionPerformanceData = {
+        labels: getPeriodDisplayValue(Object.keys(otherChargesPaymentsPeformanceData)),
+        datasets: [
+            {
+                label: 'Service Charges',
+                backgroundColor: "rgba(174, 182, 191,0.6)",
+                borderColor: 'rgba(174, 182, 191,1)',
+                borderWidth: 1,
+                hoverBackgroundColor: 'rgba(174, 182, 191, 1)',
+                hoverBorderColor: 'rgba(174, 182, 191,1)',
+                data: getPerformanceDataFromObject(otherChargesPaymentsPeformanceData)
+            }
+        ]
+    }
+
     return (
         <Layout pageTitle="Property Performance">
             <Grid container justify="center" direction="column" spacing={4}>
                 <Grid item key={0}>
-                    <PageHeading text={"Property Performance"} />
+                    <PageHeading text="Property Performance" />
                 </Grid>
                 <Grid container item direction="column" spacing={2}>
                     <Grid item>
@@ -360,8 +519,42 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                     </Typography>
                     <Bar
                         data={chargesAndPaymentsGraphData}
-                        options={options}>
+                        options={graphOptions}>
                     </Bar>
+                </Grid>
+                <Grid item container direction="column" spacing={1}>
+                    <Grid item>
+                        <Typography variant="h5" align="center" gutterBottom>
+                            Collection Performance
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Typography component="div" align="center">
+                            Collected by:
+                        </Typography>
+                    </Grid>
+                </Grid>
+                <Grid item container direction="row" spacing={4}>
+                    <Grid item xs>
+                        <Typography variant="h6" align="center" gutterBottom>
+                            Rent Collection
+                        </Typography>
+                        <HorizontalBar
+                            height={250}
+                            data={rentCollectionPerformanceData}
+                            options={chargesPerformanceGraphsOptions}>
+                        </HorizontalBar>
+                    </Grid>
+                    <Grid item xs>
+                        <Typography variant="h6" align="center" gutterBottom>
+                            Service Charge Collection
+                        </Typography>
+                        <HorizontalBar
+                            height={250}
+                            data={otherChargesCollectionPerformanceData}
+                            options={chargesPerformanceGraphsOptions}>
+                        </HorizontalBar>
+                    </Grid>
                 </Grid>
                 <Grid item container direction="row" spacing={4}>
                     <Grid item xs>
@@ -371,7 +564,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                         <HorizontalBar
                             height={250}
                             data={incomeCategoriesGraphData}
-                            options={options}>
+                            options={graphOptions}>
                         </HorizontalBar>
                     </Grid>
                     <Grid item xs>
@@ -381,7 +574,7 @@ let PropertyPerformancePage = ({ transactionsCharges, expenses, properties }) =>
                         <HorizontalBar
                             height={250}
                             data={expensesCategoriesGraphData}
-                            options={options}>
+                            options={graphOptions}>
                         </HorizontalBar>
                     </Grid>
                 </Grid>
@@ -397,7 +590,12 @@ const mapStateToProps = (state) => {
             const chargeDetails = {}
             //get payments with this charge id
             const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
-            chargeDetails.payed_status = chargePayments.length ? true : false;
+            if (chargePayments.length) {
+                chargeDetails.payed_status = true
+                chargeDetails.last_payment_date = chargePayments.slice(-1)[0].payment_date
+            } else {
+                chargeDetails.payed_status = false
+            }
             const payed_amount = chargePayments.reduce((total, currentValue) => {
                 return total + parseFloat(currentValue.payment_amount) || 0
             }, 0)

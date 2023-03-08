@@ -65,50 +65,50 @@ let TenantsPaymentsPage = ({
         let dateRange = []
         let startOfPeriod;
         let endOfPeriod;
-        if (periodFilter) {
-            switch (periodFilter) {
-                case 'all':
-                    startOfPeriod = new Date(1990, 1, 1)
-                    endOfPeriod = new Date(2100, 1, 1)
-                    break;
-                case 'last-month':
-                    dateRange = getLastMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'year-to-date':
-                    dateRange = getYearToDateFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'last-year':
-                    dateRange = getLastYearFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case 'month-to-date':
-                    dateRange = getCurrentMonthFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-                case '3-months-to-date':
-                    dateRange = getLastThreeMonthsFromToDates()
-                    startOfPeriod = dateRange[0]
-                    endOfPeriod = dateRange[1]
-                    break;
-            }
-            filteredPayments = filteredPayments.filter((paymentItem) => {
-                const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
-                return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
-            })
-        };
+        switch (periodFilter) {
+            case 'all':
+                startOfPeriod = new Date(1990, 1, 1)
+                endOfPeriod = new Date(2100, 1, 1)
+                break;
+            case 'last-month':
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'year-to-date':
+                dateRange = getYearToDateFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'last-year':
+                dateRange = getLastYearFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case 'month-to-date':
+                dateRange = getCurrentMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            case '3-months-to-date':
+                dateRange = getLastThreeMonthsFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+                break;
+            default:
+                dateRange = getLastMonthFromToDates()
+                startOfPeriod = dateRange[0]
+                endOfPeriod = dateRange[1]
+        }
+        filteredPayments = filteredPayments.filter((paymentItem) => {
+            const paymentDate = parse(paymentItem.payment_date, 'yyyy-MM-dd', new Date())
+            return isWithinInterval(paymentDate, { start: startOfPeriod, end: endOfPeriod })
+        })
         filteredPayments = filteredPayments
             .filter(({ payment_date }) => !fromDateFilter ? true : payment_date >= fromDateFilter)
             .filter(({ payment_date }) => !toDateFilter ? true : payment_date <= toDateFilter)
             .filter(({ property_id }) => propertyFilter === "all" ? true : property_id === propertyFilter)
             .filter(({ tenant_id }) => !contactFilter ? true : tenant_id === contactFilter.id)
-            .sort((payment1, payment2) => parse(payment1.payment_date, 'yyyy-MM-dd', new Date()) <
-                parse(payment2.payment_date, 'yyyy-MM-dd', new Date()))
         setFilteredPaymentsItems(filteredPayments);
     }
 

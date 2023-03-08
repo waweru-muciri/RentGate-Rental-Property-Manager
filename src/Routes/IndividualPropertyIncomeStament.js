@@ -6,7 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import {ExportStatementToExcelBtn} from "../components/ExportToExcelBtn";
+import { ExportStatementToExcelBtn } from "../components/ExportToExcelBtn";
 import { commonStyles } from "../components/commonStyles";
 import Typography from "@material-ui/core/Typography";
 import { getTransactionsFilterOptions, currencyFormatter, getLastYearFromToDates, getYearToDateFromToDates, getLastMonthFromToDates } from "../assets/commonAssets";
@@ -48,6 +48,9 @@ let PropertyIncomeStatement = ({
             case '3-months-to-date':
                 eachPastMonthDate = [...Array(3).keys()].reverse().map((value) => subMonths(startOfToday(), value))
                 break;
+            default:
+                eachPastMonthDate = [getLastMonthFromToDates()[0]]
+
         }
         const headCellsForMonths = [...eachPastMonthDate.map((monthDate) => format(monthDate, 'MMMM yyyy')), `Total as of ${format(eachPastMonthDate[eachPastMonthDate.length - 1], 'MMMM yyyy')}`]
         // calculate income from rent

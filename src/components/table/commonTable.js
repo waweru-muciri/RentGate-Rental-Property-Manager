@@ -9,7 +9,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TablePagination from '@material-ui/core/TablePagination';
 import Checkbox from '@material-ui/core/Checkbox';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
 import TableCell from '@material-ui/core/TableCell';
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
@@ -22,7 +21,6 @@ import { stableSort, getSorting } from "./tablesSortingFunctions";
 function CommonTable(props) {
     const {
         rows,
-        // tableRowOnClickHandler,
         headCells,
         selected,
         setSelected,
