@@ -16,6 +16,7 @@ import {
   Link,
 } from "react-router-dom";
 import TenantStatementsPage from "./ContactStatements";
+import PropertyIncomeStatement from "./PropertyIncomeStatement";
 import PropertiesPage from "./Properties";
 import MaintenancesPage from "./Maintenances";
 import ReportsPage from "./Reports";
@@ -383,6 +384,7 @@ let MainPage = ({
           classes={{
             paper: classes.drawerPaper,
           }}
+		 BackdropProps={{ invisible: true }}
         >
           <div className={classes.drawerHeader}>
             <IconButton onClick={handleDrawerToggle}>
@@ -648,7 +650,8 @@ let MainPage = ({
           pageTitle={"Yarra Property Management"}
         />
         <Switch>
-          <Route exact path={`${match.path}`} component={DashBoard} />
+			<Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
+			<Route exact path={`${match.path}`} component={DashBoard} />
           <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
           <Route exact path={`${match.path}properties/lease-renewals`} component={LeaseRenewalsPage} />
           <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />

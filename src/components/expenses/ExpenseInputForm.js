@@ -26,6 +26,7 @@ const ExpenseInputForm = (props) => {
   const expenseCategories = getExpensesCategories();
   const expenseToEdit =  typeof props.expenseToEdit !== 'undefined' ? props.expenseToEdit : {}
   const expenseValues =  {
+        id: expenseToEdit.id,
 		expense_notes: expenseToEdit.expense_notes ||  '',
 		expense_date: expenseToEdit.expense_date || defaultDate,
 		amount: expenseToEdit.amount || 0,

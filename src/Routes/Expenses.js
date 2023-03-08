@@ -32,7 +32,7 @@ const expensesTableHeadCells = [
         disablePadding: true,
         label: "Property/Unit Ref",
     },
-    { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount" },
+    { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
 ];
 
 let ExpensesPage = ({
@@ -80,7 +80,7 @@ let ExpensesPage = ({
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the expenses here according to search criteria
-        let filteredExpenses = expenseItems 
+        let filteredExpenses = expenseItems
             .filter(({ expense_date }) =>
                 !fromDateFilter ? true : expense_date >= fromDateFilter
             )
@@ -149,7 +149,7 @@ let ExpensesPage = ({
                             Edit
                         </Button>
                     </Grid>
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
                             type="button"
                             color="primary"
@@ -157,8 +157,8 @@ let ExpensesPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Expenses Records'}
-							reportTitle = {'Expenses Records'}
+                            reportName={'Expenses Records'}
+                            reportTitle={'Expenses Records'}
                             headCells={expensesTableHeadCells}
                             dataToPrint={expenseItems.filter(({ id }) => selected.includes(id))}
                         >

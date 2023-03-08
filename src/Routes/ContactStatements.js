@@ -89,7 +89,7 @@ let TenantStatementsPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedTransactions = transactions.map((transaction) => {
+        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );

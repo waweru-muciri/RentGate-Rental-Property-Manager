@@ -5,16 +5,21 @@ import Layout from "../components/myLayout";
 import { connect } from "react-redux";
 import TransactionInputForm from "../components/transactions/TransactionInputForm";
 import { withRouter } from "react-router-dom";
+import queryString from 'query-string';
 
 let TransactionPage = (props) => {
+	let params = queryString.parse(props.location.search)
+	// Get the action to complete.
+	var leaseToRenew = params.leaseToRenew;
 	let transactionToEditId = props.match.params.transactionId;
 	let transactionToEdit = props.transactions.find(
 		({ id }) => id === transactionToEditId
 	);
 	transactionToEdit = typeof transactionToEdit !== 'undefined' ? transactionToEdit : {}
-	let pageTitle = transactionToEditId
-		? "Edit Lease"
-		: "New Lease";
+	if (leaseToRenew) {
+		transactionToEdit = Object.assign({}, transactionToEdit, { id: undefined });	
+	}
+	let pageTitle = leaseToRenew ? "Renew Lease" : transactionToEditId ? "Edit Lease" : "New Lease";
 
 	return (
 		<Layout pageTitle="Lease Details">
@@ -30,7 +35,7 @@ let TransactionPage = (props) => {
 					key={3}
 				>
 					<TransactionInputForm
-						transactionToEdit={transactionToEdit}
+						transactionToEdit={transactionToEdit} leaseToRenew={leaseToRenew}
 					/>
 				</Grid>
 			</Grid>

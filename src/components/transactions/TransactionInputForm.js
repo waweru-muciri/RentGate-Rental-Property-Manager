@@ -43,7 +43,7 @@ const TransactionSchema = Yup.object().shape({
 
 let TransactionInputForm = (props) => {
 	const styles = commonStyles();
-	const { users, currentUser, properties, contacts, history, handleItemSubmit } = props
+	const { users, currentUser, properties, contacts, history, handleItemSubmit, leaseToRenew} = props
 	let transactionToEdit = typeof props.transactionToEdit !== 'undefined' ? props.transactionToEdit : {}
 	const transactionValues = {
 		id: transactionToEdit.id,
@@ -85,7 +85,7 @@ let TransactionInputForm = (props) => {
 					console.log('Saved transaction successfully => ', response)
 				});
 				resetForm({});
-				if (values.id) {
+				if (values.id || leaseToRenew) {
 					history.goBack();
 				}
 
@@ -238,7 +238,7 @@ let TransactionInputForm = (props) => {
 									>
 										{contacts.map((tenant, index) => (
 											<MenuItem key={index} value={tenant.id}>
-												{tenant.first_name + tenant.last_name}
+												{tenant.first_name + ' ' +  tenant.last_name}
 											</MenuItem>
 										))}
 									</TextField>
@@ -256,7 +256,7 @@ let TransactionInputForm = (props) => {
 									>
 										{users.map((landlord, index) => (
 											<MenuItem key={index} value={landlord.id}>
-												{landlord.first_name + landlord.last_name}
+												{landlord.first_name + ' ' +  landlord.last_name}
 											</MenuItem>
 										))}
 									</TextField>

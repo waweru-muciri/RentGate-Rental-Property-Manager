@@ -1,86 +1,21 @@
 import Layout from "../components/myLayout";
-import Grid from "@material-ui/core/Grid";
 import PageHeading from "../components/PageHeading";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import exportDataToXSL from "../assets/printToExcel";
-import {
-    Box,
-    TextField,
-    Button,
-    MenuItem,
-} from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
-import PrintIcon from "@material-ui/icons/Print";
+import Grid from "@material-ui/core/Grid";
+import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import MenuItem from "@material-ui/core/MenuItem";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
-import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/customizedSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
-import { handleDelete } from "../actions/actions";
-import CommonTable from "../components/table/commonTable";
-import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
-import PrintArrayToPdf from "../assets/PrintArrayToPdf";
+import moment from "moment";
 
-const headCells = [
-    {
-        id: "transaction_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Transaction Date",
-    },
-    {
-        id: "tenant",
-        numeric: false,
-        disablePadding: true,
-        label: "Tenant Name",
-    },
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Landlord Name",
-    },
-    {
-        id: "property_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Property Ref",
-    },
-    {
-        id: "lease_start",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Start",
-    },
-    {
-        id: "lease_end",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease End",
-    },
-    {
-        id: "security_deposit",
-        numeric: false,
-        disablePadding: true,
-        label: "Deposit Held",
-    },
-        {
-        id: "transaction_price",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent",
-    },{
-        id: "rent_balance",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent Balance",
-    },
-
-];
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -98,76 +33,129 @@ function TabPanel(props) {
     );
 }
 
-let TransactionPage = ({
-    currentUser,
-    isLoading,
+let PropertyIncomeStatement = ({
     transactions,
+    expenses,
+    meterReadings,
     properties,
-    contacts,
-    match,
     users,
-    error,
 }) => {
     const classes = commonStyles();
-    let [transactionItems, setTransactionItems] = useState([]);
-    let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
+    let [incomeStatements, setIncomeStatements] = useState([]);
+    let [headCells, setHeadCells] = useState([]);
+    let [expensesStatements, setExpensesStatements] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState("");
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
-    const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
+
+    const getIncomeStatementThreeMonthsBack = () => {
+        //go back [numMonths] months from current date
+		const numberOfMonthsBack = 12;
+        const eachPastMonthDate = Array.from(Array(numberOfMonthsBack), (_, i) => i + 1).map((value) => moment().subtract(value, 'months').format('YYYY-MM-DD'))
+        setHeadCells(eachPastMonthDate.map((monthDate) => moment(monthDate).format('MMMM YYYY')))
+        const incomeMappedByMonth = []
+        const expensesMappedByMonth = []
+        const totalIncomeObject = { income_type: 'Total Income' }
+        const totalExpensesObject = { expense_type: 'Total Expenses' }
+        const rentalIncomeObject = { income_type: 'Rental Income' }
+        eachPastMonthDate.forEach((monthDate) => {
+            //get transactions recorded in the same month and year
+            //as monthDate
+            const totalRentalIncome = transactions.filter((transaction) => {
+                const momentTransactionDate = moment(transaction.transaction_date)
+                return momentTransactionDate.isSame(monthDate, 'year') && momentTransactionDate.isSame(monthDate, 'month')
+            }).reduce((total, currentTransaction) => total + parseFloat(currentTransaction.transaction_price), 0)
+            rentalIncomeObject[moment(monthDate).format('MMMM YYYY')] = totalRentalIncome
+        })
+        incomeMappedByMonth.push(rentalIncomeObject)
+        const utilityIncomeObject = { income_type: 'Utility Income' }
+        eachPastMonthDate.forEach((monthDate) => {
+            //get utility bills recorded in the same month and year
+            //as monthDate
+            const totalUtilityIncome = meterReadings.filter((meterReading) => {
+                const momentMeterReadingDate = moment(meterReading.reading_date)
+                return momentMeterReadingDate.isSame(monthDate, 'year') && momentMeterReadingDate.isSame(monthDate, 'month')
+            }).reduce((total, currentMeterReading) => {
+                const usage = parseFloat(currentMeterReading.current_value) - parseFloat(currentMeterReading.prior_value)
+                return total + ((usage * parseFloat(currentMeterReading.unit_charge)) + parseFloat(currentMeterReading.base_charge))
+            }, 0)
+            utilityIncomeObject[moment(monthDate).format('MMMM YYYY')] = totalUtilityIncome
+        })
+        incomeMappedByMonth.push(utilityIncomeObject)
+        incomeMappedByMonth.forEach((incomeObject) => {
+            headCells.forEach((headCell) => {
+                const incomeAmount = parseFloat(incomeObject[headCell]) || 0
+                totalIncomeObject[headCell] = (parseFloat(totalIncomeObject[headCell]) || 0 ) + incomeAmount
+            })
+        })
+        incomeMappedByMonth.push(totalIncomeObject)
+        const expenseObjectsInMonth = []
+        eachPastMonthDate.forEach((monthDate) => {
+            //get expenses recorded in the same month and year
+            //as monthDate
+            expenses.filter((expense) => {
+                const momentExpenseDate = moment(expense.expense_date)
+                return momentExpenseDate.isSame(monthDate, 'year') && momentExpenseDate.isSame(monthDate, 'month')
+            }).forEach((monthExpense) => {
+                const { type, amount } = monthExpense
+                const expenseObject = {};
+                expenseObject['expense_type'] = type
+                expenseObject['amount'] = (parseFloat(amount) || 0)
+                expenseObject['month'] = moment(monthDate).format('MMMM YYYY')
+                expenseObjectsInMonth.push(expenseObject)
+            })
+        })
+        const expensesTypesSet = new Set(expenseObjectsInMonth.map((expenseObject) => expenseObject.expense_type))
+            expensesTypesSet.forEach((expenseType) => {
+        expenseObjectsInMonth.filter((expenseObject) => expenseObject.expense_type === expenseType).forEach((expenseObject) => {
+                    //make or obtain an object and push it to the expenses array
+                    const expenseObjectByType = expensesMappedByMonth.find((expense) => expense.expense_type === expenseType)
+                    if (typeof expenseObjectByType !== 'undefined') {
+                        expenseObjectByType[expenseObject.month] = (parseFloat(expenseObjectByType[expenseObject.month]) || 0) + parseFloat(expenseObject.amount)
+                    } else {
+                        const totalExpensesByTypeObject = {}
+                        totalExpensesByTypeObject['expense_type'] = expenseType
+                        totalExpensesByTypeObject[expenseObject.month] = parseFloat(expenseObject.amount
+) || 0
+					   expensesMappedByMonth.push(totalExpensesByTypeObject)
+                    }
+            })
+        })
+        expensesMappedByMonth.forEach((expenseObject) => {
+            headCells.forEach((headCell) => {
+                const expenseAmount = parseFloat(expenseObject[headCell]) || 0
+                totalExpensesObject[headCell] = (parseFloat(totalExpensesObject[headCell]) || 0 ) + expenseAmount
+            })
+        })
+        expensesMappedByMonth.push(totalExpensesObject)
+        setIncomeStatements(incomeMappedByMonth);
+        setExpensesStatements(expensesMappedByMonth);
+    }
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {};
-            transactionDetails.tenant =
-                typeof tenant !== "undefined"
-                    ? tenant.first_name + " " + tenant.last_name
-                    : "";
-            transactionDetails.landlord_name =
-                typeof landlord !== "undefined"
-                    ? landlord.first_name + " " + landlord.last_name
-                    : "";
-            if (typeof property !== "undefined") {
-                transactionDetails.property_ref = property.ref
-                transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
-            }
-            transactionDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setTransactionItems(mappedTransactions);
-        setFilteredTransactionItems(mappedTransactions);
-    }, [transactions, contacts, properties, users]);
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
+        getIncomeStatementThreeMonthsBack()
+    }, [expenses, transactions, meterReadings])
 
     const exportTransactionsRecordsToExcel = () => {
-        let items = transactionItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
-            "Leases  Records",
-            "Leases Data",
-            items,
-            "Leases Data"
+            "Income Statement",
+            "Income Statement",
+            incomeStatements,
+            "Income Statements"
+        );
+        exportDataToXSL(
+            "Expenses Statement",
+            "Expenses Statement",
+            expensesStatements,
+            "Expenses Statement"
         );
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactions according to the search criteria here
-        let filteredTransactions = transactionItems
+        let filteredTransactions = incomeStatements
             .filter(({ transaction_date }) =>
                 !fromDateFilter ? true : transaction_date >= fromDateFilter
             )
@@ -177,15 +165,13 @@ let TransactionPage = ({
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
-            .filter(({ landlord }) =>
-                !assignedToFilter ? true : landlord === assignedToFilter
+            .filter(({ assigned_to }) =>
+                !assignedToFilter ? true : assigned_to === assignedToFilter
             );
-        setFilteredTransactionItems(filteredTransactions);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredTransactionItems(transactionItems);
         setPropertyFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -193,14 +179,14 @@ let TransactionPage = ({
     };
 
     return (
-        <Layout pageTitle="Leases">
+        <Layout pageTitle="Property Income Statement">
             <Grid
                 container
                 spacing={3}
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Leases'} />
+                    <PageHeading paddingLeft={2} text={'Property Income Statement'} />
                 </Grid>
                 <Grid
                     container
@@ -211,52 +197,8 @@ let TransactionPage = ({
                     key={1}
                 >
                     <Grid item>
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<AddIcon />}
-                            component={Link}
-                            to={`${match.url}/new`}
-                        >
-                            NEW
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<EditIcon />}
-                            disabled={selected.length <= 0}
-                            component={Link}
-                            to={`${match.url}/${selected[0]}/edit`}
-                        >
-                            Edit
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <PrintArrayToPdf
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<PrintIcon />}
-                            disabled={selected.length <= 0}
-							reportName ={'Rental Transactions Records'}
-							reportTitle = {'Rental Transactions Records'}
-                            headCells={headCells}
-                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
-                        >
-                            Pdf
-                        </PrintArrayToPdf>
-                    </Grid>
-                    <Grid item>
                         <ExportToExcelBtn
                             aria-label="Export to Excel"
-                            disabled={selected.length <= 0}
                             onClick={(event) => {
                                 exportTransactionsRecordsToExcel();
                             }}
@@ -300,7 +242,7 @@ let TransactionPage = ({
                                                 key={index}
                                                 value={user.id}
                                             >
-                                                {user.first_name + ' ' +
+                                                {user.first_name +
                                                     user.last_name}
                                             </MenuItem>
                                         ))}
@@ -410,25 +352,70 @@ let TransactionPage = ({
                         </form>
                     </Box>
                 </Grid>
-                <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                    {error && (
-                        <div>
-                            <CustomizedSnackbar
-                                variant="error"
-                                message={error.message}
-                            />
-                        </div>
-                    )}
-                    <CommonTable
-                        selected={selected}
-                        setSelected={setSelected}
-                        rows={filteredTransactionItems}
-                        headCells={headCells}
-                        handleDelete={handleDelete}
-                        deleteUrl={"transactions"}
-                    />
+                <Grid item sm={12}>
+                    <div style={{ width: '100%' }}>
+                        <Box display="flex" key={'adadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                            <Box key="first1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                Income
+                            </Box>
+                            {
+                                headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        {headCell}
+                                    </Box>
+                                )
+                            }
+                        </Box>
+                        {
+                            incomeStatements.map((incomeStatement, incomeIndex) => {
+                                const otherColumns = headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        Ksh: {incomeStatement[headCell]}
+                                    </Box>
+                                )
+                                return (
+                                    <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
+                                        <Box textAlign="left" width={1} key={incomeIndex + "jl"} flexGrow={1} p={1} >
+                                            {incomeStatement['income_type']}
+                                        </Box>
+                                        {otherColumns}
+                                    </Box>
+                                )
+                            })
+                        }
+                    </div>
+                    <div style={{ width: '100%' }}>
+                        <Box display="flex" key={'adlaldadf'} flexDirection="row" p={1} bgcolor="grey.300">
+                            <Box key="faldirst1" width={1} textAlign="left" flexGrow={1} p={1} >
+                                Expenses
+                            </Box>
+                            {
+                                headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        {headCell}
+                                    </Box>
+                                )
+                            }
+                        </Box>
+                        {
+                            expensesStatements.map((expenseStatement, incomeIndex) => {
+                                const otherColumns = headCells.map((headCell, index) =>
+                                    <Box key={index} width={1} textAlign="left" flexGrow={1} p={1} >
+                                        Ksh: {expenseStatement[headCell] || 0 }
+                                    </Box>
+                                )
+                                return (
+                                    <Box display="flex" key={incomeIndex} flexDirection="row" p={1} bgcolor="background.paper">
+                                        <Box textAlign="left" width={1} key={incomeIndex + "iiajl"} flexGrow={1} p={1} >
+                                            {expenseStatement['expense_type']}
+                                        </Box>
+                                        {otherColumns}
+                                    </Box>
+                                )
+                            })
+                        }
+                    </div>
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
         </Layout>
     );
@@ -437,17 +424,16 @@ let TransactionPage = ({
 const mapStateToProps = (state, ownProps) => {
     return {
         transactions: state.transactions,
+        meterReadings: state.meterReadings,
+        expenses: state.expenses,
         users: state.users,
         currentUser: state.currentUser,
-        expenses: state.expenses,
         properties: state.properties,
-        contacts: state.contacts,
-        isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,
     };
 };
 
-TransactionPage = connect(mapStateToProps)(TransactionPage);
+PropertyIncomeStatement = connect(mapStateToProps)(PropertyIncomeStatement);
 
-export default withRouter(TransactionPage);
+export default withRouter(PropertyIncomeStatement);

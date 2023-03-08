@@ -46,6 +46,7 @@ const headCells = [
 let RentRollPage = ({
     currentUser,
     transactions,
+	match,
     properties,
     contacts,
     users
@@ -60,7 +61,7 @@ let RentRollPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedTransactions = transactions.map((transaction) => {
+        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
             const tenant = contacts.find(
                 (contact) => contact.id === transaction.tenant
             );
@@ -75,7 +76,8 @@ let RentRollPage = ({
                 transactionDetails.lease = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
                 transactionDetails.current_terms = `${transaction.lease_type} | ${transaction.transaction_price} \n ${transaction.lease_start} - ${transaction.lease_end}`;
             }
-            transactionDetails.days_left = moment(transaction.lease_end).diff(moment().format('YYYY-MM-DD'), 'days') + ' Days'
+		    const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
+            transactionDetails.days_left = daysLeft  < 0 ? 0 : daysLeft
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
@@ -166,12 +168,12 @@ let RentRollPage = ({
                             disabled={selected.length <= 0}
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`/transactions/new`}
+                            to={`/transactions/${selected[0]}/edit/?leaseToRenew=1`}
                         >
                             RENEW LEASE
                         </Button>
                     </Grid>
-                          <Grid item>
+                    <Grid item>
                         <PrintArrayToPdf
                             type="button"
                             color="primary"
@@ -179,8 +181,8 @@ let RentRollPage = ({
                             size="medium"
                             startIcon={<PrintIcon />}
                             disabled={selected.length <= 0}
-							reportName ={'Lease Renewal Records'}
-							reportTitle = {'Lease Renewal Records'}
+                            reportName={'Lease Renewal Records'}
+                            reportTitle={'Lease Renewal Records'}
                             headCells={headCells}
                             dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
                         >

@@ -83,8 +83,9 @@ let RentRollPage = ({
                 transactionDetails.property = property.id
                 transactionDetails.property_price = property.price
             }
-            transactionDetails.status = moment(transaction.lease_start).month() === moment().month() ? 'Active' : 'Inactive'
-            transactionDetails.days_left = moment(transaction.lease_end).diff(moment(), 'days')
+            transactionDetails.status = moment(transaction.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
+		    const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
+            transactionDetails.days_left = daysLeft  < 0 ? 0 : daysLeft
             if (typeof tenant !== 'undefined') {
                 transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
                 transactionDetails.tenantId = tenant.id
