@@ -8,7 +8,7 @@ export function propertyUnits(state = [], action) {
         case actionTypes.EDIT_PROPERTY_UNIT:
             return state.map((propertyUnit) =>
                 propertyUnit.id === action.propertyUnit.id
-                    ? Object.assign({}, action.propertyUnit)
+                    ? Object.assign({}, propertyUnit, action.propertyUnit)
                     : propertyUnit
             );
 

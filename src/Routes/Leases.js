@@ -86,14 +86,14 @@ let TransactionPage = ({
     };
 
     return (
-        <Layout pageTitle="Leases">
+        <Layout pageTitle="Rental Agreements">
             <Grid
                 container
                 spacing={3}
                 alignItems="center"
             >
                 <Grid item key={2}>
-                    <PageHeading paddingLeft={2} text={'Leases'} />
+                    <PageHeading paddingLeft={2} text={'Rental Agreements'} />
                 </Grid>
                 <Grid
                     container
@@ -139,14 +139,14 @@ let TransactionPage = ({
                             startIcon={<BlockIcon />}
                             disabled={selected.length <= 0}
                         >
-                            End Lease
+                            End Agreement
                         </Button>
                     </Grid>
                     <Grid item>
                         <PrintArrayToPdf
                             disabled={selected.length <= 0}
-                            reportName={'Leases Records'}
-                            reportTitle={'Leases Data'}
+                            reportName={'Rental Agreements Records'}
+                            reportTitle={'Rental Agreements Data'}
                             headCells={headCells}
                             dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
                         />
@@ -154,8 +154,8 @@ let TransactionPage = ({
                     <Grid item>
                         <ExportToExcelBtn
                             disabled={selected.length <= 0}
-                            reportName={'Leases Records'}
-                            reportTitle={'Leases Data'}
+                            reportName={'Rental Agreements Records'}
+                            reportTitle={'Rental Agreements Data'}
                             headCells={headCells}
                             dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
                         />

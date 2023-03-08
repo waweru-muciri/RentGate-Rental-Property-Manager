@@ -8,7 +8,7 @@ export function meterReadings(state = [], action) {
         case actionTypes.EDIT_METER_READING:
             return state.map((meterReading) =>
                 meterReading.id === action.meterReading.id
-                    ? Object.assign({}, action.meterReading)
+                    ? Object.assign({}, meterReading, action.meterReading)
                     : meterReading
             );
 

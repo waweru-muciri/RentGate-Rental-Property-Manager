@@ -37,7 +37,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 		charge_id: paymentToEdit.charge_id,
 		unit_id: paymentToEdit.unit_id,
 		unit_ref: paymentToEdit.unit_ref,
-		payment_amount: paymentToEdit.amount || 0,
+		payment_amount: paymentToEdit.payment_amount || 0,
 		memo: paymentToEdit.memo || '',
 		payment_label: paymentToEdit.payment_label || 0,
 		payment_type: paymentToEdit.payment_type || 0,
@@ -65,7 +65,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 							const chargePayment = {
 								id: paymentToEdit.id,
 								charge_id: values.charge_id,
-								amount: values.payment_amount,
+								payment_amount: values.payment_amount,
 								memo: values.memo,
 								payment_date: values.payment_date,
 								tenant_id: values.tenant_id,

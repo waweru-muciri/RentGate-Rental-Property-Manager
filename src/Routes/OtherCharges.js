@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../components/PrivateLayout";
 import PageHeading from "../components/PageHeading";
+import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import AddIcon from "@material-ui/icons/Add";
 import { Link } from "react-router-dom";
@@ -11,11 +15,12 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
 import { handleDelete } from "../actions/actions";
-import { getTransactionsFilterOptions } from "../assets/commonAssets";
+import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
 import moment from "moment";
 import { commonStyles } from '../components/commonStyles'
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
 const PERIOD_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -29,12 +34,13 @@ const headCells = [
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 
 ];
 
 let TenantChargesStatementPage = ({
+    properties,
+    contacts,
     transactionsCharges,
     handleItemDelete,
 }) => {
@@ -43,6 +49,9 @@ let TenantChargesStatementPage = ({
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState("");
+    let [contactFilter, setContactFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("");
+
     const [selected, setSelected] = useState([]);
 
     const CHARGE_TYPES = Array.from(new Set(tenantChargesItems
@@ -53,6 +62,19 @@ let TenantChargesStatementPage = ({
         setFilteredChargeItems(transactionsCharges);
     }, [transactionsCharges]);
 
+    const totalNumOfCharges = filteredChargeItems.length
+
+    const totalChargesAmount = filteredChargeItems.filter(charge => charge.charge_type !== 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.charge_amount) || 0
+        }, 0)
+
+    const chargesWithPayments = filteredChargeItems.filter(charge => charge.payed_status === true).length
+
+    const totalPaymentsAmount = filteredChargeItems.filter(payment => payment.charge_type !== 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.payed_amount) || 0
+        }, 0)
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the transactionsCharges according to the search criteria here
@@ -85,6 +107,8 @@ let TenantChargesStatementPage = ({
         }
         filteredStatements = filteredStatements.filter(({ charge_type }) =>
             !chargeType ? true : charge_type === chargeType
+        ).filter(({ tenant_id }) =>
+            !contactFilter ? true : tenant_id === contactFilter.id
         )
         setFilteredChargeItems(filteredStatements);
     };
@@ -94,6 +118,8 @@ let TenantChargesStatementPage = ({
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
         setPeriodFilter("");
+        setContactFilter('')
+        setPropertyFilter('')
     };
 
     return (
@@ -162,104 +188,189 @@ let TenantChargesStatementPage = ({
                                 container
                                 spacing={2}
                                 justify="center"
-                                direction="row"
+                                direction="column"
                             >
-                                <Grid item md={6} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        select
-                                        id="period_filter"
-                                        name="period_filter"
-                                        label="Period"
-                                        value={periodFilter}
-                                        onChange={(event) => {
-                                            setPeriodFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                    >
-                                        {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={filterOption.id}
+                                <Grid item container direction="column" spacing={2}>
+                                    <Grid item container direction="row" spacing={2}>
+                                        <Grid item md={6} xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                select
+                                                id="period_filter"
+                                                name="period_filter"
+                                                label="Period"
+                                                value={periodFilter}
+                                                onChange={(event) => {
+                                                    setPeriodFilter(
+                                                        event.target.value
+                                                    );
+                                                }}
                                             >
-                                                {filterOption.text}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                                {PERIOD_FILTER_OPTIONS.map((filterOption, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={filterOption.id}
+                                                    >
+                                                        {filterOption.text}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item md={6} xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                select
+                                                variant="outlined"
+                                                name="chargeType"
+                                                label="Charge Type"
+                                                id="chargeType"
+                                                onChange={(event) => {
+                                                    setChargeTypeFilter(
+                                                        event.target.value
+                                                    );
+                                                }}
+                                                value={chargeType}
+                                            >
+                                                {CHARGE_TYPES.map(
+                                                    (charge_type, index) => (
+                                                        <MenuItem
+                                                            key={index}
+                                                            value={charge_type.value}
+                                                        >
+                                                            {charge_type.label}
+                                                        </MenuItem>
+                                                    )
+                                                )}
+                                            </TextField>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item container direction="row" spacing={2}>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                fullWidth
+                                                select
+                                                variant="outlined"
+                                                name="property_filter"
+                                                label="Property"
+                                                id="property_filter"
+                                                onChange={(event) => {
+                                                    setPropertyFilter(
+                                                        event.target.value
+                                                    );
+                                                }}
+                                                value={propertyFilter}
+                                            >
+                                                {properties.map(
+                                                    (property, index) => (
+                                                        <MenuItem
+                                                            key={index}
+                                                            value={property.id}
+                                                        >
+                                                            {property.ref}
+                                                        </MenuItem>
+                                                    )
+                                                )}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Autocomplete
+                                                id="contact_filter"
+                                                options={contacts}
+                                                getOptionSelected={(option, value) => option.id === value.id}
+                                                name="contact_filter"
+                                                onChange={(event, newValue) => {
+                                                    setContactFilter(newValue);
+                                                }}
+                                                value={contactFilter}
+                                                getOptionLabel={(tenant) => tenant ? `${tenant.first_name} ${tenant.last_name}` : ''}
+                                                style={{ width: "100%" }}
+                                                renderInput={(params) => <TextField {...params} label="Tenant" variant="outlined" />}
+                                            />
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
-                                <Grid item md={6} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        variant="outlined"
-                                        name="chargeType"
-                                        label="Charge Type"
-                                        id="chargeType"
-                                        onChange={(event) => {
-                                            setChargeTypeFilter(
-                                                event.target.value
-                                            );
-                                        }}
-                                        value={chargeType}
-                                    >
-                                        {CHARGE_TYPES.map(
-                                            (charge_type, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={charge_type.value}
-                                                >
-                                                    {charge_type.label}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                    </TextField>
-                                </Grid>
-                            </Grid>
-                            <Grid
-                                container
-                                spacing={2}
-                                item
-                                justify="flex-end"
-                                alignItems="center"
-                                direction="row"
-                                key={1}
-                            >
-                                <Grid item>
-                                    <Button
-                                        onClick={(event) => handleSearchFormSubmit(event)}
-                                        type="submit"
-                                        form="contactSearchForm"
-                                        color="primary"
-                                        variant="contained"
-                                        size="medium"
-                                        startIcon={<SearchIcon />}
-                                    >
-                                        SEARCH
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    item
+                                    justify="flex-end"
+                                    alignItems="center"
+                                    direction="row"
+                                    key={1}
+                                >
+                                    <Grid item>
+                                        <Button
+                                            onClick={(event) => handleSearchFormSubmit(event)}
+                                            type="submit"
+                                            form="contactSearchForm"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<SearchIcon />}
+                                        >
+                                            SEARCH
                                     </Button>
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        onClick={(event) => resetSearchForm(event)}
-                                        type="reset"
-                                        form="contactSearchForm"
-                                        color="primary"
-                                        variant="contained"
-                                        size="medium"
-                                        startIcon={<UndoIcon />}
-                                    >
-                                        RESET
+                                    </Grid>
+                                    <Grid item>
+                                        <Button
+                                            onClick={(event) => resetSearchForm(event)}
+                                            type="reset"
+                                            form="contactSearchForm"
+                                            color="primary"
+                                            variant="contained"
+                                            size="medium"
+                                            startIcon={<UndoIcon />}
+                                        >
+                                            RESET
                                     </Button>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </form>
                     </Box>
                 </Grid>
                 <Grid item>
-                    <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
-                        Show Totals and other important statistics here
-                </Box>
+                    <Box border={1} borderRadius="borderRadius" borderColor="grey.400" className={classes.form}>
+                        <Grid container direction="row" spacing={1}>
+                            <Grid item container md={4}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Charges: {currencyFormatter.format(totalChargesAmount)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total Charges: {totalNumOfCharges}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                            <Grid item container md={4}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Total  Payments: {currencyFormatter.format(totalPaymentsAmount)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Charges With Payments: {chargesWithPayments}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                            <Grid item container md={4}>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Outstanding Balances: {currencyFormatter.format((totalChargesAmount - totalPaymentsAmount))}
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={12}>
+                                    <Typography variant="subtitle1" align="center">
+                                        Charges Without Payments: {(totalNumOfCharges - chargesWithPayments)}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 </Grid>
                 <Grid item>
                     <CommonTable
@@ -267,12 +378,13 @@ let TenantChargesStatementPage = ({
                         setSelected={setSelected}
                         rows={filteredChargeItems}
                         headCells={headCells}
+                        noEditCol
                         deleteUrl={'unit-charges'}
                         handleDelete={handleItemDelete}
                     />
                 </Grid>
             </Grid>
-        </Layout>
+        </Layout >
     );
 };
 
@@ -285,15 +397,15 @@ const mapStateToProps = (state) => {
                 //get payments with this charge id
                 const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
-                let payed_amount = 0
-                chargePayments.forEach(chargePayment => {
-                    payed_amount += parseFloat(chargePayment.amount) || 0
-                });
+                const payed_amount = chargePayments.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue.payment_amount) || 0
+                }, 0)
                 chargeDetails.payed_amount = payed_amount
-                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
                 return Object.assign({}, charge, chargeDetails);
             }).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date),
         contacts: state.contacts,
+        properties: state.properties,
     };
 };
 

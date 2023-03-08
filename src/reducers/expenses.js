@@ -8,7 +8,7 @@ export function expenses(state = [], action) {
         case actionTypes.EDIT_EXPENSE:
             return state.map((expense) =>
                 expense.id === action.expense.id
-                    ? Object.assign({}, action.expense)
+                    ? Object.assign({}, expense, action.expense)
                     : expense
             );
 

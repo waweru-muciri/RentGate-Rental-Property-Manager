@@ -8,7 +8,7 @@ export function notices(state = [], action) {
         case actionTypes.EDIT_NOTICE:
             return state.map((notice) =>
                 notice.id === action.notice.id
-                    ? Object.assign({}, action.notice)
+                    ? Object.assign({}, notice, action.notice)
                     : notice
             );
 

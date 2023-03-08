@@ -8,7 +8,7 @@ export function contacts(state = [], action) {
         case actionTypes.EDIT_CONTACT:
             return state.map((contact) =>
                 contact.id === action.contact.id
-                    ? Object.assign({}, action.contact)
+                    ? Object.assign({}, contact, action.contact)
                     : contact
             );
 

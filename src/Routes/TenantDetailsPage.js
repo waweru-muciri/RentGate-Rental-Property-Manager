@@ -17,14 +17,11 @@ import { withRouter } from "react-router-dom";
 let TenantDetailsPage = ({
     transactionsCharges,
     tenantUnit,
-    transactions,
     history,
     tenantDetails,
-    match,
     handleItemDelete,
 }) => {
     const classes = commonStyles()
-    const [tenantPaymentsItems, setTenantPaymentItems] = useState([])
     const [tenantChargesItems, setTenantChargesItems] = useState([])
     const emergencyContact = {
         emergency_contact_name: tenantDetails.emergency_contact_name,
@@ -33,10 +30,6 @@ let TenantDetailsPage = ({
         emergency_contact_email: tenantDetails.emergency_contact_email,
     }
     const [tabValue, setTabValue] = React.useState(1);
-
-    useEffect(() => {
-        setTenantPaymentItems(transactions)
-    }, [transactions])
 
     useEffect(() => {
         setTenantChargesItems(transactionsCharges)
@@ -56,7 +49,6 @@ let TenantDetailsPage = ({
             </AppBar>
             <TabPanel value={tabValue} index={1}>
                 <TenantChargesStatement tenantTransactionCharges={tenantChargesItems}
-                    tenantPayments={tenantPaymentsItems}
                     tenantDetails={tenantDetails} handleItemDelete={handleItemDelete} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
@@ -118,7 +110,6 @@ let TenantDetailsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        transactions: state.transactions.filter((transaction) => transaction.tenant_id === ownProps.match.params.contactId),
         transactionsCharges: state.transactionsCharges
             .filter((charge) => charge.tenant_id === ownProps.match.params.contactId).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
             .map((charge) => {
@@ -126,11 +117,11 @@ const mapStateToProps = (state, ownProps) => {
                 //get payments with this charge id
                 const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
                 chargeDetails.payed_status = chargePayments.length ? true : false;
-                chargeDetails.payed_amount = 0
-                chargePayments.forEach(chargePayment => {
-                    chargeDetails.payed_amount += chargePayment.amount
-                });
-                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                const payed_amount = chargePayments.reduce((total, currentValue) => {
+                    return total + parseFloat(currentValue.payment_amount) || 0
+                }, 0)
+                chargeDetails.payed_amount = payed_amount
+                chargeDetails.balance = parseFloat(charge.charge_amount) - payed_amount
                 return Object.assign({}, charge, chargeDetails);
             }),
         tenantUnit: state.propertyUnits.find((unit) => unit.tenants.includes(ownProps.match.params.contactId)) || {},

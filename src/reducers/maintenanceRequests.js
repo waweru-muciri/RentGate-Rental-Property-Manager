@@ -8,7 +8,7 @@ export function maintenanceRequests(state = [], action) {
         case actionTypes.EDIT_MAINTENANCE_REQUEST:
             return state.map((maintenanceRequest) =>
                 maintenanceRequest.id === action.maintenanceRequest.id
-                    ? Object.assign({}, action.maintenanceRequest)
+                    ? Object.assign({}, maintenanceRequest, action.maintenanceRequest)
                     : maintenanceRequest
             );
 

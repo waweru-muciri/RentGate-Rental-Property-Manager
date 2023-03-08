@@ -8,7 +8,7 @@ export function toDos(state = [], action) {
         case actionTypes.EDIT_TO_DO:
             return state.map((toDo) =>
                 toDo.id === action.toDo.id
-                    ? Object.assign({}, action.toDo)
+                    ? Object.assign({}, toDo, action.toDo)
                     : toDo
             );
 

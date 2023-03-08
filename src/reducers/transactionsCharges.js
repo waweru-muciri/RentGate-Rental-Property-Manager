@@ -8,7 +8,7 @@ export function transactionsCharges(state = [], action) {
         case actionTypes.EDIT_TRANSACTION_CHARGE:
             return state.map((transactionCharge) =>
                 transactionCharge.id === action.transactionCharge.id
-                    ? Object.assign({}, action.transactionCharge)
+                    ? Object.assign({}, transactionCharge, action.transactionCharge)
                     : transactionCharge
             );
 

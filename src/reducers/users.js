@@ -8,7 +8,7 @@ export function users(state = [], action) {
         case actionTypes.EDIT_USER:
             return state.map((user) =>
                 user.id === action.user.id
-                    ? Object.assign({}, action.user)
+                    ? Object.assign({}, user, action.user)
                     : user
             );
 

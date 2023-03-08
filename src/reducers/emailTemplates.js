@@ -8,7 +8,7 @@ export function emailTemplates(state = [], action) {
         case actionTypes.EDIT_EMAIL_TEMPLATE:
             return state.map((emailTemplate) =>
                 emailTemplate.id === action.emailTemplate.id
-                    ? Object.assign({}, action.emailTemplate)
+                    ? Object.assign({}, emailTemplate, action.emailTemplate)
                     : emailTemplate
             );
 

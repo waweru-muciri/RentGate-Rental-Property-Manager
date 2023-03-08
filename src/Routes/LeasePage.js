@@ -9,10 +9,10 @@ import { withRouter } from "react-router-dom";
 let TransactionPage = (props) => {
 	let leaseToEditId = props.match.params.leaseId;
 	let leaseToEdit = props.leases.find(({ id }) => id === leaseToEditId) || {};
-	let pageTitle =  leaseToEdit.id ? "Edit Lease" : "Add New Lease";
+	let pageTitle =  leaseToEdit.id ? "Edit Rental Agreement" : "Add New Rental Agreement";
 
 	return (
-		<Layout pageTitle="Lease Details">
+		<Layout pageTitle="Rental Agreement Details">
 			<Grid container justify="center" direction="column">
 				<Grid item key={2}>
 					<PageHeading paddingLeft={2} text={pageTitle} />

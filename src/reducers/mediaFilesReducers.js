@@ -8,7 +8,7 @@ export function mediaFiles(state = [], action) {
         case actionTypes.EDIT_MEDIA_FILE:
             return state.map((mediaFile) =>
                 mediaFile.id === action.mediaFile.id
-                    ? Object.assign({}, action.mediaFile)
+                    ? Object.assign({}, mediaFile, action.mediaFile)
                     : mediaFile
             );
 

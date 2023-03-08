@@ -12,11 +12,10 @@ let PaymentPage = ({ history, match, transactions, transactionsCharges, contacts
 	const chargeToAddPaymentId = match.params.chargeId;
 	const chargeToAddPayment = transactionsCharges.find(({ id }) => id === chargeToAddPaymentId) || {};
 	const chargePayments = transactions.filter((payment) => payment.charge_id === chargeToAddPaymentId)
-	chargeToAddPayment.payed_amount = 0
-	chargePayments.forEach(chargePayment => {
-		chargeToAddPayment.payed_amount += chargePayment.amount
-	});
-	chargeToAddPayment.balance = chargeToAddPayment.charge_amount - chargeToAddPayment.payed_amount
+	const totalPaymentsToCharge = chargePayments.reduce((total, currentValue) =>
+		total + parseFloat(currentValue.payment_amount) || 0, 0);
+	chargeToAddPayment.payed_amount = totalPaymentsToCharge
+	chargeToAddPayment.balance = parseFloat(chargeToAddPayment.charge_amount) - totalPaymentsToCharge
 	const contactWithCharge = contacts.find((contact) => contact.id === chargeToAddPayment.tenant_id) || {}
 	const pageTitle = `Receive Payment for - ${chargeToAddPayment.unit_ref} • ${contactWithCharge.first_name} ${contactWithCharge.last_name}`;
 	return (

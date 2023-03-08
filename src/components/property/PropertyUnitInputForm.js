@@ -6,11 +6,6 @@ import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import Chip from "@material-ui/core/Chip";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
 import SaveIcon from "@material-ui/icons/Save";
 import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
@@ -34,11 +29,8 @@ import moment from "moment";
 const UNIT_TYPES = getUnitTypes();
 const PROPERTY_BEDS = getPropertyBeds();
 const PROPERTY_BATHS = getPropertyBaths();
-const LEASE_TYPES = getLeaseOptions();
-const RENT_CYCLES = getPaymentOptions();
 
 const defaultDate = moment().format("YYYY-MM-DD");
-const dateAfterOneMonth = moment().add(1, "months").format("YYYY-MM-DD");
 
 const recurringChargesTableHeadCells = [
 	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
@@ -57,23 +49,13 @@ const PropertyUnitSchema = Yup.object().shape({
 	beds: Yup.string().trim().required("Beds is required"),
 	ref: Yup.string().trim().required("Unit Ref Required"),
 	sqft: Yup.number().typeError('Sqft must be a number').min(0).default(0),
-	lease_type: Yup.string().trim().required("Lease Type is Required"),
-	rent_cycle: Yup.string().trim().required('Frequency to charge rent on unit is required'),
-	start_date: Yup.date().required('Start Date is Required'),
-	rent_amount: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
-	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0).default(0),
-	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
-	rent_due_date: Yup.date().required('Next Rent Due Date is Required'),
-	security_deposit_due_date: Yup.date(),
 });
 
 
 let PropertyUnitInputForm = (props) => {
 	const classes = commonStyles();
-	const { properties, leases, propertyUnitCharges, contacts, history, handleItemDelete, handleItemSubmit } = props
+	const { properties, propertyUnitCharges, history, handleItemDelete, handleItemSubmit } = props
 	let propertyUnitToEdit = props.propertyUnitToEdit || {};
-	const unitLease = leases.filter((lease) => lease.unit_id === propertyUnitToEdit.id)
-		.sort((lease1, lease2) => lease1.start_end > lease2.start_date)[0] || {}
 	//get both unit values and latest lease information
 	const propertyValues = {
 		id: propertyUnitToEdit.id,
@@ -84,19 +66,7 @@ let PropertyUnitInputForm = (props) => {
 		beds: propertyUnitToEdit.beds || "",
 		baths: propertyUnitToEdit.baths || "",
 		sqft: propertyUnitToEdit.sqft || '',
-		lease_id: unitLease.id,
-		tenants: unitLease.tenants || [],
-		cosigner: unitLease.cosigner || "",
-		rent_due_date: unitLease.rent_due_date || dateAfterOneMonth,
-		security_deposit: unitLease.security_deposit || '',
-		security_deposit_due_date: unitLease.security_deposit_due_date || '',
-		property: unitLease.property || '',
-		start_date: unitLease.start_date || defaultDate,
-		end_date: unitLease.end_date || dateAfterOneMonth,
-		rent_amount: unitLease.rent_amount || '',
-		lease_type: unitLease.lease_type || LEASE_TYPES[1],
-		rent_cycle: unitLease.rent_cycle || "Monthly",
-		unit_id: unitLease.unit_id || '',
+		tenants: propertyUnitToEdit.tenants || [],
 	};
 
 	const defaultChargeValues = {
@@ -139,7 +109,7 @@ let PropertyUnitInputForm = (props) => {
 					property_id: values.property_id,
 					id: values.id,
 					ref: values.ref,
-					address: values.address,
+					address: values.ref,
 					unit_type: values.unit_type,
 					beds: values.beds,
 					baths: values.baths,
@@ -157,7 +127,6 @@ let PropertyUnitInputForm = (props) => {
 			{({
 				values,
 				handleSubmit,
-				setFieldValue,
 				touched,
 				errors,
 				handleChange,
@@ -171,14 +140,14 @@ let PropertyUnitInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2}>
-							<Grid container item spacing={4} direction="row">
-								<Grid md={6} xs={12} container item spacing={1} direction="column">
-									<Grid item>
-										<Typography variant="subtitle2">
-											Unit Details
+							<Grid container item spacing={1} direction="column">
+								<Grid item>
+									<Typography variant="subtitle2">
+										Unit Details
 										</Typography>
-									</Grid>
-									<Grid item>
+								</Grid>
+								<Grid xs={12} container item spacing={2} direction="row">
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -199,7 +168,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item>
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -214,7 +183,9 @@ let PropertyUnitInputForm = (props) => {
 											helperText={touched.ref && errors.ref}
 										/>
 									</Grid>
-									<Grid item>
+								</Grid>
+								<Grid xs={12} container item spacing={1} direction="row">
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -235,7 +206,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item>
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -256,7 +227,9 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item>
+								</Grid>
+								<Grid xs={12} container item spacing={1} direction="row">
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -277,22 +250,7 @@ let PropertyUnitInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											variant="outlined"
-											label="Address"
-											id="address"
-											type="text"
-											name="address"
-											value={values.address}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={errors.address && touched.address}
-											helperText={touched.address && errors.address}
-										/>
-									</Grid>
-									<Grid item>
+									<Grid item sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -305,225 +263,6 @@ let PropertyUnitInputForm = (props) => {
 											error={errors.sqft && touched.sqft}
 											helperText={touched.sqft && errors.sqft}
 										/>
-									</Grid>
-								</Grid>
-								{/** start of the adjacent column here */}
-								<Grid md={6} xs={12} container item spacing={1} direction="column">
-									<Grid item>
-										<Typography variant="subtitle2">Current Unit Lease Info</Typography>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												select
-												name="lease_type"
-												label="Lease Type"
-												id="lease_type"
-												onBlur={handleBlur}
-												onChange={handleChange}
-												value={values.lease_type}
-												error={errors.lease_type && touched.lease_type}
-												helperText={touched.lease_type && errors.lease_type}
-											>
-												{LEASE_TYPES.map((lease_type, index) => (
-													<MenuItem key={index} value={lease_type}>
-														{lease_type}
-													</MenuItem>
-												))}
-											</TextField>
-										</Grid>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												select
-												name="rent_cycle"
-												label="Rent Cycle"
-												id="rent_cycle"
-												onBlur={handleBlur}
-												onChange={handleChange}
-												value={values.rent_cycle}
-												error={errors.rent_cycle && touched.rent_cycle}
-												helperText={touched.rent_cycle && errors.rent_cycle}
-											>
-												{RENT_CYCLES.map((rent_cycle, index) => (
-													<MenuItem key={index} value={rent_cycle}>
-														{rent_cycle}
-													</MenuItem>
-												))}
-											</TextField>
-										</Grid>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												label="Start Date"
-												error={'start_date' in errors}
-												helperText={errors.start_date}
-												id="start_date"
-												type="date"
-												name="start_date"
-												value={values.start_date}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="end_date"
-												type="date"
-												name="end_date"
-												label="End Date"
-												value={values.end_date}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-												error={errors.end_date && touched.end_date}
-												helperText={touched.end_date && errors.end_date}
-											/>
-										</Grid>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="rent_amount"
-												label="Rent Amount"
-												name="rent_amount"
-												value={values.rent_amount}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												error={errors.rent_amount && touched.rent_amount}
-												helperText={touched.rent_amount && errors.rent_amount}
-											/>
-										</Grid>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="rent_due_date"
-												type="date"
-												name="rent_due_date"
-												label="Rent Next Due Date"
-												value={values.rent_due_date}
-												error={errors.rent_due_date && touched.rent_due_date}
-												helperText={touched.rent_due_date && errors.rent_due_date || 'Next date when the rent is due'}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="security_deposit"
-												label="Security Deposit"
-												name="security_deposit"
-												value={values.security_deposit}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												error={errors.security_deposit && touched.security_deposit}
-												helperText={touched.security_deposit && errors.security_deposit}
-											/>
-										</Grid>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="security_deposit_due_date"
-												type="date"
-												name="security_deposit_due_date"
-												label="Security Deposit Due Date"
-												value={values.security_deposit_due_date}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-									</Grid>
-									<Grid item>
-										<FormControl
-											variant="outlined"
-											fullWidth
-											className={classes.formControl}
-										>
-											<InputLabel id="demo-simple-select-outlined-label">
-												Tenants
-										</InputLabel>
-											<Select
-												fullWidth
-												multiple
-												labelId="demo-simple-select-outlined-label"
-												id="demo-simple-select-outlined"
-												name="tenant"
-												label="Tenants"
-												value={values.tenants}
-												onChange={(event) =>
-													setFieldValue("tenants", event.target.value)
-												}
-												onBlur={handleBlur}
-												renderValue={(selectedContacts) => {
-													const contactsWithDetails = contacts.filter(
-														({ id }) =>
-															selectedContacts.includes(id)
-													);
-													return contactsWithDetails.map(
-														(selectedContact, index) => (
-															<Chip
-																color="primary"
-																key={index}
-																label={
-																	selectedContact.first_name +
-																	" " +
-																	selectedContact.last_name
-																}
-																className={classes.chip}
-															/>
-														)
-													);
-												}}
-											>
-												{contacts.map((contact, contactIndex) => (
-													<MenuItem key={contactIndex} value={contact.id}>
-														{contact.first_name} {contact.last_name}
-													</MenuItem>
-												))}
-											</Select>
-											<FormHelperText>Select Tenants</FormHelperText>
-										</FormControl>
-									</Grid>
-									<Grid item>
-										<TextField
-											fullWidth
-											select
-											variant="outlined"
-											id="cosigner"
-											name="cosigner"
-											label="Unit Cosigner"
-											value={values.cosigner}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Unit Cosigner"
-										>
-											{contacts.map((contact, index) => (
-												<MenuItem key={index} value={contact.id}>
-													{contact.first_name +
-														" " +
-														contact.last_name}
-												</MenuItem>
-											))}
-										</TextField>
 									</Grid>
 								</Grid>
 							</Grid>

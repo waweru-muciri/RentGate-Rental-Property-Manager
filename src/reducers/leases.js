@@ -7,7 +7,7 @@ export function leases(state = [], action) {
 
         case actionTypes.EDIT_LEASE:
             return state.map((lease) =>
-                lease.id === action.lease.id ? Object.assign({}, action.lease) : lease
+                lease.id === action.lease.id ? Object.assign({}, lease, action.lease) : lease
             );
 
         case actionTypes.ADD_LEASE:

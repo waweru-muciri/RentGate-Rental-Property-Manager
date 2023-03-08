@@ -7,7 +7,7 @@ export function logs(state = [], action) {
 
         case actionTypes.EDIT_AUDIT_LOG:
             return state.map((log) =>
-                log.id === action.log.id ? Object.assign({}, action.log) : log
+                log.id === action.log.id ? Object.assign({}, log, action.log) : log
             );
 
         case actionTypes.ADD_AUDIT_LOG:

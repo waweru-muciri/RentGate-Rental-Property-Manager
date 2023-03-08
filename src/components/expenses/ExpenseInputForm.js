@@ -15,7 +15,7 @@ const PropertyExpenseSchema = Yup.object().shape({
   type: Yup.string().required("Expenditure Type/Name is required"),
   amount: Yup.number().min(0).required("Expenditure Amount is required"),
   expense_date: Yup.date().required("Expenditure Date Required"),
-  property: Yup.string().required("Property is Required"),
+  property_id: Yup.string().required("Property is Required"),
   property_unit: Yup.string().required("Unit is Required"),
   expense_notes: Yup.string().default(""),
 });
@@ -29,7 +29,7 @@ const ExpenseInputForm = (props) => {
     expense_notes: expenseToEdit.expense_notes || '',
     expense_date: expenseToEdit.expense_date || defaultDate,
     amount: expenseToEdit.amount || '',
-    property: expenseToEdit.property || '',
+    property_id: expenseToEdit.property_id || '',
     property_unit: expenseToEdit.property_unit || '',
     type: expenseToEdit.type || '',
   }
@@ -49,7 +49,7 @@ const ExpenseInputForm = (props) => {
           type: values.type,
           amount: values.amount,
           property_unit: values.property_unit,
-          property: values.property,
+          property_id: values.property_id,
           expense_date: values.expense_date,
           expense_notes: values.expense_notes,
         };
@@ -93,16 +93,16 @@ const ExpenseInputForm = (props) => {
                     fullWidth
                     select
                     variant="outlined"
-                    name="property"
+                    name="property_id"
                     label="Property"
-                    id="property"
+                    id="property_id"
                     onChange={(event) => {
-                      setFieldValue('property', event.target.value);
+                      setFieldValue('property_id', event.target.value);
                       setFieldValue('property_unit', '');
                     }}
-                    value={values.property}
-                    error={errors.property && touched.property}
-                    helperText={touched.property && errors.property}
+                    value={values.property_id}
+                    error={errors.property_id && touched.property_id}
+                    helperText={touched.property_id && errors.property_id}
 
                   >
                     {properties.map((property, index) => (
@@ -125,7 +125,7 @@ const ExpenseInputForm = (props) => {
                     error={errors.property_unit && touched.property_unit}
                     helperText={touched.property_unit && errors.property_unit}
                   >
-                    {propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
+                    {propertyUnits.filter(({property_id}) => property_id === values.property_id).map((property_unit, index) => (
                       <MenuItem key={index} value={property_unit.id}>
                         {property_unit.ref}
                       </MenuItem>

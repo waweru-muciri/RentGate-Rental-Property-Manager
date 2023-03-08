@@ -1,13 +1,16 @@
+import React, { useEffect, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import React, { useEffect, useState } from "react";
-import { Box, TextField, Button, MenuItem } from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Box from "@material-ui/core/Box";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import CommonTable from "../components/table/commonTable";
-import { getTransactionsFilterOptions } from "../assets/commonAssets";
+import { getTransactionsFilterOptions, currencyFormatter } from "../assets/commonAssets";
 import moment from "moment";
 
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
@@ -22,13 +25,9 @@ const headCells = [
     { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
     { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
-    { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
-    { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
-
 ];
 
 let TenantChargesStatementPage = ({
-    tenantPayments,
     tenantDetails,
     tenantTransactionCharges,
     handleItemDelete,
@@ -37,10 +36,29 @@ let TenantChargesStatementPage = ({
     let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
-    let [periodFilter, setPeriodFilter] = useState("");
+    let [periodFilter, setPeriodFilter] = useState(1);
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems.map((chargeItem) => chargeItem.charge_type)))
+    const CHARGE_TYPES = Array.from(new Set(tenantTransactionCharges.map((chargeItem) => chargeItem.charge_type)))
 
+    const totalRentCharges = filteredChargeItems.filter(charge => charge.charge_type === 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.charge_amount) || 0
+        }, 0)
+
+    const totalOtherCharges = filteredChargeItems.filter(charge => charge.charge_type !== 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.charge_amount) || 0
+        }, 0)
+
+    const totalRentPayments = filteredChargeItems.filter(payment => payment.charge_type === 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.payed_amount) || 0
+        }, 0)
+
+    const totalOtherPayments = filteredChargeItems.filter(payment => payment.charge_type !== 'rent')
+        .reduce((total, currentValue) => {
+            return total + parseFloat(currentValue.payed_amount) || 0
+        }, 0)
 
     useEffect(() => {
         setTenantChargesItems(tenantTransactionCharges);
@@ -87,7 +105,7 @@ let TenantChargesStatementPage = ({
         event.preventDefault();
         setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
-        setPeriodFilter("");
+        setPeriodFilter(1);
     };
 
     return (
@@ -237,8 +255,45 @@ let TenantChargesStatementPage = ({
                 </Box>
             </Grid>
             <Grid item>
-                <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
-                    Show Totals and other important statistics here
+                <Box border={1} borderRadius="borderRadius" borderColor="grey.400" className={classes.form}>
+                    <Grid container direction="row" spacing={1}>
+                        <Grid item container md={4}>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Total Rent Charges: {currencyFormatter.format(totalRentCharges)}
+                                </Typography>
+                            </Grid>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Total Other Charges: {currencyFormatter.format(totalOtherCharges)}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                        <Grid item container md={4}>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Total Rent Payments: {currencyFormatter.format(totalRentPayments)}
+                                </Typography>
+                            </Grid>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Total Other Payments: {currencyFormatter.format(totalOtherPayments)}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                        <Grid item container md={4}>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Outstanding Rent Balances: {currencyFormatter.format((totalRentCharges - totalRentPayments))}
+                                </Typography>
+                            </Grid>
+                            <Grid item sm={12}>
+                                <Typography variant="subtitle1" align="center">
+                                    Other Charges Outstanding Balances: {currencyFormatter.format((totalOtherPayments - totalOtherPayments))}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Box>
             </Grid>
             <Grid item>
@@ -247,6 +302,8 @@ let TenantChargesStatementPage = ({
                     setSelected={setSelected}
                     rows={filteredChargeItems}
                     headCells={headCells}
+                    noEditCol
+                    noDeleteCol
                     deleteUrl={'unit-charges'}
                     handleDelete={handleItemDelete}
                 />

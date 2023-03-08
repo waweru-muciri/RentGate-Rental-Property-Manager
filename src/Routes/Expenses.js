@@ -17,12 +17,7 @@ import PageHeading from "../components/PageHeading";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const expensesTableHeadCells = [
-    {
-        id: "expense_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Date",
-    },
+    { id: "expense_date", numeric: false, disablePadding: true, label: "Date", },
     { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
@@ -310,7 +305,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

@@ -36,7 +36,6 @@ const headCells = [
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
     { id: "address", numeric: false, disablePadding: true, label: "Unit Adddress" },
     { id: "sqft", numeric: false, disablePadding: true, label: "Square Footage" },
-    // { id: "price", numeric: false, disablePadding: true, label: "Rent" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
@@ -105,7 +104,7 @@ let PropertyDetailsPage = ({
                 <PropertySettingsForm classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
-                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails}
+                <PropertySummaryPage propertyToShowDetails={propertyToShowDetails} transactions={transactions}
                     propertyUnits={propertyUnitsItems} users={users} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
@@ -283,7 +282,6 @@ let PropertyDetailsPage = ({
                             rows={filteredPropertyItems}
                             headCells={headCells}
                             deleteUrl={'property_units'}
-                            
                             handleDelete={handleItemDelete}
                         />
                     </Grid>
@@ -295,12 +293,15 @@ let PropertyDetailsPage = ({
 };
 
 const mapStateToProps = (state, ownProps) => {
+    const unitsInProperty = state.propertyUnits
+    .filter(({ property_id }) => property_id === ownProps.match.params.propertyId)
+    .map(({id}) => id)
     return {
-        transactions: state.transactions,
+        transactions: state.transactions.filter(({unit_id}) => unitsInProperty.includes(unit_id)),
         meterReadings: state.meterReadings,
         expenses: state.expenses,
         propertyToShowDetails : state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
-        propertyUnits: state.propertyUnits.filter(({ property_id }) => property_id === ownProps.match.params.propertyId).map(
+        propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id)).map(
             (property_unit) => {
                 const tenant = state.contacts.find(
                     ({ id }) => property_unit.tenants ? property_unit.tenants.includes(id) : false) || {}

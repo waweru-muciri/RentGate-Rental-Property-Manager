@@ -23,10 +23,8 @@ let PropertyIncomeStatement = ({
     expenses,
     meterReadings,
     properties,
-    users,
 }) => {
     const classes = commonStyles();
-    let [userItems, setUserItems] = useState([]);
     let [expensesItems, setExpensesItems] = useState([]);
     let [transactionItems, setTransactionItems] = useState([]);
     let [meterReadingItems, setMeterReadingItems] = useState([]);
@@ -63,8 +61,7 @@ let PropertyIncomeStatement = ({
         const rentalIncomeObject = { income_type: 'Rental Income' }
         let totalRentalIncomeForPeriod = 0
         eachPastMonthDate.forEach((monthDate) => {
-            //get transactions recorded in the same month and year
-            //as monthDate
+            //get transactions recorded in the same month and year as monthDate
             const totalRentalIncome = transactionItems.filter((transaction) => {
                 const momentTransactionDate = moment(transaction.transaction_date)
                 return momentTransactionDate.isSame(monthDate, 'year') && momentTransactionDate.isSame(monthDate, 'month')
@@ -141,10 +138,6 @@ let PropertyIncomeStatement = ({
         setIncomeStatements(incomeMappedByMonth);
         setExpensesStatements(expensesMappedByMonth);
     }, [expensesItems, transactionItems, meterReadingItems])
-
-    useEffect(() => {
-        setUserItems(users)
-    }, [users])
 
     useEffect(() => {
         setExpensesItems(expenses)
@@ -385,7 +378,6 @@ const mapStateToProps = (state, ownProps) => {
         transactions: state.transactions,
         meterReadings: state.meterReadings,
         expenses: state.expenses,
-        users: state.users,
         currentUser: state.currentUser,
         properties: state.properties,
         error: state.error,

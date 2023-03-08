@@ -7,18 +7,48 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import TEAL from '@material-ui/core/colors/teal';
+import RED from '@material-ui/core/colors/red';
+import GREEN from '@material-ui/core/colors/green';
 import { Doughnut } from 'react-chartjs-2';
+import GREY from "@material-ui/core/colors/grey";
 
+const legendOpts = {
+    display: true,
+    position: 'right',
+    fullWidth: false,
+    reverse: false,
+    labels: {
+        fontColor: GREY[800],
+        fontSize: 14,
+    }
+};
 
 let PropertySummaryPage = (props) => {
-    const { classes } = props;
-    let { propertyToShowDetails, propertyUnits, users } = props
+    let { classes, propertyToShowDetails, propertyUnits, transactions, users } = props
     const occupiedUnitsNumber = propertyUnits.filter((unit) => unit.tenants.length !== 0).length
+    //get current month income data
+    const curentMonthIncomeData = { datasets: [] }
+    const totalPaymentsByType = []
+    const totalRentPayments = transactions
+        .filter(payment => payment.payment_type === 'rent')
+        .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
+    const totalOtherPayments = transactions.filter(payment => payment.payment_type !== 'rent')
+        .reduce((totalValue, currentValue) => (totalValue += parseFloat(currentValue.payment_amount) || 0), 0)
+    totalPaymentsByType.push({ type: "rent", totalAmount: totalRentPayments, label: "Rent" })
+    totalPaymentsByType.push({ type: "other", totalAmount: totalOtherPayments, label: "Others" })
+    curentMonthIncomeData.labels = totalPaymentsByType.map(totalPayment => totalPayment.label)
+    curentMonthIncomeData.datasets.push({
+        data: totalPaymentsByType.map(totalPayment => totalPayment.totalAmount),
+        backgroundColor: [GREEN[800], GREEN[200]]
+    })
     //get occupancy graph data
-    const occupancyChartData = [
-        { name: 'Occupied Units', value: occupiedUnitsNumber },
-        { name: 'Vacant Units', value: propertyUnits.length - occupiedUnitsNumber },
-    ]
+    const rentalUnitsOccupancyData = { datasets: [] }
+    rentalUnitsOccupancyData.labels = ['Occupied Units', 'Vacant Units']
+    rentalUnitsOccupancyData.datasets.push(
+        {
+            data: [occupiedUnitsNumber, (propertyUnits.length - occupiedUnitsNumber)],
+            backgroundColor: [RED[800], RED[200]]
+        })
     //get the number of the different units by category
     const rentalUnitsDistributionData = { datasets: [] }
     const unitTypes = Array.from(new Set(propertyUnits.map(unit => unit.unit_type)))
@@ -27,10 +57,9 @@ let PropertySummaryPage = (props) => {
         data: unitTypes
             .map(unit_type => {
                 return propertyUnits.filter((property) => property.unit_type === unit_type).length
-            }), 
-        backgroundColor: unitTypes.map((_unit_type, key) => TEAL[(key+ 1) * 100])
+            }),
+        backgroundColor: unitTypes.map((_unit_type, key) => TEAL[(key + 1) * 100])
     })
-    console.log(rentalUnitsDistributionData)
     const propertyManager = users.find((user) => user.id === propertyToShowDetails.assigned_to) ||
         { first_name: 'R', last_name: 'O' }
     const propertyOwner = users.find((user) => user.id === propertyToShowDetails.owner) ||
@@ -118,9 +147,9 @@ let PropertySummaryPage = (props) => {
                     <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                Occupancy Data
+                                Current Occupancy
                             </Typography>
-                            <Doughnut data={rentalUnitsDistributionData} />
+                            <Doughnut data={rentalUnitsOccupancyData} legend={legendOpts} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -128,9 +157,9 @@ let PropertySummaryPage = (props) => {
                     <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
-                                Hello world
+                                Current Month Income
                             </Typography>
-                            <Doughnut data={rentalUnitsDistributionData} />
+                            <Doughnut data={curentMonthIncomeData} />
                         </CardContent>
                     </Card>
                 </Grid>

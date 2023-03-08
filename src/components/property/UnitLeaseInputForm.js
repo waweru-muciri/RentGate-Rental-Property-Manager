@@ -177,7 +177,7 @@ let UnitLeaseInputForm = (props) => {
 						<Grid container spacing={1} direction="column">
 							<Grid item>
 								<Typography variant="subtitle1" component="h2">
-									Lease Details
+									Agreement Details
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
