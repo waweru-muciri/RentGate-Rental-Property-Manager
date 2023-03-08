@@ -6,18 +6,18 @@ export function mediaFiles(state = [], action) {
             return action.mediaFiles;
 
         case actionTypes.EDIT_MEDIA_FILE:
-            return state.map((mediafile) =>
-                mediafile.id === action.mediafile.id
-                    ? Object.assign({}, action.mediafile)
-                    : mediafile
+            return state.map((mediaFile) =>
+                mediaFile.id === action.mediaFile.id
+                    ? Object.assign({}, action.mediaFile)
+                    : mediaFile
             );
 
         case actionTypes.ADD_MEDIA_FILE:
-            return [...state, action.mediafile];
+            return [...state, action.mediaFile];
 
         case actionTypes.DELETE_MEDIA_FILE:
             return state.filter(
-                (mediafile) => mediafile.id !== action.mediafileId
+                (mediaFile) => mediaFile.id !== action.mediaFileId
             );
 
         default:

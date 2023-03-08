@@ -1,5 +1,6 @@
 import * as actionTypes from "../assets/actionTypes";
 import * as propertyActions from "./property";
+import * as mediaFilesActions from "./mediaFiles";
 import * as contactsActions from "./contacts";
 import * as transactionsActions from "./transactions";
 import * as logActions from "./logs";
@@ -127,6 +128,10 @@ export function itemsFetchData(collectionsUrls) {
                                 dispatch(logActions.addAuditLog(addedItem));
                                 break;
 
+                            case "property_media":
+                                dispatch(mediaFilesActions.addMediaFile(addedItem));
+                                break;
+
                             case "users":
                                 dispatch(usersActions.addUser(addedItem));
                                 break;
@@ -206,6 +211,12 @@ export function itemsFetchData(collectionsUrls) {
                                 );
                                 break;
 
+                            case "property_media":
+                                dispatch(
+                                    mediaFilesActions.editMediaFile(modifiedObject)
+                                );
+                                break;
+
                             case "users":
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
@@ -280,6 +291,12 @@ export function itemsFetchData(collectionsUrls) {
                             case "logs":
                                 dispatch(
                                     logActions.deleteAuditLog(deletedItemId)
+                                );
+                                break;
+
+                            case "property_media":
+                                dispatch(
+                                    mediaFilesActions.deleteMediaFile(deletedItemId)
                                 );
                                 break;
 

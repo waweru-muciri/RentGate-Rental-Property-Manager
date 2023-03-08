@@ -27,7 +27,8 @@ import { DropzoneAreaBase } from "material-ui-dropzone";
 import { connect } from "react-redux";
 import { withFormik } from "formik";
 import {
-	handleItemFormSubmit, handleDelete,
+	handleItemFormSubmit,
+	handleDelete,
 	uploadFilesToFirebase,
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
@@ -500,12 +501,16 @@ let InputForm = ({
 											const fileName =
 												typeof propertyMediaFile.file !=
 												"undefined"
-													? propertyMediaFile.file.name
+													? propertyMediaFile.file
+															.name
 													: "File " + imageIndex;
 											return (
 												<GridListTile key={imageIndex}>
 													<img
-														src={propertyMediaFile.url ||propertyMediaFile.data}
+														src={
+															propertyMediaFile.url ||
+															propertyMediaFile.data
+														}
 														alt={fileName}
 													/>
 													<GridListTileBar
@@ -519,16 +524,19 @@ let InputForm = ({
 																	classes.icon
 																}
 																onClick={() => {
-
-																	const propertyMediaFiles = [
-																		...values.property_media,
-																	];
+																	let propertyMediaFiles = [
+																		...values.property_media];
 																	let removedFile = propertyMediaFiles.splice(
 																		imageIndex,
 																		1
-																	);
-																	if (removedFile.id) {
-																		handleDelete(removedFile.id, 'property_media')
+																	)[0];
+																	if (
+																		removedFile.id
+																	) {
+																		handleDelete(
+																			removedFile.id,
+																			"property_media"
+																		);
 																	}
 																	setFieldValue(
 																		"property_media",
@@ -746,8 +754,8 @@ let InputForm = ({
 									);
 								}}
 							>
-								{values.contacts.map((contact, index) => (
-									<MenuItem key={index} value={contact.id}>
+								{values.contacts.map((contact, contactIndex) => (
+									<MenuItem key={contactIndex} value={contact.id}>
 										{contact.first_name +
 											" " +
 											contact.last_name}
@@ -865,7 +873,9 @@ let PropertyInputForm = withFormik({
 	},
 
 	handleSubmit: (values, { resetForm }) => {
-		let propertyFilesToSave = values.property_media.filter((file) => !file.id);
+		let propertyFilesToSave = values.property_media.filter(
+			(file) => !file.id
+		);
 		let property = {
 			id: values.id,
 			ref: values.ref,
@@ -899,26 +909,26 @@ let PropertyInputForm = withFormik({
 			owner: values.owner,
 		};
 		handleItemFormSubmit(property, "properties").then((propertyId) => {
-			if (propertyFilesToSave.length <= 0) {
-				// no need to proceed
-				return null;
+			if (propertyFilesToSave.length) {
+				let fileDownloadUrlsPromises = uploadFilesToFirebase(
+					propertyFilesToSave
+				);
+				Promise.all(fileDownloadUrlsPromises).then(
+					(fileDownloadUrls) => {
+						//here is the fileDownloadUrls array
+						fileDownloadUrls.forEach((fileDownloadUrl) => {
+							let fileDownloadUrlObject = {
+								url: fileDownloadUrl,
+								property: propertyId,
+							};
+							handleItemFormSubmit(
+								fileDownloadUrlObject,
+								"property_media"
+							);
+						});
+					}
+				);
 			}
-			let fileDownloadUrlsPromises = uploadFilesToFirebase(
-				propertyFilesToSave
-			);
-			Promise.all(fileDownloadUrlsPromises).then((fileDownloadUrls) => {
-				//here is the fileDownloadUrls array
-				fileDownloadUrls.forEach((fileDownloadUrl) => {
-					let fileDownloadUrlObject = {
-						url: fileDownloadUrl,
-						property: propertyId,
-					};
-					handleItemFormSubmit(
-						fileDownloadUrlObject,
-						"property_media"
-					);
-				});
-			});
 		});
 		resetForm({});
 		if (values.id) {
@@ -930,6 +940,7 @@ let PropertyInputForm = withFormik({
 })(InputForm);
 
 const mapStateToProps = (state) => {
+	console.log(state)
 	return {
 		properties: state.properties,
 		propertiesMediaFiles: state.mediaFiles,

@@ -21,7 +21,6 @@ const Layout = (props) => {
 	return (
 		<React.Fragment>
 			<CssBaseline />
-			<PersistentDrawerLeft />
 			<Head title={props.pageTitle} />
 			<Container>
 				<Paper className={classes.rootPaper}>{props.children}</Paper>

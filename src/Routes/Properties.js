@@ -112,6 +112,7 @@ const propertyRows = [
 let PropertyPage = ({
     isLoading,
     properties,
+    currentUser,
     contacts,
     match,
     error,
@@ -150,7 +151,7 @@ let PropertyPage = ({
     };
 
     const exportPropertyRecordsToExcel = () => {
-        let items = getMappedProperties().filter(({ id }) => selected.includes(id));
+        let items = propertyItems.filter(({ id }) => selected.includes(id));
         exportDataToXSL(
             "Properties  Records",
             "Property Data",
@@ -158,6 +159,7 @@ let PropertyPage = ({
             "PropertyData"
         );
     };
+
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the properties according to the search criteria here
@@ -406,6 +408,7 @@ let PropertyPage = ({
 const mapStateToProps = (state, ownProps) => {
     return {
         properties: state.properties,
+        currentUser: state.currentUser,
         contacts: state.contacts,
         isLoading: state.isLoading,
         error: state.error,
