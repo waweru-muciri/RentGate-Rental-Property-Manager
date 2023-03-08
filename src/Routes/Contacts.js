@@ -58,28 +58,7 @@ const contactsTableHeadCells = [
     },
 ];
 
-let ContactsPage = ({
-    isLoading,
-    contacts,
-    properties,
-    users, 
-    currentUser,
-    notices,
-    contact_emails,
-    contact_addresses,
-    match,
-    error,
-    handleDelete,
-}) => {
-    let [contactItems, setContactItems] = useState([]);
-    let [firstNameFilter, setFirstNameFilter] = useState("");
-    let [lastNameFilter, setLastNameFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState("");
-    let [genderFilter, setGenderFilter] = useState("");
-    const [selected, setSelected] = useState([]);
-    const [tabValue, setTabValue] = React.useState(0);
-
-    function TabPanel(props) {
+function TabPanel(props) {
         const { children, value, index, ...other } = props;
 
         return (
@@ -93,7 +72,27 @@ let ContactsPage = ({
                 {value === index && <Box m={2}>{children}</Box>}
             </div>
         );
-    }
+}
+
+let ContactsPage = ({
+    isLoading,
+    contacts,
+    properties,
+    users, 
+    currentUser,
+    notices,
+    contact_emails,
+    contact_addresses,
+    match,
+    error,
+}) => {
+    let [contactItems, setContactItems] = useState([]);
+    let [firstNameFilter, setFirstNameFilter] = useState("");
+    let [lastNameFilter, setLastNameFilter] = useState("");
+    let [assignedToFilter, setAssignedToFilter] = useState("");
+    let [genderFilter, setGenderFilter] = useState("");
+    const [selected, setSelected] = useState([]);
+    const [tabValue, setTabValue] = React.useState(0);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -103,7 +102,7 @@ let ContactsPage = ({
 
     useEffect(() => {
         setContactItems(contacts);
-    }, [contacts.length]);
+    }, [contacts]);
 
     const exportContactRecordsToExcel = () => {
         let items = contacts.filter(({ id }) => selected.includes(id));
@@ -120,10 +119,10 @@ let ContactsPage = ({
         //filter the contacts here according to search criteria
         let filteredContacts = contacts
             .filter(({ first_name }) =>
-                !firstNameFilter ? true : first_name === firstNameFilter
+                !firstNameFilter ? true : first_name.toLowerCase().includes(firstNameFilter.toLowerCase())
             )
             .filter(({ last_name }) =>
-                !lastNameFilter ? true : last_name === lastNameFilter
+                !lastNameFilter ? true : last_name.toLowerCase().includes(lastNameFilter.toLowerCase())
             )
             .filter(({ gender }) =>
                 !genderFilter ? true : gender == genderFilter
@@ -204,7 +203,7 @@ let ContactsPage = ({
                                 component={Link}
                                 to={`${match.url}/${selected[0]}/edit`}
                             >
-                                Edit Contact
+                                Edit
                             </Button>
                         </Grid>
                         <Grid item>
@@ -238,13 +237,13 @@ let ContactsPage = ({
                                         <TextField
                                             fullWidth
                                             variant="outlined"
-                                            id="first_name"
-                                            name="first_name"
+                                            id="contact_first_name"
+                                            name="contact_first_name"
                                             label="First Name"
-                                            value={firstNameFilter || ""}
+                                            value={firstNameFilter}
                                             onChange={(event) => {
                                                 setFirstNameFilter(
-                                                    event.target.value
+                                                    event.target.value.trim()
                                                 );
                                             }}
                                         />
@@ -258,10 +257,10 @@ let ContactsPage = ({
                                             id="last_name"
                                             onChange={(event) => {
                                                 setLastNameFilter(
-                                                    event.target.value
+                                                    event.target.value.trim()
                                                 );
                                             }}
-                                            value={lastNameFilter || ""}
+                                            value={lastNameFilter}
                                         />
                                     </Grid>
                                 </Grid>
@@ -279,7 +278,7 @@ let ContactsPage = ({
                                             id="assigned_to"
                                             name="assigned_to"
                                             label="Assinged To"
-                                            value={assignedToFilter || ""}
+                                            value={assignedToFilter }
                                             onChange={(event) => {
                                                 setAssignedToFilter(
                                                     event.target.value

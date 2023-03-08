@@ -15,8 +15,7 @@ export default function PageHeading(props) {
         <Typography
             variant="h5"
             className={styles.root}
-            gutterBottom={true}
-            gutterTop={true}
+            gutterBottom
         >
             {props.text ? props.text : "Page Heading"}
         </Typography>

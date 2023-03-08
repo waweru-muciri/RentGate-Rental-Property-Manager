@@ -1,6 +1,6 @@
 import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
@@ -10,7 +10,7 @@ import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
 import { connect } from "react-redux";
-import { itemsFetchData, handleDelete } from "../actions/actions";
+import { handleDelete } from "../actions/actions";
 import PageHeading from "../components/PageHeading";
 import CommonTable from "../components/table/commonTable";
 import { commonStyles } from "../components/commonStyles";
@@ -325,6 +325,7 @@ let UsersPage = ({
 						setSelected={setSelected}
 						rows={userItems}
 						headCells={usersTableHeadCells}
+						handleDelete={handleDelete}
 					/>
 				</Grid>
 				{isLoading && <LoadingBackdrop open={isLoading} />}
@@ -342,14 +343,7 @@ const mapStateToProps = (state, ownProps) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		handleDelete: (id) => {
-			dispatch(handleDelete(id, "users"));
-		},
-	};
-};
 
-UsersPage = connect(mapStateToProps, mapDispatchToProps)(UsersPage);
+UsersPage = connect(mapStateToProps)(UsersPage);
 
 export default withRouter(UsersPage);

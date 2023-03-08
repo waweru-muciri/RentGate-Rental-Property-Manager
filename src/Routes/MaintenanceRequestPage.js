@@ -12,16 +12,16 @@ let MaintenanceRequestPage = (props) => {
 		({ id }) => id === maintenanceRequestToEditId
 	);
 	let pageTitle = maintenanceRequestToEditId
-		? "Edit Maintenance Request(s)"
-		: "New Maintenance Request(s)";
+		? "Edit Maintenance Request"
+		: "New Maintenance Request";
 
 	return (
 		<Layout pageTitle="Maintenance Request Details">
 			<Grid container justify="center" direction="column">
-				<Grid item key={2}>
+				<Grid item key={1}>
 					<PageHeading paddingLeft={2} text={pageTitle} />
 				</Grid>
-				<Grid item key={3}>
+				<Grid item key={2}>
 					<MaintenanceRequestInputForm
 						maintenanceRequestToEdit={maintenanceRequestToEdit}
 					/>

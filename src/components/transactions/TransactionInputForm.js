@@ -34,7 +34,6 @@ let InputForm = ({
 	errors,
 	handleChange,
 	handleBlur,
-	setFieldValue,
 	handleSubmit,
 	isSubmitting,
 }) => {
@@ -377,8 +376,7 @@ let InputForm = ({
 							variant="contained"
 							size="medium"
 							startIcon={<SaveIcon />}
-							form="contactInputForm"
-							onClick={() => handleSubmit()}
+							form="transactionInputForm"
 							disabled={isSubmitting}
 						>
 							Save
@@ -392,15 +390,12 @@ let InputForm = ({
 
 let TransactionInputForm = withFormik({
 	mapPropsToValues: (props) => {
-		let transactionToEditId = props.match.params.transactionId;
-		let transactionToEdit = props.transactions.find(
-			({ id }) => id === transactionToEditId
-		);
+		let transactionToEdit = props.transactionToEdit
 		if (!transactionToEdit) {
 			transactionToEdit = {};
 		}
 		return {
-			id: transactionToEdit.id || null,
+			id: transactionToEdit.id,
 			property: transactionToEdit.property || "",
 			tenant: transactionToEdit.tenant || "",
 			lease_renewal: transactionToEdit.lease_renewal || defaultDate,

@@ -11,6 +11,7 @@ let TransactionPage = (props) => {
 	let transactionToEdit = props.transactions.find(
 		({ id }) => id === transactionToEditId
 	);
+	transactionToEdit = typeof transactionToEdit !== 'undefined' ? transactionToEdit : {}
 	let pageTitle = transactionToEditId
 		? "Edit Transaction"
 		: "New Transaction";

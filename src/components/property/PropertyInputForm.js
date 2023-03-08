@@ -789,8 +789,7 @@ let InputForm = ({
 						variant="contained"
 						size="medium"
 						startIcon={<SaveIcon />}
-						form="contactInputForm"
-						onClick={() => handleSubmit()}
+						form="propertyInputForm"
 						disabled={isSubmitting}
 					>
 						Save

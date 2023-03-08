@@ -1,10 +1,15 @@
 import firebase from "firebase";
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { itemsFetchData, setCurrentUser } from "../actions/actions";
+import { itemsFetchData, setCurrentUser, setPaginationPage } from "../actions/actions";
 import { withRouter } from "react-router-dom";
 //here are all the subroutes
-import { BrowserRouter as Router, Route, Switch, useHistory } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  useHistory,
+} from "react-router-dom";
 import PropertiesPage from "./Properties";
 import MaintenancesPage from "./Maintenances";
 import UsersPage from "./Users";
@@ -16,6 +21,7 @@ import TransactionsPage from "./Transactions";
 import PropertyPage from "./PropertyPage";
 import ContactPage from "./ContactPage";
 import ContactsPage from "./Contacts";
+import NoticesPage from "./Notices";
 import TransactionPage from "./TransactionPage";
 import DashBoard from "./DashBoard";
 import clsx from "clsx";
@@ -50,7 +56,7 @@ import AssignmentIcon from "@material-ui/icons/Assignment";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
 import { Link } from "react-router-dom";
 import Head from "../components/Head";
-import { setPaginationPage } from "../actions/actions";
+
 
 const drawerWidth = 240;
 
@@ -129,7 +135,7 @@ const nestedNavigations = [
   },
   { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
   { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
-  { text: "SMS", to: "/sms", icon: <ContactPhoneIcon /> },
+  // { text: "SMS", to: "/sms", icon: <ContactPhoneIcon /> },
   { text: "Email", to: "/email", icon: <ContactMailIcon /> },
   { text: "Audit Logs", to: "/audit-logs", icon: <HistoryIcon /> },
 ];
@@ -145,32 +151,39 @@ let MainPage = ({
   contact_phone_numbers,
   contact_addresses,
   currentUser,
+  notices,
+  toDos,
+  users,
   isLoading,
-  selectedTab, setSelectedTab,
+  selectedTab,
+  setSelectedTab,
   match,
   error,
   fetchData,
   setUser,
 }) => {
-  const history = useHistory()
+  const history = useHistory();
 
   useEffect(() => {
     if (!properties.length) {
-      fetchData([
-        "properties",
-        "transactions",
-        "maintenance-requests",
-        "property_media",
-        "to-dos",
-        "contacts",
-        "contact_phone_numbers",
-        "contact_emails",
-        "contact_faxes",
-        "contact_addresses",
-      ]);
+      // fetchData([
+      //   "properties",
+      //   "transactions",
+      //   "maintenance-requests",
+      //   "property_media",
+      //   "contacts",
+      //   "contact_phone_numbers",
+      //   "contact_emails",
+      //   "contact_faxes",
+      //   "contact_addresses",
+      //   "notices",
+      //   "to-dos",
+      //   "users",
+      // ]);
     }
   }, [
     contacts,
+    users,
     transactions,
     maintenanceRequests,
     contact_emails,
@@ -179,218 +192,233 @@ let MainPage = ({
     contact_faxes,
     contact_emails,
     contact_addresses,
+    notices,
+    toDos,
     mediaFiles,
     fetchData,
   ]);
 
-  useEffect (() => {
-    if(!currentUser){
-       firebase.auth().onAuthStateChanged(
-      function (user) {
-        if (user) {
-          // User is signed in.
-          const userDetails = {
-            displayName: user.displayName,
-            email: user.email,
-            emailVerified: user.emailVerified,
-            photoURL: user.photoURL,
-            uid: user.uid,
-            phoneNumber: user.phoneNumber,
-            providerData: user.providerData,
-          };
-          user.getIdToken().then(function (accessToken) {
-            userDetails.accessToken = accessToken;
-          });
-          setUser(userDetails);
-        } else {
-          // User is signed out.
-          setUser(null);
-          history.push('/login');
+  useEffect(() => {
+    if (!currentUser) {
+      firebase.auth().onAuthStateChanged(
+        function (user) {
+          if (user) {
+            // User is signed in.
+            const userDetails = {
+              displayName: user.displayName,
+              email: user.email,
+              emailVerified: user.emailVerified,
+              photoURL: user.photoURL,
+              uid: user.uid,
+              phoneNumber: user.phoneNumber,
+              providerData: user.providerData,
+            };
+            user.getIdToken().then(function (accessToken) {
+              userDetails.accessToken = accessToken;
+            });
+            setUser(userDetails);
+          } else {
+            // User is signed out.
+            setUser(null);
+            history.push("/login");
+          }
+        },
+        function (error) {
+          console.log(error);
         }
-      },
-      function (error) {
-        console.log(error);
-      }
-    );
-     }
+      );
+    }
   }, [currentUser]);
 
+  function AppNavLayout(props) {
+    let { currentUser, pageTitle } = props;
+    const classes = useStyles();
+    const theme = useTheme();
+    const [open, setOpen] = React.useState(false);
+    const { selectedTab, setSelectedTab } = props;
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const isProfileMenuOpen = Boolean(anchorEl);
 
-function AppNavLayout(props) {
-  let { currentUser, pageTitle } = props;
-  const classes = useStyles();
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const { selectedTab, setSelectedTab } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const isProfileMenuOpen = Boolean(anchorEl);
+    const handleProfileMenuOpen = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
 
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const handleProfileMenuClose = () => {
+      setAnchorEl(null);
+    };
+    const menuId = "primary-search-account-menu";
 
-  const handleProfileMenuClose = () => {
-    setAnchorEl(null);
-  };
-  const menuId = "primary-search-account-menu";
+    const handleDrawerOpen = () => {
+      setOpen(true);
+    };
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
+    const handleDrawerClose = () => {
+      setOpen(false);
+    };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+    const handleListItemClick = (event, index) => {
+      setSelectedTab(index);
+    };
 
-  const handleListItemClick = (event, index) => {
-    setSelectedTab(index);
-  };
-
-  return (
-    <div className={classes.root}>
-      <Head title={pageTitle} />
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
-        })}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(
-              classes.menuButton,
-              open && classes.hide
-            )}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap className={classes.title}>
-            Yarra Property Management
-          </Typography>
-          <IconButton
-            edge="end"
-            aria-label="account of current user"
-            aria-controls="primary-search-account-menu"
-            aria-haspopup="true"
-            color="inherit"
-            onClick={handleProfileMenuOpen}
-          >
-            <Avatar
-              alt="Contact Image"
-              src={currentUser ? currentUser.photoURL : ""}
-            />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            id={menuId}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            open={isProfileMenuOpen}
-            onClose={handleProfileMenuClose}
-          >
-            <MenuItem onClick={handleProfileMenuClose}>
-              Profile
-            </MenuItem>
-            <MenuItem onClick={handleProfileMenuClose}>
-              My account
-            </MenuItem>
-            <MenuItem onClick={() => {
-              handleProfileMenuClose();
-              firebase.auth().signOut().then(function() {
-                // Sign-out successful.
-                history.push('/login')
-              }).catch(function(error) {
-                // An error happened.
-              });
-            }}>
-              Sign Out
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="temporary"
-        anchor="left"
-        open={open}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
-        </div>
-        <Divider />
-        <List component="div" disablePadding>
-          {nestedNavigations.map(({ text, to, icon }, index) => (
-            <React.Fragment key={index}>
-              <ListItem
-                component={Link}
-                to={to}
-                button
-                key={text}
-                selected={selectedTab === index}
-                onClick={(event) => {
-                  handleListItemClick(event, index);
+    return (
+      <div className={classes.root}>
+        <Head title={pageTitle} />
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: open,
+          })}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              className={clsx(classes.menuButton, open && classes.hide)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap className={classes.title}>
+              Yarra Property Management
+            </Typography>
+            <IconButton
+              edge="end"
+              aria-label="account of current user"
+              aria-controls="primary-search-account-menu"
+              aria-haspopup="true"
+              color="inherit"
+              onClick={handleProfileMenuOpen}
+            >
+              <Avatar
+                alt="Contact Image"
+                src={currentUser ? currentUser.photoURL : ""}
+              />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              id={menuId}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={isProfileMenuOpen}
+              onClose={handleProfileMenuClose}
+            >
+              <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
+              <MenuItem onClick={handleProfileMenuClose}>My account</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleProfileMenuClose();
+                  firebase
+                    .auth()
+                    .signOut()
+                    .then(function () {
+                      // Sign-out successful.
+                      history.push("/login");
+                    })
+                    .catch(function (error) {
+                      // An error happened.
+                    });
                 }}
               >
-                <ListItemIcon>{icon}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            </React.Fragment>
-          ))}
-        </List>
-      </Drawer>
-      <div className={classes.drawerHeader} />
-    </div>
-  );
-}
+                Sign Out
+              </MenuItem>
+            </Menu>
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          className={classes.drawer}
+          variant="temporary"
+          anchor="left"
+          open={open}
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+        >
+          <div className={classes.drawerHeader}>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "ltr" ? (
+                <ChevronLeftIcon />
+              ) : (
+                <ChevronRightIcon />
+              )}
+            </IconButton>
+          </div>
+          <Divider />
+          <List component="div" disablePadding>
+            {nestedNavigations.map(({ text, to, icon }, index) => (
+              <React.Fragment key={index}>
+                <ListItem
+                  component={Link}
+                  to={to}
+                  button
+                  key={text}
+                  selected={selectedTab === index}
+                  onClick={(event) => {
+                    handleListItemClick(event, index);
+                  }}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItem>
+              </React.Fragment>
+            ))}
+          </List>
+        </Drawer>
+        <div className={classes.drawerHeader} />
+      </div>
+    );
+  }
 
   return (
     <React.Fragment>
-   <Router>
-    <AppNavLayout selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} pageTitle={"Yarra Property Management"}/>
+      <Router>
+        <AppNavLayout
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          currentUser={currentUser}
+          pageTitle={"Yarra Property Management"}
+        />
         <Switch>
-          <Route exact path={`${match.path}dashboard`} component={DashBoard} />
-          <Route exact
+          <Route exact path={`${match.path}`} component={DashBoard} />
+          <Route
+            exact
             path={`${match.path}maintenance-requests/new`}
             component={MaintenanceRequestPage}
           />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}maintenance-requests/:maintenanceRequestId/edit`}
             component={MaintenanceRequestPage}
           />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}maintenance-requests`}
             component={MaintenancesPage}
           />
           <Route exact path={`${match.path}to-dos`} component={ToDosPage} />
-          <Route exact path={`${match.path}audit-logs`} component={AuditLogsPage} />
-          <Route exact
+          <Route
+            exact
+            path={`${match.path}audit-logs`}
+            component={AuditLogsPage}
+          />
+          <Route
+            exact
             path={`${match.path}properties/new`}
             component={PropertyPage}
           />
           <Route exact path={`${match.path}users/new`} component={UserPage} />
           <Route exact path={`${match.path}users`} component={UsersPage} />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}transactions/new`}
             component={TransactionPage}
           />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}properties/:propertyId/edit`}
             component={PropertyPage}
           />
@@ -399,7 +427,8 @@ function AppNavLayout(props) {
             path={`${match.path}contacts`}
             component={ContactsPage}
           />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}transactions/:transactionId/edit`}
             component={TransactionPage}
           />
@@ -413,8 +442,19 @@ function AppNavLayout(props) {
             path={`${match.path}contacts/:contactId/edit`}
             component={ContactPage}
           />
+          <Route
+            exact
+            path={`${match.path}contacts/notices/new`}
+            component={NoticesPage}
+          />
+          <Route
+            exact
+            path={`${match.path}contacts/notices/:noticeId/edit`}
+            component={NoticesPage}
+          />
           <Route path={`${match.path}properties`} component={PropertiesPage} />
-          <Route exact
+          <Route
+            exact
             path={`${match.path}transactions`}
             component={TransactionsPage}
           />
@@ -426,6 +466,9 @@ function AppNavLayout(props) {
 
 const mapStateToProps = (state, ownProps) => {
   return {
+    toDos: state.toDos,
+    notices: state.notices,
+    users: state.users,
     contacts: state.contacts,
     mediaFiles: state.mediaFiles,
     properties: state.properties,
@@ -437,7 +480,7 @@ const mapStateToProps = (state, ownProps) => {
     contact_addresses: state.contact_addresses,
     currentUser: state.currentUser,
     isLoading: state.isLoading,
-        selectedTab: state.selectedTab,
+    selectedTab: state.selectedTab,
     error: state.error,
     match: ownProps.match,
   };

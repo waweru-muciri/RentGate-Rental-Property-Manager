@@ -17,7 +17,9 @@ import { connect } from "react-redux";
 import { withFormik } from "formik";
 import {
 	handleItemFormSubmit,
-	uploadFilesToFirebase, handleDelete
+	uploadFilesToFirebase,
+	handleDelete,
+	deleteUploadedFileByUrl,
 } from "../../actions/actions";
 import { withRouter } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
@@ -39,10 +41,10 @@ const CONTACT_TYPES = getContactTypes();
 const ADDRESS_TYPES = getAddressTypes();
 
 const contactInfoBoxStyles = {
-		width: "100%",
-		overflow: "auto",
-		overflowX: 'hidden'
-	}
+	width: "100%",
+	overflow: "auto",
+	overflowX: "hidden",
+};
 
 let InputForm = ({
 	values,
@@ -79,12 +81,14 @@ let InputForm = ({
 						direction="column"
 						spacing={2}
 					>
-					<Grid item>
+						<Grid item>
 							<Typography variant="h6">Personal Info</Typography>
-						<Box m={2}>
-						<Typography variant="subtitle2">Contact Image</Typography>
-						</Box>
-				</Grid> 
+							<Box m={2}>
+								<Typography variant="subtitle2">
+									Contact Image
+								</Typography>
+							</Box>
+						</Grid>
 						<Grid
 							item
 							container
@@ -307,617 +311,610 @@ let InputForm = ({
 							<Typography variant="h6">
 								Contact Details
 							</Typography>
-						<Box m={2}> 
-						<Typography variant="subtitle2">
-								Phone Numbers </Typography> 
-						</Box>
-						<Box maxHeight="200px" style={contactInfoBoxStyles}>
-							{/** start of mobile textfield and types columns **/}
-							{values.contactPhoneNumbers.map(
-								(phoneNumber, phoneNumberIndex) => (
-									<Grid
-										container
-										key={phoneNumberIndex}
-										spacing={2}
-										justify="center"
-										alignItems="center"
-										direction="row"
-									>
-										<Grid item sm={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id={`mobile_number${phoneNumberIndex}`}
-												name={`mobile_number${phoneNumberIndex}`}
-												label="Mobile"
-												value={
-													phoneNumber.phone_number ||
-													""
-												}
-												onChange={(event) => {
-													let editedPhoneNumbers = values.contactPhoneNumbers.map(
-														(
-															contactPhoneNumber,
-															index
-														) =>
-															index ===
-															phoneNumberIndex
-																? Object.assign(
-																		contactPhoneNumber,
-																		{
-																			phone_number:
-																				event
-																					.target
-																					.value,
-																		}
-																  )
-																: contactPhoneNumber
-													);
-													setFieldValue(
-														"contactPhoneNumbers",
-														editedPhoneNumbers
-													);
-												}}
-												onBlur={handleBlur}
-												helperText="Mobile"
-											/>
-										</Grid>
-										<Grid item sm={12} md={4}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												select
-												name="phone_type"
-												label="Mobile Type"
-												id="phone_type"
-												onBlur={handleBlur}
-												onChange={(
-													mobileTypeChangeEvent
-												) => {
-													const changedPhoneNumbers = values.contactPhoneNumbers.map(
-														(
-															phoneNumberObject,
-															index
-														) =>
-															index ===
-															phoneNumberIndex
-																? Object.assign(
-																		phoneNumberObject,
-																		{
-																			phone_type:
-																				mobileTypeChangeEvent
-																					.target
-																					.value,
-																		}
-																  )
-																: phoneNumberObject
-													);
-													setFieldValue(
-														"contactPhoneNumbers",
-														changedPhoneNumbers
-													);
-												}}
-												value={
-													phoneNumber.phone_type || ""
-												}
-												helperText="Mobile Type"
-											>
-												{MOBILE_TYPES.map(
-													(phone_type, index) => (
-														<MenuItem
-															key={index}
-															value={phone_type}
-														>
-															{phone_type}
-														</MenuItem>
-													)
-												)}
-											</TextField>
-										</Grid>
-										<Grid item sm={12} md={1}>
-										<IconButton color="secondary"
-										style={{marginBottom: '14px'}}
-										aria-label="delete item"
-										onClick={() =>{
-
-let valueToRemove = values.contactPhoneNumbers[phoneNumberIndex]
-if(valueToRemove.id){
-	//delete the item from the server
-	handleDelete(valueToRemove.id, 'contact_phone_numbers')
-}
-	if(values.contactPhoneNumbers.length=== 1){
-		setFieldValue('contactPhoneNumbers', [{}])}
-		else
-		{
-			setFieldValue('contactPhoneNumbers', [...values.contactPhoneNumbers.filter((pN, index) => index !== phoneNumberIndex)])
-		}
-
-
-
-										}}>
-										  <DeleteIcon />
-										</IconButton>
-										</Grid>
-										<Grid item sm={12} md={1}>
-										{
-											phoneNumberIndex === 0 ? 
-										<IconButton color="primary"
-										style={{marginBottom: '14px'}}
-										aria-label="add item"
-										onClick={() => {
-											setFieldValue(
-														"contactPhoneNumbers",
-														[...values.contactPhoneNumbers, {}]
-													);
-										}}>
-										  <AddIcon />
-										</IconButton>
-										: null 
-										}
-										</Grid>
-									</Grid>
-								)
-							)}
-						</Box>
-						{/* start of contact emails column */}
-						<Box m={2}> 
-						<Typography variant="subtitle2">
-								Emails </Typography> 
-						</Box>
-						<Box maxHeight="200px" style={contactInfoBoxStyles}>
-							{values.contactEmails.map(
-								(contactEmail, emailIndex) => (
-									<Grid
-										key={emailIndex}
-										container
-										spacing={2}
-										justify="center"
-										alignItems="center"
-										direction="row"
-									>
-										<Grid item md={6}>
-											<TextField
-												fullWidth
-												type="email"
-												variant="outlined"
-												id={`email${emailIndex}`}
-												name={`email${emailIndex}`}
-												label="Email"
-												value={contactEmail.email}
-												onChange={(
-													emailValueChangeEvent
-												) => {
-													const changedEmails = values.contactEmails.map(
-														(emailObject, index) =>
-															index === emailIndex
-																? Object.assign(
-																		emailObject,
-																		{
-																			email:
-																				emailValueChangeEvent
-																					.target
-																					.value,
-																		}
-																  )
-																: emailObject
-													);
-													setFieldValue(
-														"contactEmails",
-														changedEmails
-													);
-												}}
-												onBlur={handleBlur}
-												helperText="Email"
-											/>
-										</Grid>
-										<Grid item md={4}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												select
-												name="email_type"
-												label="Email Type"
-												id="email_type"
-												onBlur={handleBlur}
-												onChange={(
-													emailTypeChangeEvent
-												) => {
-													const changedEmails = values.contactEmails.map(
-														(emailObject, index) =>
-															index === emailIndex
-																? Object.assign(
-																		emailObject,
-																		{
-																			email_type:
-																				emailTypeChangeEvent
-																					.target
-																					.value,
-																		}
-																  )
-																: emailObject
-													);
-													setFieldValue(
-														"contactEmails",
-														changedEmails
-													);
-												}}
-												value={
-													contactEmail.email_type ||
-													""
-												}
-												helperText="Email Type"
-											>
-												{MOBILE_TYPES.map(
-													(phone_type, index) => (
-														<MenuItem
-															key={index}
-															value={phone_type}
-														>
-															{phone_type}
-														</MenuItem>
-													)
-												)}
-											</TextField>
-										</Grid>
-										<Grid item md={1}>
-										<IconButton color="secondary"
-										style={{marginBottom: '14px'}}
-										aria-label="delete item"
-										onClick={() => {
-let valueToRemove = values.contactEmails[emailIndex]
-if(valueToRemove.id){
-	//delete the item from the server
-		handleDelete(valueToRemove.id, 'contact_emails')
-
-}
-if(values.contactEmails.length === 1){
-	setFieldValue('contactEmails', [{}])
-}else
-{
-	setFieldValue('contactEmails', [...values.contactEmails.filter((email, index) => index !== emailIndex)])
-}
-
-
-
-										}}>
-										  <DeleteIcon />
-										</IconButton>
-										</Grid>
-										<Grid item md={1}>
-										{
-											emailIndex === 0 ? 
-											<IconButton color="primary"
-										style={{marginBottom: '14px'}}
-										aria-label="add item"
-										onClick={() => {
-											setFieldValue(
-														"contactEmails",
-														[...values.contactEmails, {}]
-													);
-										}}>
-										  <AddIcon />
-										</IconButton> : null
-										}
-										</Grid>
-									</Grid>
-								)
-							)}
-						</Box>
-						{/* Start of contact faxes column */}
-						{/**
-						<Box m={2}> 
-						<Typography variant="subtitle2">
-								Faxes </Typography> 
-						</Box>
-						<Box maxHeight="200px" style={contactInfoBoxStyles}>
-							{values.contactFaxes.map((contactFax, faxIndex) => (
-								<Grid
-									key={faxIndex}
-									container
-									spacing={2}
-									justify="center"
-									alignItems="center"
-									direction="row"
-								>
-									<Grid item md={6}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={`fax${faxIndex}`}
-											name={`fax${faxIndex}`}
-											label="Fax"
-											value={contactFax.fax || ""}
-											onChange={(faxValueChangeEvent) => {
-												const changedFaxes = values.contactFaxes.map(
-													(faxObject, index) =>
-														index === faxIndex
-															? Object.assign(
-																	faxObject,
-																	{
-																		fax:
-																			faxValueChangeEvent
-																				.target
-																				.value,
-																	}
-															  )
-															: faxObject
-												);
-												setFieldValue(
-													"contactFaxes",
-													changedFaxes
-												);
-											}}
-											onBlur={handleBlur}
-											helperText="Fax"
-										/>
-									</Grid>
-									<Grid item md={4}>
-										<TextField
-											fullWidth
-											variant="outlined"
-											select
-											name="fax_type"
-											label="Fax Type"
-											id="fax_type"
-											onBlur={handleBlur}
-											onChange={(faxTypeChangeEvent) => {
-												const changedFaxes = values.contactFaxes.map(
-													(faxObject, index) =>
-														index === faxIndex
-															? Object.assign(
-																	faxObject,
-																	{
-																		fax_type:
-																			faxTypeChangeEvent
-																				.target
-																				.value,
-																	}
-															  )
-															: faxObject
-												);
-												setFieldValue(
-													"contactFaxes",
-													changedFaxes
-												);
-											}}
-											value={contactFax.fax_type || ""}
-											helperText="Fax Type"
+							<Box m={2}>
+								<Typography variant="subtitle2">
+									Phone Numbers{" "}
+								</Typography>
+							</Box>
+							<Box maxHeight="200px" style={contactInfoBoxStyles}>
+								{/** start of mobile textfield and types columns **/}
+								{values.contactPhoneNumbers.map(
+									(phoneNumber, phoneNumberIndex) => (
+										<Grid
+											container
+											key={phoneNumberIndex}
+											spacing={2}
+											justify="center"
+											alignItems="center"
+											direction="row"
 										>
-											{MOBILE_TYPES.map(
-												(phone_type, index) => (
-													<MenuItem
-														key={index}
-														value={phone_type}
+											<Grid item sm={12} md={6}>
+												<TextField
+													fullWidth
+													variant="outlined"
+													id={`mobile_number${phoneNumberIndex}`}
+													name={`mobile_number${phoneNumberIndex}`}
+													label="Mobile"
+													value={
+														phoneNumber.phone_number ||
+														""
+													}
+													onChange={(event) => {
+														let editedPhoneNumbers = values.contactPhoneNumbers.map(
+															(
+																contactPhoneNumber,
+																index
+															) =>
+																index ===
+																phoneNumberIndex
+																	? Object.assign(
+																			contactPhoneNumber,
+																			{
+																				phone_number:
+																					event
+																						.target
+																						.value,
+																			}
+																	  )
+																	: contactPhoneNumber
+														);
+														setFieldValue(
+															"contactPhoneNumbers",
+															editedPhoneNumbers
+														);
+													}}
+													onBlur={handleBlur}
+													helperText="Mobile"
+												/>
+											</Grid>
+											<Grid item sm={12} md={4}>
+												<TextField
+													fullWidth
+													variant="outlined"
+													select
+													name="phone_type"
+													label="Mobile Type"
+													id="phone_type"
+													onBlur={handleBlur}
+													onChange={(
+														mobileTypeChangeEvent
+													) => {
+														const changedPhoneNumbers = values.contactPhoneNumbers.map(
+															(
+																phoneNumberObject,
+																index
+															) =>
+																index ===
+																phoneNumberIndex
+																	? Object.assign(
+																			phoneNumberObject,
+																			{
+																				phone_type:
+																					mobileTypeChangeEvent
+																						.target
+																						.value,
+																			}
+																	  )
+																	: phoneNumberObject
+														);
+														setFieldValue(
+															"contactPhoneNumbers",
+															changedPhoneNumbers
+														);
+													}}
+													value={
+														phoneNumber.phone_type ||
+														""
+													}
+													helperText="Mobile Type"
+												>
+													{MOBILE_TYPES.map(
+														(phone_type, index) => (
+															<MenuItem
+																key={index}
+																value={
+																	phone_type
+																}
+															>
+																{phone_type}
+															</MenuItem>
+														)
+													)}
+												</TextField>
+											</Grid>
+											<Grid item sm={12} md={1}>
+												<IconButton
+													color="secondary"
+													style={{
+														marginBottom: "14px",
+													}}
+													aria-label="delete item"
+													onClick={() => {
+														let valueToRemove =
+															values
+																.contactPhoneNumbers[
+																phoneNumberIndex
+															];
+														if (valueToRemove.id) {
+															//delete the item from the server
+															handleDelete(
+																valueToRemove.id,
+																"contact_phone_numbers"
+															);
+														}
+														if (
+															values
+																.contactPhoneNumbers
+																.length === 1
+														) {
+															setFieldValue(
+																"contactPhoneNumbers",
+																[{}]
+															);
+														} else {
+															setFieldValue(
+																"contactPhoneNumbers",
+																[
+																	...values.contactPhoneNumbers.filter(
+																		(
+																			pN,
+																			index
+																		) =>
+																			index !==
+																			phoneNumberIndex
+																	),
+																]
+															);
+														}
+													}}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</Grid>
+											<Grid item sm={12} md={1}>
+												{phoneNumberIndex === 0 ? (
+													<IconButton
+														color="primary"
+														style={{
+															marginBottom:
+																"14px",
+														}}
+														aria-label="add item"
+														onClick={() => {
+															setFieldValue(
+																"contactPhoneNumbers",
+																[
+																	...values.contactPhoneNumbers,
+																	{},
+																]
+															);
+														}}
 													>
-														{phone_type}
-													</MenuItem>
-												)
-											)}
-										</TextField>
-									</Grid>
-									<Grid item md={1}>
-										<IconButton color="secondary"
-										style={{marginBottom: '14px'}}
-										aria-label="delete item"
-										onClick={() => {
-											
-										}}>
-										  <DeleteIcon />
-										</IconButton>
-									</Grid>
-								</Grid>
-								{
-									faxIndex === 0 ? 
-									<Grid item md={1}>
-										<IconButton color="primary"
-										style={{marginBottom: '14px'}}
-										aria-label="add item"
-										onClick={() => {
-											setFieldValue(
-														"contactFaxes",
-														[...values.contactFaxes, {}]
-													);
-										}}>
-										  <AddIcon />
-										</IconButton>
-									} : null
-								</Grid> 
-								</Grid>
-							))}
-						</Box>**/}
-						{/* Start of contact addresses row */}
-						<Box m={2}> 
-						<Typography variant="subtitle2">
-								Addresses </Typography> 
-						</Box>
-						<Box maxHeight="200px" style={contactInfoBoxStyles}>
-							{values.contactAddresses.map(
-								(contactAddress, addressIndex) => (
-									<Grid
-										key={addressIndex}
-										container
-										spacing={2}
-										justify="center"
-										alignItems="center"
-										direction="row"
-									>
-										<Grid item md={6} sm={12}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id={`address${addressIndex}`}
-												name={`address${addressIndex}`}
-												label="Address"
-												value={
-													contactAddress.address || ""
-												}
-												onChange={(
-													addressChangeEvent
-												) => {
-													const changedAddresses = values.contactAddresses.map(
-														(
-															addressObject,
-															index
-														) =>
-															index ===
-															addressIndex
-																? Object.assign(
-																		addressObject,
-																		{
-																			address:
-																				addressChangeEvent
-																					.target
-																					.value,
-																		}
-																  )
-																: addressObject
-													);
-													setFieldValue(
-														"contactAddresses",
-														changedAddresses
-													);
-												}}
-												onBlur={handleBlur}
-												helperText="Address"
-											/>
+														<AddIcon />
+													</IconButton>
+												) : null}
+											</Grid>
 										</Grid>
-										<Grid item md={4} sm={12}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												select
-												name="address_type"
-												label="Address Type"
-												id="address_type"
-												onBlur={handleBlur}
-												onChange={(
-													addressChangeEvent
-												) => {
-													const changedAddresses = values.contactAddresses.map(
-														(
-															addressObject,
-															index
-														) =>
-															index ===
-															addressIndex
-																? Object.assign(
-																		addressObject,
-																		{
-																			address_type:
-																				addressChangeEvent
-																					.target
-																					.value,
-																		}
-																  )
-																: addressObject
-													);
-													setFieldValue(
-														"contactAddresses",
-														changedAddresses
-													);
-												}}
-												value={
-													contactAddress.address_type ||
-													""
-												}
-												helperText="Address Type"
-											>
-												{ADDRESS_TYPES.map(
-													(phone_type, index) => (
-														<MenuItem
-															key={index}
-															value={phone_type}
-														>
-															{phone_type}
-														</MenuItem>
-													)
-												)}
-											</TextField>
+									)
+								)}
+							</Box>
+							{/* start of contact emails column */}
+							<Box m={2}>
+								<Typography variant="subtitle2">
+									Emails{" "}
+								</Typography>
+							</Box>
+							<Box maxHeight="200px" style={contactInfoBoxStyles}>
+								{values.contactEmails.map(
+									(contactEmail, emailIndex) => (
+										<Grid
+											key={emailIndex}
+											container
+											spacing={2}
+											justify="center"
+											alignItems="center"
+											direction="row"
+										>
+											<Grid item md={6}>
+												<TextField
+													fullWidth
+													type="email"
+													variant="outlined"
+													id={`email${emailIndex}`}
+													name={`email${emailIndex}`}
+													label="Email"
+													value={contactEmail.email}
+													onChange={(
+														emailValueChangeEvent
+													) => {
+														const changedEmails = values.contactEmails.map(
+															(
+																emailObject,
+																index
+															) =>
+																index ===
+																emailIndex
+																	? Object.assign(
+																			emailObject,
+																			{
+																				email:
+																					emailValueChangeEvent
+																						.target
+																						.value,
+																			}
+																	  )
+																	: emailObject
+														);
+														setFieldValue(
+															"contactEmails",
+															changedEmails
+														);
+													}}
+													onBlur={handleBlur}
+													helperText="Email"
+												/>
+											</Grid>
+											<Grid item md={4}>
+												<TextField
+													fullWidth
+													variant="outlined"
+													select
+													name="email_type"
+													label="Email Type"
+													id="email_type"
+													onBlur={handleBlur}
+													onChange={(
+														emailTypeChangeEvent
+													) => {
+														const changedEmails = values.contactEmails.map(
+															(
+																emailObject,
+																index
+															) =>
+																index ===
+																emailIndex
+																	? Object.assign(
+																			emailObject,
+																			{
+																				email_type:
+																					emailTypeChangeEvent
+																						.target
+																						.value,
+																			}
+																	  )
+																	: emailObject
+														);
+														setFieldValue(
+															"contactEmails",
+															changedEmails
+														);
+													}}
+													value={
+														contactEmail.email_type ||
+														""
+													}
+													helperText="Email Type"
+												>
+													{MOBILE_TYPES.map(
+														(phone_type, index) => (
+															<MenuItem
+																key={index}
+																value={
+																	phone_type
+																}
+															>
+																{phone_type}
+															</MenuItem>
+														)
+													)}
+												</TextField>
+											</Grid>
+											<Grid item md={1}>
+												<IconButton
+													color="secondary"
+													style={{
+														marginBottom: "14px",
+													}}
+													aria-label="delete item"
+													onClick={() => {
+														let valueToRemove =
+															values
+																.contactEmails[
+																emailIndex
+															];
+														if (valueToRemove.id) {
+															//delete the item from the server
+															handleDelete(
+																valueToRemove.id,
+																"contact_emails"
+															);
+														}
+														if (
+															values.contactEmails
+																.length === 1
+														) {
+															setFieldValue(
+																"contactEmails",
+																[{}]
+															);
+														} else {
+															setFieldValue(
+																"contactEmails",
+																[
+																	...values.contactEmails.filter(
+																		(
+																			email,
+																			index
+																		) =>
+																			index !==
+																			emailIndex
+																	),
+																]
+															);
+														}
+													}}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</Grid>
+											<Grid item md={1}>
+												{emailIndex === 0 ? (
+													<IconButton
+														color="primary"
+														style={{
+															marginBottom:
+																"14px",
+														}}
+														aria-label="add item"
+														onClick={() => {
+															setFieldValue(
+																"contactEmails",
+																[
+																	...values.contactEmails,
+																	{},
+																]
+															);
+														}}
+													>
+														<AddIcon />
+													</IconButton>
+												) : null}
+											</Grid>
 										</Grid>
-										<Grid item md={1} sm={12}>
-										<IconButton color="secondary"
-										style={{marginBottom: '14px'}}
-										aria-label="delete item"
-										onClick={() => {
-let valueToRemove = values.contactAddresses[addressIndex]
-if(valueToRemove.id){
-	//delete the item from the server
-	handleDelete(valueToRemove.id, 'contact_addresses')
-}
-if(values.contactAddresses.length === 1){
-	setFieldValue('contactAddresses', [{}])}
-	else
-{
-setFieldValue('contactAddresses', [...values.contactAddresses.filter((address, index) => index !== addressIndex)])
-}
-											
-										}}>
-										  <DeleteIcon />
-										</IconButton>
+									)
+								)}
+							</Box>
+							{/* Start of contact addresses row */}
+							<Box m={2}>
+								<Typography variant="subtitle2">
+									Addresses{" "}
+								</Typography>
+							</Box>
+							<Box maxHeight="200px" style={contactInfoBoxStyles}>
+								{values.contactAddresses.map(
+									(contactAddress, addressIndex) => (
+										<Grid
+											key={addressIndex}
+											container
+											spacing={2}
+											justify="center"
+											alignItems="center"
+											direction="row"
+										>
+											<Grid item md={6} sm={12}>
+												<TextField
+													fullWidth
+													variant="outlined"
+													id={`address${addressIndex}`}
+													name={`address${addressIndex}`}
+													label="Address"
+													value={
+														contactAddress.address ||
+														""
+													}
+													onChange={(
+														addressChangeEvent
+													) => {
+														const changedAddresses = values.contactAddresses.map(
+															(
+																addressObject,
+																index
+															) =>
+																index ===
+																addressIndex
+																	? Object.assign(
+																			addressObject,
+																			{
+																				address:
+																					addressChangeEvent
+																						.target
+																						.value,
+																			}
+																	  )
+																	: addressObject
+														);
+														setFieldValue(
+															"contactAddresses",
+															changedAddresses
+														);
+													}}
+													onBlur={handleBlur}
+													helperText="Address"
+												/>
+											</Grid>
+											<Grid item md={4} sm={12}>
+												<TextField
+													fullWidth
+													variant="outlined"
+													select
+													name="address_type"
+													label="Address Type"
+													id="address_type"
+													onBlur={handleBlur}
+													onChange={(
+														addressChangeEvent
+													) => {
+														const changedAddresses = values.contactAddresses.map(
+															(
+																addressObject,
+																index
+															) =>
+																index ===
+																addressIndex
+																	? Object.assign(
+																			addressObject,
+																			{
+																				address_type:
+																					addressChangeEvent
+																						.target
+																						.value,
+																			}
+																	  )
+																	: addressObject
+														);
+														setFieldValue(
+															"contactAddresses",
+															changedAddresses
+														);
+													}}
+													value={
+														contactAddress.address_type ||
+														""
+													}
+													helperText="Address Type"
+												>
+													{ADDRESS_TYPES.map(
+														(phone_type, index) => (
+															<MenuItem
+																key={index}
+																value={
+																	phone_type
+																}
+															>
+																{phone_type}
+															</MenuItem>
+														)
+													)}
+												</TextField>
+											</Grid>
+											<Grid item md={1} sm={12}>
+												<IconButton
+													color="secondary"
+													style={{
+														marginBottom: "14px",
+													}}
+													aria-label="delete item"
+													onClick={() => {
+														let valueToRemove =
+															values
+																.contactAddresses[
+																addressIndex
+															];
+														if (valueToRemove.id) {
+															//delete the item from the server
+															handleDelete(
+																valueToRemove.id,
+																"contact_addresses"
+															);
+														}
+														if (
+															values
+																.contactAddresses
+																.length === 1
+														) {
+															setFieldValue(
+																"contactAddresses",
+																[{}]
+															);
+														} else {
+															setFieldValue(
+																"contactAddresses",
+																[
+																	...values.contactAddresses.filter(
+																		(
+																			address,
+																			index
+																		) =>
+																			index !==
+																			addressIndex
+																	),
+																]
+															);
+														}
+													}}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</Grid>
+											<Grid item md={1} sm={12}>
+												{addressIndex === 0 ? (
+													<IconButton
+														color="primary"
+														style={{
+															marginBottom:
+																"14px",
+														}}
+														aria-label="add item"
+														onClick={() => {
+															setFieldValue(
+																"contactAddresses",
+																[
+																	...values.contactAddresses,
+																	{},
+																]
+															);
+														}}
+													>
+														<AddIcon />
+													</IconButton>
+												) : null}
+											</Grid>
 										</Grid>
-										<Grid item md={1} sm={12}>
-										{
-											addressIndex === 0 ? 
-											<IconButton color="primary"
-										style={{marginBottom: '14px'}}
-										aria-label="add item"
-										onClick={() => {
-											setFieldValue(
-														"contactAddresses",
-														[...values.contactAddresses, {}]
-													);
-										}}>
-										  <AddIcon />
-										</IconButton>
-										: null 
-										}
-										</Grid>
-									</Grid>
-								)
-							)}
-						</Box>
-						{/* end of addresses textfield and types row */}
+									)
+								)}
+							</Box>
+							{/* end of addresses textfield and types row */}
 						</Box>
 						<Box minHeight="35%">
-						<Typography variant="h6">
-							Social Media Details
-						</Typography>
-						<TextField
-							fullWidth
-							type="url"
-							variant="outlined"
-							id="facebook_url"
-							name="facebook_url"
-							label="Facebook"
-							value={values.facebook_url}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							helperText="Facebook Link"
-						/>
-						<TextField
-							fullWidth
-							type="url"
-							variant="outlined"
-							id="linkedin_url"
-							name="linkedin_url"
-							label="Facebook"
-							value={values.linkedin_url}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							helperText="LinkedIn Link"
-						/>
-						<TextField
-							fullWidth
-							type="url"
-							variant="outlined"
-							id="skype_url"
-							name="skype_url"
-							label="Skype"
-							value={values.skype_url}
-							onChange={handleChange}
-							onBlur={handleBlur}
-							helperText="Skype Link"
-						/>
+							<Typography variant="h6">
+								Social Media Details
+							</Typography>
+							<TextField
+								fullWidth
+								type="url"
+								variant="outlined"
+								id="facebook_url"
+								name="facebook_url"
+								label="Facebook"
+								value={values.facebook_url}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								helperText="Facebook Link"
+							/>
+							<TextField
+								fullWidth
+								type="url"
+								variant="outlined"
+								id="linkedin_url"
+								name="linkedin_url"
+								label="Facebook"
+								value={values.linkedin_url}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								helperText="LinkedIn Link"
+							/>
+							<TextField
+								fullWidth
+								type="url"
+								variant="outlined"
+								id="skype_url"
+								name="skype_url"
+								label="Skype"
+								value={values.skype_url}
+								onChange={handleChange}
+								onBlur={handleBlur}
+								helperText="Skype Link"
+							/>
 						</Box>
 					</Grid>
 				</Grid>
@@ -947,7 +944,6 @@ setFieldValue('contactAddresses', [...values.contactAddresses.filter((address, i
 						size="medium"
 						startIcon={<SaveIcon />}
 						form="contactInputForm"
-						onClick={() => handleSubmit()}
 						disabled={isSubmitting}
 					>
 						Save
@@ -979,10 +975,7 @@ let ContactInputForm = withFormik({
 			({ contact }) => contact === contactToEdit.id
 		);
 		contactAddresses = contactAddresses.length ? contactAddresses : [{}];
-		let contactFaxes = props.contact_faxes.filter(
-			({ contact }) => contact === contactToEdit.id
-		);
-		contactFaxes = contactFaxes.length ? contactFaxes : [{}];
+
 		return {
 			id: contactToEdit.id,
 			assigned_to: contactToEdit.assigned_to || "",
@@ -1003,8 +996,9 @@ let ContactInputForm = withFormik({
 			contact_images: [],
 			contactEmails: contactEmails,
 			contactPhoneNumbers: contactPhoneNumbers,
-			contactFaxes: contactFaxes,
 			contactAddresses: contactAddresses,
+			currentUser: props.currentUser, 
+			users: props.users,
 			history: props.history,
 			match: props.match,
 			error: props.error,
@@ -1059,7 +1053,14 @@ let ContactInputForm = withFormik({
 		console.log("Contact object => ", contact);
 		//first upload the image to firebase
 		if (values.contact_images.length) {
-			uploadFilesToFirebase(values.contact_images).then(
+			//if the user had previously uploaded an avatar
+			// then delete it here and replace the url with new uploaded image
+			if (values.contact_avatar_url) {
+				//delete file from storage
+				deleteUploadedFileByUrl(values.contact_avatar_url);
+			}
+			//upload the first and only image in the contact images array
+			uploadFilesToFirebase([values.contact_images[0]]).then(
 				(fileDownloadUrl) => {
 					contact.contact_avatar_url = fileDownloadUrl;
 				}
@@ -1069,34 +1070,20 @@ let ContactInputForm = withFormik({
 		handleItemFormSubmit(contact, "contacts").then((contactId) => {
 			values.contactPhoneNumbers.forEach((contactPhoneNumber) => {
 				if (contactPhoneNumber.phone_number) {
-					handleItemFormSubmit(
-						{ ...contactPhoneNumber, contact: contactId },
-						"contact_phone_numbers"
-					);
+					contactPhoneNumber.contact = contactId;
+					handleItemFormSubmit(contactPhoneNumber, "contact_phone_numbers").catch((error) => console.log('Error occurred saving phone number ',error));
 				}
 			});
 			values.contactEmails.forEach((contactEmail) => {
 				if (contactEmail.email) {
-					handleItemFormSubmit(
-						{ ...contactEmail, contact: contactId },
-						"contact_emails"
-					);
-				}
-			});
-			values.contactFaxes.forEach((contactFax) => {
-				if (contactFax.fax) {
-					handleItemFormSubmit(
-						{ ...contactFax, contact: contactId },
-						"contact_faxes"
-					);
+					contactEmail.contact = contactId;
+					handleItemFormSubmit(contactEmail, "contact_emails").catch((error) => console.log('Error occurred saving email ',error));;
 				}
 			});
 			values.contactAddresses.forEach((contactAddress) => {
 				if (contactAddress.address) {
-					handleItemFormSubmit(
-						{ ...contactAddress, contact: contactId },
-						"contact_addresses"
-					);
+					contactAddress.contact = contactId;
+					handleItemFormSubmit(contactAddress, "contact_addresses").catch((error) => console.log('Error occurred saving address ',error));;
 				}
 			});
 		});
@@ -1105,7 +1092,7 @@ let ContactInputForm = withFormik({
 			values.history.goBack();
 		}
 	},
-	enableReinitialize: false,
+	enableReinitialize: true,
 	displayName: "Contact Input Form", // helps with React DevTools
 })(InputForm);
 
@@ -1113,8 +1100,9 @@ const mapStateToProps = (state) => {
 	return {
 		contact_emails: state.contact_emails,
 		contact_phone_numbers: state.contact_phone_numbers,
-		contact_faxes: state.contact_faxes,
 		contact_addresses: state.contact_addresses,
+		currentUser: state.currentUser,
+		users: state.users, 
 	};
 };
 

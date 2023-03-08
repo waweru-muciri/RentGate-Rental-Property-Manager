@@ -14,6 +14,7 @@ import * as toDoActions from "./to-dos";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import app from "../firebase";
 
+const storageRef = app.storage().ref();
 const db = app.firestore().collection("tenant").doc("wPEY7XfSReuoOEOa22aX");
 
 export function setCurrentUser(user){
@@ -23,8 +24,11 @@ export function setCurrentUser(user){
     };
 }
 
+export function deleteUploadedFileByUrl(fileUrl){
+    storageRef.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
+}
+
 export function uploadFilesToFirebase(filesArray) {
-    var storageRef = app.storage().ref();
     return filesArray.map((file) => {
         var fileRef = storageRef.child(`propertyImages/${file.file.name}`);
         return fileRef

@@ -14,12 +14,12 @@ import ExportToExcelBtn from "../../components/ExportToExcelBtn";
 
 const noticesTableHeadCells = [
     {
-        id: "landlord",
+        id: "landlord_name",
         numeric: false,
         disablePadding: true,
         label: "LandLord",
     },
-    { id: "tenant", numeric: false, disablePadding: true, label: "Tenant Name" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     {
         id: "tenant_id_number",
         numeric: false,
@@ -27,7 +27,7 @@ const noticesTableHeadCells = [
         label: "Tenant ID Number",
     },
     {
-        id: "notice_date",
+        id: "notification_date",
         numeric: false,
         disablePadding: true,
         label: "Notification Date",
@@ -46,10 +46,8 @@ let VacatingNoticesPage = ({
     properties,
     contacts,
     contact_emails,
-    contact_addresses,
     match,
     error,
-    handleDelete,
 }) => {
     const classes = commonStyles();
     let [noticeItems, setNoticeItems] = useState([]);
@@ -59,8 +57,9 @@ let VacatingNoticesPage = ({
     let [contactFilter, setContactFilter] = useState("");
     const [selected, setSelected] = useState([]);
 
+
     useEffect(() => {
-        setNoticeItems(notices);
+        setNoticeItems(getMappedNotices());
     }, [notices.length]);
 
     const exportVacatingNoticesToExcel = () => {
@@ -85,11 +84,12 @@ let VacatingNoticesPage = ({
                 (property) => property.id === notice.property
             );
             const noticeDetails = {};
-            noticeDetails.tenant =
+            noticeDetails.tenant_id_number = typeof tenant !== 'undefined' ? tenant.id_number : '';
+            noticeDetails.tenant_name =
                 typeof tenant !== "undefined"
                     ? tenant.first_name + " " + tenant.last_name
                     : "";
-            noticeDetails.landlord =
+            noticeDetails.landlord_name =
                 typeof landlord !== "undefined"
                     ? landlord.first_name + " " + landlord.last_name
                     : "";
@@ -106,11 +106,11 @@ let VacatingNoticesPage = ({
         event.preventDefault();
         //filter the notices here according to search criteria
         let filteredNotices = getMappedNotices()
-            .filter(({ notice_date }) =>
-                !fromDateFilter ? true : notice_date >= fromDateFilter
+            .filter(({ notification_date }) =>
+                !fromDateFilter ? true : notification_date >= fromDateFilter
             )
-            .filter(({ notice_date }) =>
-                !toDateFilter ? true : notice_date <= toDateFilter
+            .filter(({ notification_date }) =>
+                !toDateFilter ? true : notification_date <= toDateFilter
             )
             .filter(({ tenant }) =>
                 !contactFilter ? true : tenant == contactFilter
@@ -349,7 +349,8 @@ let VacatingNoticesPage = ({
                         rows={noticeItems}
                         headCells={noticesTableHeadCells}
                         handleDelete={handleDelete}
-                        deleteUrl={"vacating-notices"}
+                        deleteUrl={"notices"}
+                        noEditCol={true}
                     />
                 </Grid>
             </Grid>

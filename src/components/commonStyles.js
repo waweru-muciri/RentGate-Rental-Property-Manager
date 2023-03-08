@@ -45,6 +45,12 @@ let useStyles = makeStyles((theme) => ({
 		margin: theme.spacing(1),
 		minWidth: 120,
 	},
+	infoDisplayPaper: {
+		paddingBottom: theme.spacing(2),
+		paddingTop: theme.spacing(2),
+		paddingLeft: theme.spacing(2),
+		paddingRight: theme.spacing(2),
+	},
 }));
 
 export { useStyles as commonStyles };

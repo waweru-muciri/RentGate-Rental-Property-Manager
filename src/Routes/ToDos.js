@@ -3,8 +3,6 @@ import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import ToDoInputForm from "../components/to-dos/EventInputForm.js";
 import { Grid } from "@material-ui/core";
-import { handleItemFormSubmit } from "../actions/actions";
-import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -14,51 +12,70 @@ import interactionPlugin from "@fullcalendar/interaction";
 import "@fullcalendar/core/main.css";
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
+import moment from "moment";
+import { handleItemFormSubmit } from "../actions/actions";
 
-let InputForm = ({
-	values,
-	match,
-	touched,
-	errors,
-	handleChange,
-	handleBlur,
-	setFieldValue,
-	handleSubmit,
-	isSubmitting,
-}) => {
+let ToDosPage = ({ toDos, error, users }) => {
 	const [open, toggleOpen] = React.useState(false);
-	const [events, setEvents] = React.useState([
-		{ id: 1, title: "Event 1", start: new Date(), end: new Date() },
-		{ id: 2, title: "Event 2", start: new Date(), end: new Date() },
-	]);
 
-	const [eventToShow, setEventToShow] = React.useState(null);
+	const [eventToShow, setEventToShow] = React.useState({});
+
+	const mappedToDos = toDos.map((event) =>
+		Object.assign({}, event, {
+			backgroundColor: event.extendedProps.complete_status === "true" ? "#008000" : "",
+		})
+	);
 
 	const handleEventDrop = (info) => {
 		let updatedEvent = {
 			...info.event.extendedProps,
-			start: info.event.start,
-			end: info.event.end,
+			start: moment(info.event.start).format("YYYY-MM-DD"),
+			end: moment(info.event.start).format("YYYY-MM-DD"),
+			id: info.event.id,
+			title: info.event.title,
 		};
-		setEventToShow(updatedEvent);
-		console.log("Updated event from drop => ", updatedEvent);
+		handleItemFormSubmit(updatedEvent, "to-dos").then((response) => {
+			console.log("Updated event successfully!", updatedEvent);
+		});
 	};
 
 	const handleClose = () => {
-		setEventToShow({});
 		toggleOpen(!open);
 	};
 
 	const handleEventClick = ({ event }) => {
-		setEventToShow(event);
+		const clickedEvent = {
+			title: event.title,
+			id: event.id,
+			description: event.extendedProps.description,
+			reminder_date: event.extendedProps.reminder_date,
+			start: event.start ? moment(event.start).format("YYYY-MM-DD") : "",
+			end: event.end ? moment(event.end).format("YYYY-MM-DD") : "",
+			allDay: event.allDay,
+		};
+		setEventToShow(clickedEvent);
+		handleClose();
+		//console.log(event);
+	};
+
+	const handleEventResize = ({ event }) => {
+		const clickedEvent = {
+			title: event.title,
+			id: event.id,
+			description: event.extendedProps.description,
+			reminder_date: event.extendedProps.reminder_date,
+			start: event.start ? moment(event.start).format("YYYY-MM-DD") : "",
+			end: event.end ? moment(event.end).format("YYYY-MM-DD") : "",
+			allDay: event.allDay,
+		};
+		setEventToShow(clickedEvent);
 		handleClose();
 		//console.log(event);
 	};
 
 	const handleDateClick = (arg) => {
-		setEvents([...events, { title: "Another one", start: arg.date }]);
+		setEventToShow({});
 		handleClose();
-		//console.log(event);
 	};
 
 	return (
@@ -86,14 +103,18 @@ let InputForm = ({
 							timeGridPlugin,
 							interactionPlugin,
 						]}
-						events={events}
+						editable
+						events={mappedToDos}
 						editable={true}
+						eventResize={handleEventResize}
 						eventDrop={handleEventDrop}
 						eventClick={handleEventClick}
 						dateClick={handleDateClick}
 					/>
 					<ToDoInputForm
+						users={users}
 						eventToShow={eventToShow}
+						setEventToShow={setEventToShow}
 						open={open}
 						handleClose={handleClose}
 					/>
@@ -105,19 +126,10 @@ let InputForm = ({
 
 const mapStateToProps = (state) => {
 	return {
-		todos: state.todos,
+		toDos: state.toDos,
 		error: state.error,
+		users: state.users,
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
-	return {
-		submitForm: (todo) => {
-			dispatch(handleItemFormSubmit(todo, "todos"));
-		},
-	};
-};
-
-InputForm = connect(mapStateToProps, mapDispatchToProps)(InputForm);
-
-export default withRouter(InputForm);
+export default connect(mapStateToProps)(ToDosPage);

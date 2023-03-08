@@ -31,11 +31,11 @@ let InputForm = ({
 	handleSubmit,
 	isSubmitting,
 }) => {
-	let styles = commonStyles();
+	let classes = commonStyles();
 
 	return (
 		<form
-			className={styles.form}
+			className={classes.form}
 			method="post"
 			id="maintenanceRequestInputForm"
 			onSubmit={handleSubmit}
@@ -189,7 +189,7 @@ let InputForm = ({
 				</Grid>
 				{/** end of maintenance request details grid **/}
 
-				<Grid item className={styles.buttonBox}>
+				<Grid item className={classes.buttonBox}>
 					<Button
 						color="secondary"
 						variant="contained"
@@ -207,7 +207,6 @@ let InputForm = ({
 						size="medium"
 						startIcon={<SaveIcon />}
 						form="maintenanceRequestInputForm"
-						onClick={() => handleSubmit()}
 						disabled={isSubmitting}
 					>
 						Save

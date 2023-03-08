@@ -18,12 +18,31 @@ import { setCurrentUser, handleItemFormSubmit } from "../actions/actions";
 import { commonStyles } from "../components/commonStyles";
 import * as Yup from "yup";
 
+const db = firebase.firestore().collection("tenant");
+
 const signUpWithEmailAndPassword = (email, password) => {
   return firebase
     .auth()
     .createUserWithEmailAndPassword(email, password)
     .then((authCredential) => {
+      //get user details from autheCredential
       const user = authCredential.user;
+      //create a new tenant with user details for the profile page
+      db.doc(user.uid)
+        .set({
+          first_name: user.displayName,
+          last_name: user.displayName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+        })
+        .then(function () {
+          console.log("Document successfully written!");
+        })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        });
+      //call api to set custom claims on user 
+      // Set admin privilege on the user corresponding to uid.
       const userDetails = {
         displayName: user.displayName,
         email: user.email,

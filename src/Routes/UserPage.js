@@ -7,9 +7,12 @@ import UserInputForm from "../components/users/UserInputForm";
 import { withRouter } from "react-router-dom";
 
 let UserPage = (props) => {
+	const {match, users} = props
 	let userToEditId = props.match.params.userId;
-	let userToEdit = props.users.find(({ id }) => id === userToEditId);
-	let pageTitle = userToEditId ? "Edit User(s)" : "New User(s)";
+	let userToEdit = users.find(({ id }) => id === userToEditId);
+	userToEdit = typeof userToEdit !== 'undefined' ? userToEdit : {
+		contact_images: []}
+	let pageTitle = userToEditId ? "Edit User" : "New User(s)";
 
 	return (
 		<Layout pageTitle="User Details">
@@ -24,7 +27,7 @@ let UserPage = (props) => {
 					item
 					key={3}
 				>
-					<UserInputForm userToEdit={userToEdit} />
+					<UserInputForm match={match} userToEdit={userToEdit} />
 				</Grid>
 			</Grid>
 		</Layout>

@@ -77,6 +77,22 @@ const headCells = [
     },
 ];
 
+function TabPanel(props) {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}
+            >
+                {value === index && <Box m={2}>{children}</Box>}
+            </div>
+        );
+    }
+
 let TransactionPage = ({
     isLoading,
     transactions,
@@ -99,22 +115,6 @@ let TransactionPage = ({
     useEffect(() => {
         setTransactionItems(getMappedTransactions());
     }, [transactions, contacts]);
-
-    function TabPanel(props) {
-        const { children, value, index, ...other } = props;
-
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && <Box m={2}>{children}</Box>}
-            </div>
-        );
-    }
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -248,7 +248,7 @@ let TransactionPage = ({
                             component={Link}
                             to={`${match.url}/${selected[0]}/edit`}
                         >
-                            Edit Transaction
+                            Edit
                         </Button>
                     </Grid>
                     <Grid item>
