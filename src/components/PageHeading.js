@@ -4,7 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        textAlign: "left",
         fontWeight: 700,
     },
 }));
@@ -13,6 +12,7 @@ export default function PageHeading(props) {
     const styles = useStyles();
     return (
         <Typography
+            align="left"
             variant="h5"
             className={styles.root}
             gutterBottom

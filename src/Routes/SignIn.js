@@ -101,7 +101,7 @@ let SignInLayout = ({ setUser }) => {
                     <Grid container justify="center" direction="column" spacing={3}>
                       <Grid item>
                         <Typography align="center" component="h1" variant="h5">
-                          Sign in
+                          Sign In
                       </Typography>
                       </Grid>
                       <Grid item>

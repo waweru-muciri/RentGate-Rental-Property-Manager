@@ -39,7 +39,7 @@ const ExpenseInputForm = (props) => {
       initialValues={expenseValues}
       enableReinitialize
       validationSchema={PropertyExpenseSchema}
-      onSubmit={async (values, { resetForm }) => {
+      onSubmit={async (values, { resetForm, setStatus }) => {
         try {
           const expense = {
             id: values.id,
@@ -55,20 +55,15 @@ const ExpenseInputForm = (props) => {
           if (values.id) {
             history.goBack();
           }
+          setStatus({ sent: true, msg: "Details saved successfully!" })
         } catch (error) {
-          return error && (
-            <div>
-              <CustomSnackbar
-                variant="error"
-                message={error.message}
-              />
-            </div>
-          )
+          setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
         }
       }}
     >
       {({
         values,
+        status,
         handleSubmit,
         touched,
         errors,
@@ -90,6 +85,14 @@ const ExpenseInputForm = (props) => {
               alignItems="stretch"
               direction="column"
             >
+              {
+                status && status.msg && (
+                  <CustomSnackbar
+                    variant={status.sent ? "success" : "error"}
+                    message={status.msg}
+                  />
+                )
+              }
               <Grid item container direction="row" spacing={2}>
                 <Grid item sm={6}>
                   <TextField

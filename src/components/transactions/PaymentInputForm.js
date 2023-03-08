@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../../components/commonStyles";
 import * as Yup from "yup";
@@ -47,36 +48,42 @@ let PaymentInputForm = (props) => {
 		<Formik
 			initialValues={paymentValues}
 			enableReinitialize validationSchema={PaymentSchema}
-			onSubmit={async (values, { resetForm }) => {
-				const chargePayment = {
-					charge_id: values.charge_id,
-					payment_amount: values.payment_amount,
-					memo: values.memo,
-					payment_date: values.payment_date,
-					tenant_id: values.tenant_id,
-					unit_ref: values.unit_ref,
-					unit_id: values.unit_id,
-					property_id: values.property_id,
-					payment_label: values.charge_label,
-					payment_type: values.charge_type,
-				};
-				if (values.tenantLease) {
-					// charge the payment on the security deposit
-					const securityDepositAfterCharge = parseFloat(values.tenantLease.security_deposit) - parseFloat(values.payment_amount)
-					const leaseToEdit = {
-						id: values.tenantLease.id,
-						security_deposit: securityDepositAfterCharge
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					const chargePayment = {
+						charge_id: values.charge_id,
+						payment_amount: values.payment_amount,
+						memo: values.memo,
+						payment_date: values.payment_date,
+						tenant_id: values.tenant_id,
+						unit_ref: values.unit_ref,
+						unit_id: values.unit_id,
+						property_id: values.property_id,
+						payment_label: values.charge_label,
+						payment_type: values.charge_type,
+					};
+					if (values.tenantLease) {
+						// charge the payment on the security deposit
+						const securityDepositAfterCharge = parseFloat(values.tenantLease.security_deposit) - parseFloat(values.payment_amount)
+						const leaseToEdit = {
+							id: values.tenantLease.id,
+							security_deposit: securityDepositAfterCharge
+						}
+						await handleItemSubmit(leaseToEdit, 'leases')
+						chargePayment.security_deposit_charge_id = values.tenantLease.id
 					}
-					await handleItemSubmit(leaseToEdit, 'leases')
-					chargePayment.security_deposit_charge_id = values.tenantLease.id
+					await handleItemSubmit(chargePayment, 'charge-payments')
+					resetForm({});
+					history.goBack()
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
-				await handleItemSubmit(chargePayment, 'charge-payments')
-				resetForm({});
-				history.goBack()
 			}}
 		>
 			{({
 				values,
+				status,
 				handleSubmit,
 				touched,
 				errors,
@@ -91,6 +98,14 @@ let PaymentInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2} direction="column">
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid item>
 								<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>
 							</Grid>

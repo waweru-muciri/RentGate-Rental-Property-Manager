@@ -75,7 +75,6 @@ let ExpensesPage = ({
             <Grid
                 container
                 spacing={3}
-                justify="space-evenly"
                 alignItems="center"
             >
                 <Grid item lg={12}>

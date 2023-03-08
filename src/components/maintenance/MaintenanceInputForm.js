@@ -10,6 +10,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import { format, startOfToday } from "date-fns";
@@ -51,30 +52,36 @@ let MaintenanceRequestInputForm = (props) => {
 			initialValues={maintenanceRequestValues}
 			enableReinitialize
 			validationSchema={MaintenanceRequestSchema}
-			onSubmit={async (values, { resetForm }) => {
-				let maintenanceRequest = {
-					id: values.id,
-					property_unit: values.property_unit,
-					property: values.property,
-					date_created: values.date_created,
-					expected_completion_date: values.expected_completion_date,
-					actual_completion_date: values.actual_completion_date,
-					tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
-					maintenance_details: values.maintenance_details,
-					other_details: values.other_details,
-					enter_permission: values.enter_permission,
-					issue_urgency: values.issue_urgency,
-					status: values.status,
-				};
-				await handleItemSubmit(maintenanceRequest, "maintenance-requests")
-				resetForm({});
-				if (values.id) {
-					history.goBack();
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					let maintenanceRequest = {
+						id: values.id,
+						property_unit: values.property_unit,
+						property: values.property,
+						date_created: values.date_created,
+						expected_completion_date: values.expected_completion_date,
+						actual_completion_date: values.actual_completion_date,
+						tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
+						maintenance_details: values.maintenance_details,
+						other_details: values.other_details,
+						enter_permission: values.enter_permission,
+						issue_urgency: values.issue_urgency,
+						status: values.status,
+					};
+					await handleItemSubmit(maintenanceRequest, "maintenance-requests")
+					resetForm({});
+					if (values.id) {
+						history.goBack();
+					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				touched,
 				errors,
 				handleChange,
@@ -96,6 +103,14 @@ let MaintenanceRequestInputForm = (props) => {
 							alignItems="center"
 							direction="column"
 						>
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid item container direction="row" spacing={2}>
 								<Grid item xs={12} md={6}>
 									<TextField

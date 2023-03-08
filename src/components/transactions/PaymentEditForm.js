@@ -6,6 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import * as Yup from "yup";
@@ -58,26 +59,32 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 					<Formik
 						initialValues={paymentValues}
 						enableReinitialize validationSchema={PaymentSchema}
-						onSubmit={async (values, { resetForm }) => {
-							const chargePayment = {
-								id: paymentToEdit.id,
-								charge_id: values.charge_id,
-								payment_amount: values.payment_amount,
-								memo: values.memo,
-								payment_date: values.payment_date,
-								tenant_id: values.tenant_id,
-								unit_id: values.unit_id,
-								property_id: values.property_id,
-								payment_label: values.payment_label,
-								payment_type: values.payment_type,
-							};
-							await handleItemSubmit(chargePayment, 'charge-payments')
-							resetForm({});
-							history.goBack()
+						onSubmit={async (values, { resetForm, setStatus }) => {
+							try {
+								const chargePayment = {
+									id: paymentToEdit.id,
+									charge_id: values.charge_id,
+									payment_amount: values.payment_amount,
+									memo: values.memo,
+									payment_date: values.payment_date,
+									tenant_id: values.tenant_id,
+									unit_id: values.unit_id,
+									property_id: values.property_id,
+									payment_label: values.payment_label,
+									payment_type: values.payment_type,
+								};
+								await handleItemSubmit(chargePayment, 'charge-payments')
+								resetForm({});
+								history.goBack()
+								setStatus({ sent: true, msg: "Details saved successfully!" })
+							} catch (error) {
+								setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+							}
 						}}
 					>
 						{({
 							values,
+							status,
 							handleSubmit,
 							touched,
 							errors,
@@ -92,6 +99,14 @@ let PaymentEditForm = ({ history, unitWithCharge, paymentToEdit, contactWithPaym
 									onSubmit={handleSubmit}
 								>
 									<Grid container>
+										{
+											status && status.msg && (
+												<CustomSnackbar
+													variant={status.sent ? "success" : "error"}
+													message={status.msg}
+												/>
+											)
+										}
 										<Grid item container spacing={2} direction="column">
 											<Grid item>
 												<TextField

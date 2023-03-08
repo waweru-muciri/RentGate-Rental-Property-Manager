@@ -1,5 +1,10 @@
 import React from "react";
-import { Typography, Grid, Button, TextField, MenuItem } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import MenuItem from "@material-ui/core/MenuItem";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
@@ -32,26 +37,31 @@ const NoticeInputForm = (props) => {
     <Formik
       initialValues={noticeValues}
       validationSchema={VacatingNoticeSchema}
-      onSubmit={async (values, { resetForm }) => {
-        console.log('Lease details => ', values)
-        const vacatingNotice = {
-          id: values.id,
-          lease_id: values.lease_id,
-          vacating_date: values.vacating_date,
-          notification_date: values.notification_date,
-          unit_id: values.lease_details.unit_id,
-          property_id: values.lease_details.property_id,
-          tenant_id: values.lease_details.tenants[0]
-        };
-        await submitForm(vacatingNotice, "notices")
-        resetForm({});
-        if (values.id) {
-          history.goBack()
+      onSubmit={async (values, { resetForm, setStatus }) => {
+        try {
+          const vacatingNotice = {
+            id: values.id,
+            lease_id: values.lease_id,
+            vacating_date: values.vacating_date,
+            notification_date: values.notification_date,
+            unit_id: values.lease_details.unit_id,
+            property_id: values.lease_details.property_id,
+            tenant_id: values.lease_details.tenants[0]
+          };
+          await submitForm(vacatingNotice, "notices")
+          resetForm({});
+          if (values.id) {
+            history.goBack()
+          }
+          setStatus({ sent: true, msg: "Details saved successfully!" })
+        } catch (error) {
+          setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
         }
       }}
     >
       {({
         values,
+        status,
         handleSubmit,
         errors,
         handleChange,
@@ -72,6 +82,14 @@ const NoticeInputForm = (props) => {
               alignItems="stretch"
               direction="column"
             >
+              {
+                status && status.msg && (
+                  <CustomSnackbar
+                    variant={status.sent ? "success" : "error"}
+                    message={status.msg}
+                  />
+                )
+              }
               <Grid item>
                 <Typography color="textSecondary" component="p">
                   Recording every tenant's intention to move out will automatically end the agreement

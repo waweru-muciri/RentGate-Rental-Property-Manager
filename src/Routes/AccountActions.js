@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { auth } from "../firebase";
-import Layout from "../components/PrivateLayout";
+import Layout from "../components/GeneralLayout";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -8,12 +8,12 @@ import FormControl from "@material-ui/core/FormControl";
 import Typography from "@material-ui/core/Typography";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
 import { connect } from "react-redux";
-import { useHistory, Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import queryString from 'query-string';
 import { Formik } from "formik";
 import { commonStyles } from "../components/commonStyles";
-import { signInUserWithEmailAndPassword, setCurrentUser } from "../actions/actions";
 import * as Yup from "yup";
 
 
@@ -31,47 +31,36 @@ const ResetPasswordSchema = Yup.object().shape({
 });
 
 let AccountActions = (props) => {
+    const [emailVerificationSuccess, setEmailVerificationSuccess] = useState()
+    const [emailVerificationError, setEmailVerificationError] = useState()
     const classes = commonStyles();
-    const { setUser } = props
 
-    let loginValues = { password: "", confirmPassword: "" };
+    let loginValues = { email: '', password: "", confirmPassword: "" };
 
-    const history = useHistory();
     let params = queryString.parse(props.location.search)
     // Get the action to complete.
     var mode = params.mode;
     // Get the one-time code from the query parameter.
     var actionCode = params.oobCode;
 
-    const getEmailConfirmationLayout = async () => {
+    const applyEmailConfirmationCode = async () => {
         try {
             await auth.applyActionCode(actionCode)
             // Email address has been verified.
             // Display a confirmation message to the user.
             // You could also provide the user with a link back to the app.
-            return (
-                <div>
-                    <Typography variant="subtitle1" align="center">
-                        Email Verified Successfully
-                        </Typography>
-                    <Button component={Link} to={'/sign-in'}>Sign In</Button>
-                </div>
-            )
+            setEmailVerificationSuccess(true)
         } catch (error) {
             // Code is invalid or expired. Ask the user to verify their email address
             // again.
-            return (
-                <Typography variant="subtitle1" align="center">
-                    Email Verification Failed! Code is invalid or expired!
-                </Typography>
-            )
+            setEmailVerificationError(true)
         }
 
     }
 
     return (
-        <Layout pageTitle="Sign In">
-            <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
+        <Layout>
+            <Box border={1} borderRadius="borderRadius" borderColor="grey.400" p={4}>
                 {
                     mode === "resetPassword" ?
                         (
@@ -82,7 +71,6 @@ let AccountActions = (props) => {
                                     // Verify the password reset code is valid.
                                     try {
                                         var accountEmail = await auth.verifyPasswordResetCode(actionCode)
-                                        var userEmail = values.email;
                                         var newPassword = values.password;
                                         try {
                                             // TODO: Show the reset screen with the user's email and ask the user for
@@ -91,14 +79,8 @@ let AccountActions = (props) => {
                                             await auth.confirmPasswordReset(actionCode, newPassword)
                                             // Password reset has been confirmed and new password updated.
                                             //sign-in the user directly
-                                            try {
-                                                const signedInUser = await signInUserWithEmailAndPassword(userEmail, newPassword);
-                                                setUser(signedInUser)
-                                                resetForm({});
-                                                history.push('/')
-                                            } catch (error) {
-                                                console.log('Cannot sign in user with password change')
-                                            }
+                                            resetForm({});
+                                            setStatus({ success: "Password reset successful!" });
                                         } catch (error) {
                                             setStatus({ error: "Error occurred during confirmation. The code might have expired or the password is too weak." });
                                             console.log('Error confirming password reset => ', error)
@@ -125,18 +107,26 @@ let AccountActions = (props) => {
                                             id="resetPasswordForm"
                                             onSubmit={handleSubmit}
                                         >
-                                            <Grid container justify="center" direction="column" spacing={3}>
-                                                <Grid item key={2}>
+                                            <Grid container justify="center" direction="column" spacing={2}>
+                                                <Grid item>
                                                     <Typography variant="subtitle1">Reset Password</Typography>
                                                 </Grid>
-                                                <Grid item key={3}>
-                                                    <FormControl fullWidth>
-                                                        {status && (
+                                                {status && status.error && (
+                                                    <Grid item>
+                                                        <FormControl fullWidth>
                                                             <FormHelperText error={true}>
                                                                 {status.error}
                                                             </FormHelperText>
-                                                        )}
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </Grid>
+                                                )}
+                                                {status && status.success && (
+                                                    <Grid item>
+                                                        <Typography variant="h6">Password reset successful.</Typography>
+                                                        <Link component={RouterLink} to="/app/login">Click here to login</Link>
+                                                    </Grid>
+                                                )}
+                                                <Grid item>
                                                     <TextField
                                                         fullWidth
                                                         variant="outlined"
@@ -151,6 +141,8 @@ let AccountActions = (props) => {
                                                         error={'email' in errors}
                                                         InputLabelProps={{ shrink: true }}
                                                     />
+                                                </Grid>
+                                                <Grid item>
                                                     <TextField
                                                         fullWidth
                                                         variant="outlined"
@@ -165,6 +157,8 @@ let AccountActions = (props) => {
                                                         error={errors.password && touched.password}
                                                         InputLabelProps={{ shrink: true }}
                                                     />
+                                                </Grid>
+                                                <Grid item>
                                                     <TextField
                                                         fullWidth
                                                         variant="outlined"
@@ -187,14 +181,14 @@ let AccountActions = (props) => {
                                                         disabled={isSubmitting}
                                                         type="submit"
                                                         variant="outlined"
-                                                        color="primary"
                                                         form="resetPasswordForm">
                                                         Reset Password
                                                 </Button>
                                                 </Grid>
                                             </Grid>
                                         </form>
-                                    )}
+                                    )
+                                }
                             />
                         )
                         : mode === 'verifyEmail' ?
@@ -203,24 +197,38 @@ let AccountActions = (props) => {
                             // parameter.
                             // Try to apply the email verification code.
                             (
-                                <div>
+                                <Grid container justify="center" alignItems="center" direction="column" spacing={2}>
+                                    <Grid item>
+                                        <Typography variant="subtitle1">Email Account Verification</Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant="contained" color="primary" onClick={applyEmailConfirmationCode}>Verify Email</Button>
+                                    </Grid>
                                     {
-                                        getEmailConfirmationLayout()
+                                        emailVerificationSuccess &&
+                                        <Grid item>
+                                            <Typography variant="subtitle1" align="center">
+                                                Email Verified Successfully
+                                        </Typography>
+                                            <Link component={RouterLink} to="/app/login">Click here to login</Link>
+                                        </Grid>
                                     }
-                                </div>
+                                    {
+                                        emailVerificationError &&
+                                        <Grid item>
+                                            <Typography variant="subtitle1" align="center">
+                                                Email Verification Failed! Code is invalid or expired!
+                                        </Typography>
+                                        </Grid>
+                                    }
+                                </Grid>
                             )
 
                             : null
                 }
             </Box>
-        </Layout >
+        </Layout>
     );
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        setUser: (user) => dispatch(setCurrentUser(user)),
-    };
-};
-
-export default connect(null, mapDispatchToProps)(AccountActions);
+export default connect(null)(AccountActions);

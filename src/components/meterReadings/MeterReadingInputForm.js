@@ -1,5 +1,9 @@
 import React from "react";
-import { Grid, Button, TextField, MenuItem } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import MenuItem from "@material-ui/core/MenuItem";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import SaveIcon from "@material-ui/icons/Save";
@@ -45,44 +49,50 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
       initialValues={meterReadingValues}
       enableReinitialize
       validationSchema={MeterReadingSchema}
-      onSubmit={async (values, { resetForm }) => {
-        const meterReading = {
-          id: values.id,
-          meter_type: values.meter_type,
-          prior_value: values.prior_value,
-          current_value: values.current_value,
-          base_charge: values.base_charge,
-          unit_charge: values.unit_charge,
-          property_unit: values.property_unit,
-          property: values.property,
-          tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
-          reading_date: values.reading_date,
-        };
-        //assign usage values to meter reading
-        meterReading.usage = values.current_value - values.prior_value
-        meterReading.amount = (meterReading.usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
-        await handleItemSubmit( meterReading, "meter_readings")
-        if (!values.id) {
-          const newMeterReadingCharge = {
-            charge_amount: meterReading.amount,
-            charge_date: defaultDate,
-            charge_label: "Utility Income",
-            charge_type: "meter_type",
-            due_date: defaultDate,
-            tenant_id: meterReading.tenant_id,
-            unit_id: values.property_unit,
+      onSubmit={async (values, { resetForm, setStatus }) => {
+        try {
+          const meterReading = {
+            id: values.id,
+            meter_type: values.meter_type,
+            prior_value: values.prior_value,
+            current_value: values.current_value,
+            base_charge: values.base_charge,
+            unit_charge: values.unit_charge,
+            property_unit: values.property_unit,
             property: values.property,
+            tenant_id: propertyUnits.find(unit => unit.id === values.property_unit).tenant_id,
+            reading_date: values.reading_date,
+          };
+          //assign usage values to meter reading
+          meterReading.usage = values.current_value - values.prior_value
+          meterReading.amount = (meterReading.usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
+          await handleItemSubmit(meterReading, "meter_readings")
+          if (!values.id) {
+            const newMeterReadingCharge = {
+              charge_amount: meterReading.amount,
+              charge_date: defaultDate,
+              charge_label: "Utility Income",
+              charge_type: "meter_type",
+              due_date: defaultDate,
+              tenant_id: meterReading.tenant_id,
+              unit_id: values.property_unit,
+              property: values.property,
+            }
+            await handleItemSubmit(newMeterReadingCharge, "transactions-charges")
           }
-          await handleItemSubmit( newMeterReadingCharge, "transactions-charges")
-        }
-        resetForm({})
-        if (values.id) {
-          history.goBack();
+          resetForm({})
+          if (values.id) {
+            history.goBack();
+          }
+          setStatus({ sent: true, msg: "Details saved successfully!" })
+        } catch (error) {
+          setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
         }
       }}
     >
       {({
         values,
+        status,
         handleSubmit,
         setFieldValue,
         errors,
@@ -104,6 +114,14 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
               alignItems="stretch"
               direction="column"
             >
+              {
+                status && status.msg && (
+                  <CustomSnackbar
+                    variant={status.sent ? "success" : "error"}
+                    message={status.msg}
+                  />
+                )
+              }
               <Grid item container direction="row" spacing={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
@@ -113,7 +131,7 @@ const MeterReadingInputForm = ({ properties, propertyUnits, history, meterReadin
                     name="property"
                     label="Property"
                     id="property"
-                    onChange={ (event) => {
+                    onChange={(event) => {
                       setFieldValue('property', event.target.value)
                       setFieldValue('property_unit', '')
                     }

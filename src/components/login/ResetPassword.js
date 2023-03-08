@@ -6,6 +6,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Yup from "yup";
 import { Formik } from "formik";
+import { resetUserPasswordByEmail } from "../../actions/actions";
 
 
 const ResetPasswordSchema = Yup.object().shape({
@@ -13,11 +14,7 @@ const ResetPasswordSchema = Yup.object().shape({
 });
 
 export default function FormDialog(props) {
-  const { auth, open, handleClose } = props
-
-  const resetUserPasswordByEmail = (email) => {
-    return auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/' })
-  }
+  const { open, handleClose } = props
 
   const emailValues = { email: '' }
   return (
@@ -35,6 +32,7 @@ export default function FormDialog(props) {
           } catch (error) {
             setSubmitting(false);
             // Handle Errors here.
+            console.log("Error => ", error)
             var errorCode = error.code;
             var errorMessage =
               errorCode === "auth/missing-continue-uri"

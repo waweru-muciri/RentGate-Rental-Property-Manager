@@ -42,7 +42,6 @@ function EnhancedTableHead(props) {
           <StyledTableCell key={index}>
             {headCell.label}
           </StyledTableCell>
-
         ))}
       </TableRow>
     </TableHead>

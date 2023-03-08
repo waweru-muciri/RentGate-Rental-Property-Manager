@@ -12,6 +12,8 @@ import * as communicationEmailsReducers from "./CommunicationEmails";
 import * as transactionChargesReducers from "./transactionsCharges";
 import * as leaseReducers from "./leases";
 import * as noticesReducers from "./notices";
+import * as companyProfileReducers from "./companyProfile";
+import * as accountBillingsReducers from "./accountBilling";
 import * as expensesReducers from "./expenses";
 import * as toDosReducers from "./toDos";
 import * as meterReadingsReducers from "./meterReadings";
@@ -68,6 +70,7 @@ function reducers(state = {}, action) {
         properties: propertyReducers.properties(state.properties, action),
         propertyUnitCharges: propertyUnitChargesReducers.propertyUnitCharges(state.propertyUnitCharges, action),
         propertyUnits: propertyUnitsReducers.propertyUnits(state.propertyUnits, action),
+        companyProfile: companyProfileReducers.companyProfiles(state.companyProfile, action),
         mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
         users: usersReducers.users(state.users, action),
         expenses: expensesReducers.expenses(state.expenses, action),
@@ -89,6 +92,7 @@ function reducers(state = {}, action) {
         meterReadings: meterReadingsReducers.meterReadings(state.meterReadings, action),
         toDos: toDosReducers.toDos(state.toDos, action),
         notices: noticesReducers.notices(state.notices, action),
+        accountBillings: accountBillingsReducers.accountBillings(state.accountBillings, action),
         currentUser: setCurrentUser(state.currentUser, action),
         auditLogs: logsReducers.logs(state.auditLogs, action),
         isLoading: itemsIsLoading(state.isLoading, action),

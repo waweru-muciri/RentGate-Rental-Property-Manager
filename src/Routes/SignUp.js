@@ -1,18 +1,18 @@
 import React from "react";
 import Layout from "../components/GeneralLayout";
 import PageHeading from "../components/PageHeading";
-import { useHistory, Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import Typography from "@material-ui/core/Typography"
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import Grid from "@material-ui/core/Grid"
+import Link from "@material-ui/core/Link"
 import FormHelperText from "@material-ui/core/FormHelperText"
 import Box from "@material-ui/core/Box"
 import FormControl from "@material-ui/core/FormControl"
 import { connect } from "react-redux";
 import { Formik } from "formik";
 import {
-  setCurrentUser,
   signUpWithEmailAndPassword,
   handleItemFormSubmit,
 } from "../actions/actions";
@@ -32,8 +32,7 @@ const SignUpSchema = Yup.object().shape({
     }),
 });
 
-const SignUpLayout = ({ setUser }) => {
-  const history = useHistory();
+const SignUpLayout = ({ handleItemSubmit, history }) => {
 
   const classes = commonStyles();
 
@@ -49,10 +48,9 @@ const SignUpLayout = ({ setUser }) => {
             var email = values.email;
             var password = values.password;
             try {
-              const createdUser = await signUpWithEmailAndPassword(email, password);
-              setUser(createdUser)
+              await signUpWithEmailAndPassword(email, password);
               resetForm({});
-              history.push("/app");
+              setStatus({ success: "Successfully added user" })
             } catch (error) {
               setSubmitting(false);
               setStatus({ error: error.message });
@@ -79,11 +77,19 @@ const SignUpLayout = ({ setUser }) => {
                   <Grid item key={2}>
                     <PageHeading text={"Sign Up"} />
                   </Grid>
-                  {status && (
+                  {status && status.error && (
                     <Grid item xs={12}>
                       <FormControl fullWidth>
                         <FormHelperText error={true}>{status.error}</FormHelperText>
                       </FormControl>
+                    </Grid>
+                  )}
+                  {status && status.success && (
+                    <Grid item>
+                      <Typography variant="h6" align="center">Verify your email address</Typography>
+                      <Typography variant="subtitle1">In order to start using your account, you need to
+                      confirm your email address. A link to verify your email has been sent to the email provided.</Typography>
+                      <Link component={RouterLink} to="/app/login">Click here to login</Link>
                     </Grid>
                   )}
                   <Grid item>
@@ -158,8 +164,8 @@ const SignUpLayout = ({ setUser }) => {
                       <Button
                         disabled={isSubmitting}
                         color="primary"
-                        component={Link}
-                        to={"/login"}
+                        component={RouterLink}
+                        to={"/app/login"}
                       >
                         Sign In
                     </Button>
@@ -176,8 +182,7 @@ const SignUpLayout = ({ setUser }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    submitForm: (currentUser, userDetails) => dispatch(handleItemFormSubmit(currentUser, userDetails, "users")),
-    setUser: (user) => dispatch(setCurrentUser(user)),
+    handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
   };
 };
 

@@ -122,15 +122,14 @@ let MeterReadingsPage = ({
     };
 
     return (
-        <Layout pageTitle="Rental Units Meter Readings">
+        <Layout pageTitle="Units Meter Readings">
             <Grid
                 container
                 spacing={3}
-                justify="space-evenly"
                 alignItems="center"
             >
                 <Grid item lg={12}>
-                    <PageHeading text="Rental Units Meter Readings" />
+                    <PageHeading text="Units Meter Readings" />
                 </Grid>
                 <Grid
                     container

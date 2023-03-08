@@ -10,6 +10,7 @@ import IconButton from "@material-ui/core/IconButton";
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
+import CustomSnackbar from '../CustomSnackbar'
 import { connect } from "react-redux";
 import { Formik } from "formik";
 import {
@@ -62,40 +63,47 @@ let PropertyUnitInputForm = (props) => {
 		<Formik
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertyUnitSchema}
-			onSubmit={async (values, { resetForm }) => {
-				let property_unit = {
-					id: values.id,
-					property_id: values.property_id,
-					ref: values.ref,
-					address: values.ref,
-					unit_type: values.unit_type,
-					beds: values.beds,
-					baths: values.baths,
-					sqft: values.sqft,
-				};
-				//check if the unit has an image to upload
-				if (values.unit_image && values.unit_image.data) {
-					//if the user had previously uploaded an image for unit
-					// then delete it here and replace the url with new uploaded image
-					if (values.unit_image_url) {
-						//delete file from storage
-						await deleteUploadedFileByUrl(values.unit_image_url);
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					let property_unit = {
+						id: values.id,
+						property_id: values.property_id,
+						ref: values.ref,
+						address: values.ref,
+						unit_type: values.unit_type,
+						beds: values.beds,
+						baths: values.baths,
+						sqft: values.sqft,
+					};
+					//check if the unit has an image to upload
+					if (values.unit_image && values.unit_image.data) {
+						//if the user had previously uploaded an image for unit
+						// then delete it here and replace the url with new uploaded image
+						if (values.unit_image_url) {
+							//delete file from storage
+							await deleteUploadedFileByUrl(values.unit_image_url);
+						}
+						//upload the file to the database and assign the resulting file 
+						// upload path to property_unit
+						const fileUploadPath = await uploadFilesToFirebase(values.unit_image)
+						property_unit.unit_image_url = fileUploadPath
 					}
-					//upload the file to the database and assign the resulting file 
-					// upload path to property_unit
-					const fileUploadPath = await uploadFilesToFirebase(values.unit_image)
-					property_unit.unit_image_url = fileUploadPath
-				}
-				//save the unit details
-				await handleItemSubmit(property_unit, 'property_units')
-				resetForm({});
-				if (values.id) {
-					history.goBack();
+					//save the unit details
+					await handleItemSubmit(property_unit, 'property_units')
+					resetForm({});
+					if (values.id) {
+						history.goBack();
+					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+					
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				handleSubmit,
 				touched,
 				errors,
@@ -111,6 +119,14 @@ let PropertyUnitInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2}>
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid container item spacing={2} direction="column">
 								<Grid item>
 									<Typography variant="subtitle2">
@@ -251,7 +267,7 @@ let PropertyUnitInputForm = (props) => {
 												setCroppedImageData={(croppedImage) => {
 													setFieldValue('file_to_load_url', '');
 													setFieldValue('unit_image', croppedImage);
-												}} cropHeight={200} cropWidth={300}/>
+												}} cropHeight={200} cropWidth={300} />
 										}
 										<Avatar
 											style={{ width: "100%", height: '300px' }}
@@ -278,7 +294,7 @@ let PropertyUnitInputForm = (props) => {
 											</label>
 											<Box marginBottom="1">{values.unit_image_url || values.unit_image ? "Change Image" : "Add Image"}</Box>
 											{
-												values.unit_image_url ? <Button variant="contained" onClick={ async () => {
+												values.unit_image_url ? <Button variant="contained" onClick={async () => {
 													await deleteUploadedFileByUrl(values.unit_image_url)
 													setFieldValue('unit_image_url', '')
 												}}>Delete Image</Button> : null

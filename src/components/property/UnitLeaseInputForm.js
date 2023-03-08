@@ -9,6 +9,7 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import AddIcon from "@material-ui/icons/Add";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../../components/commonStyles";
 import {
@@ -100,58 +101,64 @@ let UnitLeaseInputForm = (props) => {
 		<Formik
 			initialValues={unitLeaseValues}
 			enableReinitialize validationSchema={UnitLeaseSchema}
-			onSubmit={async (values, { resetForm }) => {
-				let propertyUnitLease = {
-					id: values.id,
-					property_id: values.property_id,
-					unit_id: values.unit_id,
-					lease_type: values.lease_type,
-					rent_cycle: values.rent_cycle,
-					tenants: values.tenants.map(tenant => tenant.id),
-					cosigner: values.cosigner ? values.cosigner.id : "",
-					start_date: values.start_date,
-					end_date: values.end_date,
-					rent_due_date: values.rent_due_date,
-					security_deposit: values.security_deposit,
-					security_deposit_due_date: values.security_deposit_due_date,
-					rent_amount: values.rent_amount,
-					terminated: values.terminated
-				};
-				await handleItemSubmit(propertyUnitLease, "leases")
-				if (!values.id) {
-					//post charges for rent and  security deposit 
-					const tenant = values.tenants[0]
-					const newRentCharge = {
-						charge_amount: values.rent_amount,
-						charge_date: defaultDate,
-						charge_label: "Rent",
-						charge_type: "rent",
-						due_date: defaultDate,
-						tenant_id: tenant.id,
-						unit_id: values.unit_id,
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					let propertyUnitLease = {
+						id: values.id,
 						property_id: values.property_id,
-					}
-					const newSecurityDepositCharge = {
-						charge_amount: values.security_deposit,
-						charge_date: defaultDate,
-						charge_label: "Security Deposit",
-						charge_type: "security_deposit",
-						due_date: values.security_deposit_due_date,
-						tenant_id: tenant.id,
 						unit_id: values.unit_id,
-						property_id: values.property_id,
+						lease_type: values.lease_type,
+						rent_cycle: values.rent_cycle,
+						tenants: values.tenants.map(tenant => tenant.id),
+						cosigner: values.cosigner ? values.cosigner.id : "",
+						start_date: values.start_date,
+						end_date: values.end_date,
+						rent_due_date: values.rent_due_date,
+						security_deposit: values.security_deposit,
+						security_deposit_due_date: values.security_deposit_due_date,
+						rent_amount: values.rent_amount,
+						terminated: values.terminated
+					};
+					await handleItemSubmit(propertyUnitLease, "leases")
+					if (!values.id) {
+						//post charges for rent and  security deposit 
+						const tenant = values.tenants[0]
+						const newRentCharge = {
+							charge_amount: values.rent_amount,
+							charge_date: defaultDate,
+							charge_label: "Rent",
+							charge_type: "rent",
+							due_date: defaultDate,
+							tenant_id: tenant.id,
+							unit_id: values.unit_id,
+							property_id: values.property_id,
+						}
+						const newSecurityDepositCharge = {
+							charge_amount: values.security_deposit,
+							charge_date: defaultDate,
+							charge_label: "Security Deposit",
+							charge_type: "security_deposit",
+							due_date: values.security_deposit_due_date,
+							tenant_id: tenant.id,
+							unit_id: values.unit_id,
+							property_id: values.property_id,
+						}
+						await handleItemSubmit(newRentCharge, 'transactions-charges')
+						await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 					}
-					await handleItemSubmit(newRentCharge, 'transactions-charges')
-					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
-				}
-				resetForm({});
-				if (values.id) {
-					history.goBack()
+					resetForm({});
+					if (values.id) {
+						history.goBack()
+					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				handleSubmit,
 				errors,
 				touched,
@@ -167,6 +174,14 @@ let UnitLeaseInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={1} direction="column">
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid item>
 								<Typography variant="subtitle1" component="h2">
 									Agreement Details
@@ -225,7 +240,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item xs md={4}>
+								<Grid item xs={12} md={4}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -246,7 +261,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item container xs md={8} direction="row" spacing={2}>
+								<Grid item container xs={12} md={8} direction="row" spacing={2}>
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
@@ -447,11 +462,11 @@ let UnitLeaseInputForm = (props) => {
 									/>
 								</Grid>
 							</Grid>
-							<Grid item container direction="column" spacing={1}>
-								<Grid item>
+							<Grid item container direction="column" spacing={1} xs={12}>
+								<Grid item xs={12}>
 									<Typography variant="subtitle1">Unit Charges</Typography>
 								</Grid>
-								<Grid item>
+								<Grid item xs={12}>
 									<ChargesTable
 										rows={values.unit_charges}
 										headCells={recurringChargesTableHeadCells}
@@ -466,7 +481,7 @@ let UnitLeaseInputForm = (props) => {
 											chargeValues={chargeToEdit} /> : null
 									}
 								</Grid>
-								<Grid item>
+								<Grid item xs={12}>
 									<Button
 										className={classes.oneMarginTopBottom}
 										variant="outlined"

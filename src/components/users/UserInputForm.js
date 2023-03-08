@@ -5,18 +5,22 @@ import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { useHistory } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import IconButton from "@material-ui/core/IconButton";
-import PhotoCamera from '@material-ui/icons/PhotoCamera'; 
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import CustomSnackbar from '../CustomSnackbar'
 import {
 	getContactTitles,
 	getGendersList,
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
 import {
+	createFirebaseUser,
+	setDatabaseRefCustomClaim,
 	uploadFilesToFirebase,
 	deleteUploadedFileByUrl,
 } from "../../actions/actions";
@@ -33,19 +37,24 @@ const UserSchema = Yup.object().shape({
 	first_name: Yup.string().trim().required("First Name is required"),
 	last_name: Yup.string().trim().required("Last Name is Required"),
 	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
-	primary_email: Yup.string().trim().email("Invalid Email"),
+	primary_email: Yup.string().trim().email("Invalid Email").required("Primary Email is Required"),
 	other_email: Yup.string().trim().email("Invalid Email"),
 	phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
 	work_mobile_number: Yup.string().trim().min(10, 'Too Short'),
-	custom_mobile_number: Yup.string().trim().min(10, 'Too Short'),
-	home_phone_number: Yup.string().trim().min(10, 'Too Short'),
+	password: Yup.string().min(6, "Too Short!")
+		.max(20, "We prefer an insecure system, try a shorter password.")
+		.required("Pasword is Required"),
+	confirm_password: Yup.string()
+		.test("passwords-match", "Passwords must match", function (value) {
+			return this.parent.password === value;
+		}).required("Please Confirm Password")
 });
 
 let UserInputForm = (props) => {
 	let { handleItemSubmit } = props;
 	const userToEdit = props.userToEdit ? props.userToEdit : {};
 	const userValues = {
-		id: userToEdit.id || '',
+		id: userToEdit.id,
 		gender: userToEdit.gender || "",
 		title: userToEdit.title || "",
 		id_number: userToEdit.id_number || '',
@@ -55,10 +64,10 @@ let UserInputForm = (props) => {
 		other_email: userToEdit.other_email || '',
 		phone_number: userToEdit.phone_number || '',
 		work_mobile_number: userToEdit.work_mobile_number || '',
-		home_phone_number: userToEdit.home_phone_number || "",
-		custom_mobile_number: userToEdit.custom_mobile_number || '',
 		user_avatar_url: userToEdit.user_avatar_url || '',
 		user_image: '',
+		password: '',
+		confirm_password: ''
 	}
 	const history = useHistory();
 	let classes = commonStyles();
@@ -68,42 +77,60 @@ let UserInputForm = (props) => {
 			initialValues={userValues}
 			enableReinitialize
 			validationSchema={UserSchema}
-			onSubmit={async (values, { resetForm }) => {
-				const user = {
-					id: values.id,
-					title: values.title,
-					gender: values.gender,
-					id_number: values.id_number,
-					primary_email: values.primary_email,
-					other_email: values.other_email,
-					first_name: values.first_name,
-					last_name: values.last_name,
-					phone_number: values.phone_number,
-					work_mobile_number: values.work_mobile_number,
-					home_phone_number: values.home_phone_number,
-					custom_mobile_number: values.custom_mobile_number,
-				};
-				//first upload the image to firebase
-				if (values.user_image && values.user_image.data) {
-					//if the user had previously had a file avatar uploaded
-					// then delete it here
-					if (values.user_avatar_url) {
-						//delete file
-						await deleteUploadedFileByUrl(values.user_avatar_url);
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					const user = {
+						id: values.id,
+						title: values.title,
+						gender: values.gender,
+						id_number: values.id_number,
+						first_name: values.first_name,
+						last_name: values.last_name,
+						primary_email: values.primary_email,
+						other_email: values.other_email,
+						phone_number: values.phone_number,
+						work_mobile_number: values.work_mobile_number,
+					};
+					//first upload the image to firebase
+					if (values.user_image && values.user_image.data) {
+						//if the user had previously had a file avatar uploaded
+						// then delete it here
+						if (values.user_avatar_url) {
+							//delete file
+							await deleteUploadedFileByUrl(values.user_avatar_url);
+						}
+						//upload the first and only image in the contact images array
+						var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
+						user.user_avatar_url = fileDownloadUrl;
 					}
-					//upload the first and only image in the contact images array
-					var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
-					user.user_avatar_url = fileDownloadUrl;
-				}
-				await handleItemSubmit(user, "users")
-				resetForm({});
-				if (values.id) {
-					history.goBack();
+					//create new user who can log in
+					try {
+						const returnData = await createFirebaseUser({
+							email: values.primary_email,
+							password: values.password, phoneNumber: values.phone_number
+						})
+						const newUserData = returnData.data
+						if (newUserData) {
+							await setDatabaseRefCustomClaim({ userId: newUserData.uid })
+						}
+					} catch (error) {
+						console.log("Error while creating user => ", error)
+					}
+					//store the user's profile in the db
+					await handleItemSubmit(user, "users")
+					resetForm({});
+					if (values.id) {
+						history.goBack();
+					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				touched,
 				errors,
 				handleChange,
@@ -115,6 +142,7 @@ let UserInputForm = (props) => {
 					<form
 						className={classes.form}
 						method="post"
+						noValidate
 						id="userInputForm"
 						onSubmit={handleSubmit}
 					>
@@ -125,6 +153,14 @@ let UserInputForm = (props) => {
 							alignItems="center"
 							direction="column"
 						>
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid
 								justify="center"
 								container
@@ -135,7 +171,7 @@ let UserInputForm = (props) => {
 								<Grid
 									item
 									container
-									justify="flex-start"
+									justify="center"
 									spacing={4}
 									alignItems="center"
 								>
@@ -155,7 +191,7 @@ let UserInputForm = (props) => {
 											setCroppedImageData={(croppedImage) => {
 												setFieldValue('file_to_load_url', '');
 												setFieldValue('user_image', croppedImage);
-											}} cropHeight={160} cropWidth={160}/>
+											}} cropHeight={160} cropWidth={160} />
 									}
 									<Grid key={2} item>
 										<Box>
@@ -177,6 +213,7 @@ let UserInputForm = (props) => {
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
 											select
 											name="title"
@@ -198,6 +235,7 @@ let UserInputForm = (props) => {
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
 											select
 											name="gender"
@@ -221,6 +259,7 @@ let UserInputForm = (props) => {
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
 											id="first_name"
 											name="first_name"
@@ -235,6 +274,7 @@ let UserInputForm = (props) => {
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
 											id="last_name"
 											name="last_name"
@@ -250,6 +290,7 @@ let UserInputForm = (props) => {
 								<Grid item sm>
 									<TextField
 										fullWidth
+										required
 										variant="outlined"
 										id="id_number"
 										name="id_number"
@@ -265,10 +306,11 @@ let UserInputForm = (props) => {
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
-											id={"phone_number"}
-											name={"phone_number"}
-											label="Phone Number"
+											id="phone_number"
+											name="phone_number"
+											label="Personal Phone Number"
 											onChange={handleChange}
 											onBlur={handleBlur}
 											error={errors.phone_number && touched.phone_number}
@@ -280,48 +322,21 @@ let UserInputForm = (props) => {
 										<TextField
 											fullWidth
 											variant="outlined"
-											id={"home_phone_number"}
-											name={"home_phone_number"}
-											label="Home Phone Number"
+											id="work_mobile_number"
+											name="work_mobile_number"
+											label="Work Phone Number"
 											onChange={handleChange}
 											onBlur={handleBlur}
-											helperText="Home Phone Number"
-											value={values.home_phone_number}
-										/>
-									</Grid>
-								</Grid>
-								<Grid item container direction="row" spacing={2}>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id={"work_mobile_number"}
-											name={"work_mobile_number"}
-											label="Work Mobile Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Work Mobile Number"
+											helperText="Work Phone Number"
 											value={values.work_mobile_number}
 										/>
 									</Grid>
-									<Grid item xs={12} sm>
-										<TextField
-											fullWidth
-											variant="outlined"
-											id="custom_mobile_number"
-											name="custom_mobile_number"
-											label="Custom Mobile Number"
-											onChange={handleChange}
-											onBlur={handleBlur}
-											helperText="Custom Mobile Number"
-											value={values.custom_mobile_number}
-										/>
-									</Grid>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
 											variant="outlined"
 											name="primary_email"
 											label="Primary Email"
@@ -348,24 +363,31 @@ let UserInputForm = (props) => {
 										/>
 									</Grid>
 								</Grid>
+								<Grid item>
+									<Typography>Password</Typography>
+								</Grid>
 								<Grid item container direction="row" spacing={2}>
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											required
+											type="password"
 											variant="outlined"
-											name="user_password"
-											label="Password"
-											id="user_password"
+											name="password"
+											label="User Password"
+											id="password"
 											onBlur={handleBlur}
 											onChange={handleChange}
-											value={values.user_password}
-											error={errors.user_password && touched.user_password}
-											helperText={touched.user_password && errors.user_password}
+											value={values.password}
+											error={errors.password && touched.password}
+											helperText={touched.password && errors.password}
 										/>
 									</Grid>
 									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
+											type="password"
+											required
 											variant="outlined"
 											name="confirm_password"
 											label="Confirm Password"

@@ -63,11 +63,12 @@ let MainPage = ({
   useEffect(() => {
     if (!currentUser) {
       auth.onAuthStateChanged(
-        function (user) {
+        async function (user) {
           if (user) {
             //get details about user
-            const userDetails = getFirebaseUserDetails(user)
+            const userDetails = await getFirebaseUserDetails(user)
             setUser(userDetails)
+            console.log("userDetails => ", userDetails)
           } else {
             // User is signed out.
             setUser(null);
@@ -94,6 +95,8 @@ let MainPage = ({
         "to-dos",
         "users",
         "expenses",
+        "company_profile",
+        "account-billing",
         "meter_readings",
       ]);
     }

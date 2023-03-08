@@ -10,6 +10,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
 import Box from "@material-ui/core/Box";
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import CustomSnackbar from '../CustomSnackbar'
 import { connect } from "react-redux";
 import { Formik, FieldArray } from "formik";
 import {
@@ -151,7 +152,7 @@ let PropertyInputForm = (props) => {
 							<ImageCropper open={true} selectedFile={property_unit.file_to_load_url}
 								setCroppedImageData={(croppedImage) => {
 									replace(propertyUnitIndex, Object.assign({}, property_unit, { file_to_load_url: '', image: croppedImage }));
-								}} cropHeight={200} cropWidth={300}/>
+								}} cropHeight={200} cropWidth={300} />
 						}
 						<Box>
 							<input onChange={(event) => {
@@ -209,52 +210,59 @@ let PropertyInputForm = (props) => {
 		<Formik
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertySchema}
-			onSubmit={async (values, { resetForm }) => {
-				let property = {
-					id: values.id,
-					assigned_to: values.assigned_to,
-					city: values.city,
-					postal_code: values.postal_code,
-					address: values.address,
-					ref: values.ref,
-					owner: values.owner,
-				};
-				//first upload the image to firebase
-				if (values.property_image && values.property_image.data) {
-					//if the user had previously uploaded an image
-					// then delete it here and replace the url with new uploaded image
-					if (values.property_image_url) {
-						//delete file from storage
-						await deleteUploadedFileByUrl(values.property_image_url);
+			onSubmit={async (values, { resetForm, setStatus }) => {
+				try {
+					let property = {
+						id: values.id,
+						assigned_to: values.assigned_to,
+						city: values.city,
+						postal_code: values.postal_code,
+						address: values.address,
+						ref: values.ref,
+						owner: values.owner,
+					};
+					//first upload the image to firebase
+					if (values.property_image && values.property_image.data) {
+						//if the user had previously uploaded an image
+						// then delete it here and replace the url with new uploaded image
+						if (values.property_image_url) {
+							//delete file from storage
+							await deleteUploadedFileByUrl(values.property_image_url);
+						}
+						//upload the first and only image in the contact images array
+						var fileDownloadUrl = await uploadFilesToFirebase(values.property_image)
+						property.property_image_url = fileDownloadUrl;
 					}
-					//upload the first and only image in the contact images array
-					var fileDownloadUrl = await uploadFilesToFirebase(values.property_image)
-					property.property_image_url = fileDownloadUrl;
-				}
-				const propertyId = await handleItemSubmit(property, "properties")
-				values.property_units.forEach(async (property_unit) => {
-					//check if the unit has an image to upload
-					if (property_unit.image && property_unit.image.data) {
-						//upload the file to the database and assign the resulting file 
-						// upload path to property_unit
-						const fileUploadPath = await uploadFilesToFirebase(property_unit.image)
-						property_unit.unit_image_url = fileUploadPath
-					}
-					const propertyUnitToSave = Object.assign({}, property_unit, {
-						property_id: propertyId,
-						property_ref: values.ref,
-						assigned_to: values.assigned_to
+					const propertyId = await handleItemSubmit(property, "properties")
+					values.property_units.forEach(async (property_unit) => {
+						//check if the unit has an image to upload
+						if (property_unit.image && property_unit.image.data) {
+							//upload the file to the database and assign the resulting file 
+							// upload path to property_unit
+							const fileUploadPath = await uploadFilesToFirebase(property_unit.image)
+							property_unit.unit_image_url = fileUploadPath
+						}
+						const propertyUnitToSave = Object.assign({}, property_unit, {
+							property_id: propertyId,
+							property_ref: values.ref,
+							assigned_to: values.assigned_to
+						})
+						await handleItemSubmit(propertyUnitToSave, 'property_units')
 					})
-					await handleItemSubmit(propertyUnitToSave, 'property_units')
-				})
-				resetForm({});
-				if (values.id) {
-					history.goBack()
+					resetForm({});
+					if (values.id) {
+						history.goBack()
+					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				handleSubmit,
 				touched,
 				errors,
@@ -270,6 +278,14 @@ let PropertyInputForm = (props) => {
 						onSubmit={handleSubmit}
 					>
 						<Grid container spacing={2} direction="column">
+							{
+								status && status.msg && (
+									<CustomSnackbar
+										variant={status.sent ? "success" : "error"}
+										message={status.msg}
+									/>
+								)
+							}
 							<Grid item>
 								<TextField
 									fullWidth

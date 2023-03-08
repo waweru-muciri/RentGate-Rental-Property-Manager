@@ -6,14 +6,14 @@ const drawerWidth = 240;
 
 let useStyles = makeStyles((theme) => ({
 	form: {
-		marginTop: theme.spacing(2),
-		marginBottom: theme.spacing(2),
+		marginTop: theme.spacing(1),
+		marginBottom: theme.spacing(1),
 		marginLeft: theme.spacing(1),
 		marginRight: theme.spacing(1),
-		paddingRight: theme.spacing(2),
-		paddingLeft: theme.spacing(2),
-		paddingBottom: theme.spacing(2),
-		paddingTop: theme.spacing(2),
+		paddingRight: theme.spacing(1),
+		paddingLeft: theme.spacing(1),
+		paddingBottom: theme.spacing(1),
+		paddingTop: theme.spacing(1),
 		"& .MuiTextField-root": {
 			marginTop: theme.spacing(1),
 			marginBottom: theme.spacing(1),
@@ -25,9 +25,10 @@ let useStyles = makeStyles((theme) => ({
 		backgroundColor: red[500],
 	},
 	buttonBox: {
-		paddingTop: `${theme.spacing(2)}px`,
+		paddingTop: `${theme.spacing(1)}px`,
 		"& .MuiButton-root": {
 			margin: theme.spacing(1),
+			marginLeft: 0
 		},
 	},
 	fileInputDisplayNone: {

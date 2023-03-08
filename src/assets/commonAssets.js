@@ -126,7 +126,7 @@ export function getCurrentMonthFromToDates(){
 }
 
 export function getLastThreeMonthsFromToDates(){
-	return [startOfMonth(subMonths(startOfToday(), 1)), endOfMonth(subMonths(startOfToday(), 1))]
+	return [startOfMonth(subMonths(startOfToday(), 2)), endOfMonth(startOfToday())]
 }
 
 export function getMonthsInYear () {

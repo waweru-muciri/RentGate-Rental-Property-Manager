@@ -27,7 +27,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import GroupIcon from "@material-ui/icons/Group";
+import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import TimelineIcon from "@material-ui/icons/Timeline";
 import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -55,7 +55,7 @@ import MoneyOffIcon from '@material-ui/icons/MoneyOff';
 const navigationLinks = [
     { text: "Home", to: "/app/", icon: <DashboardIcon /> },
     { text: "Tenants", to: "/app/contacts", icon: <ContactsIcon /> },
-    { text: "Users", to: "/app/users", icon: <GroupIcon /> },
+    { text: "User Management", to: "/app/users", icon: <GroupAddIcon /> },
     { text: "Email", to: "/app/emails", icon: <ContactMailIcon /> },
     { text: "Account Settings", to: "/app/account-settings", icon: <SettingsIcon /> },
     { text: "Audit Logs", to: "/app/audit-logs", icon: <HistoryIcon /> },

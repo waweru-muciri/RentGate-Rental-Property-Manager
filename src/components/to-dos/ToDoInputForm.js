@@ -15,6 +15,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import CustomSnackbar from '../CustomSnackbar'
 import { Formik } from "formik";
 import { commonStyles } from "../commonStyles";
 import * as Yup from "yup";
@@ -48,29 +49,35 @@ let ToDoInputForm = (props) => {
 			initialValues={eventToShow}
 			enableReinitialize
 			validationSchema={ToDoSchema}
-			onSubmit={(values, { resetForm }) => {
-				let todo = {
-					id: values.id,
-					title: values.title,
-					start: values.start,
-					end: values.end,
-				};
-				todo.extendedProps = {
-					description: values.description,
-					reminder_date: values.reminder_date,
-					complete_status: values.complete_status,
-				};
-				handleItemSubmit( todo, "to-dos").then((response) => {
-					setEventToShow({});
-					resetForm({});
-					if (values.id) {
-						handleClose()
-					}
-				});
+			onSubmit={(values, { resetForm, setStatus }) => {
+				try {
+					let todo = {
+						id: values.id,
+						title: values.title,
+						start: values.start,
+						end: values.end,
+					};
+					todo.extendedProps = {
+						description: values.description,
+						reminder_date: values.reminder_date,
+						complete_status: values.complete_status,
+					};
+					handleItemSubmit(todo, "to-dos").then((response) => {
+						setEventToShow({});
+						resetForm({});
+						if (values.id) {
+							handleClose()
+						}
+					});
+					setStatus({ sent: true, msg: "Details saved successfully!" })
+				} catch (error) {
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
+				}
 			}}
 		>
 			{({
 				values,
+				status,
 				touched,
 				errors,
 				handleChange,
@@ -83,6 +90,14 @@ let ToDoInputForm = (props) => {
 						onClose={handleClose}
 						aria-labelledby="form-dialog-title"
 					>
+						{
+							status && status.msg && (
+								<CustomSnackbar
+									variant={status.sent ? "success" : "error"}
+									message={status.msg}
+								/>
+							)
+						}
 						<DialogTitle id="form-dialog-title">
 							{pageTitle}
 						</DialogTitle>

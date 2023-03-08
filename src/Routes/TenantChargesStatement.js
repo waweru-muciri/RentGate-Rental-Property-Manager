@@ -17,8 +17,6 @@ import { parse, isWithinInterval } from "date-fns";
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
-    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
     { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
     { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
@@ -128,7 +126,7 @@ let TenantChargesStatementPage = ({
     return (
         <Grid container spacing={2} justify="center" direction="column">
             <Grid item sm={12}>
-                <Typography variant="h6">Tenant Charges Statement</Typography>
+                <Typography variant="h6">Tenant Charges Statement - {tenantDetails.first_name} {tenantDetails.last_name} </Typography>
             </Grid>
             <Grid item container spacing={2} alignItems="center" direction="row">
                 <Grid item>
@@ -305,7 +303,7 @@ let TenantChargesStatementPage = ({
                 </Grid>
             </Grid>
             <Grid item container xs={12}>
-                <Grid item>
+                <Grid item xs={12}>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

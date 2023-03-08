@@ -42,11 +42,13 @@ const ContactSchema = Yup.object().shape({
 	contact_email: Yup.string().trim().email(),
 	alternate_email: Yup.string().trim().email(),
 	present_address: Yup.string().trim().default(''),
-	phone_number: Yup.string().trim().required('Phone Number is Required'),
+	personal_phone_number: Yup.string().trim().required('Phone Number is Required'),
 	date_of_birth: Yup.date().required("Date of Birth is Required"),
 });
 
 const currentDate = format(startOfToday(), 'yyyy-MM-dd')
+
+
 let ContactInputForm = (props) => {
 
 	const { history, handleItemSubmit } = props;
@@ -65,10 +67,8 @@ let ContactInputForm = (props) => {
 		alternate_address: contactToEdit.alternate_address || "",
 		contact_email: contactToEdit.contact_email || "",
 		alternate_email: contactToEdit.alternate_email || "",
-		phone_number: contactToEdit.phone_number || "",
-		work_mobile_number: contactToEdit.work_mobile_number || "",
-		home_phone_number: contactToEdit.home_phone_number || "",
-		custom_mobile_number: contactToEdit.custom_mobile_number || "",
+		personal_phone_number: contactToEdit.personal_phone_number || "",
+		work_phone_number: contactToEdit.work_phone_number || "",
 		date_of_birth: contactToEdit.date_of_birth || currentDate,
 		emergency_contact_email: contactToEdit.emergency_contact_email || "",
 		emergency_contact_name: contactToEdit.emergency_contact_name || "",
@@ -83,7 +83,7 @@ let ContactInputForm = (props) => {
 		<Formik
 			initialValues={contactValues}
 			enableReinitialize validationSchema={ContactSchema}
-			onSubmit={async (values, { resetForm }) => {
+			onSubmit={async (values, { resetForm, setStatus }) => {
 				try {
 					let contact = {
 						id: values.id,
@@ -98,10 +98,8 @@ let ContactInputForm = (props) => {
 						alternate_address: values.alternate_address,
 						contact_email: values.contact_email,
 						alternate_email: values.alternate_email,
-						phone_number: values.phone_number,
-						work_mobile_number: values.work_mobile_number,
-						home_phone_number: values.home_phone_number,
-						custom_mobile_number: values.custom_mobile_number,
+						personal_phone_number: values.personal_phone_number,
+						work_phone_number: values.work_phone_number,
 						emergency_contact_name: values.emergency_contact_name,
 						emergency_contact_relationship: values.emergency_contact_relationship,
 						emergency_contact_phone_number: values.emergency_contact_phone_number,
@@ -119,27 +117,21 @@ let ContactInputForm = (props) => {
 						var fileDownloadUrl = await uploadFilesToFirebase(values.contact_image)
 						contact.contact_avatar_url = fileDownloadUrl;
 					}
-	
+
 					await handleItemSubmit(contact, "contacts")
 					resetForm({});
 					if (values.id) {
 						history.goBack();
 					}
+					setStatus({ sent: true, msg: "Details saved successfully!" })
 				} catch (error) {
-					console.log("A fucking error => ", error)
-					return error && (
-						<div>
-						  <CustomSnackbar
-							variant="error"
-							message={error.message}
-						  />
-						</div>
-					  )
+					setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
 				}
 			}}
 		>
 			{({
 				values,
+				status,
 				touched,
 				handleSubmit,
 				setFieldValue,
@@ -151,6 +143,7 @@ let ContactInputForm = (props) => {
 					<form
 						className={classes.form}
 						method="post"
+						noValidate
 						id="contactInputForm"
 						onSubmit={handleSubmit}
 					>
@@ -164,6 +157,14 @@ let ContactInputForm = (props) => {
 									direction="column"
 									spacing={2}
 								>
+									{
+										status && status.msg && (
+											<CustomSnackbar
+												variant={status.sent ? "success" : "error"}
+												message={status.msg}
+											/>
+										)
+									}
 									<Grid item>
 										<Typography variant="h6">Personal Info</Typography>
 										<Box>
@@ -187,7 +188,7 @@ let ContactInputForm = (props) => {
 													setCroppedImageData={(croppedImage) => {
 														setFieldValue('file_to_load_url', '');
 														setFieldValue('contact_image', croppedImage);
-													}} cropHeight={160} cropWidth={160}/>
+													}} cropHeight={160} cropWidth={160} />
 											}
 											<Avatar
 												alt="Contact Image"
@@ -223,6 +224,7 @@ let ContactInputForm = (props) => {
 											name="title"
 											label="Title"
 											id="title"
+											required
 											onBlur={handleBlur}
 											onChange={handleChange}
 											value={values.title}
@@ -243,6 +245,7 @@ let ContactInputForm = (props) => {
 											id="first_name"
 											name="first_name"
 											label="First Name"
+											required
 											value={values.first_name}
 											onChange={handleChange}
 											onBlur={handleBlur}
@@ -257,6 +260,7 @@ let ContactInputForm = (props) => {
 											id="last_name"
 											name="last_name"
 											label="Last Name"
+											required
 											value={values.last_name}
 											onChange={handleChange}
 											onBlur={handleBlur}
@@ -272,6 +276,7 @@ let ContactInputForm = (props) => {
 											name="gender"
 											label="Gender"
 											id="gender"
+											required
 											onBlur={handleBlur}
 											onChange={handleChange}
 											value={values.gender}
@@ -309,6 +314,7 @@ let ContactInputForm = (props) => {
 											label="ID No."
 											type="text"
 											name="id_number"
+											required
 											value={values.id_number}
 											onChange={handleChange}
 											onBlur={handleBlur}
@@ -338,55 +344,28 @@ let ContactInputForm = (props) => {
 											<TextField
 												fullWidth
 												variant="outlined"
-												id={"phone_number"}
-												name={"phone_number"}
-												label="Phone Number"
+												id={"personal_phone_number"}
+												name={"personal_phone_number"}
+												label="Personal Phone Number"
+												required
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={errors.phone_number && touched.phone_number}
-												helperText={touched.phone_number && errors.phone_number}
-												value={values.phone_number}
+												error={errors.personal_phone_number && touched.personal_phone_number}
+												helperText={"Personal Phone Number"}
+												value={values.personal_phone_number}
 											/>
 										</Grid>
 										<Grid item sm>
 											<TextField
 												fullWidth
 												variant="outlined"
-												id={"home_phone_number"}
-												name={"home_phone_number"}
-												label="Home Phone Number"
+												id={"work_phone_number"}
+												name={"work_phone_number"}
+												label="Work Phone Number"
 												onChange={handleChange}
 												onBlur={handleBlur}
-												helperText="Home Phone Number"
-												value={values.home_phone_number}
-											/>
-										</Grid>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item sm>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id={"work_mobile_number"}
-												name={"work_mobile_number"}
-												label="Work Mobile Number"
-												onChange={handleChange}
-												onBlur={handleBlur}
-												helperText="Work Mobile Number"
-												value={values.work_mobile_number}
-											/>
-										</Grid>
-										<Grid item sm>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id={"custom_mobile_number"}
-												name={"custom_mobile_number"}
-												label="Custom Mobile Number"
-												onChange={handleChange}
-												onBlur={handleBlur}
-												helperText="Custom Mobile Number"
-												value={values.custom_mobile_number}
+												helperText="Work Phone Number"
+												value={values.work_phone_number}
 											/>
 										</Grid>
 									</Grid>
@@ -441,10 +420,7 @@ let ContactInputForm = (props) => {
 											id={"present_address"}
 											name={"present_address"}
 											label="Present Address"
-											value={
-												values.present_address
-											}
-
+											value={values.present_address}
 											onChange={handleChange}
 											onBlur={handleBlur}
 											error={errors.present_address && touched.present_address}
@@ -469,7 +445,7 @@ let ContactInputForm = (props) => {
 											Emergency Contact
 										</Typography>
 									</Grid>
-									<Grid item container direction="row" spacing={2}>
+									<Grid item container direction="column" spacing={2}>
 										<Grid item sm>
 											<TextField
 												fullWidth
@@ -540,7 +516,6 @@ let ContactInputForm = (props) => {
 							< Grid
 								item
 								container
-								justify="center"
 								direction="row"
 								className={classes.buttonBox}
 							>

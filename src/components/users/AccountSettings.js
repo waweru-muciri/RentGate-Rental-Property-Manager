@@ -3,6 +3,7 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 import MenuItem from "@material-ui/core/MenuItem";
 import Grid from "@material-ui/core/Grid";
 import SaveIcon from "@material-ui/icons/Save";
@@ -22,6 +23,7 @@ import {
 } from "../../actions/actions";
 import { Formik } from "formik";
 import ImageCropper from '../ImageCropper';
+import CustomSnackbar from '../CustomSnackbar'
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -33,12 +35,10 @@ const UserSchema = Yup.object().shape({
     first_name: Yup.string().trim().required("First Name is required"),
     last_name: Yup.string().trim().required("Last Name is Required"),
     id_number: Yup.string().trim().min(8).required("Id Number is Required"),
-    primary_email: Yup.string().trim().email("Invalid Email"),
+    primary_email: Yup.string().trim().email("Invalid Email").required("Primary Email is Required"),
     other_email: Yup.string().trim().email("Invalid Email"),
-    phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
-    work_mobile_number: Yup.string().trim().min(10, 'Too Short'),
-    custom_mobile_number: Yup.string().trim().min(10, 'Too Short'),
-    home_phone_number: Yup.string().trim().min(10, 'Too Short'),
+    personal_phone_number: Yup.string().trim().min(10, 'Too Short').required("Personal Phone Number is Required"),
+    work_phone_number: Yup.string().trim().min(10, 'Too Short').required("Work Phone Number is Required"),
 });
 
 const UpdatePasswordSchema = Yup.object().shape({
@@ -57,7 +57,7 @@ let UserInputForm = (props) => {
     let { handleItemSubmit } = props;
     const userToShow = props.userToShow ? props.userToShow : {};
     const userValues = {
-        id: userToShow.id || '',
+        id: userToShow.id,
         gender: userToShow.gender || "",
         title: userToShow.title || "",
         id_number: userToShow.id_number || '',
@@ -65,10 +65,8 @@ let UserInputForm = (props) => {
         last_name: userToShow.last_name || '',
         primary_email: userToShow.primary_email || '',
         other_email: userToShow.other_email || '',
-        phone_number: userToShow.phone_number || '',
-        work_mobile_number: userToShow.work_mobile_number || '',
-        home_phone_number: userToShow.home_phone_number || "",
-        custom_mobile_number: userToShow.custom_mobile_number || '',
+        personal_phone_number: userToShow.personal_phone_number || '',
+        work_phone_number: userToShow.work_phone_number || '',
         user_avatar_url: userToShow.user_avatar_url || '',
         user_image: '',
     }
@@ -81,42 +79,46 @@ let UserInputForm = (props) => {
                 initialValues={userValues}
                 enableReinitialize
                 validationSchema={UserSchema}
-                onSubmit={async (values, { resetForm }) => {
-                    const user = {
-                        id: values.id,
-                        title: values.title,
-                        gender: values.gender,
-                        id_number: values.id_number,
-                        primary_email: values.primary_email,
-                        other_email: values.other_email,
-                        first_name: values.first_name,
-                        last_name: values.last_name,
-                        phone_number: values.phone_number,
-                        work_mobile_number: values.work_mobile_number,
-                        home_phone_number: values.home_phone_number,
-                        custom_mobile_number: values.custom_mobile_number,
-                    };
-                    //first upload the image to firebase
-                    if (values.user_image && values.user_image.data) {
-                        //if the user had previously had a file avatar uploaded
-                        // then delete it here
-                        if (values.user_avatar_url) {
-                            //delete file
-                            await deleteUploadedFileByUrl(values.user_avatar_url);
+                onSubmit={async (values, { resetForm, setStatus }) => {
+                    try {
+                        const user = {
+                            id: values.id,
+                            title: values.title,
+                            gender: values.gender,
+                            id_number: values.id_number,
+                            primary_email: values.primary_email,
+                            other_email: values.other_email,
+                            first_name: values.first_name,
+                            last_name: values.last_name,
+                            personal_phone_number: values.personal_phone_number,
+                            work_phone_number: values.work_phone_number,
+                        };
+                        //first upload the image to firebase
+                        if (values.user_image && values.user_image.data) {
+                            //if the user had previously had a file avatar uploaded
+                            // then delete it here
+                            if (values.user_avatar_url) {
+                                //delete file
+                                await deleteUploadedFileByUrl(values.user_avatar_url);
+                            }
+                            //upload the first and only image in the contact images array
+                            var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
+                            user.user_avatar_url = fileDownloadUrl;
                         }
-                        //upload the first and only image in the contact images array
-                        var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
-                        user.user_avatar_url = fileDownloadUrl;
-                    }
-                    await handleItemSubmit(user, "users")
-                    resetForm({});
-                    if (values.id) {
-                        history.goBack();
+                        await handleItemSubmit(user, "users")
+                        resetForm({});
+                        if (values.id) {
+                            history.goBack();
+                        }
+                        setStatus({ sent: true, msg: "Details saved successfully!" })
+                    } catch (error) {
+                        setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
                     }
                 }}
             >
                 {({
                     values,
+                    status,
                     touched,
                     errors,
                     handleChange,
@@ -128,16 +130,25 @@ let UserInputForm = (props) => {
                         <form
                             className={classes.form}
                             method="post"
+                            noValidate
                             id="userInputForm"
                             onSubmit={handleSubmit}
                         >
                             <Grid
                                 container
-                                spacing={2}
                                 justify="center"
                                 alignItems="center"
                                 direction="column"
+                                spacing={2}
                             >
+                                {
+                                    status && status.msg && (
+                                        <CustomSnackbar
+                                            variant={status.sent ? "success" : "error"}
+                                            message={status.msg}
+                                        />
+                                    )
+                                }
                                 <Grid
                                     justify="center"
                                     container
@@ -145,10 +156,13 @@ let UserInputForm = (props) => {
                                     direction="column"
                                     spacing={2}
                                 >
+                                    <Grid item>
+                                        <Typography>Personal Info</Typography>
+                                    </Grid>
                                     <Grid
                                         item
                                         container
-                                        justify="flex-start"
+                                        justify="center"
                                         spacing={4}
                                         alignItems="center"
                                     >
@@ -191,6 +205,7 @@ let UserInputForm = (props) => {
                                             <TextField
                                                 fullWidth
                                                 variant="outlined"
+                                                required
                                                 select
                                                 name="title"
                                                 label="Title"
@@ -212,6 +227,7 @@ let UserInputForm = (props) => {
                                             <TextField
                                                 fullWidth
                                                 variant="outlined"
+                                                required
                                                 select
                                                 name="gender"
                                                 label="Gender"
@@ -235,6 +251,7 @@ let UserInputForm = (props) => {
                                             <TextField
                                                 fullWidth
                                                 variant="outlined"
+                                                required
                                                 id="first_name"
                                                 name="first_name"
                                                 label="First Name"
@@ -252,6 +269,7 @@ let UserInputForm = (props) => {
                                                 id="last_name"
                                                 name="last_name"
                                                 label="Last Name"
+                                                required
                                                 value={values.last_name}
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
@@ -267,6 +285,7 @@ let UserInputForm = (props) => {
                                             id="id_number"
                                             name="id_number"
                                             label="ID Number"
+                                            required
                                             value={values.id_number}
                                             onChange={handleChange}
                                             onBlur={handleBlur}
@@ -279,55 +298,28 @@ let UserInputForm = (props) => {
                                             <TextField
                                                 fullWidth
                                                 variant="outlined"
-                                                id={"phone_number"}
-                                                name={"phone_number"}
-                                                label="Phone Number"
+                                                id={"personal_phone_number"}
+                                                name={"personal_phone_number"}
+                                                label="Personal Phone Number"
+                                                required
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
-                                                error={errors.phone_number && touched.phone_number}
-                                                helperText={touched.phone_number && errors.phone_number}
-                                                value={values.phone_number}
+                                                error={errors.personal_phone_number && touched.personal_phone_number}
+                                                helperText={"Personal Phone Number"}
+                                                value={values.personal_phone_number}
                                             />
                                         </Grid>
                                         <Grid item xs={12} sm>
                                             <TextField
                                                 fullWidth
                                                 variant="outlined"
-                                                id={"home_phone_number"}
-                                                name={"home_phone_number"}
-                                                label="Home Phone Number"
+                                                id={"work_phone_number"}
+                                                name={"work_phone_number"}
+                                                label="Work Phone Number"
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
-                                                helperText="Home Phone Number"
-                                                value={values.home_phone_number}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item container direction="row" spacing={2}>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id={"work_mobile_number"}
-                                                name={"work_mobile_number"}
-                                                label="Work Mobile Number"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                helperText="Work Mobile Number"
-                                                value={values.work_mobile_number}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                id="custom_mobile_number"
-                                                name="custom_mobile_number"
-                                                label="Custom Mobile Number"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                helperText="Custom Mobile Number"
-                                                value={values.custom_mobile_number}
+                                                helperText="Work Phone Number"
+                                                value={values.work_phone_number}
                                             />
                                         </Grid>
                                     </Grid>
@@ -339,6 +331,7 @@ let UserInputForm = (props) => {
                                                 name="primary_email"
                                                 label="Primary Email"
                                                 id="primary_email"
+                                                required
                                                 onBlur={handleBlur}
                                                 onChange={handleChange}
                                                 value={values.primary_email}
@@ -407,6 +400,7 @@ let UserInputForm = (props) => {
                             className={classes.form}
                             method="post"
                             id="changePasswordForm"
+                            noValidate
                             onSubmit={handleSubmit}
                         >
                             <Grid
@@ -420,15 +414,20 @@ let UserInputForm = (props) => {
                                     container
                                     item
                                     direction="column"
+                                    spacing={2}
                                 >
+                                    <Grid item>
+                                        <Typography>Change Password</Typography>
+                                    </Grid>
                                     <Grid item container direction="row" spacing={2}>
                                         <Grid item xs={12} sm>
                                             <TextField
                                                 fullWidth
+                                                required
                                                 type="password"
                                                 variant="outlined"
                                                 name="password"
-                                                label="Password"
+                                                label="New Password"
                                                 id="password"
                                                 onBlur={handleBlur}
                                                 onChange={handleChange}
@@ -441,9 +440,10 @@ let UserInputForm = (props) => {
                                             <TextField
                                                 fullWidth
                                                 type="password"
+                                                required
                                                 variant="outlined"
                                                 name="confirm_password"
-                                                label="Confirm Password"
+                                                label="Confirm New Password"
                                                 id="confirm_password"
                                                 onBlur={handleBlur}
                                                 onChange={handleChange}

@@ -8,6 +8,7 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
+import CustomSnackbar from '../CustomSnackbar'
 import * as Yup from "yup";
 import { Formik } from "formik";
 import { getPaymentOptions } from "../../assets/commonAssets.js";
@@ -47,24 +48,30 @@ export default function FormDialog(props) {
                 <Formik
                     initialValues={chargeValues}
                     validationSchema={UnitChargeSchema}
-                    onSubmit={async (values, { resetForm }) => {
-                        let unitChargeToSave = {
-                            id: values.id,
-                            unit_id: values.unit_id,
-                            account: values.account,
-                            type: values.type,
-                            amount: values.amount,
-                            due_date: values.due_date,
-                            frequency: values.frequency,
-                        };
-                        await handleItemSubmit(unitChargeToSave, 'unit-charges')
-                        resetForm({});
-                        if(values.id){
-                            handleClose()
+                    onSubmit={async (values, { resetForm, setStatus }) => {
+                        try {
+                            let unitChargeToSave = {
+                                id: values.id,
+                                unit_id: values.unit_id,
+                                account: values.account,
+                                type: values.type,
+                                amount: values.amount,
+                                due_date: values.due_date,
+                                frequency: values.frequency,
+                            };
+                            await handleItemSubmit(unitChargeToSave, 'unit-charges')
+                            resetForm({});
+                            if (values.id) {
+                                handleClose()
+                            }
+                            setStatus({ sent: true, msg: "Details saved successfully!" })
+                        } catch (error) {
+                            setStatus({ sent: false, msg: `Error! ${error}. Please try again later` })
                         }
                     }}>
                     {({
                         values,
+                        status,
                         handleSubmit,
                         touched,
                         errors,
@@ -83,6 +90,14 @@ export default function FormDialog(props) {
                                     direction="column"
                                     spacing={2}
                                 >
+                                    {
+                                        status && status.msg && (
+                                            <CustomSnackbar
+                                                variant={status.sent ? "success" : "error"}
+                                                message={status.msg}
+                                            />
+                                        )
+                                    }
                                     <Grid key={'kjjh'} container item direction="column" spacing={2}>
                                         <Grid item xs={12} md key={'35hse'}>
                                             <Typography variant="h5">{values.id ? 'Edit Charge' : 'Add Charge'}</Typography>

@@ -1,17 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-    Box,
-    IconButton,
-    Checkbox,
-    Table,
-    TableCell,
-    TableBody,
-    TableContainer,
-    TablePagination,
-    TableRow,
-    Tooltip,
-} from "@material-ui/core";
+import Box from '@material-ui/core/Box';
+import IconButton from '@material-ui/core/IconButton';
+import TableBody from '@material-ui/core/TableBody';
+import Table from '@material-ui/core/Table';
+import TableRow from '@material-ui/core/TableRow';
+import Tooltip from '@material-ui/core/Tooltip';
+import TablePagination from '@material-ui/core/TablePagination';
+import Checkbox from '@material-ui/core/Checkbox';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableCell from '@material-ui/core/TableCell';
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import DetailsIcon from "@material-ui/icons/Details";

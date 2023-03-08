@@ -8,6 +8,8 @@ import * as mediaFilesActions from "./mediaFiles";
 import * as contactsActions from "./contacts";
 import * as transactionsActions from "./transactions";
 import * as logActions from "./logs";
+import * as companyProfileActions from "./companyProfile";
+import * as accountBillingActions from "./accountBilling";
 import * as usersActions from "./users";
 import * as transactionChargesActions from "./transactionsCharges";
 import * as communicationEmailsActions from "./CommunicationEmails";
@@ -21,6 +23,9 @@ import { getDatabaseRef } from "./firebaseHelpers";
 
 
 const firebaseStorageRef = firebaseStorage.ref();
+const setAdminCustomClaim = firebaseFunctions.httpsCallable('setAdminCustomClaim');
+export const setDatabaseRefCustomClaim = firebaseFunctions.httpsCallable('setDatabaseRefCustomClaim');
+export const createFirebaseUser = firebaseFunctions.httpsCallable('createFirebaseUser');
 
 export function setCurrentUser(user) {
     return {
@@ -44,7 +49,14 @@ export const firebaseSignOutUser = () => {
     }
 }
 
-export const getFirebaseUserDetails = (userToken) => {
+export const getFirebaseUserDetails = async (userToken) => {
+    const idTokenResult = await userToken.getIdTokenResult()
+    let isAdmin;
+    let tenantId;
+    if (idTokenResult.claims) {
+        isAdmin = idTokenResult.claims.admin
+        tenantId = idTokenResult.claims.databaseRef
+    }
     const userDetails = {
         displayName: userToken.displayName,
         email: userToken.email,
@@ -52,47 +64,39 @@ export const getFirebaseUserDetails = (userToken) => {
         photoURL: userToken.photoURL,
         uid: userToken.uid,
         id: userToken.uid,
-        tenant: 'wPEY7XfSReuoOEOa22aX',
+        isAdmin: isAdmin,
+        tenant_id: tenantId
     };
-    userToken.getIdTokenResult().then((idTokenResult) => {
-        // Confirm the user is an Admin.
-        if (!!idTokenResult.claims.isAdmin) {
-            userDetails.isAdmin = true
-        } else {
-            userDetails.isAdmin = false
-        }
-    });
     return userDetails;
 }
 
-export const signUpWithEmailAndPassword = async (email, password) => {
+export const resetUserPasswordByEmail = async (email) => {
+    return await auth.sendPasswordResetEmail(email, { handleCodeInApp: false, url: 'https://gallant-propertymanager.herokuapp.com/account-actions/' })
+}
 
+export const signUpWithEmailAndPassword = async (email, password) => {
     try {
-        const authCredential = await auth.createUserWithEmailAndPassword(email, password);
-        //get user details from autheCredential
-        const user = authCredential.user;
-        //   //call api to set custom claims on user 
-        const userDetails = getFirebaseUserDetails(user)
-        return userDetails;
+        const user = await auth.createUserWithEmailAndPassword(email, password)
+        await auth.updateCurrentUser(user)
+        await setAdminCustomClaim(getFirebaseUserDetails(user))
+        user.getIdToken(true)
     } catch (error) {
         // Handle Errors here.
         var errorCode = error.code;
-        var errorMessage =
-            errorCode === "auth/weak-password"
-                ? "The password is too weak."
+        var errorMessage = errorCode === "auth/email-already-in-use"
+            ? "Email is already in use"
+            : errorCode === "auth/invalid-email"
+                ? "Email is invalid"
                 : errorCode === "auth/operation-not-allowed"
-                    ? "Operation Not Allowed"
-                    : errorCode === "auth/invalid-email"
-                        ? "Email is Invalid"
-                        : errorCode === "auth/email-already-in-use"
-                            ? "Email is already in Use"
-                            : "Failed to connect to resource. Check your internet connection";
-        throw new Error(errorMessage)
+                    ? "Operation is not allowed"
+                    : errorCode === "auth/weak-password"
+                        ? "Password is not strong enough"
+                        : "Failed to connect to resource. Check your internet connection";
+        throw new Error(errorMessage);
     }
 };
 
 export const signInUserWithEmailAndPassword = async (email, password) => {
-
     try {
         const authCredential = await auth.signInWithEmailAndPassword(email, password);
         const user = authCredential.user;
@@ -131,27 +135,6 @@ export async function sendEmails(subject, email, recipients) {
         console.error(`There was an error when calling the Cloud Function.\n 
         Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
     }
-}
-
-export function addRolesToUserByEmail(email, rolesToAddObject) {
-    var addRolesToUser = firebaseFunctions.httpsCallable('addRolesToUser');
-    addRolesToUser({ email: email, roles: rolesToAddObject }).then(function (result) {
-        // Read result of the Cloud Function.
-        var response = result.data;
-        if (response.error) {
-            console.log('Error adding roles to user => ', response.error)
-        }
-        else {
-            console.log('Successfully added roles to user => ', response.success)
-        }
-    }).catch((error) => {
-        //getting the error details
-        var code = error.code;
-        var message = error.message;
-        var details = error.details;
-        console.error(`There was an error when calling the Cloud Function.\n 
-        Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
-    });
 }
 
 export async function deleteUploadedFileByUrl(fileUrl) {
@@ -200,8 +183,9 @@ export async function uploadFilesToFirebase(fileToUpload) {
 export function itemsFetchData(collectionsUrls) {
     return (dispatch) => {
         dispatch(itemsIsLoading(true));
-        collectionsUrls.forEach((url) => {
-            getDatabaseRef().collection(url).get().then((snapshot) => {
+        collectionsUrls.forEach(async (url) => {
+            try {
+                const snapshot = await getDatabaseRef().collection(url).get()
                 let fetchedItems = []
                 snapshot.forEach((doc) => {
                     let fetchedObject = Object.assign(
@@ -214,58 +198,40 @@ export function itemsFetchData(collectionsUrls) {
                     fetchedItems.push(fetchedObject)
                 });
                 switch (url) {
+                    case "company_profile":
+                        dispatch(companyProfileActions.companyProfilesFetchDataSuccess(fetchedItems));
+                        break;
+
+                    case "account-billing":
+                        dispatch(accountBillingActions.acccountBillingsFetchDataSuccess(fetchedItems));
+                        break;
+
                     case "properties":
-                        dispatch(
-                            propertyActions.propertiesFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(propertyActions.propertiesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "property_units":
-                        dispatch(
-                            propertyUnitActions.propertyUnitsFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(propertyUnitActions.propertyUnitsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "leases":
-                        dispatch(
-                            leaseActions.leasesFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(leaseActions.leasesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "unit-charges":
-                        dispatch(
-                            propertyUnitChargeActions.propertyUnitChargesFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(propertyUnitChargeActions.propertyUnitChargesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "contacts":
-                        dispatch(
-                            contactsActions.contactsFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(contactsActions.contactsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "transactions-charges":
-                        dispatch(
-                            transactionChargesActions.transactionChargesFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(transactionChargesActions.transactionChargesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "charge-payments":
-                        dispatch(
-                            transactionsActions.transactionsFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(transactionsActions.transactionsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "to-dos":
@@ -273,68 +239,48 @@ export function itemsFetchData(collectionsUrls) {
                         break;
 
                     case "maintenance-requests":
-                        dispatch(
-                            maintenanceRequestsActions.maintenanceRequestsFetchDataSuccess(
-                                fetchedItems
-                            )
-                        );
+                        dispatch(maintenanceRequestsActions.maintenanceRequestsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "logs":
-                        dispatch(
-                            logActions.auditLogsFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(logActions.auditLogsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "notices":
-                        dispatch(
-                            vacatingNoticesActions.noticesFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(vacatingNoticesActions.noticesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "email-templates":
-                        dispatch(
-                            emailTemplatesActions.emailTemplatesFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(emailTemplatesActions.emailTemplatesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "property_media":
-                        dispatch(
-                            mediaFilesActions.mediaFilesFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(mediaFilesActions.mediaFilesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "expenses":
-                        dispatch(
-                            expensesActions.expensesFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(expensesActions.expensesFetchDataSuccess(fetchedItems));
                         break;
 
                     case "meter_readings":
-                        dispatch(
-                            meterReadingsActions.meterReadingsFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(meterReadingsActions.meterReadingsFetchDataSuccess(fetchedItems));
                         break;
 
                     case "users":
-                        dispatch(
-                            usersActions.usersFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(usersActions.usersFetchDataSuccess(fetchedItems));
                         break;
 
                     case "communication_emails":
-                        dispatch(
-                            communicationEmailsActions.communicationEmailsFetchDataSuccess(fetchedItems)
-                        );
+                        dispatch(communicationEmailsActions.communicationEmailsFetchDataSuccess(fetchedItems));
                         break;
 
                     default:
                         break;
                 }
-            }).catch((error) => {
+            } catch (error) {
                 dispatch(itemsHasErrored(error.message))
                 dispatch(itemsIsLoading(false));
-            });
+            }
         })
         dispatch(itemsIsLoading(false));
     }
@@ -377,33 +323,28 @@ export function handleDelete(itemId, url) {
                 .doc(itemId)
                 .delete();
             switch (url) {
+                case "company_profile":
+                    dispatch(companyProfileActions.deleteCompanyProfile(itemId)
+                    );
+                    break;
+
                 case "properties":
-                    dispatch(
-                        propertyActions.deleteProperty(
-                            itemId
-                        )
+                    dispatch(propertyActions.deleteProperty(itemId)
                     );
                     break;
 
                 case "property_units":
-                    dispatch(
-                        propertyUnitActions.deletePropertyUnit(
-                            itemId
-                        )
+                    dispatch(propertyUnitActions.deletePropertyUnit(itemId)
                     );
                     break;
 
                 case "contacts":
-                    dispatch(
-                        contactsActions.deleteContact(itemId)
+                    dispatch(contactsActions.deleteContact(itemId)
                     );
                     break;
 
                 case "transactions-charges":
-                    dispatch(
-                        transactionChargesActions.deleteTransactionCharge(
-                            itemId
-                        )
+                    dispatch(transactionChargesActions.deleteTransactionCharge(itemId)
                     );
                     break;
 
@@ -412,10 +353,7 @@ export function handleDelete(itemId, url) {
                     break;
 
                 case "charge-payments":
-                    dispatch(
-                        transactionsActions.deleteTransaction(
-                            itemId
-                        )
+                    dispatch(transactionsActions.deleteTransaction(itemId)
                     );
                     break;
 
@@ -428,58 +366,47 @@ export function handleDelete(itemId, url) {
                     break;
 
                 case "maintenance-requests":
-                    dispatch(
-                        maintenanceRequestsActions.deleteMaintenanceRequest(
-                            itemId
-                        )
+                    dispatch(maintenanceRequestsActions.deleteMaintenanceRequest(itemId)
                     );
                     break;
 
                 case "logs":
-                    dispatch(
-                        logActions.deleteAuditLog(itemId)
+                    dispatch(logActions.deleteAuditLog(itemId)
                     );
                     break;
 
                 case "notices":
-                    dispatch(
-                        vacatingNoticesActions.deleteNotice(itemId)
+                    dispatch(vacatingNoticesActions.deleteNotice(itemId)
                     );
                     break;
 
                 case "email-templates":
-                    dispatch(
-                        emailTemplatesActions.deleteEmailTemplate(itemId)
+                    dispatch(emailTemplatesActions.deleteEmailTemplate(itemId)
                     );
                     break;
 
                 case "property_media":
-                    dispatch(
-                        mediaFilesActions.deleteMediaFile(itemId)
+                    dispatch(mediaFilesActions.deleteMediaFile(itemId)
                     );
                     break;
 
                 case "expenses":
-                    dispatch(
-                        expensesActions.deleteExpense(itemId)
+                    dispatch(expensesActions.deleteExpense(itemId)
                     );
                     break;
 
                 case "users":
-                    dispatch(
-                        usersActions.deleteUser(itemId)
+                    dispatch(usersActions.deleteUser(itemId)
                     );
                     break;
 
                 case "meter_readings":
-                    dispatch(
-                        meterReadingsActions.deleteMeterReading(itemId)
+                    dispatch(meterReadingsActions.deleteMeterReading(itemId)
                     );
                     break;
 
                 case "communication_emails":
-                    dispatch(
-                        communicationEmailsActions.deleteCommunicationEmail(itemId)
+                    dispatch(communicationEmailsActions.deleteCommunicationEmail(itemId)
                     );
                     break;
 
@@ -513,36 +440,28 @@ export function handleItemFormSubmit(data, url) {
                             data,
                         );
                         switch (url) {
+                            case "company_profile":
+                                dispatch(companyProfileActions.editCompanyProfile(modifiedObject));
+                                break;
+
                             case "properties":
-                                dispatch(
-                                    propertyActions.editProperty(modifiedObject)
-                                );
+                                dispatch(propertyActions.editProperty(modifiedObject));
                                 break;
 
                             case "property_units":
-                                dispatch(
-                                    propertyUnitActions.editPropertyUnit(modifiedObject)
-                                );
+                                dispatch(propertyUnitActions.editPropertyUnit(modifiedObject));
                                 break;
 
                             case "unit-charges":
-                                dispatch(
-                                    propertyUnitChargeActions.editPropertyUnitCharge(modifiedObject)
-                                );
+                                dispatch(propertyUnitChargeActions.editPropertyUnitCharge(modifiedObject));
                                 break;
 
                             case "contacts":
-                                dispatch(
-                                    contactsActions.editContact(modifiedObject)
-                                );
+                                dispatch(contactsActions.editContact(modifiedObject));
                                 break;
 
                             case "transactions-charges":
-                                dispatch(
-                                    transactionChargesActions.editTransactionCharge(
-                                        modifiedObject
-                                    )
-                                );
+                                dispatch(transactionChargesActions.editTransactionCharge(modifiedObject));
                                 break;
 
                             case "leases":
@@ -550,11 +469,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "charge-payments":
-                                dispatch(
-                                    transactionsActions.editTransaction(
-                                        modifiedObject
-                                    )
-                                );
+                                dispatch(transactionsActions.editTransaction(modifiedObject));
                                 break;
 
                             case "to-dos":
@@ -562,35 +477,23 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "maintenance-requests":
-                                dispatch(
-                                    maintenanceRequestsActions.editMaintenanceRequest(
-                                        modifiedObject
-                                    )
-                                );
+                                dispatch(maintenanceRequestsActions.editMaintenanceRequest(modifiedObject));
                                 break;
 
                             case "logs":
-                                dispatch(
-                                    logActions.editAuditLog(modifiedObject)
-                                );
+                                dispatch(logActions.editAuditLog(modifiedObject));
                                 break;
 
                             case "notices":
-                                dispatch(
-                                    vacatingNoticesActions.editNotice(modifiedObject)
-                                );
+                                dispatch(vacatingNoticesActions.editNotice(modifiedObject));
                                 break;
 
                             case "email-templates":
-                                dispatch(
-                                    emailTemplatesActions.editEmailTemplate(modifiedObject)
-                                );
+                                dispatch(emailTemplatesActions.editEmailTemplate(modifiedObject));
                                 break;
 
                             case "property_media":
-                                dispatch(
-                                    mediaFilesActions.editMediaFile(modifiedObject)
-                                );
+                                dispatch(mediaFilesActions.editMediaFile(modifiedObject));
                                 break;
 
                             case "expenses":
@@ -602,9 +505,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "meter_readings":
-                                dispatch(
-                                    meterReadingsActions.editMeterReading(modifiedObject)
-                                );
+                                dispatch(meterReadingsActions.editMeterReading(modifiedObject));
                                 break;
 
                             case "communication_emails":
@@ -631,22 +532,19 @@ export function handleItemFormSubmit(data, url) {
                             id: docRef.id,
                         });
                         switch (url) {
+                            case "company_profile":
+                                dispatch(companyProfileActions.addCompanyProfile(addedItem));
+                                break;
                             case "properties":
-                                dispatch(
-                                    propertyActions.addProperty(addedItem)
-                                );
+                                dispatch(propertyActions.addProperty(addedItem));
                                 break;
 
                             case "property_units":
-                                dispatch(
-                                    propertyUnitActions.addPropertyUnit(addedItem)
-                                );
+                                dispatch(propertyUnitActions.addPropertyUnit(addedItem));
                                 break;
 
                             case "unit-charges":
-                                dispatch(
-                                    propertyUnitChargeActions.addPropertyUnitCharge(addedItem)
-                                );
+                                dispatch(propertyUnitChargeActions.addPropertyUnitCharge(addedItem));
                                 break;
 
                             case "contacts":
@@ -654,11 +552,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "transactions-charges":
-                                dispatch(
-                                    transactionChargesActions.addTransactionCharge(
-                                        addedItem
-                                    )
-                                );
+                                dispatch(transactionChargesActions.addTransactionCharge(addedItem));
                                 break;
 
                             case "leases":
@@ -666,11 +560,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "charge-payments":
-                                dispatch(
-                                    transactionsActions.addTransaction(
-                                        addedItem
-                                    )
-                                );
+                                dispatch(transactionsActions.addTransaction(addedItem));
                                 break;
 
                             case "to-dos":
@@ -678,11 +568,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "maintenance-requests":
-                                dispatch(
-                                    maintenanceRequestsActions.addMaintenanceRequest(
-                                        addedItem
-                                    )
-                                );
+                                dispatch(maintenanceRequestsActions.addMaintenanceRequest(addedItem));
                                 break;
 
                             case "logs":
@@ -710,9 +596,7 @@ export function handleItemFormSubmit(data, url) {
                                 break;
 
                             case "meter_readings":
-                                dispatch(
-                                    meterReadingsActions.addMeterReading(addedItem)
-                                );
+                                dispatch(meterReadingsActions.addMeterReading(addedItem));
                                 break;
 
                             case "communication_emails":

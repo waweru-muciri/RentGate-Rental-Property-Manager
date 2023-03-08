@@ -89,7 +89,7 @@ let PropertySummaryPage = (props) => {
                             <CardMedia
                                 height="200"
                                 component="img"
-                                image='/apartmentImage.png'
+                                image={propertyToShowDetails.property_image_url || '/apartmentImage.png'}
                                 title="Property Image"
                             />
                         </CardActionArea>
