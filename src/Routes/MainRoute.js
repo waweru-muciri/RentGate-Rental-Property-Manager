@@ -1,20 +1,30 @@
 import firebase from "firebase";
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { itemsFetchData, setCurrentUser, setPaginationPage } from "../actions/actions";
-import { withRouter } from "react-router-dom";
+import {
+  itemsFetchData,
+  setCurrentUser,
+  setPaginationPage,
+} from "../actions/actions";
 //here are all the subroutes
 import {
   BrowserRouter as Router,
   Route,
   Switch,
   useHistory,
+  withRouter,
+  Link,
 } from "react-router-dom";
 import PropertiesPage from "./Properties";
 import MaintenancesPage from "./Maintenances";
+import ReportsPage from "./Reports";
 import UsersPage from "./Users";
 import EmailsPage from "./Emails";
+import EmailPage from "./EmailPage";
+import ExpensePage from "./ExpensePage";
+import ExpensesPage from "./Expenses";
 import UserPage from "./UserPage";
+import UserProfilePage from "./UserProfilePage";
 import MaintenanceRequestPage from "./MaintenanceRequestPage";
 import ToDosPage from "./ToDos";
 import AuditLogsPage from "./AuditLogs";
@@ -39,25 +49,29 @@ import {
   Divider,
   IconButton,
   ListItem,
+  Collapse,
   ListItemIcon,
   ListItemText,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import { ExpandLess, ExpandMore } from "@material-ui/icons";
+import AccountBoxIcon from "@material-ui/icons/AccountBox";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import GroupIcon from "@material-ui/icons/Group";
+import TimelineIcon from "@material-ui/icons/Timeline";
+import AccountBalanceWalletIcon from "@material-ui/icons/AccountBalanceWallet";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ContactMailIcon from "@material-ui/icons/ContactMail";
-import ContactPhoneIcon from "@material-ui/icons/ContactPhone";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import HistoryIcon from "@material-ui/icons/History";
+import MoneyIcon from "@material-ui/icons/Money";
 import ContactsIcon from "@material-ui/icons/Contacts";
-import HomeIcon from "@material-ui/icons/Home";
+import DashboardIcon from "@material-ui/icons/Dashboard";
 import HouseIcon from "@material-ui/icons/House";
 import EventNoteIcon from "@material-ui/icons/EventNote";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import AttachMoneyIcon from "@material-ui/icons/AttachMoney";
-import { Link } from "react-router-dom";
 import Head from "../components/Head";
-
 
 const drawerWidth = 240;
 
@@ -67,6 +81,9 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
+  },
+  nested: {
+    paddingLeft: theme.spacing(4),
   },
   appBar: {
     transition: theme.transitions.create(["margin", "width"], {
@@ -124,38 +141,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const nestedNavigations = [
-  { text: "Home", to: "/", icon: <HomeIcon /> },
+const navigationLinks = [
+  { text: "Home", to: "/", icon: <DashboardIcon /> },
   { text: "Rentals", to: "/properties/rentals/", icon: <HouseIcon /> },
   { text: "Contacts", to: "/contacts", icon: <ContactsIcon /> },
-  { text: "Users", to: "/users", icon: <AccountCircleIcon /> },
+  { text: "Users", to: "/users", icon: <GroupIcon /> },
   {
     text: "Maintenance Requests",
     to: "/maintenance-requests",
     icon: <EventNoteIcon />,
   },
-  { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
   { text: "To-Dos", to: "/to-dos", icon: <AssignmentIcon /> },
-  // { text: "SMS", to: "/sms", icon: <ContactPhoneIcon /> },
   { text: "Email", to: "/emails", icon: <ContactMailIcon /> },
+  { text: "Reports", to: "/reports", icon: <TimelineIcon /> },
   { text: "Audit Logs", to: "/audit-logs", icon: <HistoryIcon /> },
 ];
 
+const reportLinkNestedLinks = [
+  { text: "Transactions", to: "/transactions", icon: <AttachMoneyIcon /> },
+  {
+    text: "Property Expenditure",
+    to: "/expenses",
+    icon: <AccountBalanceWalletIcon />,
+  },
+];
+
 let MainPage = ({
-  mediaFiles,
-  properties,
-  maintenanceRequests,
-  transactions,
-  contacts,
-  contact_faxes,
-  contact_emails,
-  contact_phone_numbers,
-  contact_addresses,
   currentUser,
-  notices,
-  toDos,
-  users,
-  isLoading,
+  properties,
   selectedTab,
   setSelectedTab,
   match,
@@ -167,37 +180,23 @@ let MainPage = ({
 
   useEffect(() => {
     if (!properties.length) {
-      // fetchData([
-      //   "properties",
-      //   "transactions",
-      //   "maintenance-requests",
-      //   "property_media",
-      //   "contacts",
-      //   "contact_phone_numbers",
-      //   "contact_emails",
-      //   "contact_faxes",
-      //   "contact_addresses",
-      //   "notices",
-      //   "to-dos",
-      //   "users",
-      // ]);
+      fetchData([
+        "properties",
+        "transactions",
+        "maintenance-requests",
+        "property_media",
+        "contacts",
+        "contact_phone_numbers",
+        "contact_emails",
+        "contact_faxes",
+        "contact_addresses",
+        "notices",
+        "to-dos",
+        "users",
+        "expenses",
+      ]);
     }
-  }, [
-    contacts,
-    users,
-    transactions,
-    maintenanceRequests,
-    contact_emails,
-    properties,
-    contact_phone_numbers,
-    contact_faxes,
-    contact_emails,
-    contact_addresses,
-    notices,
-    toDos,
-    mediaFiles,
-    fetchData,
-  ]);
+  }, [properties]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -214,9 +213,6 @@ let MainPage = ({
               phoneNumber: user.phoneNumber,
               providerData: user.providerData,
             };
-            user.getIdToken().then(function (accessToken) {
-              userDetails.accessToken = accessToken;
-            });
             setUser(userDetails);
           } else {
             // User is signed out.
@@ -239,6 +235,7 @@ let MainPage = ({
     const { selectedTab, setSelectedTab } = props;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isProfileMenuOpen = Boolean(anchorEl);
+    const [accountNavOpen, setAccountNavOpen] = React.useState(false);
 
     const handleProfileMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
@@ -249,15 +246,15 @@ let MainPage = ({
     };
     const menuId = "primary-search-account-menu";
 
-    const handleDrawerOpen = () => {
-      setOpen(true);
+    const handleDrawerToggle = () => {
+      setOpen(!open);
     };
 
-    const handleDrawerClose = () => {
-      setOpen(false);
+    const toggleAccountsNav = () => {
+      setAccountNavOpen(!accountNavOpen);
     };
 
-    const handleListItemClick = (event, index) => {
+    const handleListItemClick = (index) => {
       setSelectedTab(index);
     };
 
@@ -274,7 +271,7 @@ let MainPage = ({
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={handleDrawerOpen}
+              onClick={handleDrawerToggle}
               edge="start"
               className={clsx(classes.menuButton, open && classes.hide)}
             >
@@ -308,8 +305,17 @@ let MainPage = ({
               open={isProfileMenuOpen}
               onClose={handleProfileMenuClose}
             >
-              <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
-              <MenuItem onClick={handleProfileMenuClose}>My account</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleProfileMenuClose();
+                  history.push("/profile");
+                }}
+              >
+                <ListItemIcon>
+                  <AccountBoxIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Edit Profile" />
+              </MenuItem>
               <MenuItem
                 onClick={() => {
                   handleProfileMenuClose();
@@ -325,7 +331,10 @@ let MainPage = ({
                     });
                 }}
               >
-                Sign Out
+                <ListItemIcon>
+                  <ExitToAppIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Sign Out" />
               </MenuItem>
             </Menu>
           </Toolbar>
@@ -340,7 +349,7 @@ let MainPage = ({
           }}
         >
           <div className={classes.drawerHeader}>
-            <IconButton onClick={handleDrawerClose}>
+            <IconButton onClick={handleDrawerToggle}>
               {theme.direction === "ltr" ? (
                 <ChevronLeftIcon />
               ) : (
@@ -350,23 +359,61 @@ let MainPage = ({
           </div>
           <Divider />
           <List component="div" disablePadding>
-            {nestedNavigations.map(({ text, to, icon }, index) => (
+            {navigationLinks.map((linkItem, index) => (
               <React.Fragment key={index}>
                 <ListItem
                   component={Link}
-                  to={to}
+                  to={linkItem.to}
                   button
-                  key={text}
+                  key={linkItem.text}
                   selected={selectedTab === index}
                   onClick={(event) => {
-                    handleListItemClick(event, index);
+                    handleDrawerToggle();
+                    handleListItemClick(index);
                   }}
                 >
-                  <ListItemIcon>{icon}</ListItemIcon>
-                  <ListItemText primary={text} />
+                  <ListItemIcon>{linkItem.icon}</ListItemIcon>
+                  <ListItemText primary={linkItem.text} />
                 </ListItem>
               </React.Fragment>
             ))}
+            <ListItem
+              button
+              key={20}
+              selected={selectedTab === 20}
+              onClick={(event) => {
+                event.preventDefault();
+                toggleAccountsNav();
+              }}
+            >
+              <ListItemIcon>
+                <MoneyIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Accounts"} />
+              {accountNavOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse in={accountNavOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {reportLinkNestedLinks.map(
+                  (innerLinkItem, innerLinkItemIndex) => (
+                    <ListItem
+                      component={Link}
+                      to={innerLinkItem.to}
+                      button
+                      key={innerLinkItem.text}
+                      selected={selectedTab === innerLinkItemIndex}
+                      onClick={(event) => {
+                        handleDrawerToggle();
+                        handleListItemClick(20);
+                      }}
+                    >
+                      <ListItemIcon>{innerLinkItem.icon}</ListItemIcon>
+                      <ListItemText primary={innerLinkItem.text} />
+                    </ListItem>
+                  )
+                )}
+              </List>
+            </Collapse>
           </List>
         </Drawer>
         <div className={classes.drawerHeader} />
@@ -385,6 +432,7 @@ let MainPage = ({
         />
         <Switch>
           <Route exact path={`${match.path}`} component={DashBoard} />
+          <Route exact path={`${match.path}reports`} component={ReportsPage} />
           <Route exact path={`${match.path}emails`} component={EmailsPage} />
           <Route
             exact
@@ -413,6 +461,16 @@ let MainPage = ({
             component={PropertyPage}
           />
           <Route exact path={`${match.path}users/new`} component={UserPage} />
+          <Route
+            exact
+            path={`${match.path}profile`}
+            component={UserProfilePage}
+          />
+          <Route
+            exact
+            path={`${match.path}users/:userId/edit`}
+            component={UserPage}
+          />
           <Route exact path={`${match.path}users`} component={UsersPage} />
           <Route
             exact
@@ -441,6 +499,23 @@ let MainPage = ({
           />
           <Route
             exact
+            path={`${match.path}expenses/new`}
+            component={ExpensePage}
+          />
+          <Route
+            exact
+            path={`${match.path}expenses`}
+            component={ExpensesPage}
+          />
+          <Route
+            exact
+            path={`${match.path}expenses/:expenseId/edit`}
+            component={ExpensePage}
+          />
+
+          <Route exact path={`${match.path}emails/new`} component={EmailPage} />
+          <Route
+            exact
             path={`${match.path}contacts/:contactId/edit`}
             component={ContactPage}
           />
@@ -466,25 +541,12 @@ let MainPage = ({
   );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
-    toDos: state.toDos,
-    notices: state.notices,
-    users: state.users,
-    contacts: state.contacts,
-    mediaFiles: state.mediaFiles,
     properties: state.properties,
-    transactions: state.transactions,
-    maintenanceRequests: state.maintenanceRequests,
-    contact_emails: state.contact_emails,
-    contact_phone_numbers: state.contact_phone_numbers,
-    contact_faxes: state.contact_faxes,
-    contact_addresses: state.contact_addresses,
     currentUser: state.currentUser,
-    isLoading: state.isLoading,
     selectedTab: state.selectedTab,
-    error: state.error,
-    match: ownProps.match,
+    setSelectedTab: state.setSelectedTab,
   };
 };
 

@@ -11,6 +11,7 @@ import * as phoneNumbersReducers from "./phoneNumbers";
 import * as addressesReducers from "./addresses";
 import * as faxesReducers from "./faxes";
 import * as noticesReducers from "./notices";
+import * as expensesReducers from "./expenses";
 import * as toDosReducers from "./toDos";
 
 export function itemsHasErrored(state = null, action) {
@@ -54,6 +55,7 @@ function reducers(state = {}, action) {
         properties: propertyReducers.properties(state.properties, action),
         mediaFiles: mediaFilesReducers.mediaFiles(state.mediaFiles, action),
         users: usersReducers.users(state.users, action),
+        expenses: expensesReducers.expenses(state.expenses, action),
         contacts: contactsReducers.contacts(state.contacts, action),
         contact_faxes: faxesReducers.faxes(state.contact_faxes, action),
         contact_emails: emailsReducers.emails(state.contact_emails, action),

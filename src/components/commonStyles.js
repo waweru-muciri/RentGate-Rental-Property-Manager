@@ -51,6 +51,17 @@ let useStyles = makeStyles((theme) => ({
 		paddingLeft: theme.spacing(2),
 		paddingRight: theme.spacing(2),
 	},
+	fullHeightWidthContainer: {
+		width: "100%",
+		height: "100%",
+	},
+	oneMarginRight: {
+		marginRight: theme.spacing(1),
+	},
+	oneMarginTopBottom: {
+		marginTop: theme.spacing(1),
+		marginBottom: theme.spacing(1),
+	},
 }));
 
 export { useStyles as commonStyles };

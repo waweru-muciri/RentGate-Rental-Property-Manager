@@ -6,7 +6,11 @@ import { useHistory } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
 import { DropzoneDialogBase } from "material-ui-dropzone";
 import * as Yup from "yup";
-import { handleItemFormSubmit, uploadFilesToFirebase, deleteUploadedFileByUrl } from "../../actions/actions";
+import {
+	handleItemFormSubmit,
+	uploadFilesToFirebase,
+	deleteUploadedFileByUrl,
+} from "../../actions/actions";
 import { Formik } from "formik";
 
 const UserSchema = Yup.object().shape({
@@ -17,7 +21,16 @@ const UserSchema = Yup.object().shape({
 });
 
 let UserInputForm = (props) => {
-	const { userToEdit } = props;
+	let { userToEdit } = props;
+	const userValues = {};
+	if (userToEdit !== null) {
+		userValues.id = userToEdit.uid;
+		userValues.first_name = userToEdit.displayName;
+		userValues.email = userToEdit.email;
+		userValues.phone_number = userToEdit.phoneNumber;
+		userValues.user_avatar_url = userToEdit.photoURL;
+	}
+	userValues.contact_images = [];
 	const history = useHistory();
 	let classes = commonStyles();
 
@@ -31,7 +44,7 @@ let UserInputForm = (props) => {
 
 	return (
 		<Formik
-			initialValues={userToEdit}
+			initialValues={{...userValues}}
 			validationSchema={UserSchema}
 			onSubmit={(values, { resetForm }) => {
 				const user = {
@@ -43,21 +56,20 @@ let UserInputForm = (props) => {
 					user_roles: values.user_roles,
 				};
 				//first upload the image to firebase
-		if (values.contact_images.length) {
-			//if the user had previously had a file avatar uploaded 
-			// then delete it here
-			if(values.user_avatar_url){
-				//delete file
-				deleteUploadedFileByUrl(values.user_avatar_url)
-			}
-			//upload the first and only image in the contact images array
-			uploadFilesToFirebase([values.contact_images[0]]).then(
-				(fileDownloadUrl) => {
-					user.user_avatar_url = fileDownloadUrl;
+				if (values.contact_images.length) {
+					//if the user had previously had a file avatar uploaded
+					// then delete it here
+					if (values.user_avatar_url) {
+						//delete file
+						deleteUploadedFileByUrl(values.user_avatar_url);
+					}
+					//upload the first and only image in the contact images array
+					uploadFilesToFirebase([values.contact_images[0]]).then(
+						(fileDownloadUrl) => {
+							user.user_avatar_url = fileDownloadUrl;
+						}
+					);
 				}
-			);
-
-		}
 				handleItemFormSubmit(user, "users").then((response) => {
 					resetForm({});
 				});
@@ -96,20 +108,20 @@ let UserInputForm = (props) => {
 							<Grid
 								item
 								container
-								justify="start"
+								justify="flex-start"
 								spacing={4}
 								alignItems="center"
 							>
 								<Grid key={1} item>
 									<Avatar
 										alt="User Image"
-									src={
-										typeof values.contact_images[0] !==
-										"undefined"
-											? values.contact_images[0].data
-											: values.user_avatar_url
-									}
-									className={classes.largeAvatar}
+										src={
+											typeof values.contact_images[0] !==
+											"undefined"
+												? values.contact_images[0].data
+												: values.user_avatar_url
+										}
+										className={classes.largeAvatar}
 									/>
 								</Grid>
 								<Grid key={2} item>
@@ -118,31 +130,37 @@ let UserInputForm = (props) => {
 										color="primary"
 										onClick={() => toggleImageDialog()}
 									>
-										Add Image
+										{values.user_avatar_url || values.contact_images[0] ? "Change Photo" : "Add Photo"}
 									</Button>
 									<DropzoneDialogBase
-									filesLimit={1}
-									fileObjects={values.contact_images}
-									acceptedFiles={["image/*"]}
-									cancelButtonText={"cancel"}
-									submitButtonText={"submit"}
-									maxFileSize={5000000}
-									open={imageDialogState}
-									onClose={() => toggleImageDialog()}
-									onDelete={() => {
-										setFieldValue("contact_images", []);
-									}}
-									onSave={(files) => {
-										setFieldValue("contact_images", files);
-										toggleImageDialog();
-									}}
-									onAdd={(files) => {
-										setFieldValue("contact_images", files);
-										toggleImageDialog();
-									}}
-									showPreviews={true}
-									showFileNamesInPreview={true}
-								/>
+										filesLimit={1}
+										fileObjects={values.contact_images}
+										acceptedFiles={["image/*"]}
+										cancelButtonText={"cancel"}
+										submitButtonText={"submit"}
+										maxFileSize={5000000}
+										open={imageDialogState}
+										onClose={() => toggleImageDialog()}
+										onDelete={() => {
+											setFieldValue("contact_images", []);
+										}}
+										onSave={(files) => {
+											setFieldValue(
+												"contact_images",
+												files
+											);
+											toggleImageDialog();
+										}}
+										onAdd={(files) => {
+											setFieldValue(
+												"contact_images",
+												files
+											);
+											toggleImageDialog();
+										}}
+										showPreviews={true}
+										showFileNamesInPreview={true}
+									/>
 								</Grid>
 							</Grid>
 							<TextField
@@ -150,7 +168,7 @@ let UserInputForm = (props) => {
 								id="first_name"
 								name="first_name"
 								label="First Name"
-								value={values.first_name || ""}
+								value={values.first_name}
 								onChange={handleChange}
 								onBlur={handleBlur}
 								error={errors.first_name && touched.first_name}
@@ -163,7 +181,7 @@ let UserInputForm = (props) => {
 								id="last_name"
 								name="last_name"
 								label="Last Name"
-								value={values.last_name || ""}
+								value={values.last_name}
 								onChange={handleChange}
 								onBlur={handleBlur}
 								error={errors.last_name && touched.last_name}
@@ -176,7 +194,7 @@ let UserInputForm = (props) => {
 								id="phone_number"
 								name="phone_number"
 								label="Phone Number"
-								value={values.phone_number || ""}
+								value={values.phone_number}
 								onChange={handleChange}
 								onBlur={handleBlur}
 								error={
@@ -193,7 +211,7 @@ let UserInputForm = (props) => {
 								id="email"
 								onBlur={handleBlur}
 								onChange={handleChange}
-								value={values.email || ""}
+								value={values.email}
 								error={errors.email && touched.email}
 								helperText={touched.email && errors.email}
 							/>
@@ -226,9 +244,6 @@ let UserInputForm = (props) => {
 						{/** end of user details grid **/}
 						<Grid
 							item
-							justify="center"
-							alignItems="space-evenly"
-							direction="row"
 							className={classes.buttonBox}
 						>
 							<Button

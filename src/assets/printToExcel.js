@@ -5,7 +5,7 @@ export default function exportDataToXSL(title, subject, data, fileName) {
     workBook.Props = {
         Title: title,
         Subject: subject,
-        Author: "Brian Muciri",
+        Author: "Yarra Property Manager",
         CreatedDate: new Date(),
     };
     var workBookSheetData = data;

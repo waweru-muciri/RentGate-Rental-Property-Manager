@@ -1,98 +1,117 @@
-import Layout from "../components/myLayout";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
-import { Grid, TextField, Button, Box } from "@material-ui/core";
+import { Grid, TextField, Button, MenuItem, Box } from "@material-ui/core";
 import CustomizedSnackbar from "../components/customizedSnackbar";
-import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
-import { commonStyles } from "../components/commonStyles";
-import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
+import { commonStyles } from "../components/commonStyles";
+import { connect } from "react-redux";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
+import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 
-const contactsTableHeadCells = [
+const expensesTableHeadCells = [
     {
-        id: "from_user",
+        id: "expense_date",
         numeric: false,
         disablePadding: true,
-        label: "From",
+        label: "Date",
     },
+    { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
     {
-        id: "date_sent",
+        id: "property_ref",
         numeric: false,
         disablePadding: true,
-        label: "Date Sent",
+        label: "Property Ref",
     },
-    {
-        id: "email_subject",
-        numeric: false,
-        disablePadding: true,
-        label: "Email Subject",
-    },
+    { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount" },
 ];
 
-let EmailsPage = ({
-    isLoading,
-    contacts,
-    users,
-    currentUser,
-    contact_emails,
+let ExpensesPage = ({
+    expenses,
+    properties,
     match,
     error,
 }) => {
-    let [contactItems, setContactItems] = useState([]);
-    let [selected, setSelected] = useState([]);
+    const classes = commonStyles();
+    let [expenseItems, setExpenseItems] = useState([]);
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
+    let [propertyFilter, setPropertyFilter] = useState("");
+    const [selected, setSelected] = useState([]);
 
-    const classes = commonStyles();
 
     useEffect(() => {
-        setContactItems(contacts);
-    }, [contacts]);
+        setExpenseItems(getMappedExpenses());
+    }, [expenses.length]);
 
-    const exportContactRecordsToExcel = () => {
-        let items = contacts.filter(({ id }) => selected.includes(id));
-        exportDataToXSL("Emails  Records", "Emails Data", items, "EmailsData");
+    const exportVacatingExpensesToExcel = () => {
+        let items = expenseItems.filter(({ id }) => selected.includes(id));
+        exportDataToXSL(
+            "Expenses  Records",
+            "Expense Data",
+            items,
+            "ExpenseData"
+        );
+    };
+
+    const getMappedExpenses = () => {
+        const mappedExpenses = expenses.map((expense) => {
+            const property = properties.find(
+                (property) => property.id === expense.property
+            );
+            const expenseDetails = {};
+            expenseDetails.property_ref =
+                typeof property !== "undefined" ? property.ref : null;
+            expenseDetails.property =
+                typeof property !== "undefined" ? property.id : null;
+            return Object.assign({}, expense, expenseDetails);
+        });
+        return mappedExpenses;
     };
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the contacts here according to search criteria
-        let filteredContacts = contacts
-            .filter(({ date_sent }) =>
-                !fromDateFilter ? true : date_sent >= fromDateFilter
+        //filter the expenses here according to search criteria
+        let filteredExpenses = getMappedExpenses()
+            .filter(({ expense_date }) =>
+                !fromDateFilter ? true : expense_date >= fromDateFilter
             )
-            .filter(({ date_sent }) =>
-                !toDateFilter ? true : date_sent <= toDateFilter
-            );
+            .filter(({ expense_date }) =>
+                !toDateFilter ? true : expense_date <= toDateFilter
+            )
+            .filter(({ property }) =>
+                !propertyFilter ? true : property == propertyFilter
+            )
 
-        setContactItems(filteredContacts);
+        setExpenseItems(filteredExpenses);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setContactItems(contacts);
+        setExpenseItems(getMappedExpenses());
         setFromDateFilter("");
         setToDateFilter("");
+        setPropertyFilter("");
     };
 
     return (
-        <Layout pageTitle="Emails">
+                <Layout pageTitle="Property Expenses">
+
             <Grid
                 container
                 spacing={3}
                 justify="space-evenly"
                 alignItems="center"
-            >
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <PageHeading text="Emails" />
+            > 
+            <Grid item lg={12}>
+                    <PageHeading text="Property Expenses" />
                 </Grid>
                 <Grid
                     container
@@ -110,9 +129,23 @@ let EmailsPage = ({
                             size="medium"
                             startIcon={<AddIcon />}
                             component={Link}
-                            to={`${match.url}/new`}
+                            to={`expenses/new`}
                         >
                             NEW
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<EditIcon />}
+                            disabled={selected.length <= 0}
+                            component={Link}
+                            to={`expenses/${selected[0]}/edit`}
+                        >
+                            Edit
                         </Button>
                     </Grid>
                     <Grid item>
@@ -120,7 +153,7 @@ let EmailsPage = ({
                             aria-label="Export to Excel"
                             disabled={selected.length <= 0}
                             onClick={(event) => {
-                                exportContactRecordsToExcel();
+                                exportVacatingExpensesToExcel();
                             }}
                         />
                     </Grid>
@@ -142,14 +175,21 @@ let EmailsPage = ({
                                 justify="center"
                                 direction="row"
                             >
-                                <Grid item lg={6} md={6} xs={6}>
+                            <Grid
+                                container
+                                item
+                                lg={6} md={12} xs={12}
+                                spacing={1}
+                                justify="center"
+                                direction="row"
+                            >
+                                <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
-                                        type="date"
-                                        InputLabelProps={{ shrink: true }}
                                         variant="outlined"
-                                        id="from_date"
-                                        name="from_date"
+                                        type="date"
+                                        id="from_date_filter"
+                                        name="from_date_filter"
                                         label="From Date"
                                         value={fromDateFilter}
                                         onChange={(event) => {
@@ -157,22 +197,51 @@ let EmailsPage = ({
                                                 event.target.value
                                             );
                                         }}
+                                        InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
-                                <Grid item lg={6} md={6} xs={6}>
+                                <Grid item lg={6} md={12} xs={12}>
                                     <TextField
                                         fullWidth
-                                        type="date"
-                                        InputLabelProps={{ shrink: true }}
                                         variant="outlined"
-                                        name="to_date"
+                                        type="date"
+                                        name="to_date_filter"
                                         label="To Date"
-                                        id="to_date"
+                                        id="to_date_filter"
                                         onChange={(event) => {
                                             setToDateFilter(event.target.value);
                                         }}
                                         value={toDateFilter}
+                                        InputLabelProps={{ shrink: true }}
                                     />
+                                </Grid>
+                            </Grid>
+                                <Grid item lg={6} md={12} xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        variant="outlined"
+                                        name="property_filter"
+                                        label="Property"
+                                        id="property_filter"
+                                        onChange={(event) => {
+                                            setPropertyFilter(
+                                                event.target.value
+                                            );
+                                        }}
+                                        value={propertyFilter}
+                                    >
+                                        {properties.map(
+                                            (property, index) => (
+                                                <MenuItem
+                                                    key={index}
+                                                    value={property.id}
+                                                >
+                                                    {property.ref}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </TextField>
                                 </Grid>
                             </Grid>
                             <Grid
@@ -186,9 +255,7 @@ let EmailsPage = ({
                             >
                                 <Grid item>
                                     <Button
-                                        onClick={(event) =>
-                                            handleSearchFormSubmit(event)
-                                        }
+                                        onClick={(event) => handleSearchFormSubmit(event)}
                                         type="submit"
                                         form="contactSearchForm"
                                         color="primary"
@@ -201,9 +268,9 @@ let EmailsPage = ({
                                 </Grid>
                                 <Grid item>
                                     <Button
-                                        onClick={(event) => {
-                                            resetSearchForm(event);
-                                        }}
+                                        onClick={(event) => 
+                                            resetSearchForm(event)
+                                        }
                                         type="reset"
                                         form="propertySearchForm"
                                         color="primary"
@@ -230,16 +297,12 @@ let EmailsPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={contactItems}
-                        headCells={contactsTableHeadCells}
+                        rows={expenseItems}
+                        headCells={expensesTableHeadCells}
                         handleDelete={handleDelete}
-                        deleteUrl={"contacts"}
-                        noDetailsCol
-                        noEditCol
-                        noDeleteCol
+                        deleteUrl={"expenses"}
                     />
                 </Grid>
-                {isLoading && <LoadingBackdrop open={isLoading} />}
             </Grid>
         </Layout>
     );
@@ -247,16 +310,14 @@ let EmailsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        users: state.users,
-        currentUser: state.currentUser,
-        contacts: state.contacts,
-        contact_emails: state.contact_emails,
+        expenses: state.expenses,
+        properties: state.properties,
         isLoading: state.isLoading,
         error: state.error,
         match: ownProps.match,
     };
 };
 
-EmailsPage = connect(mapStateToProps)(EmailsPage);
+ExpensesPage = connect(mapStateToProps)(ExpensesPage);
 
-export default withRouter(EmailsPage);
+export default withRouter(ExpensesPage);

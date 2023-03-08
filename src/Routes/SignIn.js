@@ -35,9 +35,6 @@ const signInWithEmailAndPassword = (email, password) => {
         phoneNumber: user.phoneNumber,
         providerData: user.providerData,
       };
-      user.getIdToken().then(function (accessToken) {
-        userDetails.accessToken = accessToken;
-      });
       setCurrentUser(userDetails);
     });
 };

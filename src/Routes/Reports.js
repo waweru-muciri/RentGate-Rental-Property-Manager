@@ -24,6 +24,7 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
+import TenantStatementsPage from "../components/contacts/ContactStatements";
 
 const headCells = [
     {
@@ -92,15 +93,15 @@ function TabPanel(props) {
         );
     }
 
-let TransactionPage = ({
+let ReportsPage = ({
     isLoading,
     transactions,
-	expenses,
     properties,
     contacts,
     match,
     users,
     error,
+    handleDelete,
 }) => {
     const classes = commonStyles();
     let [transactionItems, setTransactionItems] = useState([]);
@@ -190,6 +191,7 @@ let TransactionPage = ({
         <Layout pageTitle="Transactions">
             <AppBar
                 style={{
+                    position: "-webkit-sticky" /* Safari */,
                     position: "sticky",
                     top: 70,
                 }}
@@ -202,8 +204,8 @@ let TransactionPage = ({
                     textColor="primary"
                     centered
                 >
-                    <Tab label="Transactions" />
-                    <Tab label="Property Expenditure" />
+                    <Tab label="Property Performance" />
+                    <Tab label="Tenant Statements" />
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
@@ -428,6 +430,13 @@ let TransactionPage = ({
             </Grid>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
+                <TenantStatementsPage
+                    contacts={contacts}
+                    users={users}
+                    transactions={transactions}
+                    isLoading={isLoading}
+                    properties={properties}
+                />
             </TabPanel>
         </Layout>
     );
@@ -437,7 +446,6 @@ const mapStateToProps = (state, ownProps) => {
     return {
         transactions: state.transactions,
         users: state.users,
-        expenses: state.expenses,
         currentUser: state.currentUser,
         properties: state.properties,
         contacts: state.contacts,
@@ -447,6 +455,6 @@ const mapStateToProps = (state, ownProps) => {
     };
 };
 
-TransactionPage = connect(mapStateToProps)(TransactionPage);
+ReportsPage = connect(mapStateToProps)(ReportsPage);
 
-export default withRouter(TransactionPage);
+export default withRouter(ReportsPage);

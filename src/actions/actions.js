@@ -11,6 +11,7 @@ import * as phoneNumbersActions from "./phoneNumbers";
 import * as emailsActions from "./emails";
 import * as faxesActions from "./faxes";
 import * as toDoActions from "./to-dos";
+import * as expensesActions from "./expenses";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
 import app from "../firebase";
 
@@ -141,6 +142,10 @@ export function itemsFetchData(collectionsUrls) {
                                 dispatch(mediaFilesActions.addMediaFile(addedItem));
                                 break;
 
+                            case "expenses":
+                                dispatch(expensesActions.addExpense(addedItem));
+                                break;
+
                             case "users":
                                 dispatch(usersActions.addUser(addedItem));
                                 break;
@@ -232,6 +237,10 @@ export function itemsFetchData(collectionsUrls) {
                                 );
                                 break;
 
+                            case "expenses":
+                                dispatch(expensesActions.editExpense(modifiedObject));
+                                break;
+
                             case "users":
                                 dispatch(usersActions.editUser(modifiedObject));
                                 break;
@@ -320,6 +329,12 @@ export function itemsFetchData(collectionsUrls) {
                                     mediaFilesActions.deleteMediaFile(deletedItemId)
                                 );
                                 break;
+
+                            case "expenses":
+                                dispatch(
+                                    expensesActions.deleteExpense(deletedItemId)
+                                );
+								break;
 
                             case "users":
                                 dispatch(

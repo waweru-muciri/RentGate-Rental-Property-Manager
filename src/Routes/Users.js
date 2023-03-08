@@ -1,6 +1,6 @@
 import Layout from "../components/myLayout";
 import Grid from "@material-ui/core/Grid";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
@@ -50,36 +50,6 @@ const usersTableHeadCells = [
 	},
 ];
 
-const rows = [
-	{
-		id: 1,
-		first_name: "Brian",
-		last_name: "Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		phone_number: "254742654637",
-	},
-	{
-		id: 2,
-		first_name: "Brian",
-		last_name: "Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		phone_number: "254742654637",
-	},
-	{
-		id: 3,
-		first_name: "Brian",
-		last_name: "Muciri",
-		status: "active",
-		email: "bwwaweru18@gmail.com",
-		date_created: "12/12/2012",
-		phone_number: "254742654637",
-	},
-];
-
 let UsersPage = ({
 	isLoading,
 	users,
@@ -87,12 +57,16 @@ let UsersPage = ({
 	error,
 	handleDelete,
 }) => {
-	let [userItems, setUserItems] = useState(rows);
+	let [userItems, setUserItems] = useState([]);
 	let [firstNameFilter, setFirstNameFilter] = useState("");
 	let [lastNameFilter, setLastNameFilter] = useState("");
 	let [roleFilter, setRoleFilter] = useState("");
 	let [statusFilter, setStatusFilter] = useState("");
 	const [selected, setSelected] = useState([]);
+
+	useEffect(() => {
+		setUserItems(users)
+	}, [users])
 
 	const classes = commonStyles();
 
@@ -159,8 +133,7 @@ let UsersPage = ({
 							component={Link}
 							to={`${match.url}${selected[0]}/edit`}
 						>
-							{" "}
-							Edit User
+							Edit
 						</Button>
 					</Grid>
 					<Grid item>

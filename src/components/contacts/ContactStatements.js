@@ -78,6 +78,7 @@ let TenantStatementsPage = ({
     transactions,
     properties,
     contacts,
+    users
 }) => {
     let [statementItems, setStatementItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
@@ -86,8 +87,6 @@ let TenantStatementsPage = ({
     let [fromDateFilter, setFromDateFilter] = useState("");
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
-
-    const USERS = []
 
     useEffect(() => {
         setStatementItems(getMappedStatements());
@@ -296,7 +295,7 @@ let TenantStatementsPage = ({
                                             );
                                         }}
                                     >
-                                    {USERS.map((user, index) => (
+                                    {users.map((user, index) => (
                                 <MenuItem key={index} value={user.id}>
                                     {user.first_name + user.last_name}
                                 </MenuItem>

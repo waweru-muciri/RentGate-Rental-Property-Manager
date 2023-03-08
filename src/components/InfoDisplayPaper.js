@@ -5,7 +5,7 @@ import { commonStyles } from "../components/commonStyles";
 let InfoDisplayPaper = (props) => {
 	const classes = commonStyles();
 	return (
-		<Paper fullWidth
+		<Paper
 			className={classes.infoDisplayPaper}
 			number={24}
 			variant="elevation"
