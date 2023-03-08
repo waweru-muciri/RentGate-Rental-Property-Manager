@@ -281,10 +281,10 @@ let UnitLeaseInputForm = (props) => {
 					rent_cycle: values.rent_cycle,
 					property_unit: values.property_unit,
 				};
-				await handleItemSubmit(currentUser, propertyUnitLease, "leases")
+				await handleItemSubmit( propertyUnitLease, "leases")
 				unit_charges.forEach(async (unitCharge) => {
 					const unitChargeToSave = Object.assign({}, unitCharge, { unit_id: values.property_unit })
-					await handleItemSubmit(currentUser, unitChargeToSave, 'unit_charges')
+					await handleItemSubmit( unitChargeToSave, 'unit_charges')
 				})
 				resetForm({});
 			}}
@@ -676,7 +676,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

@@ -1,16 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../components/PrivateLayout";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Tab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
-import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import TenantChargesStatement from "./TenantChargesStatement";
 import TabPanel from "../components/TabPanel";
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import { commonStyles } from '../components/commonStyles'
+import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 
 
@@ -19,14 +19,13 @@ let TenantDetailsPage = ({
     tenantUnit,
     transactions,
     history,
-    contacts,
+    tenantDetails,
     match,
     handleItemDelete,
 }) => {
     const classes = commonStyles()
-    const tenantId = match.params.contactId;
-    const tenantTransactionCharges = transactionsCharges.filter(({ tenant_id }) => tenant_id === tenantId)
-    const tenantDetails = contacts.find(({ id }) => id === tenantId) || {}
+    const [tenantPaymentsItems, setTenantPaymentItems] = useState([])
+    const [tenantChargesItems, setTenantChargesItems] = useState([])
     const emergencyContact = {
         emergency_contact_name: tenantDetails.emergency_contact_name,
         emergency_contact_relationship: tenantDetails.emergency_contact_relationship,
@@ -35,6 +34,13 @@ let TenantDetailsPage = ({
     }
     const [tabValue, setTabValue] = React.useState(1);
 
+    useEffect(() => {
+        setTenantPaymentItems(transactions)
+    }, [transactions])
+
+    useEffect(() => {
+        setTenantChargesItems(transactionsCharges)
+    }, [transactionsCharges])
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -49,7 +55,8 @@ let TenantDetailsPage = ({
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={1}>
-                <TenantChargesStatement tenantTransactionCharges={tenantTransactionCharges}
+                <TenantChargesStatement tenantTransactionCharges={tenantChargesItems}
+                    tenantPayments={tenantPaymentsItems}
                     tenantDetails={tenantDetails} handleItemDelete={handleItemDelete} classes={classes} />
             </TabPanel>
             <TabPanel value={tabValue} index={0}>
@@ -111,16 +118,29 @@ let TenantDetailsPage = ({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        transactions: state.transactions,
-        transactionsCharges: state.transactionsCharges,
-        tenantUnit: state.propertyUnits.find((unit) => unit.tenants.includes(ownProps.match.tenantId)) || {},
-        contacts: state.contacts,
-    };
+        transactions: state.transactions.filter((transaction) => transaction.tenant_id === ownProps.match.params.contactId),
+        transactionsCharges: state.transactionsCharges
+            .filter((charge) => charge.tenant_id === ownProps.match.params.contactId).sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
+            .map((charge) => {
+                const chargeDetails = {}
+                //get payments with this charge id
+                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                chargeDetails.payed_status = chargePayments.length ? true : false;
+                chargeDetails.payed_amount = 0
+                chargePayments.forEach(chargePayment => {
+                    chargeDetails.payed_amount += chargePayment.amount
+                });
+                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                return Object.assign({}, charge, chargeDetails);
+            }),
+        tenantUnit: state.propertyUnits.find((unit) => unit.tenants.includes(ownProps.match.params.contactId)) || {},
+        tenantDetails: state.contacts.find(({ id }) => id === ownProps.match.params.contactId) || {}
+    }
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

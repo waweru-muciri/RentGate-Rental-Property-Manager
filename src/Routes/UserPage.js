@@ -42,7 +42,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

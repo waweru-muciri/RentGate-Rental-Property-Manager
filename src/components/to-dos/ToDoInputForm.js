@@ -59,7 +59,7 @@ let ToDoInputForm = (props) => {
 					reminder_date: values.reminder_date,
 					complete_status: values.complete_status,
 				};
-				handleItemSubmit(currentUser, todo, "to-dos").then((response) => {
+				handleItemSubmit( todo, "to-dos").then((response) => {
 					setEventToShow({});
 					resetForm({});
 					if (values.id) {

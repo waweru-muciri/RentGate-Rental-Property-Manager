@@ -156,7 +156,7 @@ let PaymentInputForm = (props) => {
 				values.balances_payments.forEach(async (balance_payment) => {
 					const balancePaymentToSave = Object.assign({}, balance_payment,
 						{ tenant: values.tenant, date: values.date })
-					await handleItemSubmit(currentUser, balancePaymentToSave, 'transactions')
+					await handleItemSubmit( balancePaymentToSave, 'transactions')
 				})
 				resetForm({});
 			}}
@@ -295,7 +295,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

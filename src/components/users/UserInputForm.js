@@ -17,7 +17,8 @@ const UserSchema = Yup.object().shape({
 	other_email: Yup.string().trim().email("Invalid Email"),
 	first_name: Yup.string().trim().required("First Name is required"),
 	last_name: Yup.string().trim().required("Last Name is Required"),
-	phone_number: Yup.string().trim().min(8).required("Phone Number is Required"),
+	personal_mobile_number: Yup.string().trim().min(8).required("Phone Number is Required"),
+	work_mobile_number: Yup.string().trim().min(8).required("Work Phone Number"),
 	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
 });
 
@@ -25,15 +26,16 @@ let UserInputForm = (props) => {
 	let { handleItemSubmit, currentUser } = props;
 	const userToEdit = typeof props.userToEdit !== 'undefined' ? props.userToEdit : {};
 	const userValues = {
-		id : userToEdit.uid || '',
-		first_name : userToEdit.first_name || '',
-		last_name : userToEdit.last_name || '',
-		primary_email : userToEdit.primary_email || '',
-		other_email: userToEdit.other_email|| '',
-		phone_number : userToEdit.phone_number || '',
-		id_number : userToEdit.id_number || '',
-		user_avatar_url : userToEdit.user_avatar_url || '',
-		user_roles : userToEdit.user_roles || [],
+		id: userToEdit.uid || '',
+		first_name: userToEdit.first_name || '',
+		last_name: userToEdit.last_name || '',
+		primary_email: userToEdit.primary_email || '',
+		other_email: userToEdit.other_email || '',
+		personal_mobile_number: userToEdit.personal_mobile_number || '',
+		work_mobile_number: userToEdit.work_mobile_number || '',
+		id_number: userToEdit.id_number || '',
+		user_avatar_url: userToEdit.user_avatar_url || '',
+		user_roles: userToEdit.user_roles || [],
 	}
 	userValues.contact_image = [];
 	const history = useHistory();
@@ -59,7 +61,8 @@ let UserInputForm = (props) => {
 					other_email: values.other_email,
 					first_name: values.first_name,
 					last_name: values.last_name,
-					phone_number: values.phone_number,
+					personal_mobile_number: values.personal_mobile_number,
+					work_mobile_number: values.work_mobile_number,
 					user_roles: values.user_roles,
 				};
 				//first upload the image to firebase
@@ -71,16 +74,17 @@ let UserInputForm = (props) => {
 						deleteUploadedFileByUrl(values.user_avatar_url);
 					}
 					//upload the first and only image in the contact images array
-					var fileDownloadUrl = uploadFilesToFirebase([values.contact_image[0]])	
+					var fileDownloadUrl = uploadFilesToFirebase([values.contact_image[0]])
 					user.user_avatar_url = fileDownloadUrl;
 				}
-				handleItemSubmit(currentUser, user, "users").then((response) => {
+				handleItemSubmit(user, "users").then((response) => {
 					resetForm({});
 				});
 			}}
 		>
 			{({
 				values,
+				touched,
 				errors,
 				handleChange,
 				handleBlur,
@@ -174,9 +178,8 @@ let UserInputForm = (props) => {
 									value={values.first_name}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'first_name' in errors}
-									helperText={errors.first_name
-									}
+									error={errors.first_name && touched.first_name}
+									helperText={touched.first_name && errors.first_name}
 								/>
 								<TextField
 									variant="outlined"
@@ -186,40 +189,41 @@ let UserInputForm = (props) => {
 									value={values.last_name}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={'last_name' in errors}
-									helperText={
-										errors.last_name
-									}
+									error={errors.last_name && touched.last_name}
+									helperText={touched.last_name && errors.last_name}
 								/>
 								<TextField
 									variant="outlined"
 									id="id_number"
 									name="id_number"
-									label="Id Number"
+									label="ID Number"
 									value={values.id_number}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={
-										'id_number' in errors
-									}
-									helperText={
-										errors.id_number
-									}
+									error={errors.id_number && touched.id_number}
+									helperText={touched.id_number && errors.id_number}
 								/>
 								<TextField
 									variant="outlined"
-									id="phone_number"
-									name="phone_number"
+									id="personal_mobile_number"
+									name="personal_mobile_number"
 									label="Phone Number"
-									value={values.phone_number}
+									value={values.personal_mobile_number}
 									onChange={handleChange}
 									onBlur={handleBlur}
-									error={
-										'phone_number' in errors
-									}
-									helperText={
-										errors.phone_number
-									}
+									error={errors.personal_mobile_number && touched.personal_mobile_number}
+									helperText={touched.personal_mobile_number && errors.personal_mobile_number}
+								/>
+								<TextField
+									variant="outlined"
+									id="work_mobile_number"
+									name="work_mobile_number"
+									label="Work Mobile Number"
+									value={values.work_mobile_number}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									error={errors.work_mobile_number && touched.work_mobile_number}
+									helperText={touched.work_mobile_number && errors.work_mobile_number}
 								/>
 								<TextField
 									variant="outlined"
@@ -229,8 +233,8 @@ let UserInputForm = (props) => {
 									onBlur={handleBlur}
 									onChange={handleChange}
 									value={values.primary_email}
-									error={'primary_email' in errors}
-									helperText={errors.primary_email}
+									error={errors.primary_email && touched.primary_email}
+									helperText={touched.primary_email && errors.primary_email}
 								/>
 								<TextField
 									variant="outlined"
@@ -240,8 +244,8 @@ let UserInputForm = (props) => {
 									onBlur={handleBlur}
 									onChange={handleChange}
 									value={values.other_email}
-									error={'other_email' in errors}
-									helperText={errors.other_email}
+									error={errors.other_email && touched.other_email}
+									helperText={touched.other_email && errors.other_email}
 								/>
 								<TextField
 									variant="outlined"
@@ -252,11 +256,9 @@ let UserInputForm = (props) => {
 									id="user_roles"
 									onBlur={handleBlur}
 									onChange={handleChange}
-									value={values.user_roles }
-									error={'user_roles' in errors}
-									helperText={
-										errors.user_roles
-									}
+									value={values.user_roles}
+									error={errors.user_roles && touched.user_roles}
+									helperText={touched.user_roles && errors.user_roles}
 								>
 									{USER_ROLES_LIST.map(
 										(user_roles_type, index) => (
@@ -273,29 +275,36 @@ let UserInputForm = (props) => {
 							{/** end of user details grid **/}
 							<Grid
 								item
+								container
+								justify="center"
+								direction="row"
 								className={classes.buttonBox}
 							>
-								<Button
-									onClick={() => history.goBack()}
-									color="secondary"
-									variant="contained"
-									size="medium"
-									startIcon={<CancelIcon />}
-									disableElevation
-								>
-									Cancel
-							</Button>
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="userInputForm"
-									disabled={isSubmitting}
-								>
-									Save
-							</Button>
+								<Grid item>
+									<Button
+										color="secondary"
+										variant="contained"
+										size="medium"
+										startIcon={<CancelIcon />}
+										onClick={() => history.goBack()}
+										disableElevation
+									>
+										Cancel
+									</Button>
+								</Grid>
+								<Grid item>
+									<Button
+										type="submit"
+										color="primary"
+										variant="contained"
+										size="medium"
+										startIcon={<SaveIcon />}
+										form="userInputForm"
+										disabled={isSubmitting}
+									>
+										{values.id ? "Save Details" : "Create User"}
+									</Button>
+								</Grid>
 							</Grid>
 						</Grid>
 					</form>

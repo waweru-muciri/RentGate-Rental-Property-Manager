@@ -36,7 +36,7 @@ let ToDosPage = ({ currentUser, toDos, users, handleItemDelete, handleItemSubmit
 			title: info.event.title,
 			extendedProps: {...info.event.extendedProps}
 		};
-		handleItemSubmit(currentUser, updatedEvent, "to-dos").then((response) => {
+		handleItemSubmit( updatedEvent, "to-dos").then((response) => {
 			console.log("Updated event successfully!", updatedEvent);
 		});
 	};
@@ -140,8 +140,8 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ToDosPage);

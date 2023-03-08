@@ -13,14 +13,12 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
-import CustomizedSnackbar from "../components/CustomSnackbar";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import IndividualPropertyIncomeStatement from "./IndividualPropertyIncomeStament";
 import TabPanel from "../components/TabPanel";
 import CommonTable from "../components/table/commonTable";
-
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -32,54 +30,35 @@ import PropertySettingsForm from "../components/property/PropertySettingsForm";
 const PROPERTY_TYPES = getUnitTypes();
 
 const headCells = [
-    {
-        id: "unit_type",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Type",
-    },
+    { id: "unit_type", numeric: false, disablePadding: true, label: "Unit Type" },
     { id: "ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "beds", numeric: false, disablePadding: true, label: "Beds" },
     { id: "baths", numeric: false, disablePadding: true, label: "Baths" },
-    {
-        id: "address",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Adddress",
-    },
-    {
-        id: "sqft",
-        numeric: false,
-        disablePadding: true,
-        label: "Square Footage",
-    },
+    { id: "address", numeric: false, disablePadding: true, label: "Unit Adddress" },
+    { id: "sqft", numeric: false, disablePadding: true, label: "Square Footage" },
     // { id: "price", numeric: false, disablePadding: true, label: "Rent" },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID Number" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let PropertyDetailsPage = ({
-    properties,
     propertyUnits,
-    isLoading,
     transactions,
     expenses,
     meterReadings,
-    currentUser,
+    propertyToShowDetails,
     history,
-    contacts,
     users,
     match,
-    error, handleItemDelete
+    handleItemDelete
 }) => {
     const classes = commonStyles()
-    const propertyToShowDetailsId = match.params.propertyId;
-    const propertyToShowDetails = properties.find(({ id }) => id === propertyToShowDetailsId) || {}
-    let [propertyUnitsItems, setPropertyUnitItems] = useState([])
-    let [filteredPropertyItems, setFilteredPropertyUnitsItems] = useState([])
-    let [propertyRefFilter, setPropertyRefFilter] = useState("");
-    let [propertyTypeFilter, setPropertyTypeFilter] = useState("");
+    const [propertyUnitsItems, setPropertyUnitItems] = useState([])
+    const [filteredPropertyItems, setFilteredPropertyUnitsItems] = useState([])
+    const [propertyRefFilter, setPropertyRefFilter] = useState("");
+    const [propertyTypeFilter, setPropertyTypeFilter] = useState("");
     const [selected, setSelected] = useState([]);
     const [tabValue, setTabValue] = React.useState(0);
 
@@ -90,18 +69,9 @@ let PropertyDetailsPage = ({
 
 
     useEffect(() => {
-        const mappedPropertyUnits = propertyUnits.filter(({ property_id }) => property_id === propertyToShowDetailsId).map(
-            (property_unit) => {
-                const tenant = contacts.find(
-                    ({ id }) => property_unit.tenants ? property_unit.tenants.includes(id) : ''
-                ) || {}
-                return Object.assign({}, property_unit, { tenant_name: tenant.first_name + ' ' + tenant.last_name });
-            }
-        );
-
-        setPropertyUnitItems(mappedPropertyUnits)
-        setFilteredPropertyUnitsItems(mappedPropertyUnits)
-    }, [propertyUnits, contacts])
+        setPropertyUnitItems(propertyUnits)
+        setFilteredPropertyUnitsItems(propertyUnits)
+    }, [propertyUnits])
 
 
     const handleSearchFormSubmit = (event) => {
@@ -307,21 +277,13 @@ let PropertyDetailsPage = ({
                         </Box>
                     </Grid>
                     <Grid item lg={12} md={12} sm={12} xl={12} xs={12}>
-                        {error && (
-                            <div>
-                                <CustomizedSnackbar
-                                    variant="error"
-                                    message={error.message}
-                                />
-                            </div>
-                        )}
                         <CommonTable
                             selected={selected}
                             setSelected={setSelected}
                             rows={filteredPropertyItems}
                             headCells={headCells}
                             deleteUrl={'property_units'}
-                            tenantId={currentUser.tenant}
+                            
                             handleDelete={handleItemDelete}
                         />
                     </Grid>
@@ -337,20 +299,25 @@ const mapStateToProps = (state, ownProps) => {
         transactions: state.transactions,
         meterReadings: state.meterReadings,
         expenses: state.expenses,
-        properties: state.properties,
-        propertyUnits: state.propertyUnits,
-        currentUser: state.currentUser,
-        contacts: state.contacts,
+        propertyToShowDetails : state.properties.find(({ id }) => id === ownProps.match.params.propertyId) || {},
+        propertyUnits: state.propertyUnits.filter(({ property_id }) => property_id === ownProps.match.params.propertyId).map(
+            (property_unit) => {
+                const tenant = state.contacts.find(
+                    ({ id }) => property_unit.tenants ? property_unit.tenants.includes(id) : false) || {}
+                return Object.assign(
+                    {}, property_unit, 
+                    { tenant_name: tenant.first_name + ' ' + tenant.last_name,
+                     tenant_id_number: tenant.id_number 
+                    });
+            }
+        ),
         users: state.users,
-        isLoading: state.isLoading,
-        error: state.error,
-        match: ownProps.match,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

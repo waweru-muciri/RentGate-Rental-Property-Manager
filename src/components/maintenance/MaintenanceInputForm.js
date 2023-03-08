@@ -64,7 +64,7 @@ let MaintenanceRequestInputForm = (props) => {
 					issue_urgency: values.issue_urgency,
 					status: values.status,
 				};
-				handleItemSubmit(currentUser, maintenanceRequest, "maintenance-requests").then(
+				handleItemSubmit( maintenanceRequest, "maintenance-requests").then(
 					(response) => {
 				resetForm({});
 				if (values.id) {
@@ -297,7 +297,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

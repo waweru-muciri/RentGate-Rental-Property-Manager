@@ -16,8 +16,8 @@ const MeterReadingSchema = Yup.object().shape({
   meter_type: Yup.string().trim().required("Meter Reading is required"),
   prior_value: Yup.number().required("Prior Value is required").min(0),
   current_value: Yup.number().min(Yup.ref('prior_value'), 'Current Value must be greater than prior value').required("Current Value is required"),
+  unit_charge: Yup.number().min(0).required("Unit Charge is Required"),
   base_charge: Yup.number().min(0).default(0),
-  unit_charge: Yup.number().min(0).default(0),
   reading_date: Yup.date().required("Reading Date Required"),
   property: Yup.string().trim().required("Property is Required"),
   property_unit: Yup.string().trim().required("Unit is Required"),
@@ -25,7 +25,7 @@ const MeterReadingSchema = Yup.object().shape({
 
 const METER_OPTIONS = getMeterTypes();
 
-const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, meterReadingToEdit, currentUser, handleItemSubmit }) => {
+const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, meterReadingToEdit, handleItemSubmit }) => {
 
   const classes = commonStyles();
   const meterReadingValues = meterReadingToEdit || {
@@ -65,10 +65,23 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
         meterReading.tenant_id_number = tenant.id_number
         meterReading.tenant_name = `${tenant.first_name} ${tenant.last_name}`
         //assign usage values to meter reading
-        const usage = parseFloat(values.current_value) - parseFloat(values.prior_value)
-        meterReading.usage = usage
-        meterReading.amount = (usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
-        await handleItemSubmit(currentUser, meterReading, "meter_readings")
+        meterReading.usage = values.current_value - values.prior_value
+        meterReading.amount = (meterReading.usage * parseFloat(values.unit_charge)) + parseFloat(values.base_charge)
+        await handleItemSubmit( meterReading, "meter_readings")
+        if (!values.id) {
+          const newMeterReadingCharge = {
+            charge_amount: meterReading.amount,
+            charge_date: defaultDate,
+            charge_label: "Utility Income",
+            charge_type: "meter_type",
+            due_date: defaultDate,
+            tenant_id: tenant.id,
+            tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+            unit_id: values.property_unit,
+            unit_ref: meterReading.property_ref,
+          }
+          await handleItemSubmit( newMeterReadingCharge, "transactions-charges")
+        }
         resetForm({})
         if (values.id) {
           history.goBack();
@@ -78,6 +91,7 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
       {({
         values,
         handleSubmit,
+        setFieldValue,
         errors,
         touched,
         handleChange,
@@ -106,7 +120,11 @@ const MeterReadingInputForm = ({ properties, contacts, propertyUnits, history, m
                     name="property"
                     label="Property"
                     id="property"
-                    onChange={handleChange}
+                    onChange={ (event) => {
+                      setFieldValue('property', event.target.value)
+                      setFieldValue('property_unit', '')
+                    }
+                    }
                     value={values.property}
                     error={errors.property && touched.property}
                     helperText={touched.property && errors.property}

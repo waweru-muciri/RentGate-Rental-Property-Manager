@@ -13,33 +13,14 @@ import moment from "moment";
 const TRANSACTIONS_FILTER_OPTIONS = getTransactionsFilterOptions()
 
 const headCells = [
-    {
-        id: "tenant_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Tenant",
-    },
-    {
-        id: "unit_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Unit Ref/Number",
-    },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant" },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
     { id: "charge_label", numeric: false, disablePadding: true, label: "Charge Name/Type" },
-    {
-        id: "charge_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Transaction Date",
-    },
-    {
-        id: "charge_amount",
-        numeric: false,
-        disablePadding: true,
-        label: "Charge Amount",
-    },
-    { id: "payed_status", numeric: false, disablePadding: true, label: "Payment Status" },
-    { id: "payed_amount", numeric: false, disablePadding: true, label: "Paid Amount" },
+    { id: "charge_date", numeric: false, disablePadding: true, label: "Charge Date", },
+    { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
+    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
+    { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -47,28 +28,29 @@ const headCells = [
 ];
 
 let TenantChargesStatementPage = ({
+    tenantPayments,
     tenantDetails,
     tenantTransactionCharges,
     handleItemDelete,
     classes,
 }) => {
-    let [chargesItems, setChargeItems] = useState([]);
+    let [tenantChargesItems, setTenantChargesItems] = useState([]);
     let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [chargeType, setChargeTypeFilter] = useState("");
     let [periodFilter, setPeriodFilter] = useState("");
     const [selected, setSelected] = useState([]);
-    const CHARGE_TYPES = Array.from(new Set(chargesItems.map((chargeItem) => chargeItem.charge_type)))
+    const CHARGE_TYPES = Array.from(new Set(tenantChargesItems.map((chargeItem) => chargeItem.charge_type)))
 
 
     useEffect(() => {
-        setChargeItems(tenantTransactionCharges);
+        setTenantChargesItems(tenantTransactionCharges);
         setFilteredChargeItems(tenantTransactionCharges);
     }, [tenantTransactionCharges]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
         //filter the tenantTransactionCharges according to the search criteria here
-        let filteredStatements = chargesItems
+        let filteredStatements = tenantChargesItems
         let startOfPeriod;
         let endOfPeriod;
         if (periodFilter) {
@@ -103,7 +85,7 @@ let TenantChargesStatementPage = ({
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredChargeItems(chargesItems);
+        setFilteredChargeItems(tenantChargesItems);
         setChargeTypeFilter("");
         setPeriodFilter("");
     };
@@ -131,7 +113,7 @@ let TenantChargesStatementPage = ({
                         reportName={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
                         reportTitle={'Tenant Charges Data'}
                         headCells={headCells}
-                        dataToPrint={chargesItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
                 <Grid item>
@@ -140,7 +122,7 @@ let TenantChargesStatementPage = ({
                         reportName={'Tenant Charges Data'}
                         reportTitle={`${tenantDetails.first_name} ${tenantDetails.last_name} Charges Record`}
                         headCells={headCells}
-                        dataToPrint={chargesItems.filter(({ id }) => selected.includes(id))}
+                        dataToPrint={tenantChargesItems.filter(({ id }) => selected.includes(id))}
                     />
                 </Grid>
             </Grid>
@@ -252,6 +234,11 @@ let TenantChargesStatementPage = ({
                             </Grid>
                         </Grid>
                     </form>
+                </Box>
+            </Grid>
+            <Grid item>
+                <Box border={1} borderRadius="borderRadius" borderColor="grey.400">
+                    Show Totals and other important statistics here
                 </Box>
             </Grid>
             <Grid item>

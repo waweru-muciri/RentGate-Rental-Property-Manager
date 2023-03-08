@@ -8,10 +8,11 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let ExpensePage = (props) => {
-    const { expenses, properties, propertyUnits, handleItemSubmit, currentUser, history } = props;
+    const { expenses, contacts, properties, propertyUnits, handleItemSubmit, history } = props;
     let expenseToEditId = props.match.params.expenseId;
     let expenseToEdit = expenses.find(({ id }) => id === expenseToEditId);
     let pageTitle = expenseToEditId ? "Edit Expense" : "New Expense";
+    const propertyUnitsWithTenants = propertyUnits.filter((propertyUnit) => propertyUnit.tenants.length)
     return (
         <Layout pageTitle="Expense Details">
             <Grid container justify="center" direction="column">
@@ -23,9 +24,9 @@ let ExpensePage = (props) => {
                         history={history}
                         expenseToEdit={expenseToEdit}
                         handleItemSubmit={handleItemSubmit}
-                        currentUser={currentUser}
+                        contacts={contacts}
                         properties={properties}
-                        propertyUnits={propertyUnits}
+                        propertyUnits={propertyUnitsWithTenants}
                     />
                 </Grid>
             </Grid>
@@ -36,14 +37,14 @@ let ExpensePage = (props) => {
 const mapStateToProps = (state) => {
     return {
         properties: state.properties,
-        currentUser: state.currentUser,
+        contacts: state.contacts,
         propertyUnits: state.propertyUnits,
         expenses: state.expenses,
     };
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+        handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
     }
 };
 

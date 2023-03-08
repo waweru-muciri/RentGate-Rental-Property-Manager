@@ -10,7 +10,7 @@ import { handleItemFormSubmit } from '../actions/actions'
 let MeterReadingPage = (props) => {
     const {history, meterReadings, contacts, propertyUnits, properties, handleItemSubmit } = props;
     //only allow adding meter readings to units with tenants
-    const propertyUnitsWithTenants = propertyUnits.filter((propertyUnit) => !propertyUnit.tenants)
+    const propertyUnitsWithTenants = propertyUnits.filter((propertyUnit) => propertyUnit.tenants.length)
     let meterReadingToEditId = props.match.params.meterReadingId;
     const meterReadingToEdit = meterReadings.find(({ id }) => id === meterReadingToEditId)
     const pageTitle = "Charge Tenants for Meter Reading";
@@ -45,7 +45,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+        handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
     }
 };
 

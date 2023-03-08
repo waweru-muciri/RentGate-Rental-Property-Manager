@@ -23,13 +23,10 @@ const expensesTableHeadCells = [
         disablePadding: true,
         label: "Date",
     },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit Ref/Number" },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID" },
     { id: "type", numeric: false, disablePadding: true, label: "Expenditure Type" },
-    {
-        id: "property_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Property/Unit Ref",
-    },
     { id: "amount", numeric: false, disablePadding: true, label: "Expenditure Amount(Ksh)" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -54,20 +51,9 @@ let ExpensesPage = ({
 
 
     useEffect(() => {
-        const mappedExpenses = expenses.sort((expense1, expense2) => expense2.expense_date > expense1.expense_date).map((expense) => {
-            const property = properties.find(
-                (property) => property.id === expense.property
-            );
-            const expenseDetails = {};
-            expenseDetails.property_ref =
-                typeof property !== "undefined" ? property.ref : null;
-            expenseDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, expense, expenseDetails);
-        });
-        setExpenseItems(mappedExpenses);
-        setFilteredExpenseItems(mappedExpenses);
-    }, [expenses, properties]);
+        setExpenseItems(expenses);
+        setFilteredExpenseItems(expenses);
+    }, [expenses]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
@@ -314,7 +300,7 @@ let ExpensesPage = ({
 const mapStateToProps = (state, ownProps) => {
     return {
         currentUser: state.currentUser,
-        expenses: state.expenses,
+        expenses: state.expenses.sort((expense1, expense2) => expense2.expense_date > expense1.expense_date),
         properties: state.properties,
         isLoading: state.isLoading,
         error: state.error,
@@ -324,7 +310,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

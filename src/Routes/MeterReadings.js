@@ -27,17 +27,17 @@ const meterReadingsTableHeadCells = [
         id: "reading_date",
         numeric: false,
         disablePadding: true,
-        label: "Date",
+        label: "Date Recorded",
     },
-    { id: "meter_type", numeric: false, disablePadding: true, label: "Meter Type" },
     {
         id: "property_ref",
         numeric: false,
         disablePadding: true,
-        label: "Property Ref/Unit",
+        label: "Unit Number/Ref",
     },
     { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name" },
     { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant Id Number" },
+    { id: "meter_type", numeric: false, disablePadding: true, label: "Meter Type" },
     { id: "prior_value", numeric: false, disablePadding: true, label: "Prior Value" },
     { id: "current_value", numeric: false, disablePadding: true, label: "Curent Value" },
     { id: "usage", numeric: false, disablePadding: true, label: "Usage" },
@@ -383,7 +383,7 @@ let MeterReadingsPage = ({
                         setSelected={setSelected}
                         rows={filteredMeterReadingItems}
                         headCells={meterReadingsTableHeadCells}
-                        tenantId={currentUser.tenant}
+                        
                         handleDelete={handleItemDelete}
                         deleteUrl={"meter_readings"}
                     />
@@ -407,7 +407,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

@@ -56,8 +56,6 @@ export const getFirebaseUserDetails = (userToken) => {
         uid: userToken.uid,
         id: userToken.uid,
         tenant: 'wPEY7XfSReuoOEOa22aX',
-        transactionCharge: userToken.transactionCharge,
-        providerData: userToken.providerData,
     };
     userToken.getIdTokenResult().then((idTokenResult) => {
         // Confirm the user is an Admin.
@@ -161,8 +159,7 @@ export function uploadFilesToFirebase(filesArray) {
                 .putString(file.data, "data_url");
             // console.log("Uploaded files successfully!");
             try {
-                const url = await snapshot.ref
-                    .getDownloadURL();
+                const url = await snapshot.ref.getDownloadURL();
                 return url;
             }
             catch (error) {
@@ -227,6 +224,14 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
 
+                    case "leases":
+                        dispatch(
+                            leaseActions.leasesFetchDataSuccess(
+                                fetchedItems
+                            )
+                        );
+                        break;
+
                     case "unit-charges":
                         dispatch(
                             propertyUnitChargeActions.propertyUnitChargesFetchDataSuccess(
@@ -249,7 +254,7 @@ export function itemsFetchData(collectionsUrls) {
                         );
                         break;
                 
-                    case "transactions":
+                    case "charge-payments":
                         dispatch(
                             transactionsActions.transactionsFetchDataSuccess(
                                 fetchedItems
@@ -351,7 +356,7 @@ export function itemsIsLoading(bool) {
     };
 }
 
-export function handleDelete(user, itemId, url) {
+export function handleDelete(itemId, url) {
     //send request to server to delete selected item
     return async (dispatch) => {
         try {
@@ -394,7 +399,7 @@ export function handleDelete(user, itemId, url) {
                     dispatch(leaseActions.deleteLease(itemId));
                     break;
 
-                case "transactions":
+                case "charge-payments":
                     dispatch(
                         transactionsActions.deleteTransaction(
                             itemId
@@ -468,7 +473,7 @@ export function handleDelete(user, itemId, url) {
     }
 }
 
-export function handleItemFormSubmit(user, data, url) {
+export function handleItemFormSubmit(data, url) {
     if (typeof data.id === "undefined") {
         delete data.id;
     }
@@ -522,7 +527,7 @@ export function handleItemFormSubmit(user, data, url) {
                                 dispatch(leaseActions.editLease(modifiedObject));
                                 break;
 
-                            case "transactions":
+                            case "charge-payments":
                                 dispatch(
                                     transactionsActions.editTransaction(
                                         modifiedObject
@@ -632,7 +637,7 @@ export function handleItemFormSubmit(user, data, url) {
                                 dispatch(leaseActions.addLease(addedItem));
                                 break;
 
-                            case "transactions":
+                            case "charge-payments":
                                 dispatch(
                                     transactionsActions.addTransaction(
                                         addedItem

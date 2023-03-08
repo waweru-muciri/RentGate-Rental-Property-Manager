@@ -8,6 +8,7 @@ import * as Yup from "yup";
 import { getExpensesCategories } from "../../assets/commonAssets";
 import moment from "moment";
 
+const EXPENSE_CATEGORIES = getExpensesCategories();
 const defaultDate = moment().format("YYYY-MM-DD");
 
 const PropertyExpenseSchema = Yup.object().shape({
@@ -20,10 +21,9 @@ const PropertyExpenseSchema = Yup.object().shape({
 });
 
 const ExpenseInputForm = (props) => {
-  const { properties, propertyUnits, handleItemSubmit, currentUser, history } = props
+  const { properties, propertyUnits, contacts, handleItemSubmit, history } = props
   const classes = commonStyles();
-  const expenseCategories = getExpensesCategories();
-  const expenseToEdit = typeof props.expenseToEdit !== 'undefined' ? props.expenseToEdit : {}
+  const expenseToEdit = props.expenseToEdit || {}
   const expenseValues = {
     id: expenseToEdit.id,
     expense_notes: expenseToEdit.expense_notes || '',
@@ -40,15 +40,24 @@ const ExpenseInputForm = (props) => {
       enableReinitialize
       validationSchema={PropertyExpenseSchema}
       onSubmit={async (values, { resetForm }) => {
+        //assign tenant details to meter reading
+        const propertyUnitSelected = propertyUnits.find((propertyUnit) => propertyUnit.id === values.property_unit) || {}
+        const tenant = contacts.find(
+          (contact) => propertyUnitSelected.tenants.length ? contact.id === propertyUnitSelected.tenants[0] || propertyUnitSelected.tenants[1] : false) || {};
         const expense = {
           id: values.id,
           type: values.type,
           amount: values.amount,
           property_unit: values.property_unit,
+          property: values.property,
           expense_date: values.expense_date,
           expense_notes: values.expense_notes,
         };
-        await handleItemSubmit(currentUser, expense, "expenses")
+        expense.unit_ref = propertyUnitSelected.ref
+        expense.tenant = tenant.id
+        expense.tenant_id_number = tenant.id_number
+        expense.tenant_name = `${tenant.first_name} ${tenant.last_name}`
+        await handleItemSubmit(expense, "expenses")
         resetForm({});
         if (values.id) {
           history.goBack();
@@ -62,6 +71,7 @@ const ExpenseInputForm = (props) => {
         errors,
         handleChange,
         handleBlur,
+        setFieldValue,
         isSubmitting,
       }) => (
           <form
@@ -86,7 +96,10 @@ const ExpenseInputForm = (props) => {
                     name="property"
                     label="Property"
                     id="property"
-                    onChange={handleChange}
+                    onChange={(event) => {
+                      setFieldValue('property', event.target.value);
+                      setFieldValue('property_unit', '');
+                    }}
                     value={values.property}
                     error={errors.property && touched.property}
                     helperText={touched.property && errors.property}
@@ -111,7 +124,6 @@ const ExpenseInputForm = (props) => {
                     value={values.property_unit}
                     error={errors.property_unit && touched.property_unit}
                     helperText={touched.property_unit && errors.property_unit}
-
                   >
                     {propertyUnits.filter((propertyUnit) => propertyUnit.property_id === values.property).map((property_unit, index) => (
                       <MenuItem key={index} value={property_unit.id}>
@@ -151,7 +163,7 @@ const ExpenseInputForm = (props) => {
                   error={errors.type && touched.type}
                   helperText={touched.type && errors.type}
                 >
-                  {expenseCategories.map((category, index) => (
+                  {EXPENSE_CATEGORIES.map((category, index) => (
                     <MenuItem key={index} value={category}>
                       {category}
                     </MenuItem>

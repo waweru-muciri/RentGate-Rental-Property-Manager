@@ -19,7 +19,6 @@ import { Formik } from "formik";
 import {
 	handleItemFormSubmit,
 	handleDelete,
-	uploadFilesToFirebase,
 } from "../../actions/actions";
 import { commonStyles } from "../commonStyles";
 import { withRouter } from "react-router-dom";
@@ -39,6 +38,7 @@ const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
 
 const defaultDate = moment().format("YYYY-MM-DD");
+const dateAfterOneMonth = moment().add(1, "months").format("YYYY-MM-DD");
 
 const recurringChargesTableHeadCells = [
 	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
@@ -57,15 +57,13 @@ const PropertyUnitSchema = Yup.object().shape({
 	beds: Yup.string().trim().required("Beds is required"),
 	ref: Yup.string().trim().required("Unit Ref Required"),
 	sqft: Yup.number().typeError('Sqft must be a number').min(0).default(0),
-	address: Yup.string().trim().required('Address is Required'),
 	lease_type: Yup.string().trim().required("Lease Type is Required"),
 	rent_cycle: Yup.string().trim().required('Frequency to charge rent on unit is required'),
 	start_date: Yup.date().required('Start Date is Required'),
 	rent_amount: Yup.number().typeError('Rent Amount must be number').min(0).required('Rent Amount is Required'),
-	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0),
-	property_unit: Yup.string().trim().required('Unit is Required'),
+	security_deposit: Yup.number().typeError('Security Deposit must be number').min(0).default(0),
 	end_date: Yup.date().when('lease_type', { is: 'Fixed', then: Yup.date().required('End Date is Required') }),
-	next_due_date: Yup.date().required('Next Due Date is Required'),
+	rent_due_date: Yup.date().required('Next Rent Due Date is Required'),
 	security_deposit_due_date: Yup.date(),
 });
 
@@ -74,7 +72,9 @@ let PropertyUnitInputForm = (props) => {
 	const classes = commonStyles();
 	const { properties, leases, propertyUnitCharges, currentUser, contacts, history, handleItemDelete, handleItemSubmit } = props
 	let propertyUnitToEdit = props.propertyUnitToEdit || {};
-	const unitLease = leases.find((lease) => lease.unit_id === propertyUnitToEdit.id) || {}
+	const unitLease = leases.filter((lease) => lease.unit_id === propertyUnitToEdit.id)
+		.sort((lease1, lease2) => lease1.start_end > lease2.start_date)[0] || {}
+	//get both unit values and latest lease information
 	const propertyValues = {
 		id: propertyUnitToEdit.id,
 		ref: propertyUnitToEdit.ref || "",
@@ -84,20 +84,19 @@ let PropertyUnitInputForm = (props) => {
 		beds: propertyUnitToEdit.beds || "",
 		baths: propertyUnitToEdit.baths || "",
 		sqft: propertyUnitToEdit.sqft || '',
-		lease_id: unitLease.id || '',
+		lease_id: unitLease.id,
 		tenants: unitLease.tenants || [],
 		cosigner: unitLease.cosigner || "",
-		rent_account: unitLease.rent_account,
-		next_due_date: unitLease.next_due_date || defaultDate,
-		security_deposit: unitLease.security_deposit,
-		security_deposit_due_date: unitLease.security_deposit_due_date,
-		property: unitLease.property,
+		rent_due_date: unitLease.rent_due_date || dateAfterOneMonth,
+		security_deposit: unitLease.security_deposit || '',
+		security_deposit_due_date: unitLease.security_deposit_due_date || '',
+		property: unitLease.property || '',
 		start_date: unitLease.start_date || defaultDate,
-		end_date: unitLease.end_date,
-		rent_amount: unitLease.rent_amount,
+		end_date: unitLease.end_date || dateAfterOneMonth,
+		rent_amount: unitLease.rent_amount || '',
 		lease_type: unitLease.lease_type || LEASE_TYPES[1],
-		rent_cycle: unitLease.rent_cycle || "",
-		property_unit: unitLease.property_unit,
+		rent_cycle: unitLease.rent_cycle || "Monthly",
+		unit_id: unitLease.unit_id || '',
 	};
 
 	const defaultChargeValues = {
@@ -114,18 +113,21 @@ let PropertyUnitInputForm = (props) => {
 	propertyValues.unit_charges = propertyUnitCharges.filter((unit_charge) => unit_charge.unit_id === propertyUnitToEdit.id)
 
 
-	const handleModalClose = () => {
+	const handleModalStateToggle = () => {
 		toggleModalState(!modalOpenState)
 	}
 
 	const handleAddChargeClick = () => {
-		setChargeToEdit(defaultChargeValues)
-		toggleModalState(!modalOpenState)
+		//don't open the modal if unit_id has no value
+		if (defaultChargeValues.unit_id) {
+			setChargeToEdit(defaultChargeValues)
+			handleModalStateToggle()
+		}
 	}
 
 	const handleEditClick = (rowId) => {
 		setChargeToEdit(propertyValues.unit_charges.find(({ id }) => id === rowId) || defaultChargeValues)
-		handleModalClose()
+		handleModalStateToggle()
 	}
 
 	return (
@@ -133,7 +135,7 @@ let PropertyUnitInputForm = (props) => {
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertyUnitSchema}
 			onSubmit={async (values, { resetForm }) => {
-				let property_unit = {
+				let unit = {
 					property_id: values.property_id,
 					id: values.id,
 					ref: values.ref,
@@ -146,28 +148,52 @@ let PropertyUnitInputForm = (props) => {
 				};
 				let propertyUnitLease = {
 					id: values.lease_id,
-					property_unit: values.property_unit,
+					unit_ref: values.ref,
 					property: values.property_id,
 					lease_type: values.lease_type,
 					rent_cycle: values.rent_cycle,
-					tenant: values.tenant,
+					tenants: values.tenants,
 					cosigner: values.cosigner,
 					start_date: values.start_date,
 					end_date: values.end_date,
-					rent_account: values.rent_account,
-					next_due_date: values.next_due_date,
+					rent_due_date: values.rent_due_date,
 					security_deposit: values.security_deposit,
 					security_deposit_due_date: values.security_deposit_due_date,
 					rent_amount: values.rent_amount,
 				};
-				//check if the unit has an image to upload
-				if (property_unit.image && property_unit.image.data) {
-					//upload the file to the database and assign the resulting file 
-					// upload path to property_unit
-					const fileUploadPath = await uploadFilesToFirebase([property_unit.image])
-					property_unit.image = fileUploadPath
+				//save the unit details
+				const unitId = await handleItemSubmit(unit, 'property_units')
+				propertyUnitLease.unit_id = unitId
+				//save the lease details after saving unit
+				await handleItemSubmit(propertyUnitLease, 'leases')
+				if (!values.lease_id) {
+					//post charges for rent and  security deposit 
+					const tenant = contacts.find(({id}) => id === values.tenants[0]) || {}
+					const newRentCharge = {
+						charge_amount: values.rent_amount,
+						charge_date: defaultDate,
+						charge_label: "Rent Income",
+						charge_type: "rent_income",
+						due_date: defaultDate,
+						tenant_id: tenant.id,
+						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+						unit_id: unitId,
+						unit_ref: values.ref,
+					}
+					const newSecurityDepositCharge = {
+						charge_amount: values.rent_amount,
+						charge_date: defaultDate,
+						charge_label: "Security Deposit",
+						charge_type: "security_deposit",
+						due_date: defaultDate,
+						tenant_id: tenant.id,
+						tenant_name: `${tenant.first_name} ${tenant.last_name}`,
+						unit_id: unitId,
+						unit_ref: values.ref,
+					}
+					await handleItemSubmit(newRentCharge, 'transactions-charges')
+					await handleItemSubmit(newSecurityDepositCharge, 'transactions-charges')
 				}
-				await handleItemSubmit(currentUser, property_unit, 'property_units')
 				resetForm({});
 				if (values.id) {
 					history.goBack();
@@ -192,11 +218,11 @@ let PropertyUnitInputForm = (props) => {
 					>
 						<Grid container spacing={2}>
 							<Grid container item spacing={4} direction="row">
-								<Grid md={6} container item spacing={1} direction="column">
+								<Grid md={6} xs={12} container item spacing={1} direction="column">
 									<Grid item>
 										<Typography variant="subtitle2">
 											Unit Details
-									</Typography>
+										</Typography>
 									</Grid>
 									<Grid item>
 										<TextField
@@ -328,43 +354,9 @@ let PropertyUnitInputForm = (props) => {
 									</Grid>
 								</Grid>
 								{/** start of the adjacent column here */}
-								<Grid md={6} container item spacing={1} direction="column">
+								<Grid md={6} xs={12} container item spacing={1} direction="column">
 									<Grid item>
-										<Typography variant="subtitle2">Unit Lease Info</Typography>
-									</Grid>
-									<Grid item container direction="row" spacing={2}>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												label="Start Date"
-												error={'start_date' in errors}
-												helperText={errors.start_date}
-												id="start_date"
-												type="date"
-												name="start_date"
-												value={values.start_date}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-										<Grid item xs={12} md={6}>
-											<TextField
-												fullWidth
-												variant="outlined"
-												id="end_date"
-												type="date"
-												name="end_date"
-												label="End Date"
-												value={values.end_date}
-												onChange={handleChange}
-												onBlur={handleBlur}
-												InputLabelProps={{ shrink: true }}
-												error={errors.end_date && touched.end_date}
-												helperText={touched.end_date && errors.end_date}
-											/>
-										</Grid>
+										<Typography variant="subtitle2">Current Unit Lease Info</Typography>
 									</Grid>
 									<Grid item container direction="row" spacing={2}>
 										<Grid item xs={12} md={6}>
@@ -415,27 +407,61 @@ let PropertyUnitInputForm = (props) => {
 											<TextField
 												fullWidth
 												variant="outlined"
-												id="price"
-												label="Rent Amount"
-												name="price"
-												value={values.price}
+												label="Start Date"
+												error={'start_date' in errors}
+												helperText={errors.start_date}
+												id="start_date"
+												type="date"
+												name="start_date"
+												value={values.start_date}
 												onChange={handleChange}
 												onBlur={handleBlur}
-												error={errors.price && touched.price}
-												helperText={touched.price && errors.price}
+												InputLabelProps={{ shrink: true }}
 											/>
 										</Grid>
 										<Grid item xs={12} md={6}>
 											<TextField
 												fullWidth
 												variant="outlined"
-												id="next_due_date"
+												id="end_date"
 												type="date"
-												name="next_due_date"
+												name="end_date"
+												label="End Date"
+												value={values.end_date}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												InputLabelProps={{ shrink: true }}
+												error={errors.end_date && touched.end_date}
+												helperText={touched.end_date && errors.end_date}
+											/>
+										</Grid>
+									</Grid>
+									<Grid item container direction="row" spacing={2}>
+										<Grid item xs={12} md={6}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id="rent_amount"
+												label="Rent Amount"
+												name="rent_amount"
+												value={values.rent_amount}
+												onChange={handleChange}
+												onBlur={handleBlur}
+												error={errors.rent_amount && touched.rent_amount}
+												helperText={touched.rent_amount && errors.rent_amount}
+											/>
+										</Grid>
+										<Grid item xs={12} md={6}>
+											<TextField
+												fullWidth
+												variant="outlined"
+												id="rent_due_date"
+												type="date"
+												name="rent_due_date"
 												label="Rent Next Due Date"
-												value={values.next_due_date}
-												error={errors.next_due_date && touched.next_due_date}
-												helperText={touched.next_due_date && errors.next_due_date || 'Next date when the rent is due'}
+												value={values.rent_due_date}
+												error={errors.rent_due_date && touched.rent_due_date}
+												helperText={touched.rent_due_date && errors.rent_due_date || 'Next date when the rent is due'}
 												onChange={handleChange}
 												onBlur={handleBlur}
 												InputLabelProps={{ shrink: true }}
@@ -516,9 +542,7 @@ let PropertyUnitInputForm = (props) => {
 											>
 												{contacts.map((contact, contactIndex) => (
 													<MenuItem key={contactIndex} value={contact.id}>
-														{contact.first_name +
-															" " +
-															contact.last_name}
+														{contact.first_name} {contact.last_name}
 													</MenuItem>
 												))}
 											</Select>
@@ -557,14 +581,14 @@ let PropertyUnitInputForm = (props) => {
 									<ChargesTable
 										rows={values.unit_charges}
 										headCells={recurringChargesTableHeadCells}
-										tenantId={currentUser.tenant}
+										
 										handleEditClick={handleEditClick}
 										handleItemSubmit={handleItemSubmit}
 										handleDelete={handleItemDelete}
 										deleteUrl={"unit-charges"} />
 									{
 										modalOpenState ? <ChargeInputModal open={modalOpenState}
-											handleClose={handleModalClose} history={history}
+											handleClose={handleModalStateToggle} history={history}
 											handleItemSubmit={handleItemSubmit}
 											chargeValues={chargeToEdit} /> : null
 									}
@@ -626,7 +650,7 @@ const mapStateToProps = (state) => {
 		leases: state.leases,
 		properties: state.properties,
 		error: state.error,
-		contacts: state.contacts.filter(({ id }) => !state.propertyUnits.find((property_unit) => property_unit.tenants.includes(id))),
+		contacts: state.contacts,
 		currentUser: state.currentUser,
 		users: state.users,
 	};
@@ -634,7 +658,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: (item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

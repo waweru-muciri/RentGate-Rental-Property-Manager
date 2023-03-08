@@ -358,7 +358,7 @@ let MaintenanceRequestsPage = ({
 						setSelected={setSelected}
 						rows={filteredMaintenanceRequestItems}
 						headCells={maintenanceRequestsTableHeadCells}
-						tenantId={currentUser.tenant}
+						
 						handleDelete={handleItemDelete}
 						deleteUrl={"maintenance-requests"}
 					/>
@@ -384,7 +384,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+		handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
 	};
 };
 

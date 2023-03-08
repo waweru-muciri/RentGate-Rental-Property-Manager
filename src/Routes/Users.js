@@ -320,7 +320,7 @@ let UsersPage = ({
 						deleteUrl={'users'}
 						rows={userItems}
 						headCells={usersTableHeadCells}
-						tenantId={currentUser.tenant}
+						
 						handleDelete={handleItemDelete}
 					/>
 				</Grid>
@@ -341,7 +341,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+		handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
 	};
 };
 

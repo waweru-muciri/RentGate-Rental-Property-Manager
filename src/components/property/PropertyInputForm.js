@@ -215,7 +215,7 @@ let PropertyInputForm = (props) => {
 					ref: values.ref,
 					owner: values.owner,
 				};
-				// handleItemSubmit(currentUser, property, "property_units").then((propertyId) => {
+				// handleItemSubmit( property, "property_units").then((propertyId) => {
 				// 	if (propertyFilesToSave.length) {
 				// 		let fileDownloadUrls = uploadFilesToFirebase(
 				// 			propertyFilesToSave
@@ -235,7 +235,7 @@ let PropertyInputForm = (props) => {
 				// 		});
 				// 	}
 				// });
-				const propertyId = await handleItemSubmit(currentUser, property, "properties")
+				const propertyId = await handleItemSubmit( property, "properties")
 				values.property_units.forEach(async (property_unit) => {
 					//assign a default address to each property unit
 					property_unit.address = values.address + ' - ' + property_unit.ref
@@ -244,14 +244,15 @@ let PropertyInputForm = (props) => {
 						//upload the file to the database and assign the resulting file 
 						// upload path to property_unit
 						const fileUploadPath = await uploadFilesToFirebase([property_unit.image])
-						property_unit.image = fileUploadPath
+						property_unit.image = fileUploadPath[0]
 					}
 					const propertyUnitToSave = Object.assign({}, property_unit, {
 						property_id: propertyId,
+						property_ref: values.ref,
 						tenants: [],
 						assigned_to: values.assigned_to
 					})
-					await handleItemSubmit(currentUser, propertyUnitToSave, 'property_units')
+					await handleItemSubmit( propertyUnitToSave, 'property_units')
 				})
 				resetForm({});
 				if (values.id) {
@@ -443,7 +444,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

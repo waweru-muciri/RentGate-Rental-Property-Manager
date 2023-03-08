@@ -14,6 +14,7 @@ import {
 } from "react-router-dom";
 import DashBoard from "./DashBoard";
 import LoadingBackdrop from '../components/LoadingBackdrop'
+import ErrorBoundary from '../components/ErrorBoundary'
 import app from '../firebase'
 import PropertiesPage from "./Properties";
 import PropertyPage from "./PropertyPage";
@@ -23,8 +24,8 @@ const ReportsPage = lazy(() => import('./Reports'));
 const ExpensesPage = lazy(() => import('./Expenses'));
 const ExpensePage = lazy(() => import('./ExpensePage'));
 const UsersPage = lazy(() => import('./Users'));
-const TransactionPage = lazy(() => import('./TransactionPage'));
-const TransactionsPage = lazy(() => import('./Transactions'));
+const LeasePage = lazy(() => import('./LeasePage'));
+const LeasesPage = lazy(() => import('./Leases'));
 const AuditLogsPage = lazy(() => import('./AuditLogs'));
 const LeaseRenewalsPage = lazy(() => import('./LeaseRenewals'));
 const RentRollPage = lazy(() => import('./RentRoll'));
@@ -34,7 +35,7 @@ const PaymentPage = lazy(() => import('./PaymentPage'));
 const PaymentsPage = lazy(() => import('./Payments'));
 const MaintenancesPage = lazy(() => import('./Maintenances'));
 const PropertyDetailsPage = lazy(() => import('./PropertyDetails'));
-const UserProfilePage = lazy(() => import('./UserProfilePage'));
+const AdminUserProfilePage = lazy(() => import('./AdminUserProfilePage'));
 const UserPage = lazy(() => import('./UserPage'));
 const MaintenanceRequestPage = lazy(() => import('./MaintenanceRequestPage'));
 const ToDosPage = lazy(() => import('./ToDos'));
@@ -46,6 +47,7 @@ const EmailPage = lazy(() => import('./EmailPage'));
 const EmailsPage = lazy(() => import('./Emails'));
 const MeterReadingPage = lazy(() => import('./MeterReadingPage'));
 const MeterReadingsPage = lazy(() => import('./MeterReadings'));
+const OtherChargesPage = lazy(() => import('./OtherCharges'));
 
 
 let MainPage = ({
@@ -83,11 +85,12 @@ let MainPage = ({
         "property_units",
         "unit-charges",
         "transactions-charges",
-        "transactions",
+        "charge-payments",
         // "maintenance-requests",
         // "property_media",
         "contacts",
         // "notices",
+        "leases",
         // "to-dos",
         "users",
         "expenses",
@@ -100,157 +103,164 @@ let MainPage = ({
     <React.Fragment>
       { currentUser ?
         <Router>
-          <Suspense fallback={<LoadingBackdrop open={true}/>}>
-            <Switch>
-              <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
-              <Route exact path={`${match.path}`} component={DashBoard} />
-              <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
-              <Route exact path={`${match.path}properties/lease-renewals`} component={LeaseRenewalsPage} />
-              <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
-              <Route exact path={`${match.path}emails`} component={EmailsPage} />
-              <Route
-                exact
-                path={`${match.path}maintenance-requests/new`}
-                component={MaintenanceRequestPage}
-              />
-              <Route
-                exact
-                path={`${match.path}maintenance-requests/:maintenanceRequestId/edit`}
-                component={MaintenanceRequestPage}
-              />
-              <Route
-                exact
-                path={`${match.path}maintenance-requests`}
-                component={MaintenancesPage}
-              />
-              <Route exact path={`${match.path}to-dos`} component={ToDosPage} />
-              <Route
-                exact
-                path={`${match.path}audit-logs`}
-                component={AuditLogsPage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/new`}
-                component={PropertyPage}
-              />
-              <Route exact path={`${match.path}users/new`} component={UserPage} />
-              <Route
-                exact
-                path={`${match.path}profile`}
-                component={UserProfilePage}
-              />
-              <Route
-                exact
-                path={`${match.path}users/:userId/edit`}
-                component={UserPage}
-              />
-              <Route exact path={`${match.path}users`} component={UsersPage} />
-              <Route
-                exact
-                path={`${match.path}transactions/new`}
-                component={TransactionPage}
-              />
-              <Route
-                exact
-                path={`${match.path}payments/new`}
-                component={PaymentPage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/:propertyId/edit`}
-                component={PropertyPage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/:propertyId/details`}
-                component={PropertyDetailsPage}
-              />
-              <Route
-                exact
-                path={`${match.path}contacts/:contactId/details`}
-                component={TenantDetailsPage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/:propertyId/details/:propertyUnitId/edit`}
-                component={PropertyUnitPage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/:propertyId/details/new`}
-                component={PropertyUnitPage}
-              />
-              <Route
-                exact
-                path={`${match.path}contacts`}
-                component={ContactsPage}
-              />
-              <Route
-                exact
-                path={`${match.path}transactions/:transactionId/edit`}
-                component={TransactionPage}
-              />
-              <Route
-                exact
-                path={`${match.path}payments/:paymentId/edit`}
-                component={PaymentPage}
-              />
-              <Route
-                exact
-                path={`${match.path}contacts/new`}
-                component={ContactPage}
-              />
-              <Route
-                exact
-                path={`${match.path}property_expenditure/new`}
-                component={ExpensePage}
-              />
-              <Route
-                exact
-                path={`${match.path}property_expenditure`}
-                component={ExpensesPage}
-              />
-              <Route
-                exact
-                path={`${match.path}property_expenditure/:expenseId/edit`}
-                component={ExpensePage}
-              />
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingBackdrop open={true} />}>
+              <Switch>
+                <Route exact path={`${match.path}reports/property-income`} component={PropertyIncomeStatement} />
+                <Route exact path={`${match.path}`} component={DashBoard} />
+                <Route exact path={`${match.path}reports/property-performance`} component={ReportsPage} />
+                <Route exact path={`${match.path}properties/lease-renewals`} component={LeaseRenewalsPage} />
+                <Route exact path={`${match.path}rent-roll`} component={RentRollPage} />
+                <Route exact path={`${match.path}emails`} component={EmailsPage} />
+                <Route
+                  exact
+                  path={`${match.path}maintenance-requests/new`}
+                  component={MaintenanceRequestPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}maintenance-requests/:maintenanceRequestId/edit`}
+                  component={MaintenanceRequestPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}maintenance-requests`}
+                  component={MaintenancesPage}
+                />
+                <Route exact path={`${match.path}to-dos`} component={ToDosPage} />
+                <Route
+                  exact
+                  path={`${match.path}audit-logs`}
+                  component={AuditLogsPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/new`}
+                  component={PropertyPage}
+                />
+                <Route exact path={`${match.path}users/new`} component={UserPage} />
+                <Route
+                  exact
+                  path={`/admin/profile`}
+                  component={AdminUserProfilePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}users/:userId/edit`}
+                  component={UserPage}
+                />
+                <Route exact path={`${match.path}users`} component={UsersPage} />
+                <Route
+                  exact
+                  path={`${match.path}transactions/new`}
+                  component={LeasePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}payments/new`}
+                  component={PaymentPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/:propertyId/edit`}
+                  component={PropertyPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/:propertyId/details`}
+                  component={PropertyDetailsPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}contacts/:contactId/details`}
+                  component={TenantDetailsPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/:propertyId/details/:propertyUnitId/edit`}
+                  component={PropertyUnitPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/:propertyId/details/new`}
+                  component={PropertyUnitPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}contacts`}
+                  component={ContactsPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}transactions/:transactionId/edit`}
+                  component={LeasePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/other-charges`}
+                  component={OtherChargesPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}payments/:paymentId/edit`}
+                  component={PaymentPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}contacts/new`}
+                  component={ContactPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}property_expenditure/new`}
+                  component={ExpensePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}property_expenditure`}
+                  component={ExpensesPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}property_expenditure/:expenseId/edit`}
+                  component={ExpensePage}
+                />
 
-              <Route exact path={`${match.path}emails/new`} component={EmailPage} />
-              <Route
-                exact
-                path={`${match.path}contacts/:contactId/edit`}
-                component={ContactPage}
-              />
-              <Route
-                exact
-                path={`${match.path}notices/new`}
-                component={NoticePage}
-              />
-              <Route
-                exact
-                path={`${match.path}notices`}
-                component={NoticesPage}
-              />
-              <Route
-                exact
-                path={`${match.path}notices/:noticeId/edit`}
-                component={NoticePage}
-              />
-              <Route
-                exact
-                path={`${match.path}properties/meter-reading/:meterReadingId/edit`}
-                component={MeterReadingPage}
-              />
-              <Route exact path={`${match.path}properties`} component={PropertiesPage} />
-              <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
-              <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
-              <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
-              <Route exact path={`${match.path}transactions`} component={TransactionsPage} />
-              <Route exact path={`${match.path}payments`} component={PaymentsPage} />
-            </Switch>
-          </Suspense>
+                <Route exact path={`${match.path}emails/new`} component={EmailPage} />
+                <Route
+                  exact
+                  path={`${match.path}contacts/:contactId/edit`}
+                  component={ContactPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}notices/new`}
+                  component={NoticePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}notices`}
+                  component={NoticesPage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}notices/:noticeId/edit`}
+                  component={NoticePage}
+                />
+                <Route
+                  exact
+                  path={`${match.path}properties/meter-reading/:meterReadingId/edit`}
+                  component={MeterReadingPage}
+                />
+                <Route exact path={`${match.path}properties`} component={PropertiesPage} />
+                <Route exact path={`${match.path}properties/meter-reading`} component={MeterReadingsPage} />
+                <Route exact path={`${match.path}properties/meter-reading/new`} component={MeterReadingPage} />
+                <Route exact path={`${match.path}reports/tenant-statements`} component={TenantStatementsPage} />
+                <Route exact path={`${match.path}transactions`} component={LeasesPage} />
+                <Route exact path={`${match.path}payments`} component={PaymentsPage} />
+              </Switch>
+            </Suspense>
+          </ErrorBoundary>
         </Router>
         : null}
     </React.Fragment>

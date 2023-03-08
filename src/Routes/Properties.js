@@ -33,12 +33,6 @@ const headCells = [
         disablePadding: true,
         label: "Rental Manager",
     },
-    {
-        id: "property_type",
-        numeric: false,
-        disablePadding: true,
-        label: "Type",
-    },
     { id: "details", numeric: false, disablePadding: true, label: "Details" },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
 	{ id: "delete", numeric: false, disablePadding: true, label: "Delete" },
@@ -47,7 +41,6 @@ const headCells = [
 let PropertyPage = ({
     isLoading,
     properties,
-    currentUser,
     history,
     users,
     match,
@@ -280,7 +273,6 @@ let PropertyPage = ({
                         headCells={headCells}
                         noDetailsCol={true}
                         deleteUrl={'properties'}
-                        tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
                     />
                 </Grid>
@@ -303,7 +295,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

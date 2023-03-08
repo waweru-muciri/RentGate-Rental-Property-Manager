@@ -74,6 +74,7 @@ const propertyLinkNestedLinks = [
     { text: "Rentals Properties", to: "/properties", icon: <ApartmentIcon /> },
     { text: "Leases", to: "/transactions", icon: <AttachMoneyIcon /> },
     { text: "Lease Renewals", to: "/properties/lease-renewals", icon: <WorkIcon /> },
+    { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
 ];
 
 const reportLinkNestedLinks = [
@@ -101,7 +102,6 @@ const reportLinkNestedLinks = [
 const accountsLinkNestedLinks = [
     { text: "Rent Roll", to: "/rent-roll", icon: <ScheduleIcon /> },
     { text: "Other Charges", to: "/properties/other-charges", icon: <MoneyIcon /> },
-    { text: "Meter Readings", to: "/properties/meter-reading", icon: <MonetizationOnIcon /> },
     { text: "Payments", to: "/payments", icon: <PaymentIcon /> },
     {
         text: "Property Expenses",
@@ -174,7 +174,7 @@ let AppNavLayout = ({
                     >
                         <Avatar
                             alt="Contact Image"
-                            src={currentUser ? currentUser.photoURL : ""}
+                            src={currentUser ? currentUser.user_avatar_url : ""}
                         />
                     </IconButton>
                     <Menu
@@ -191,7 +191,9 @@ let AppNavLayout = ({
                     >
                         <MenuItem
                             component={Link}
-                            to={`${match.path}users/${currentUser.uid}/edit`}
+                            to={ currentUser.isAdmin ? `/admin/profile` :
+                             `${match.path}users/${currentUser.uid}/edit`
+                            }
                             onClick={() => {
                                 handleProfileMenuClose();
                             }}

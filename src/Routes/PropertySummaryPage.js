@@ -1,14 +1,10 @@
 import React from "react";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import Button from '@material-ui/core/Button';
 import TenantInfoDisplayCard from "../components/TenantInfoDisplayCard";
 import {
     PieChart,
@@ -19,7 +15,7 @@ import {
 
 
 let PropertySummaryPage = (props) => {
-    const {classes} = props;
+    const { classes } = props;
     let { propertyToShowDetails, propertyUnits, users } = props
     const occupiedUnitsNumber = propertyUnits.filter((unit) => unit.tenants.length !== 0).length
     //get occupancy graph data
@@ -94,8 +90,8 @@ let PropertySummaryPage = (props) => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} md>
-                <TenantInfoDisplayCard title="Property Owner"
-                            subheader="Owner of this property"
+                    <TenantInfoDisplayCard title="Property Owner"
+                        subheader="Owner of this property"
                         avatar={`${propertyOwner.first_name[0]}${propertyOwner.last_name[0]}`}
                         cardContent={[
                             { name: 'Name:', value: `${propertyOwner.first_name} ${propertyOwner.last_name}` },
@@ -127,7 +123,7 @@ let PropertySummaryPage = (props) => {
                 alignItems="stretch"
                 spacing={2}
             >
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md>
                     <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
@@ -143,7 +139,7 @@ let PropertySummaryPage = (props) => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md>
                     <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">
@@ -151,15 +147,15 @@ let PropertySummaryPage = (props) => {
                             </Typography>
                             <ResponsiveContainer width="100%" height={200}>
                                 <PieChart>
-                                    <Pie isAnimationActive={true} data={occupancyChartData} dataKey="value"
-                                        outerRadius={80} fill="#7DB3FF" label />
+                                    <Pie isAnimationActive={true} data={occupancyChartData} 
+                                    dataKey="value" outerRadius={80} fill="#7DB3FF" label />
                                     <Tooltip />
                                 </PieChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md>
                     <Card className={classes.fullHeightWidthContainer} variant="outlined" elevation={1}>
                         <CardContent>
                             <Typography gutterBottom align="center" variant="subtitle1" component="h2">

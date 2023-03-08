@@ -79,7 +79,7 @@ let PropertySettingsInputForm = (props) => {
 					late_fee_amount: values.late_fee_amount,
 					management_fee_type: values.management_fee_type,
 				};
-				await handleItemSubmit(currentUser, property_unit, 'properties')
+				await handleItemSubmit( property_unit, 'properties')
 				resetForm({});
 				if (values.id) {
 					history.goBack();
@@ -366,7 +366,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	};
 };
 

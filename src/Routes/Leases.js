@@ -2,12 +2,10 @@ import Layout from "../components/PrivateLayout";
 import Grid from "@material-ui/core/Grid";
 import PageHeading from "../components/PageHeading";
 import React, { useEffect, useState } from "react";
-import {
-    Box,
-    TextField,
-    Button,
-    MenuItem,
-} from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -17,74 +15,27 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
-
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
-    {
-        id: "transaction_date",
-        numeric: false,
-        disablePadding: true,
-        label: "Transaction Date",
-    },
-    {
-        id: "tenant",
-        numeric: false,
-        disablePadding: true,
-        label: "Tenant Name",
-    },
-    {
-        id: "landlord_name",
-        numeric: false,
-        disablePadding: true,
-        label: "Landlord Name",
-    },
-    {
-        id: "property_ref",
-        numeric: false,
-        disablePadding: true,
-        label: "Property Ref",
-    },
-    {
-        id: "lease_start",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Start",
-    },
-    {
-        id: "lease_end",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease End",
-    },
-    {
-        id: "security_deposit",
-        numeric: false,
-        disablePadding: true,
-        label: "Deposit Held",
-    },
-    {
-        id: "transaction_price",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent",
-    }, {
-        id: "rent_balance",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent Balance",
-    },
+    { id: "property_ref", numeric: false, disablePadding: true, label: "Property", },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
+    { id: "tenant_id_number", numeric: false, disablePadding: true, label: "Tenant ID", },
+    { id: "unit_ref", numeric: false, disablePadding: true, label: "Unit", },
+    { id: "start_date", numeric: false, disablePadding: true, label: "Lease Start", },
+    { id: "end_date", numeric: false, disablePadding: true, label: "Lease End", },
+    { id: "security_deposit", numeric: false, disablePadding: true, label: "Deposit Held", },
+    { id: "rent_amount", numeric: false, disablePadding: true, label: "Rent", },
     { id: "edit", numeric: false, disablePadding: true, label: "Edit" },
     { id: "delete", numeric: false, disablePadding: true, label: "Delete" },
 ];
 
 let TransactionPage = ({
     currentUser,
-    isLoading,
-    transactions,
+    leases,
     properties,
     contacts,
     match,
@@ -93,8 +44,8 @@ let TransactionPage = ({
     error,
 }) => {
     const classes = commonStyles();
-    let [transactionItems, setTransactionItems] = useState([]);
-    let [filteredTransactionItems, setFilteredTransactionItems] = useState([]);
+    let [leaseItems, setLeaseItems] = useState([]);
+    let [filteredLeaseItems, setFilteredLeaseItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
     let [fromDateFilter, setFromDateFilter] = useState("");
@@ -102,46 +53,19 @@ let TransactionPage = ({
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = users.find(
-                (user) => user.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {};
-            transactionDetails.tenant =
-                typeof tenant !== "undefined"
-                    ? tenant.first_name + " " + tenant.last_name
-                    : "";
-            transactionDetails.landlord_name =
-                typeof landlord !== "undefined"
-                    ? landlord.first_name + " " + landlord.last_name
-                    : "";
-            if (typeof property !== "undefined") {
-                transactionDetails.property_ref = property.ref
-                transactionDetails.rent_balance = parseFloat(property.price) - parseFloat(transaction.transaction_price)
-            }
-            transactionDetails.property =
-                typeof property !== "undefined" ? property.id : null;
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setTransactionItems(mappedTransactions);
-        setFilteredTransactionItems(mappedTransactions);
-    }, [transactions, contacts, properties, users]);
+        setLeaseItems(leases);
+        setFilteredLeaseItems(leases);
+    }, [leases]);
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactions according to the search criteria here
-        let filteredTransactions = transactionItems
-            .filter(({ transaction_date }) =>
-                !fromDateFilter ? true : transaction_date >= fromDateFilter
+        //filter the leases according to the search criteria here
+        let filteredLeases = leaseItems
+            .filter(({ start_date }) =>
+                !fromDateFilter ? true : start_date >= fromDateFilter
             )
-            .filter(({ transaction_date }) =>
-                !toDateFilter ? true : transaction_date <= toDateFilter
+            .filter(({ start_date }) =>
+                !toDateFilter ? true : start_date <= toDateFilter
             )
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
@@ -149,12 +73,12 @@ let TransactionPage = ({
             .filter(({ landlord }) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setFilteredTransactionItems(filteredTransactions);
+        setFilteredLeaseItems(filteredLeases);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredTransactionItems(transactionItems);
+        setFilteredLeaseItems(leaseItems);
         setPropertyFilter("");
         setAssignedToFilter("");
         setFromDateFilter("");
@@ -212,7 +136,7 @@ let TransactionPage = ({
                             reportName={'Leases Records'}
                             reportTitle={'Leases Data'}
                             headCells={headCells}
-                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -221,7 +145,7 @@ let TransactionPage = ({
                             reportName={'Leases Records'}
                             reportTitle={'Leases Data'}
                             headCells={headCells}
-                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={leaseItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -262,8 +186,7 @@ let TransactionPage = ({
                                                 key={index}
                                                 value={user.id}
                                             >
-                                                {user.first_name + ' ' +
-                                                    user.last_name}
+                                                {user.first_name} {user.last_name}
                                             </MenuItem>
                                         ))}
                                     </TextField>
@@ -384,22 +307,30 @@ let TransactionPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={filteredTransactionItems}
+                        rows={filteredLeaseItems}
                         headCells={headCells}
-                        tenantId={currentUser.tenant}
                         handleDelete={handleItemDelete}
-                        deleteUrl={"transactions"}
+                        deleteUrl={"leases"}
                     />
                 </Grid>
-                
             </Grid>
         </Layout>
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
-        transactions: state.transactions,
+        leases: state.leases.sort((lease1, lease2) => lease2.start_date > lease1.start_date)
+            .map((lease) => {
+                const tenant = state.contacts.find((contact) => contact.id === lease.tenants[0]) || {};
+                const property = state.properties.find((property) => property.id === lease.property) || {};
+                return Object.assign({}, lease,
+                    {
+                        tenant_name: tenant.first_name + " " + tenant.last_name,
+                        tenant_id_number: tenant.id_number,
+                        property_ref: property.ref,
+                    });
+            }),
         users: state.users,
         currentUser: state.currentUser,
         expenses: state.expenses,
@@ -407,13 +338,12 @@ const mapStateToProps = (state, ownProps) => {
         contacts: state.contacts,
         isLoading: state.isLoading,
         error: state.error,
-        match: ownProps.match,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete(itemId, url)),
     };
 };
 

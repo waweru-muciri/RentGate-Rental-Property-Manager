@@ -354,7 +354,7 @@ let VacatingNoticesPage = ({
                         setSelected={setSelected}
                         rows={filteredNoticeItems}
                         headCells={noticesTableHeadCells}
-                        tenantId={currentUser.tenant}
+                        
                         handleDelete={handleItemDelete}
                         deleteUrl={"notices"}
                     />
@@ -377,7 +377,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

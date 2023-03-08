@@ -28,7 +28,6 @@ function CommonTable(props) {
         selected,
         setSelected,
         deleteUrl,
-        tenantId,
         handleDelete,
         noEditCol,
         noDeleteCol,
@@ -184,7 +183,6 @@ function CommonTable(props) {
                                                                             <IconButton
                                                                                 onClick={(event) => {
                                                                                     handleDelete(
-                                                                                        tenantId,
                                                                                         row.id,
                                                                                         deleteUrl
                                                                                     );

@@ -13,117 +13,64 @@ import PageHeading from "../components/PageHeading";
 import moment from "moment";
 
 const headCells = [
-    {
-        id: "lease_details",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Details",
-    },
-    {
-        id: "status",
-        numeric: false,
-        disablePadding: true,
-        label: "Status",
-    },
-    {
-        id: "lease_type",
-        numeric: false,
-        disablePadding: true,
-        label: "Lease Type",
-    },
-    {
-        id: "days_left",
-        numeric: false,
-        disablePadding: true,
-        label: "Days Left",
-    },
-    {
-        id: "transaction_price",
-        numeric: false,
-        disablePadding: true,
-        label: "Rent",
-    },
-    { id: "paid_status", numeric: false, disablePadding: true, label: "Paid Status" },
+    { id: "lease_details", numeric: false, disablePadding: true, label: "Lease Details", },
+    { id: "tenant_name", numeric: false, disablePadding: true, label: "Tenant Name", },
+    { id: "status", numeric: false, disablePadding: true, label: "Status", },
+    { id: "due_date", numeric: false, disablePadding: true, label: "Due Date", },
+    { id: "charge_amount", numeric: false, disablePadding: true, label: "Charge Amount", },
+    { id: "payed_status", numeric: false, disablePadding: true, label: "Payments Made" },
+    { id: "payed_amount", numeric: false, disablePadding: true, label: "Total Amounts Paid" },
     { id: "balance", numeric: false, disablePadding: true, label: "Balance" },
 ];
 
 let RentRollPage = ({
-    currentUser,
     transactions,
+    transactionsCharges,
     properties,
     contacts,
     users
 }) => {
-    let [statementItems, setStatementItems] = useState([]);
-    let [filteredStatementItems, setFilteredStatementItems] = useState([]);
+    let [chargeItems, setChargeItems] = useState([]);
+    let [filteredChargeItems, setFilteredChargeItems] = useState([]);
     let [propertyFilter, setPropertyFilter] = useState("");
     let [contactFilter, setContactFilter] = useState("");
-    let [assignedToFilter, setAssignedToFilter] = useState(currentUser.id);
+    let [assignedToFilter, setAssignedToFilter] = useState('');
     let [fromDateFilter, setFromDateFilter] = useState(moment().format('YYYY-MM-DD'));
     let [toDateFilter, setToDateFilter] = useState("");
     const [selected, setSelected] = useState([]);
+    const classes = commonStyles();
 
     useEffect(() => {
-        const mappedTransactions = transactions.sort((transaction1, transaction2) => transaction2.transaction_date > transaction1.transaction_date).map((transaction) => {
-            const tenant = contacts.find(
-                (contact) => contact.id === transaction.tenant
-            );
-            const landlord = contacts.find(
-                (contact) => contact.id === transaction.landlord
-            );
-            const property = properties.find(
-                (property) => property.id === transaction.property
-            );
-            const transactionDetails = {}
-            if (typeof property !== 'undefined' && typeof tenant !== 'undefined') {
-                transactionDetails.lease_details = `${property.address} - ${property.ref} | ${tenant.first_name} ${tenant.last_name}`;
-            }
-            if (typeof property !== 'undefined') {
-                transactionDetails.property_ref = property.ref
-                transactionDetails.property = property.id
-                transactionDetails.property_price = property.price
-            }
-            transactionDetails.status = moment(transaction.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
-            const daysLeft = moment(transaction.lease_end).diff(moment(), 'days')
-            transactionDetails.days_left = daysLeft < 0 ? 0 : daysLeft
-            if (typeof tenant !== 'undefined') {
-                transactionDetails.tenant_name = tenant.first_name + ' ' + tenant.last_name
-                transactionDetails.tenantId = tenant.id
-            }
-            transactionDetails.landlord_name = typeof landlord !== 'undefined' ? landlord.first_name + ' ' + landlord.last_name : ''
-            return Object.assign({}, transaction, transactionDetails);
-        });
-        setStatementItems(mappedTransactions);
-        setFilteredStatementItems(mappedTransactions);
-    }, [transactions, contacts, users, properties]);
+        setChargeItems(transactionsCharges);
+        setFilteredChargeItems(transactionsCharges);
+    }, [transactionsCharges]);
 
-    const classes = commonStyles();
 
     const handleSearchFormSubmit = (event) => {
         event.preventDefault();
-        //filter the transactions according to the search criteria here
-        let filteredStatements = statementItems
-            .filter(({ transaction_date }) =>
-                !fromDateFilter ? true : transaction_date >= fromDateFilter
+        //filter the charges according to the search criteria here
+        let filteredStatements = chargeItems
+            .filter(({ charge_date }) =>
+                !fromDateFilter ? true : charge_date >= fromDateFilter
             )
-            .filter(({ transaction_date }) =>
-                !toDateFilter ? true : transaction_date <= toDateFilter
+            .filter(({ charge_date }) =>
+                !toDateFilter ? true : charge_date <= toDateFilter
             )
             .filter(({ property }) =>
                 !propertyFilter ? true : property === propertyFilter
             )
-            .filter(({ tenantId }) =>
-                !contactFilter ? true : tenantId === contactFilter
+            .filter(({ tenant_id }) =>
+                !contactFilter ? true : tenant_id === contactFilter
             )
             .filter((landlord) =>
                 !assignedToFilter ? true : landlord === assignedToFilter
             );
-        setFilteredStatementItems(filteredStatements);
+        setFilteredChargeItems(filteredStatements);
     };
 
     const resetSearchForm = (event) => {
         event.preventDefault();
-        setFilteredStatementItems(statementItems);
+        setFilteredChargeItems(chargeItems);
         setPropertyFilter("");
         setContactFilter("");
         setAssignedToFilter("");
@@ -155,7 +102,7 @@ let RentRollPage = ({
                             reportName={'Rent Roll Records'}
                             reportTitle={'Rent Roll Data'}
                             headCells={headCells}
-                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={chargeItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                     <Grid item>
@@ -164,7 +111,7 @@ let RentRollPage = ({
                             reportName={'Rent Roll Records'}
                             reportTitle={'Rent Roll Data'}
                             headCells={headCells}
-                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
+                            dataToPrint={chargeItems.filter(({ id }) => selected.includes(id))}
                         />
                     </Grid>
                 </Grid>
@@ -349,7 +296,7 @@ let RentRollPage = ({
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}
-                        rows={filteredStatementItems}
+                        rows={filteredChargeItems}
                         headCells={headCells}
                         noDetailsCol={true}
                         noEditCol={true}
@@ -361,13 +308,30 @@ let RentRollPage = ({
     );
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
+        transactions: state.transactions.filter((payment) => payment.payment_type === 'rent_income'),
         properties: state.properties,
-        transactions: state.transactions,
+        transactionsCharges: state.transactionsCharges
+            .filter((charge) => charge.charge_type === 'rent_income').sort((charge1, charge2) => charge2.charge_date > charge1.charge_date)
+            .map((charge) => {
+                const chargeDetails = {}
+                chargeDetails.lease_details = `${charge.property_ref} - ${charge.unit_ref}`;
+                chargeDetails.status = moment(charge.lease_end).month() > moment().month() ? 'Active' : 'Inactive'
+                // const daysLeft = moment(charge.lease_end).diff(moment(), 'days')
+                // chargeDetails.days_left = daysLeft < 0 ? 0 : daysLeft
+                //get payments with this charge id
+                const chargePayments = state.transactions.filter((payment) => payment.charge_id === charge.id)
+                chargeDetails.payed_status = chargePayments.length ? true : false;
+                chargeDetails.payed_amount = 0
+                chargePayments.forEach(chargePayment => {
+                    chargeDetails.payed_amount += chargePayment.amount
+                });
+                chargeDetails.balance = charge.charge_amount - chargeDetails.payed_amount
+                return Object.assign({}, charge, chargeDetails);
+            }),
         contacts: state.contacts,
         users: state.users,
-        currentUser: state.currentUser,
     };
 };
 

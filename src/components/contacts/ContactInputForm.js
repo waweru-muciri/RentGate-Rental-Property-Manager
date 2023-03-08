@@ -124,7 +124,7 @@ let ContactInputForm = (props) => {
 					contact.contact_avatar_url = fileDownloadUrl;
 				}
 
-				handleItemSubmit(currentUser, contact, "contacts").then((contactId) => {
+				handleItemSubmit( contact, "contacts").then((contactId) => {
 					resetForm({});
 					if (values.id) {
 						history.goBack();
@@ -611,7 +611,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleItemSubmit: (user, item, url) => dispatch(handleItemFormSubmit(user, item, url)),
+		handleItemSubmit: ( item, url) => dispatch(handleItemFormSubmit(item, url)),
 	}
 };
 

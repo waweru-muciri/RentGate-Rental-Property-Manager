@@ -347,7 +347,7 @@ let ContactsPage = ({
                         setSelected={setSelected}
                         rows={filteredContactItems}
                         headCells={contactsTableHeadCells}
-                        tenantId={currentUser.tenant}
+                        
                         handleDelete={handleItemDelete}
                         noDetailsCol={true}
                         deleteUrl={"contacts"}
@@ -372,7 +372,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 

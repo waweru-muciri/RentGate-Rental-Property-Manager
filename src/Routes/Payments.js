@@ -17,7 +17,6 @@ import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { connect } from "react-redux";
 import { handleDelete } from "../actions/actions";
 import CommonTable from "../components/table/commonTable";
-
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
@@ -25,36 +24,36 @@ import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
     {
-        id: "transaction_date",
+        id: "payment_date",
         numeric: false,
         disablePadding: true,
         label: "Payment Date",
     },
     {
-        id: "payment_type",
+        id: "payment_label",
         numeric: false,
         disablePadding: true,
         label: "Payment Type",
     },
     {
-        id: "tenant",
+        id: "tenant_name",
         numeric: false,
         disablePadding: true,
         label: "Tenant Name",
     },
     {
-        id: "property_ref",
+        id: "unit_ref",
         numeric: false,
         disablePadding: true,
         label: "Unit Number/Ref",
     },
     {
-        id: "transaction_price",
+        id: "amount",
         numeric: false,
         disablePadding: true,
         label: "Payment Amount",
     }, {
-        id: "rent_balance",
+        id: "balances",
         numeric: false,
         disablePadding: true,
         label: "Balance",
@@ -391,7 +390,7 @@ let TransactionPage = ({
                         setSelected={setSelected}
                         rows={filteredTransactionItems}
                         headCells={headCells}
-                        tenantId={currentUser.tenant}
+                        
                         handleDelete={handleItemDelete}
                         deleteUrl={"transactions"}
                     />
@@ -418,7 +417,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleItemDelete: (tenantId, itemId, url) => dispatch(handleDelete(tenantId, itemId, url)),
+        handleItemDelete: (itemId, url) => dispatch(handleDelete( itemId, url)),
     };
 };
 
