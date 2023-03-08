@@ -104,7 +104,7 @@ let UnitLeaseInputForm = (props) => {
 			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
 			return (
 				<Grid key={`unit_charge-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-					<Grid xs item key={`recurring_charges[${unitChargeIndex}].account`}>
+					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].account`}>
 						<TextField
 							fullWidth
 							label="Account"
@@ -124,7 +124,7 @@ let UnitLeaseInputForm = (props) => {
 							))}
 						</TextField>
 					</Grid>
-					<Grid xs item key={`recurring_charges[${unitChargeIndex}].due_date`}>
+					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].due_date`}>
 						<TextField
 							fullWidth
 							variant="outlined"
@@ -139,8 +139,9 @@ let UnitLeaseInputForm = (props) => {
 							error={(indexInErrors && 'due_date' in indexInErrors) && (indexInTouched && indexInTouched.due_date)}
 							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)} />
 					</Grid>
-					<Grid xs item key={`recurring_charges[${unitChargeIndex}].amount`}>
+					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].amount`}>
 						<TextField
+							fullWidth
 							label="Amount"
 							variant="outlined"
 							type="text"
@@ -152,7 +153,7 @@ let UnitLeaseInputForm = (props) => {
 							helperText={(indexInTouched && indexInTouched.amount) && (indexInErrors && indexInErrors.amount)}
 						/>
 					</Grid>
-					<Grid xs item key={`recurring_charges[${unitChargeIndex}].frequency`}>
+					<Grid item xs={12} md key={`recurring_charges[${unitChargeIndex}].frequency`}>
 						<TextField
 							fullWidth
 							variant="outlined"
@@ -207,7 +208,7 @@ let UnitLeaseInputForm = (props) => {
 			const indexInTouched = propertyUnitTouched && propertyUnitTouched[unitChargeIndex];
 			return (
 				<Grid key={`one_time_charges-${unitChargeIndex}`} container item direction="row" alignItems="center" spacing={2}>
-					<Grid xs item key={`one_time_charges[${unitChargeIndex}].account`}>
+					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].account`}>
 						<TextField
 							fullWidth
 							label="Account"
@@ -227,7 +228,7 @@ let UnitLeaseInputForm = (props) => {
 							))}
 						</TextField>
 					</Grid>
-					<Grid xs item key={`one_time_charges[${unitChargeIndex}].due_date`}>
+					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].due_date`}>
 						<TextField
 							fullWidth
 							variant="outlined"
@@ -243,7 +244,7 @@ let UnitLeaseInputForm = (props) => {
 							helperText={(indexInTouched && indexInTouched.due_date) && (indexInErrors && indexInErrors.due_date)}
 						/>
 					</Grid>
-					<Grid xs item key={`one_time_charges[${unitChargeIndex}].amount`}>
+					<Grid item xs={12} md key={`one_time_charges[${unitChargeIndex}].amount`}>
 						<TextField
 							fullWidth
 							label="Amount"
@@ -338,7 +339,7 @@ let UnitLeaseInputForm = (props) => {
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item sm>
+								<Grid item xs={12} md={6}>
 									<TextField
 										fullWidth
 										label="Property"
@@ -359,7 +360,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item sm>
+								<Grid item xs={12} md={6}>
 									<TextField
 										fullWidth
 										select
@@ -383,7 +384,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item sm={4}>
+								<Grid item xs={12} md={4}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -404,8 +405,8 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item container sm={8} direction="row" alignItems="center" spacing={2}>
-									<Grid item sm>
+								<Grid item container xs={12} md={8} direction="row" alignItems="center" justify="center" spacing={2}>
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -421,8 +422,7 @@ let UnitLeaseInputForm = (props) => {
 											InputLabelProps={{ shrink: true }}
 										/>
 									</Grid>
-									<Grid item>~</Grid>
-									<Grid item sm>
+									<Grid item xs={12} md={6}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -479,8 +479,9 @@ let UnitLeaseInputForm = (props) => {
 										</Select>
 									</FormControl>
 								</Grid> */}
-								<Grid item sm>
+								<Grid item xs={12} md={6}>
 									<Autocomplete
+										fullWidth
 										id="combo-box-tenants-select"
 										filterSelectedOptions
 										options={contacts}
@@ -490,13 +491,13 @@ let UnitLeaseInputForm = (props) => {
 										style={{ width: '100%' }}
 										renderTags={(value, getTagProps) =>
 											value.map((option, index) => (
-											  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+												<Chip variant="outlined" label={option} {...getTagProps({ index })} />
 											))
-										  }
+										}
 										renderInput={(params) => <TextField {...params} label="Tenants" variant="outlined" />}
 									/>
 								</Grid>
-								<Grid item sm>
+								<Grid item xs={12} md={6}>
 									<TextField
 										fullWidth
 										select
@@ -675,27 +676,31 @@ let UnitLeaseInputForm = (props) => {
 								direction="row"
 								className={classes.buttonBox}
 							>
-								<Button
-									color="secondary"
-									variant="contained"
-									size="medium"
-									startIcon={<CancelIcon />}
-									onClick={() => { history.goBack() }}
-									disableElevation
-								>
-									Cancel
+								<Grid item>
+									<Button
+										color="secondary"
+										variant="contained"
+										size="medium"
+										startIcon={<CancelIcon />}
+										onClick={() => { history.goBack() }}
+										disableElevation
+									>
+										Cancel
+									</Button>
+								</Grid>
+								<Grid item>
+									<Button
+										type="submit"
+										color="primary"
+										variant="contained"
+										size="medium"
+										startIcon={<SaveIcon />}
+										form="propertyInputForm"
+										disabled={isSubmitting}
+									>
+										Add Lease
 								</Button>
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									size="medium"
-									startIcon={<SaveIcon />}
-									form="propertyInputForm"
-									disabled={isSubmitting}
-								>
-									Save
-								</Button>
+								</Grid>
 							</Grid>
 						</Grid>
 					</form>
