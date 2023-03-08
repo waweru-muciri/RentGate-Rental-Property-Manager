@@ -13,8 +13,7 @@ import { format, startOfToday } from "date-fns";
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
 
 const VacatingNoticeSchema = Yup.object().shape({
-  tenant: Yup.string().required("Tenant is required"),
-  landlord: Yup.string().required("Landlord is required"),
+  lease_id: Yup.string().required("Tenant is required"),
   notification_date: Yup.date().required("Vacating Date Required"),
   vacating_date: Yup.date().required("Vacating Date Required"),
   actual_vacated_date: Yup.date(),
@@ -50,9 +49,9 @@ const quillEditorFormats = [
 
 const NoticeInputForm = (props) => {
   const history = useHistory();
-  const { currentUser, contacts, users, submitForm } = props;
+  const { activeLeases, submitForm } = props;
   const classes = commonStyles();
-  const noticeToEdit = typeof props.noticeToEdit !== 'undefined' ? props.noticeToEdit : {}
+  const noticeToEdit = props.noticeToEdit || {}
 
   let noticeValues = {
     id: noticeToEdit.id,
@@ -60,8 +59,7 @@ const NoticeInputForm = (props) => {
     notification_date: noticeToEdit.notification_date || defaultDate,
     vacating_date: noticeToEdit.vacating_date || defaultDate,
     actual_vacated_date: noticeToEdit.actual_vacated_date || defaultDate,
-    landlord: noticeToEdit.landlord || '',
-    tenant: noticeToEdit.tenant || ''
+    lease_id: noticeToEdit.lease_id || ''
   };
 
   return (
@@ -71,14 +69,13 @@ const NoticeInputForm = (props) => {
       onSubmit={(values, { resetForm }) => {
         const vacatingNotice = {
           id: values.id,
-          tenant: values.tenant,
-          landlord: values.landlord,
+          lease_id: values.lease_id,
           notice_details: values.notice_details,
           vacating_date: values.vacating_date,
           actual_vacated_date: values.actual_vacated_date,
           notification_date: values.notification_date,
         };
-        submitForm(currentUser, vacatingNotice, "notices").then(
+        submitForm(vacatingNotice, "notices").then(
           (response) => {
             resetForm({});
             if (values.id) {
@@ -91,7 +88,6 @@ const NoticeInputForm = (props) => {
       {({
         values,
         handleSubmit,
-		setFieldValue,
         errors,
         handleChange,
         handleBlur,
@@ -115,37 +111,18 @@ const NoticeInputForm = (props) => {
                   fullWidth
                   select
                   variant="outlined"
-                  id="landlord"
-                  name="landlord"
-                  label="LandLord"
-                  value={values.landlord}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={"landlord" in errors}
-                  helperText={errors.landlord}
-                >
-                  {users.map((user, index) => (
-                    <MenuItem key={index} value={user.id}>
-                      {user.first_name + " " + user.last_name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  fullWidth
-                  select
-                  variant="outlined"
-                  id="tenant"
-                  name="tenant"
+                  id="lease_id"
+                  name="lease_id"
                   label="Tenant"
-                  value={values.tenant}
+                  value={values.lease_id}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={"tenant" in errors}
-                  helperText={errors.tenant}
+                  error={"lease_id" in errors}
+                  helperText={errors.lease_id}
                 >
-                  {contacts.map((contact, index) => (
+                  {activeLeases.map((contact, index) => (
                     <MenuItem key={index} value={contact.id}>
-                      {contact.first_name + " " + contact.last_name}
+                      {contact.tenant_name}
                     </MenuItem>
                   ))}
                 </TextField>

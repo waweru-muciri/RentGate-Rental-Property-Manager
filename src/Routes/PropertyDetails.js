@@ -306,7 +306,6 @@ const mapStateToProps = (state, ownProps) => {
         propertyUnits: state.propertyUnits.filter(({ id }) => unitsInProperty.includes(id))
             .map((property_unit) => {
                 const latestUnitLease = state.leases.filter(({ terminated }) => terminated !== true)
-                    .sort((lease1, lease2) => lease1.start_date > lease2.start_date)
                     .find(({ unit_id }) => unit_id === property_unit.id) || {}
                 const tenant = state.contacts.find(
                     ({ id }) => latestUnitLease.tenants ? latestUnitLease.tenants.includes(id) : false)

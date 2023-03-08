@@ -8,11 +8,16 @@ import { withRouter } from "react-router-dom";
 import { handleItemFormSubmit } from '../actions/actions'
 
 let NoticePage = (props) => {
-    const {currentUser, notices, users, contacts, submitForm } = props;
+    const { notices, contacts, leases, submitForm } = props;
+    const activeMappedLeases = leases.filter(({ terminated }) => terminated !== true)
+        .filter(({ tenants }) => tenants && tenants.length)
+        .map((lease) => {
+            const tenantDetails = contacts.find(({ id }) => lease.tenants ? lease.tenants.includes(id) : false) || {}
+            return Object.assign({}, lease, {tenant_name: `${tenantDetails.first_name} ${tenantDetails.last_name}`})
+        })
     let noticeToEditId = props.match.params.noticeId;
-    let noticeToEdit = notices.find(({ id }) => id === noticeToEditId);
-
-    let pageTitle = noticeToEditId ? "Edit Notice" : "New Notice";
+    let noticeToEdit = notices.find(({ id }) => id === noticeToEditId) || {};
+    let pageTitle = noticeToEdit.id ? "Edit Notice" : "New Notice";
 
     return (
         <Layout pageTitle="Notice Details">
@@ -24,9 +29,7 @@ let NoticePage = (props) => {
                     <NoticeInputForm
                         submitForm={submitForm}
                         noticeToEdit={noticeToEdit}
-                        users={users}
-                        currentUser={currentUser}
-                        contacts={contacts}
+                        activeLeases={activeMappedLeases}
                     />
                 </Grid>
             </Grid>
@@ -36,17 +39,15 @@ let NoticePage = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        currentUser: state.currentUser,
         notices: state.notices,
-        users: state.users,
+        leases: state.leases,
         contacts: state.contacts,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        submitForm: (user, item, itemUrl) =>
-            dispatch(handleItemFormSubmit(item, itemUrl)),
+        submitForm: (item, itemUrl) => dispatch(handleItemFormSubmit(item, itemUrl)),
     };
 };
 

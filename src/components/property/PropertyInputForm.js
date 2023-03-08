@@ -224,7 +224,7 @@ let PropertyInputForm = (props) => {
 						//upload the file to the database and assign the resulting file 
 						// upload path to property_unit
 						const fileUploadPath = await uploadFilesToFirebase([property_unit.image])
-						property_unit.image = fileUploadPath[0]
+						property_unit.image_url = fileUploadPath[0]
 					}
 					const propertyUnitToSave = Object.assign({}, property_unit, {
 						property_id: propertyId,

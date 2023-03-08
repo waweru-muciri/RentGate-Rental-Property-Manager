@@ -20,8 +20,8 @@ let useStyles = makeStyles((theme) => ({
 		},
 	},
 	avatar: {
-		height: 56,
-		width: 56,
+		width: theme.spacing(10),
+		height: theme.spacing(10),
 		backgroundColor: red[500],
 	},
 	buttonBox: {
