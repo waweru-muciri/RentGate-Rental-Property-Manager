@@ -124,7 +124,7 @@ let DashBoardPage = (props) => {
         <Grid item key={0}>
           <PageHeading text={"Overview"} />
         </Grid>
-        <Grid item>
+        <Grid item container>
           <Grid container item direction="column" spacing={4}>
             <Grid item>
               <Box

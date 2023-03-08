@@ -309,8 +309,8 @@ let TenantChargesStatementPage = ({
                     </Box>
                 </Grid>
             </Grid>
-            <Grid item container>
-                <Grid item sm={12}>
+            <Grid item container xs={12}>
+                <Grid item>
                     <CommonTable
                         selected={selected}
                         setSelected={setSelected}

@@ -161,7 +161,7 @@ let PropertyPerformancePage = ({ transactionsCharges, properties }) => {
                                                 justify="center"
                                                 direction="row"
                                             >
-                                                <Grid item xs={3}>
+                                                <Grid item sm={3}>
                                                     <TextField
                                                         fullWidth
                                                         select

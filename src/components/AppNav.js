@@ -50,8 +50,6 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import WorkIcon from '@material-ui/icons/Work';
 import MoneyOffIcon from '@material-ui/icons/MoneyOff';
-import Head from "../components/Head";
-import {commonStyles} from '../components/commonStyles'
 
 const navigationLinks = [
     { text: "Home", to: "/app/", icon: <DashboardIcon /> },
@@ -126,10 +124,9 @@ let AppNavLayout = ({
     selectedTab,
     setSelectedTab,
     pageTitle,
-    match,
+    classes,
 }) => {
     const theme = useTheme();
-    const classes = commonStyles()
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isProfileMenuOpen = Boolean(anchorEl);
 
@@ -152,7 +149,6 @@ let AppNavLayout = ({
 
     return (
         <div className={classes.root}>
-            <Head title={pageTitle} />
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar, {

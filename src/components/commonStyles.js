@@ -103,7 +103,14 @@ let useStyles = makeStyles((theme) => ({
     },
     hide: {
         display: "none",
-    },
+	},
+	rootPaper: {
+		padding: theme.spacing(2),
+		marginTop: theme.spacing(3),
+		paddingTop: theme.spacing(4),
+		paddingLeft: theme.spacing(4),
+		paddingRight: theme.spacing(4),
+	},
     drawer: {
         width: drawerWidth,
         flexShrink: 0,
