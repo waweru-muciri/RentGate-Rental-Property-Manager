@@ -236,9 +236,14 @@ let RentRollPage = ({
                                 size="medium"
                                 disabled={selected.length <= 0}
                                 startIcon={<AddIcon />}
+                                to={() => {
+                                    const selectedCharge = rentCharges.find(({ id }) => selected[0] === id) || {}
+                                    const tenantIdWithSelectedCharge = selectedCharge.tenant_id
+                                    return `/app/charge-on-deposit/${tenantIdWithSelectedCharge}/new`
+                                }}
                                 component={Link}
                             >
-                                Apply Deposit To Charge
+                                Charge on Deposit
                             </Button>
                         </Grid>
                         <Grid item>

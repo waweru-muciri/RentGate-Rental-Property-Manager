@@ -1,6 +1,6 @@
-import {firestore} from "../firebase";
+import {firebaseFirestore} from "../firebase";
 
-const db = firestore.collection("tenant");
+const db = firebaseFirestore.collection("tenant");
 
 let currentTenantId = '';
 

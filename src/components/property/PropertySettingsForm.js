@@ -44,7 +44,7 @@ const PropertySettingsSchema = Yup.object().shape({
 
 
 let PropertySettingsInputForm = (props) => {
-	const { classes, currentUser, history, handleItemSubmit } = props
+	const { classes, history, handleItemSubmit } = props
 	const propertySettingsToEdit = props.propertySettingsToEdit || {};
 	const propertyValues = {
 		id: propertySettingsToEdit.id,
@@ -333,11 +333,6 @@ let PropertySettingsInputForm = (props) => {
 
 const mapStateToProps = (state) => {
 	return {
-		properties: state.properties,
-		error: state.error,
-		contacts: state.contacts.filter(({ id }) => !state.propertyUnits.find((property_unit) => property_unit.tenants.includes(id))),
-		currentUser: state.currentUser,
-		users: state.users,
 	};
 };
 const mapDispatchToProps = (dispatch) => {

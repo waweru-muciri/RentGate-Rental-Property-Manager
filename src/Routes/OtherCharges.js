@@ -176,6 +176,24 @@ let TenantChargesStatementPage = ({
                         </Button>
                     </Grid>
                     <Grid item>
+                        <Button
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            disabled={selected.length <= 0}
+                            startIcon={<AddIcon />}
+                            to={() => {
+                                const selectedCharge = tenantChargesItems.find(({ id }) => selected[0] === id) || {}
+                                const tenantIdWithSelectedCharge = selectedCharge.tenant_id
+                                return `/app/charge-on-deposit/${tenantIdWithSelectedCharge}/new`
+                            }}
+                            component={Link}
+                        >
+                            Charge on Deposit
+                            </Button>
+                    </Grid>
+                    <Grid item>
                         <ExportToExcelBtn
                             disabled={selected.length <= 0}
                             reportName={`Tenants Charges Records`}

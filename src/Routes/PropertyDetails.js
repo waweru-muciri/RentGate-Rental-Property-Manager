@@ -308,7 +308,7 @@ const mapStateToProps = (state, ownProps) => {
                 const latestUnitLease = state.leases.filter(({ terminated }) => terminated !== true)
                     .find(({ unit_id }) => unit_id === property_unit.id) || {}
                 const tenant = state.contacts.find(
-                    ({ id }) => latestUnitLease.tenants ? latestUnitLease.tenants.includes(id) : false)
+                    ({ id }) => Array.isArray(latestUnitLease.tenants) ? latestUnitLease.tenants.includes(id) : false)
                 return Object.assign(
                     {},
                     property_unit,

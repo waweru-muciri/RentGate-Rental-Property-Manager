@@ -95,8 +95,8 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 									onSubmit={handleSubmit}
 								>
 									<Grid container>
-										<Grid item container spacing={2} direction="row">
-											<Grid sm={12} item>
+										<Grid item container spacing={2} direction="column">
+											<Grid item>
 												<TextField
 													fullWidth
 													variant="outlined"
@@ -112,7 +112,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 													helperText={touched.payment_date && errors.payment_date}
 												/>
 											</Grid>
-											<Grid sm={12} item>
+											<Grid item>
 												<TextField
 													fullWidth
 													type="text"
@@ -127,7 +127,7 @@ let PaymentInputForm = ({ history, match, transactions, contacts, handleItemSubm
 													helperText={touched.payment_amount && errors.payment_amount}
 												/>
 											</Grid>
-											<Grid sm={12} item>
+											<Grid item>
 												<TextField
 													fullWidth
 													type="text"

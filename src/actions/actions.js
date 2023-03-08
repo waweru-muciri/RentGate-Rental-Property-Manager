@@ -16,11 +16,11 @@ import * as toDoActions from "./to-dos";
 import * as expensesActions from "./expenses";
 import * as meterReadingsActions from "./meterReadings";
 import * as maintenanceRequestsActions from "./maintenanceRequests";
-import {auth, storage, functions} from "../firebase";
+import { auth, firebaseStorage, firebaseFunctions } from "../firebase";
 import { getDatabaseRef } from "./firebaseHelpers";
 
 
-const storageRef = storage.ref();
+const firebaseStorageRef = firebaseStorage.ref();
 
 export function setCurrentUser(user) {
     return {
@@ -31,7 +31,7 @@ export function setCurrentUser(user) {
 
 export const firebaseSignOutUser = () => {
     return (dispatch) => {
-            auth
+        auth
             .signOut()
             .then(function () {
 
@@ -117,21 +117,23 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
 }
 
 export function sendEmails(email, recipients) {
-    var sendEmail = functions.httpsCallable('sendEmail');
+    var sendEmail = firebaseFunctions.httpsCallable('sendEmail');
     sendEmail({ email: email, recipients: recipients }).then(function (result) {
         // Read result of the Cloud Function.
-        var response = result.data;
-        if (response.error) {
-            console.log('Error sending emails => ', response.error)
-        }
-        else {
-            console.log('Successfully sent emails => ', response.success)
-        }
+        var responseData = result.data;
+        console.log('Successfully sent emails => ', responseData.message)
+    }).catch((error) => {
+        //getting the error details
+        var code = error.code;
+        var message = error.message;
+        var details = error.details;
+        console.error(`There was an error when calling the Cloud Function.\n 
+        Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
     });
 }
 
 export function addRolesToUserByEmail(email, rolesToAddObject) {
-    var addRolesToUser = functions.httpsCallable('addRolesToUser');
+    var addRolesToUser = firebaseFunctions.httpsCallable('addRolesToUser');
     addRolesToUser({ email: email, roles: rolesToAddObject }).then(function (result) {
         // Read result of the Cloud Function.
         var response = result.data;
@@ -141,19 +143,25 @@ export function addRolesToUserByEmail(email, rolesToAddObject) {
         else {
             console.log('Successfully added roles to user => ', response.success)
         }
+    }).catch((error) => {
+        //getting the error details
+        var code = error.code;
+        var message = error.message;
+        var details = error.details;
+        console.error(`There was an error when calling the Cloud Function.\n 
+        Error Code => ${code}. Error Message => ${message}. Error Details => ${details}`);
     });
 }
 
 export async function deleteUploadedFileByUrl(fileUrl) {
-    return await storageRef.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
+    return await firebaseStorage.refFromURL(fileUrl).delete().then(() => console.log('Successfully deleted file')).catch((error) => console.log('Error deleting file => ', error))
 }
 
-export function uploadFilesToFirebase(filesArray) {
-    return filesArray.map(async (file) => {
-        var fileRef = storageRef.child(`propertyImages/${file.name}`);
+export async function uploadFilesToFirebase(fileToUpload) {
+        var fileRef = firebaseStorageRef.child(`propertyImages/${fileToUpload.name}`);
         try {
             const snapshot = await fileRef
-                .putString(file.data, "data_url");
+                .putString(fileToUpload.data, "data_url");
             // console.log("Uploaded files successfully!");
             try {
                 const url = await snapshot.ref.getDownloadURL();
@@ -183,9 +191,9 @@ export function uploadFilesToFirebase(filesArray) {
             }
         }
         catch (error_1) {
-            return console.log("Error during file upload => ", error_1);
+             console.log("Error during file upload => ", error_1);
+             return ''
         }
-    });
 }
 
 export function itemsFetchData(collectionsUrls) {
@@ -250,7 +258,7 @@ export function itemsFetchData(collectionsUrls) {
                             )
                         );
                         break;
-                
+
                     case "charge-payments":
                         dispatch(
                             transactionsActions.transactionsFetchDataSuccess(

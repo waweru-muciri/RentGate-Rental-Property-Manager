@@ -15,7 +15,7 @@ import {
 	getLeaseOptions, getPaymentOptions
 } from "../../assets/commonAssets.js";
 import * as Yup from "yup";
-import { addMonths, format, startOfToday } from "date-fns";
+import { addMonths, format, startOfMonth, startOfToday } from "date-fns";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const defaultDate = format(startOfToday(), 'yyyy-MM-dd')
@@ -23,7 +23,6 @@ const LEASE_TYPES = getLeaseOptions();
 const RENT_CYCLES = getPaymentOptions();
 
 const recurringChargesTableHeadCells = [
-	{ id: "type", numeric: false, disablePadding: true, label: "Charge Type" },
 	{ id: "account", numeric: false, disablePadding: true, label: "Charge Name" },
 	{ id: "due_date", numeric: false, disablePadding: true, label: "Next Due Date" },
 	{ id: "amount", numeric: false, disablePadding: true, label: "Amount" },
@@ -61,7 +60,7 @@ let UnitLeaseInputForm = (props) => {
 		cosigner: contacts.find(({ id }) => leaseToEdit.cosigner === id) || null,
 		start_date: leaseToEdit.start_date || defaultDate,
 		end_date: leaseToEdit.end_date || '',
-		rent_due_date: leaseToEdit.rent_due_date || format(addMonths(startOfToday(), 1), 'yyyy-MM-dd'),
+		rent_due_date: leaseToEdit.rent_due_date || format(addMonths(startOfMonth(new Date()), 1), 'yyyy-MM-dd'),
 		security_deposit_due_date: leaseToEdit.security_deposit_due_date || defaultDate,
 		rent_amount: leaseToEdit.rent_amount || '',
 		security_deposit: leaseToEdit.security_deposit || 0,
@@ -131,11 +130,11 @@ let UnitLeaseInputForm = (props) => {
 						property_id: values.property_id,
 					}
 					const newSecurityDepositCharge = {
-						charge_amount: values.rent_amount,
+						charge_amount: values.security_deposit,
 						charge_date: defaultDate,
 						charge_label: "Security Deposit",
 						charge_type: "security_deposit",
-						due_date: defaultDate,
+						due_date: values.security_deposit_due_date,
 						tenant_id: tenant.id,
 						unit_id: values.unit_id,
 						property_id: values.property_id,
@@ -172,7 +171,7 @@ let UnitLeaseInputForm = (props) => {
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} md={6}>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										label="Property"
@@ -196,7 +195,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item xs={12} md={6}>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										select
@@ -224,7 +223,7 @@ let UnitLeaseInputForm = (props) => {
 								</Grid>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item xs={12} md={4}>
+								<Grid item xs md={4}>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -245,8 +244,8 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item container xs={12} md={8} direction="row" alignItems="center" justify="center" spacing={2}>
-									<Grid item xs={12} md={6}>
+								<Grid item container xs md={8} direction="row" spacing={2}>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -262,7 +261,7 @@ let UnitLeaseInputForm = (props) => {
 											InputLabelProps={{ shrink: true }}
 										/>
 									</Grid>
-									<Grid item xs={12} md={6}>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -286,7 +285,7 @@ let UnitLeaseInputForm = (props) => {
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" spacing={2}>
-								<Grid item sm>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -307,7 +306,7 @@ let UnitLeaseInputForm = (props) => {
 										))}
 									</TextField>
 								</Grid>
-								<Grid item sm>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -323,14 +322,14 @@ let UnitLeaseInputForm = (props) => {
 										helperText={touched.rent_amount && errors.rent_amount}
 									/>
 								</Grid>
-								<Grid item sm>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										variant="outlined"
 										id="rent_due_date"
 										type="date"
 										name="rent_due_date"
-										label="Next Due Date"
+										label="Rent Next Due Date"
 										value={values.rent_due_date}
 										error={errors.rent_due_date && touched.rent_due_date}
 										helperText={"Next date when the rent is due"}
@@ -346,7 +345,7 @@ let UnitLeaseInputForm = (props) => {
 								</Typography>
 							</Grid>
 							<Grid item container direction="row" alignItems="center" spacing={2}>
-								<Grid item sm>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -360,7 +359,7 @@ let UnitLeaseInputForm = (props) => {
 										InputLabelProps={{ shrink: true }}
 									/>
 								</Grid>
-								<Grid item sm>
+								<Grid item xs={12} sm>
 									<TextField
 										fullWidth
 										variant="outlined"
@@ -383,7 +382,7 @@ let UnitLeaseInputForm = (props) => {
 									Tenants and Cosigner
 								</Typography>
 							</Grid>
-							<Grid item container direction="row" spacing={4}>
+							<Grid item container direction="row" spacing={2}>
 								<Grid item xs={12} md={6}>
 									<Autocomplete
 										id="tenants-select"
@@ -485,7 +484,6 @@ let UnitLeaseInputForm = (props) => {
 							<Grid
 								item
 								container
-								justify="center"
 								direction="row"
 								className={classes.buttonBox}
 							>

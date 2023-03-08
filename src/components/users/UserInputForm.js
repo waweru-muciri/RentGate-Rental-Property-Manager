@@ -1,10 +1,16 @@
 import React from "react";
-import { Avatar, Button, TextField, MenuItem, Grid } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import Avatar from "@material-ui/core/Avatar";
+import TextField from "@material-ui/core/TextField";
+import MenuItem from "@material-ui/core/MenuItem";
+import Grid from "@material-ui/core/Grid";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { useHistory } from "react-router-dom";
 import { commonStyles } from "../commonStyles";
-import { DropzoneDialogBase } from "material-ui-dropzone";
+import IconButton from "@material-ui/core/IconButton";
+import PhotoCamera from '@material-ui/icons/PhotoCamera'; 
 import {
 	getContactTitles,
 	getGendersList,
@@ -15,6 +21,7 @@ import {
 	deleteUploadedFileByUrl,
 } from "../../actions/actions";
 import { Formik } from "formik";
+import ImageCropper from '../ImageCropper';
 
 const CONTACT_TITLES = getContactTitles();
 const GENDERS_LIST = getGendersList();
@@ -23,20 +30,22 @@ const GENDERS_LIST = getGendersList();
 const UserSchema = Yup.object().shape({
 	title: Yup.string().trim().required("Title is required"),
 	gender: Yup.string().trim().required("Gender is required"),
-	primary_email: Yup.string().trim().email("Invalid Email").required("Email is required"),
-	other_email: Yup.string().trim().email("Invalid Email"),
 	first_name: Yup.string().trim().required("First Name is required"),
 	last_name: Yup.string().trim().required("Last Name is Required"),
-	phone_number: Yup.string().trim().min(8).required("Phone Number is Required"),
-	work_mobile_number: Yup.string().trim().min(8).required("Work Phone Number"),
 	id_number: Yup.string().trim().min(8).required("Id Number is Required"),
+	primary_email: Yup.string().trim().email("Invalid Email"),
+	other_email: Yup.string().trim().email("Invalid Email"),
+	phone_number: Yup.string().trim().min(10, 'Too Short').required("Phone Number is Required"),
+	work_mobile_number: Yup.string().trim().min(10, 'Too Short'),
+	custom_mobile_number: Yup.string().trim().min(10, 'Too Short'),
+	home_phone_number: Yup.string().trim().min(10, 'Too Short'),
 });
 
 let UserInputForm = (props) => {
-	let { handleItemSubmit, currentUser } = props;
-	const userToEdit = typeof props.userToEdit !== 'undefined' ? props.userToEdit : {};
+	let { handleItemSubmit } = props;
+	const userToEdit = props.userToEdit ? props.userToEdit : {};
 	const userValues = {
-		id: userToEdit.uid || '',
+		id: userToEdit.id || '',
 		gender: userToEdit.gender || "",
 		title: userToEdit.title || "",
 		id_number: userToEdit.id_number || '',
@@ -47,23 +56,19 @@ let UserInputForm = (props) => {
 		phone_number: userToEdit.phone_number || '',
 		work_mobile_number: userToEdit.work_mobile_number || '',
 		home_phone_number: userToEdit.home_phone_number || "",
+		custom_mobile_number: userToEdit.custom_mobile_number || '',
 		user_avatar_url: userToEdit.user_avatar_url || '',
+		user_image: '',
 	}
-	userValues.contact_image = [];
 	const history = useHistory();
 	let classes = commonStyles();
 
-	const [imageDialogState, toggleImageDialogState] = React.useState(false);
-
-	const toggleImageDialog = () => {
-		toggleImageDialogState(!imageDialogState);
-	};
-
 	return (
 		<Formik
-			initialValues={{ ...userValues }}
+			initialValues={userValues}
+			enableReinitialize
 			validationSchema={UserSchema}
-			onSubmit={(values, { resetForm }) => {
+			onSubmit={async (values, { resetForm }) => {
 				const user = {
 					id: values.id,
 					title: values.title,
@@ -75,23 +80,26 @@ let UserInputForm = (props) => {
 					last_name: values.last_name,
 					phone_number: values.phone_number,
 					work_mobile_number: values.work_mobile_number,
-					home_phone_number: userToEdit.home_phone_number || "",
+					home_phone_number: values.home_phone_number,
+					custom_mobile_number: values.custom_mobile_number,
 				};
 				//first upload the image to firebase
-				if (values.contact_image.length) {
+				if (values.user_image && values.user_image.data) {
 					//if the user had previously had a file avatar uploaded
 					// then delete it here
 					if (values.user_avatar_url) {
 						//delete file
-						deleteUploadedFileByUrl(values.user_avatar_url);
+						await deleteUploadedFileByUrl(values.user_avatar_url);
 					}
 					//upload the first and only image in the contact images array
-					var fileDownloadUrl = uploadFilesToFirebase([values.contact_image[0]])
+					var fileDownloadUrl = await uploadFilesToFirebase(values.user_image)
 					user.user_avatar_url = fileDownloadUrl;
 				}
-				handleItemSubmit(user, "users").then((response) => {
-					resetForm({});
-				});
+				await handleItemSubmit(user, "users")
+				resetForm({});
+				if (values.id) {
+					history.goBack();
+				}
 			}}
 		>
 			{({
@@ -135,55 +143,38 @@ let UserInputForm = (props) => {
 										<Avatar
 											alt="User Image"
 											src={
-												typeof values.contact_image[0] !==
-													"undefined"
-													? values.contact_image[0].data
+												values.user_image ? values.user_image.data
 													: values.user_avatar_url
 											}
 											className={classes.largeAvatar}
 										/>
 									</Grid>
+									{
+										values.file_to_load_url &&
+										<ImageCropper open={true} selectedFile={values.file_to_load_url}
+											setCroppedImageData={(croppedImage) => {
+												setFieldValue('file_to_load_url', '');
+												setFieldValue('user_image', croppedImage);
+											}} cropHeight={160} cropWidth={160}/>
+									}
 									<Grid key={2} item>
-										<Button
-											variant="contained"
-											color="primary"
-											onClick={() => toggleImageDialog()}
-										>
-											{values.user_avatar_url || values.contact_image[0] ? "Change Photo" : "Add Photo"}
-										</Button>
-										<DropzoneDialogBase
-											filesLimit={1}
-											fileObjects={values.contact_image}
-											acceptedFiles={["image/*"]}
-											cancelButtonText={"cancel"}
-											submitButtonText={"submit"}
-											maxFileSize={5000000}
-											open={imageDialogState}
-											onClose={() => toggleImageDialog()}
-											onDelete={() => {
-												setFieldValue("contact_image", []);
-											}}
-											onSave={(files) => {
-												setFieldValue(
-													"contact_image",
-													files
-												);
-												toggleImageDialog();
-											}}
-											onAdd={(files) => {
-												setFieldValue(
-													"contact_image",
-													files
-												);
-												toggleImageDialog();
-											}}
-											showPreviews={true}
-											showFileNamesInPreview={true}
-										/>
+										<Box>
+											<input onChange={(event) => {
+												const selectedFile = event.currentTarget.files[0]
+												//remove the object then push a copy of it with added image object
+												setFieldValue("file_to_load_url", selectedFile);
+											}} accept="image/*" className={classes.fileInputDisplayNone} id={"user-image-input"} type="file" />
+											<label htmlFor={"user-image-input"}>
+												<IconButton color="primary" aria-label="upload picture" component="span">
+													<PhotoCamera />
+												</IconButton>
+											</label>
+											<Box>{values.user_avatar_url || values.user_image ? "Change Photo" : "Add Photo"}</Box>
+										</Box>
 									</Grid>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -204,7 +195,7 @@ let UserInputForm = (props) => {
 											))}
 										</TextField>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -227,7 +218,7 @@ let UserInputForm = (props) => {
 									</Grid>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -241,7 +232,7 @@ let UserInputForm = (props) => {
 											helperText={touched.first_name && errors.first_name}
 										/>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -271,7 +262,7 @@ let UserInputForm = (props) => {
 									/>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -285,7 +276,7 @@ let UserInputForm = (props) => {
 											value={values.phone_number}
 										/>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -300,7 +291,7 @@ let UserInputForm = (props) => {
 									</Grid>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -313,12 +304,12 @@ let UserInputForm = (props) => {
 											value={values.work_mobile_number}
 										/>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
-											id={"custom_mobile_number"}
-											name={"custom_mobile_number"}
+											id="custom_mobile_number"
+											name="custom_mobile_number"
 											label="Custom Mobile Number"
 											onChange={handleChange}
 											onBlur={handleBlur}
@@ -328,7 +319,7 @@ let UserInputForm = (props) => {
 									</Grid>
 								</Grid>
 								<Grid item container direction="row" spacing={2}>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -342,7 +333,7 @@ let UserInputForm = (props) => {
 											helperText={touched.primary_email && errors.primary_email}
 										/>
 									</Grid>
-									<Grid item sm>
+									<Grid item xs={12} sm>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -362,7 +353,6 @@ let UserInputForm = (props) => {
 							<Grid
 								item
 								container
-								justify="center"
 								direction="row"
 								className={classes.buttonBox}
 							>

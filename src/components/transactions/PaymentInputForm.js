@@ -78,17 +78,17 @@ let PaymentInputForm = (props) => {
 						id="paymentInputForm"
 						onSubmit={handleSubmit}
 					>
-						<Grid container spacing={2} direction="row">
-							<Grid item sm={12}>
+						<Grid container spacing={2} direction="column">
+							<Grid item>
 								<Typography variant="subtitle1"> Charge Details : {values.charge_label}</Typography>
 							</Grid>
-							<Grid item sm={12}>
+							<Grid item>
 								<Typography variant="subtitle1">Total Charge Amount : {values.charge_amount}</Typography>
 							</Grid>
-							<Grid item sm={12}>
+							<Grid item>
 								<Typography variant="subtitle1">Charge Balance: {values.charge_balance}</Typography>
 							</Grid>
-							<Grid sm={12} item>
+							<Grid item>
 								<TextField
 									fullWidth
 									variant="outlined"
@@ -104,7 +104,7 @@ let PaymentInputForm = (props) => {
 									helperText={touched.payment_date && errors.payment_date}
 								/>
 							</Grid>
-							<Grid sm={12} item>
+							<Grid item>
 								<TextField
 									fullWidth
 									type="text"
@@ -119,7 +119,7 @@ let PaymentInputForm = (props) => {
 									helperText={touched.payment_amount && errors.payment_amount}
 								/>
 							</Grid>
-							<Grid sm={12} item>
+							<Grid item>
 								<TextField
 									fullWidth
 									type="text"
@@ -165,7 +165,7 @@ let PaymentInputForm = (props) => {
 										form="paymentInputForm"
 										disabled={isSubmitting}
 									>
-										Apply Payment To Charge
+										Save Payment
 								</Button>
 								</Grid>
 							</Grid>

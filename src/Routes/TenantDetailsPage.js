@@ -106,7 +106,7 @@ let TenantDetailsPage = ({
                                 <CardMedia
                                     height="200"
                                     component="img"
-                                    image={tenantUnit.image_url}
+                                    image={tenantUnit.unit_image_url}
                                     title="Unit Image"
                                 />
                                 <CardContent>

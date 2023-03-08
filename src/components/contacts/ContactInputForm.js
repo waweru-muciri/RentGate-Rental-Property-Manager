@@ -116,7 +116,7 @@ let ContactInputForm = (props) => {
 							await deleteUploadedFileByUrl(values.contact_avatar_url);
 						}
 						//upload the first and only image in the contact images array
-						var fileDownloadUrl = uploadFilesToFirebase([values.contact_image])
+						var fileDownloadUrl = await uploadFilesToFirebase(values.contact_image)
 						contact.contact_avatar_url = fileDownloadUrl;
 					}
 	
@@ -187,7 +187,7 @@ let ContactInputForm = (props) => {
 													setCroppedImageData={(croppedImage) => {
 														setFieldValue('file_to_load_url', '');
 														setFieldValue('contact_image', croppedImage);
-													}} />
+													}} cropHeight={160} cropWidth={160}/>
 											}
 											<Avatar
 												alt="Contact Image"

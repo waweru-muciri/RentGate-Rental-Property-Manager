@@ -1,4 +1,4 @@
-import {auth as firebaseAuth, firestore as firebaseFirestore, functions as firebaseFunctions, storage as firebaseStorage, initializeApp} from "firebase";
+import {auth as firebaseAuth, firestore, functions, storage, initializeApp} from "firebase";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -14,6 +14,6 @@ var firebaseConfig = {
 // Initialize firebase
 initializeApp(firebaseConfig);
 export const auth = firebaseAuth()
-export const storage = firebaseStorage()
-export const firestore = firebaseFirestore()
-export const functions = firebaseFunctions()
+export const firebaseStorage = storage()
+export const firebaseFirestore = firestore()
+export const firebaseFunctions = functions()

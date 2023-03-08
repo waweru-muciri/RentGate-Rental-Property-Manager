@@ -2,16 +2,19 @@ import React from "react";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
+import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import Avatar from "@material-ui/core/Avatar";
+import IconButton from "@material-ui/core/IconButton";
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import SaveIcon from "@material-ui/icons/Save";
-import CustomSnackbar from '../CustomSnackbar'
 import CancelIcon from "@material-ui/icons/Cancel";
 import { connect } from "react-redux";
 import { Formik } from "formik";
 import {
 	handleItemFormSubmit,
-	handleDelete,
+	handleDelete, uploadFilesToFirebase, deleteUploadedFileByUrl
 } from "../../actions/actions";
 import { commonStyles } from "../commonStyles";
 import { withRouter } from "react-router-dom";
@@ -20,6 +23,7 @@ import {
 	getPropertyBeds,
 	getPropertyBaths,
 } from "../../assets/commonAssets.js";
+import ImageCropper from '../ImageCropper';
 import * as Yup from "yup";
 
 const UNIT_TYPES = getUnitTypes();
@@ -50,7 +54,8 @@ let PropertyUnitInputForm = (props) => {
 		beds: propertyUnitToEdit.beds || "",
 		baths: propertyUnitToEdit.baths || "",
 		sqft: propertyUnitToEdit.sqft || '',
-		tenants: propertyUnitToEdit.tenants || [],
+		unit_image_url: propertyUnitToEdit.unit_image_url || '',
+		file_to_load_url: '',
 	};
 
 	return (
@@ -58,33 +63,34 @@ let PropertyUnitInputForm = (props) => {
 			initialValues={propertyValues}
 			enableReinitialize validationSchema={PropertyUnitSchema}
 			onSubmit={async (values, { resetForm }) => {
-				try {
-					let unit = {
-						property_id: values.property_id,
-						id: values.id,
-						ref: values.ref,
-						address: values.ref,
-						unit_type: values.unit_type,
-						beds: values.beds,
-						baths: values.baths,
-						sqft: values.sqft,
-						tenants: values.tenants,
-					};
-					//save the unit details
-					await handleItemSubmit(unit, 'property_units')
-					resetForm({});
-					if (values.id) {
-						history.goBack();
+				let property_unit = {
+					id: values.id,
+					property_id: values.property_id,
+					ref: values.ref,
+					address: values.ref,
+					unit_type: values.unit_type,
+					beds: values.beds,
+					baths: values.baths,
+					sqft: values.sqft,
+				};
+				//check if the unit has an image to upload
+				if (values.unit_image && values.unit_image.data) {
+					//if the user had previously uploaded an image for unit
+					// then delete it here and replace the url with new uploaded image
+					if (values.unit_image_url) {
+						//delete file from storage
+						await deleteUploadedFileByUrl(values.unit_image_url);
 					}
-				} catch (error) {
-					return error && (
-						<div>
-						  <CustomSnackbar
-							variant="error"
-							message={error.message}
-						  />
-						</div>
-					  )
+					//upload the file to the database and assign the resulting file 
+					// upload path to property_unit
+					const fileUploadPath = await uploadFilesToFirebase(values.unit_image)
+					property_unit.unit_image_url = fileUploadPath
+				}
+				//save the unit details
+				await handleItemSubmit(property_unit, 'property_units')
+				resetForm({});
+				if (values.id) {
+					history.goBack();
 				}
 			}}
 		>
@@ -95,6 +101,7 @@ let PropertyUnitInputForm = (props) => {
 				errors,
 				handleChange,
 				handleBlur,
+				setFieldValue,
 				isSubmitting,
 			}) => (
 					<form
@@ -227,6 +234,56 @@ let PropertyUnitInputForm = (props) => {
 											error={errors.sqft && touched.sqft}
 											helperText={touched.sqft && errors.sqft}
 										/>
+									</Grid>
+								</Grid>
+								<Grid
+									item
+									container
+									direction="row"
+									justify="flex-start"
+									spacing={4}
+									alignItems="center"
+								>
+									<Grid key={1} item xs={12} md={6}>
+										{
+											values.file_to_load_url &&
+											<ImageCropper open={true} selectedFile={values.file_to_load_url}
+												setCroppedImageData={(croppedImage) => {
+													setFieldValue('file_to_load_url', '');
+													setFieldValue('unit_image', croppedImage);
+												}} cropHeight={200} cropWidth={300}/>
+										}
+										<Avatar
+											style={{ width: "100%", height: '300px' }}
+											alt="Unit Image"
+											src={
+												values.unit_image ?
+													values.unit_image.data
+													: values.unit_image_url
+											}
+											className={classes.largeAvatar} variant="rounded"
+										>Image</Avatar>
+									</Grid>
+									<Grid key={2} xs={12} item md>
+										<Box>
+											<input onChange={(event) => {
+												const selectedFile = event.currentTarget.files[0]
+												//remove the object then push a copy of it with added image object
+												setFieldValue("file_to_load_url", selectedFile);
+											}} accept="image/*" className={classes.fileInputDisplayNone} id={"unit-image-input"} type="file" />
+											<label htmlFor={"unit-image-input"}>
+												<IconButton color="primary" aria-label="upload picture" component="span">
+													<PhotoCamera />
+												</IconButton>
+											</label>
+											<Box marginBottom="1">{values.unit_image_url || values.unit_image ? "Change Image" : "Add Image"}</Box>
+											{
+												values.unit_image_url ? <Button variant="contained" onClick={ async () => {
+													await deleteUploadedFileByUrl(values.unit_image_url)
+													setFieldValue('unit_image_url', '')
+												}}>Delete Image</Button> : null
+											}
+										</Box>
 									</Grid>
 								</Grid>
 							</Grid>

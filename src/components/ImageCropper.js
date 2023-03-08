@@ -5,8 +5,9 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import PropTypes from 'prop-types';
 
-const ImageCropper = ({ open, selectedFile, setCroppedImageData }) => {
+const ImageCropper = ({ open, selectedFile, setCroppedImageData, cropHeight, cropWidth }) => {
 
     const [cropper, setCropper] = useState()
     const [image, setImage] = useState()
@@ -43,12 +44,12 @@ const ImageCropper = ({ open, selectedFile, setCroppedImageData }) => {
                     <Grid item>
                         <Cropper
                             style={{ height: "100%", width: "100%" }}
-                            initialAspectRatio={1}
+                            initialAspectRatio={cropWidth === cropHeight ? 1 : (16 / 9)}
                             src={image}
                             viewMode={0.5}
                             guides={true}
-                            minCropBoxHeight={30}
-                            minCropBoxWidth={30}
+                            minCropBoxHeight={cropHeight}
+                            minCropBoxWidth={cropWidth}
                             background={false}
                             responsive={true}
                             autoCropArea={0.5}
@@ -56,6 +57,8 @@ const ImageCropper = ({ open, selectedFile, setCroppedImageData }) => {
                             onInitialized={(instance) => {
                                 setCropper(instance);
                             }}
+                            cropBoxResizable={false}
+                            data={{height: cropHeight, width: cropWidth}}
                         />
                     </Grid>
                     <Grid item container justify="center" direction="row" spacing={2}>
@@ -85,6 +88,11 @@ const ImageCropper = ({ open, selectedFile, setCroppedImageData }) => {
             </DialogContent>
         </Dialog >
     )
+}
+
+ImageCropper.propTypes = {
+    cropHeight: PropTypes.number.isRequired,
+    cropWidth: PropTypes.number.isRequired,
 }
 
 export default ImageCropper;

@@ -10,7 +10,7 @@ import { handleItemFormSubmit } from '../actions/actions'
 let MeterReadingPage = (props) => {
     const {history, meterReadings, contacts, propertyUnits, properties, handleItemSubmit } = props;
     //only allow adding meter readings to units with tenants
-    const propertyUnitsWithTenants = propertyUnits.filter((propertyUnit) => propertyUnit.tenants.length)
+    const propertyUnitsWithTenants = propertyUnits
     let meterReadingToEditId = props.match.params.meterReadingId;
     const meterReadingToEdit = meterReadings.find(({ id }) => id === meterReadingToEditId)
     const pageTitle = "Charge Tenants for Meter Reading";

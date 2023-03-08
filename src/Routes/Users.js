@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import BlockIcon from '@material-ui/icons/Block';
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
@@ -130,22 +129,10 @@ let UsersPage = ({
 							variant="contained"
 							size="medium"
 							component={Link}
-							to={`/emails/new`}
+							to={`/app/emails/new`}
 							disabled={selected.length <= 0}
 						>
 							Compose Email
-						</Button>
-					</Grid>
-					<Grid item>
-						<Button
-							type="button"
-							color="primary"
-							variant="contained"
-							size="medium"
-							startIcon={<BlockIcon />}
-							disabled={selected.length <= 0}
-						>
-							Disable
 						</Button>
 					</Grid>
 					<Grid item>
@@ -309,13 +296,11 @@ let UsersPage = ({
 	);
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
 	return {
 		currentUser: state.currentUser,
 		users: state.users,
 		isLoading: state.isLoading,
-		error: state.error,
-		match: ownProps.match,
 	};
 };
 const mapDispatchToProps = (dispatch) => {

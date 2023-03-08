@@ -11,8 +11,8 @@ import { Formik } from "formik";
 import { signInUserWithEmailAndPassword, setCurrentUser } from "../actions/actions";
 import PasswordResetDialog from "../components/login/ResetPassword";
 import * as Yup from "yup";
-import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
+import { useHistory } from "react-router-dom";
 
 const SignInSchema = Yup.object().shape({
   password: Yup.string().trim()
@@ -43,8 +43,8 @@ const useStyles = makeStyles((theme) => ({
 
 let SignInLayout = ({ setUser }) => {
 
-  const history = useHistory();
   const classes = useStyles();
+  const history = useHistory();
   let loginValues = { email: "", password: "" };
   const [open, setOpen] = React.useState(false);
 
@@ -57,121 +57,121 @@ let SignInLayout = ({ setUser }) => {
   };
 
   return (
-    <Layout pageTitle="Sign In">
-      <Formik
-        initialValues={loginValues}
-        validationSchema={SignInSchema}
-        onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
-          var email = values.email;
-          var password = values.password;
-          try {
-            const signedInUser = await signInUserWithEmailAndPassword(email, password)
-            setUser(signedInUser)
-            resetForm({});
-            history.push("/app")
-          } catch (error) {
-            setSubmitting(false);
-            setStatus({ error: error.message });
-          }
-        }}>
-        {({
-          values,
-          handleSubmit,
-          touched,
-          status,
-          errors,
-          handleChange,
-          handleBlur,
-          isSubmitting,
-        }) => {
-          const passwordOrOtherError = (touched.password && errors.password) || (status && status.error)
-          return (
-            <div>
-              <PasswordResetDialog open={open} handleClose={handleClose} />
-              <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                  <LockOutlinedIcon />
-                </Avatar>
-                <form
-                  className={classes.form}
-                  method="post"
-                  id="signInForm"
-                  onSubmit={handleSubmit}
-                >
-                  <Grid container justify="center" direction="column" spacing={3}>
-                    <Grid item>
-                      <Typography align="center" component="h1" variant="h5">
-                        Sign in
-                      </Typography>
-                    </Grid>
-                    <Grid item>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        autoFocus
-                        margin="dense"
-                        id="email"
-                        label="Email Address"
-                        value={values.email}
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        helperText={touched.email && errors.email}
-                        error={errors.email && touched.email}
-                        type="email"
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        margin="dense"
-                        id="password"
-                        label="Password"
-                        type="password"
-                        value={values.password}
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        helperText={passwordOrOtherError}
-                        error={(passwordOrOtherError ? true : false)}
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        disabled={isSubmitting}
-                        type="submit"
-                        variant="outlined"
-                        color="primary"
-                        form="signInForm"
-                      >
-                        Sign In
-                      </Button>
-                    </Grid>
-                    <Grid item container direction="row" alignItems="center">
+      <Layout pageTitle="Sign In">
+        <Formik
+          initialValues={loginValues}
+          validationSchema={SignInSchema}
+          onSubmit={async (values, { resetForm, setStatus, setSubmitting }) => {
+            var email = values.email;
+            var password = values.password;
+            try {
+              const signedInUser = await signInUserWithEmailAndPassword(email, password)
+              setUser(signedInUser)
+              resetForm({});
+              history.push("/app/")
+            } catch (error) {
+              setSubmitting(false);
+              setStatus({ error: error.message });
+            }
+          }}>
+          {({
+            values,
+            handleSubmit,
+            touched,
+            status,
+            errors,
+            handleChange,
+            handleBlur,
+            isSubmitting,
+          }) => {
+            const passwordOrOtherError = (touched.password && errors.password) || (status && status.error)
+            return (
+              <div>
+                <PasswordResetDialog open={open} handleClose={handleClose} />
+                <div className={classes.paper}>
+                  <Avatar className={classes.avatar}>
+                    <LockOutlinedIcon />
+                  </Avatar>
+                  <form
+                    className={classes.form}
+                    method="post"
+                    id="signInForm"
+                    onSubmit={handleSubmit}
+                  >
+                    <Grid container justify="center" direction="column" spacing={3}>
                       <Grid item>
-                        <Typography variant="subtitle1">
-                          Forgot your Password?
-                        </Typography>
+                        <Typography align="center" component="h1" variant="h5">
+                          Sign in
+                      </Typography>
+                      </Grid>
+                      <Grid item>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          autoFocus
+                          margin="dense"
+                          id="email"
+                          label="Email Address"
+                          value={values.email}
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          helperText={touched.email && errors.email}
+                          error={errors.email && touched.email}
+                          type="email"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          margin="dense"
+                          id="password"
+                          label="Password"
+                          type="password"
+                          value={values.password}
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          helperText={passwordOrOtherError}
+                          error={(passwordOrOtherError ? true : false)}
+                          InputLabelProps={{ shrink: true }}
+                        />
                       </Grid>
                       <Grid item>
                         <Button
                           disabled={isSubmitting}
+                          type="submit"
+                          variant="outlined"
                           color="primary"
-                          onClick={handleClickOpen}
+                          form="signInForm"
                         >
-                          Reset Password
+                          Sign In
                       </Button>
                       </Grid>
+                      <Grid item container direction="row" alignItems="center">
+                        <Grid item>
+                          <Typography variant="subtitle1">
+                            Forgot your Password?
+                        </Typography>
+                        </Grid>
+                        <Grid item>
+                          <Button
+                            disabled={isSubmitting}
+                            color="primary"
+                            onClick={handleClickOpen}
+                          >
+                            Reset Password
+                      </Button>
+                        </Grid>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </form>
+                  </form>
+                </div>
               </div>
-            </div>
-          )
-        }}
-      </Formik>
-    </Layout>
+            )
+          }}
+        </Formik>
+      </Layout>
   );
 };
 

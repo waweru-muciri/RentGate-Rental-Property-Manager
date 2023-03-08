@@ -134,18 +134,6 @@ let TransactionPage = ({
                             color="primary"
                             variant="contained"
                             size="medium"
-                            disabled={selected.length <= 0}
-                            to={`/app/notices/new?lease=${selected[0]}`}
-                        >
-                            Apply Charge To Deposit
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            type="button"
-                            color="primary"
-                            variant="contained"
-                            size="medium"
                             startIcon={<BlockIcon />}
                             disabled={selected.length <= 0}
                             component={Link}

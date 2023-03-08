@@ -14,7 +14,7 @@ import { connect } from "react-redux";
 import { Formik, FieldArray } from "formik";
 import {
 	handleItemFormSubmit,
-	handleDelete, uploadFilesToFirebase
+	handleDelete, uploadFilesToFirebase, deleteUploadedFileByUrl
 } from "../../actions/actions";
 import { commonStyles } from "../../components/commonStyles";
 import ImageCropper from '../ImageCropper';
@@ -58,6 +58,7 @@ let PropertyInputForm = (props) => {
 		ref: propertyToEdit.ref || "",
 		property_units: [],
 		owner: propertyToEdit.owner || "",
+		property_image_url: propertyToEdit.property_image_url || "",
 	};
 	const UnitInputComponent = ({ remove, push, replace, form }) => {
 		const { errors, touched, values, handleChange, handleBlur } = form
@@ -150,7 +151,7 @@ let PropertyInputForm = (props) => {
 							<ImageCropper open={true} selectedFile={property_unit.file_to_load_url}
 								setCroppedImageData={(croppedImage) => {
 									replace(propertyUnitIndex, Object.assign({}, property_unit, { file_to_load_url: '', image: croppedImage }));
-								}} />
+								}} cropHeight={200} cropWidth={300}/>
 						}
 						<Box>
 							<input onChange={(event) => {
@@ -218,21 +219,30 @@ let PropertyInputForm = (props) => {
 					ref: values.ref,
 					owner: values.owner,
 				};
+				//first upload the image to firebase
+				if (values.property_image && values.property_image.data) {
+					//if the user had previously uploaded an image
+					// then delete it here and replace the url with new uploaded image
+					if (values.property_image_url) {
+						//delete file from storage
+						await deleteUploadedFileByUrl(values.property_image_url);
+					}
+					//upload the first and only image in the contact images array
+					var fileDownloadUrl = await uploadFilesToFirebase(values.property_image)
+					property.property_image_url = fileDownloadUrl;
+				}
 				const propertyId = await handleItemSubmit(property, "properties")
 				values.property_units.forEach(async (property_unit) => {
-					//assign a default address to each property unit
-					property_unit.address = values.address + ' - ' + property_unit.ref
 					//check if the unit has an image to upload
 					if (property_unit.image && property_unit.image.data) {
 						//upload the file to the database and assign the resulting file 
 						// upload path to property_unit
-						const fileUploadPath = await uploadFilesToFirebase([property_unit.image])
-						property_unit.image_url = fileUploadPath[0]
+						const fileUploadPath = await uploadFilesToFirebase(property_unit.image)
+						property_unit.unit_image_url = fileUploadPath
 					}
 					const propertyUnitToSave = Object.assign({}, property_unit, {
 						property_id: propertyId,
 						property_ref: values.ref,
-						tenants: [],
 						assigned_to: values.assigned_to
 					})
 					await handleItemSubmit(propertyUnitToSave, 'property_units')
@@ -251,6 +261,7 @@ let PropertyInputForm = (props) => {
 				handleChange,
 				handleBlur,
 				isSubmitting,
+				setFieldValue
 			}) => (
 					<form
 						className={classes.form}
@@ -360,6 +371,46 @@ let PropertyInputForm = (props) => {
 										</MenuItem>
 									))}
 								</TextField>
+							</Grid>
+							<Grid
+								item
+								container
+								direction="row"
+								justify="flex-start"
+								spacing={4}
+								alignItems="center"
+							>
+								<Grid key={1} item>
+									{
+										values.file_to_load_url &&
+										<ImageCropper open={true} selectedFile={values.file_to_load_url}
+											setCroppedImageData={(croppedImage) => {
+												setFieldValue('file_to_load_url', '');
+												setFieldValue('property_image', croppedImage);
+											}} cropHeight={200} cropWidth={300} />
+									}
+									<Box>{values.property_image ? values.property_image.name : "No Image"}</Box>
+								</Grid>
+								<Grid key={2} item>
+									<Box>
+										<input onChange={(event) => {
+											const selectedFile = event.currentTarget.files[0]
+											//remove the object then push a copy of it with added image object
+											setFieldValue("file_to_load_url", selectedFile);
+										}} accept="image/*" className={classes.fileInputDisplayNone} id={"property-image-input"} type="file" />
+										<label htmlFor={"property-image-input"}>
+											<IconButton size="medium" color="primary" aria-label="upload picture" component="span">
+												<PhotoCamera />
+											</IconButton>
+										</label>
+										{
+											values.property_image_url ? <Button variant="contained" onClick={async () => {
+												await deleteUploadedFileByUrl(values.property_image_url)
+												setFieldValue('property_image_url', '')
+											}}>Delete Image</Button> : null
+										}
+									</Box>
+								</Grid>
 							</Grid>
 							{
 								values.id ? null : (
