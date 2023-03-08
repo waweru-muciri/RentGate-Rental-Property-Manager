@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import PrintIcon from "@material-ui/icons/Print";
 import { Link } from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
 import UndoIcon from "@material-ui/icons/Undo";
@@ -13,6 +14,7 @@ import { commonStyles } from "../components/commonStyles";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
 import moment from "moment";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
     {
@@ -168,6 +170,22 @@ let RentRollPage = ({
                         >
                             RENEW LEASE
                         </Button>
+                    </Grid>
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Lease Renewal Records'}
+							reportTitle = {'Lease Renewal Records'}
+                            headCells={headCells}
+                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn

@@ -1,8 +1,10 @@
 import Grid from "@material-ui/core/Grid";
 import React, { useEffect, useState } from "react";
 import exportDataToXSL from "../assets/printToExcel";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import CommonTable from "../components/table/commonTable";
@@ -156,6 +158,22 @@ let RentRollPage = ({
                     direction="row"
                     key={1}
                 >
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Rent Roll Records'}
+							reportTitle = {'Rent Records'}
+                            headCells={headCells}
+                            dataToPrint={statementItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
+                    </Grid>
                     <Grid item>
                         <ExportToExcelBtn
                             aria-label="Export to Excel"

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
+import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
@@ -15,6 +16,7 @@ import { connect } from "react-redux";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const meterReadingsTableHeadCells = [
     {
@@ -163,6 +165,22 @@ let MeterReadingsPage = ({
                         >
                             Edit
                         </Button>
+                    </Grid>
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Meter Readings Records'}
+							reportTitle = {'Meter Readings Records'}
+                            headCells={meterReadingsTableHeadCells}
+                            dataToPrint={meterReadingItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn

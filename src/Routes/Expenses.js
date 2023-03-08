@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
+import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
@@ -15,6 +16,7 @@ import { connect } from "react-redux";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import Layout from "../components/myLayout";
 import PageHeading from "../components/PageHeading";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const expensesTableHeadCells = [
     {
@@ -146,6 +148,22 @@ let ExpensesPage = ({
                         >
                             Edit
                         </Button>
+                    </Grid>
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Expenses Records'}
+							reportTitle = {'Expenses Records'}
+                            headCells={expensesTableHeadCells}
+                            dataToPrint={expenseItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn

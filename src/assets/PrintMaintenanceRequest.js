@@ -55,7 +55,7 @@ export default function (props) {
             size="medium"
             color="primary"
             disabled={props.disabled}
-            onClick={() => printDocument(`${maintenanceRequestDetails.tenant_name} maintenance request`, docDefinition)}
+            onClick={() => printDocument(`${maintenanceRequestDetails.tenant_name} maintenance request`," ", docDefinition)}
             startIcon={<PrintIcon />}
         >
             pdf

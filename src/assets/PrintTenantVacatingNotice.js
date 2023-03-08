@@ -53,7 +53,7 @@ export default function (props) {
             variant="contained"
             size="medium"
             color="primary"
-            onClick={() => printDocument(`${noticeDetails.tenant_name} vacating notice`, docDefinition)}
+            onClick={() => printDocument(`${noticeDetails.tenant_name} vacating notice`, " ", docDefinition)}
             startIcon={<PrintIcon />}
         >
             pdf

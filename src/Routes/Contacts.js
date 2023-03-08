@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
+import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import exportDataToXSL from "../assets/printToExcel";
@@ -23,6 +24,7 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import ExportToExcelBtn from "../components/ExportToExcelBtn";
 import { getGendersList } from "../assets/commonAssets.js";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const GENDERS_LIST = getGendersList();
 
@@ -186,7 +188,23 @@ let ContactsPage = ({
                             Edit
                             </Button>
                     </Grid>
-                    <Grid item>
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Tenant Records'}
+							reportTitle = {'Tenant Records'}
+                            headCells={contactsTableHeadCells}
+                            dataToPrint={contactItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
+                    </Grid>
+               <Grid item>
                         <ExportToExcelBtn
                             aria-label="Export to Excel"
                             disabled={selected.length <= 0}

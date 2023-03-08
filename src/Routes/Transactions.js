@@ -10,6 +10,7 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
+import PrintIcon from "@material-ui/icons/Print";
 import SearchIcon from "@material-ui/icons/Search";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
@@ -22,6 +23,7 @@ import LoadingBackdrop from "../components/loadingBackdrop";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const headCells = [
     {
@@ -222,7 +224,6 @@ let TransactionPage = ({
                         </Button>
                     </Grid>
                     <Grid item>
-                        {" "}
                         <Button
                             type="button"
                             color="primary"
@@ -235,6 +236,22 @@ let TransactionPage = ({
                         >
                             Edit
                         </Button>
+                    </Grid>
+                    <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Rental Transactions Records'}
+							reportTitle = {'Rental Transactions Records'}
+                            headCells={headCells}
+                            dataToPrint={transactionItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn

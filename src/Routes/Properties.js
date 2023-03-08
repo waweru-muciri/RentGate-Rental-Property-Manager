@@ -5,6 +5,7 @@ import exportDataToXSL from "../assets/printToExcel";
 import { Box, TextField, Button, MenuItem } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
+import PrintIcon from "@material-ui/icons/Print";
 import UndoIcon from "@material-ui/icons/Undo";
 import AddIcon from "@material-ui/icons/Add";
 import CustomizedSnackbar from "../components/customizedSnackbar";
@@ -18,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { commonStyles } from "../components/commonStyles";
 import { getPropertyTypes } from "../assets/commonAssets.js";
+import PrintArrayToPdf from "../assets/PrintArrayToPdf";
 
 const PROPERTY_TYPES = getPropertyTypes();
 
@@ -174,6 +176,22 @@ let PropertyPage = ({
                         >
                             Edit
                         </Button>
+                    </Grid>
+                          <Grid item>
+                        <PrintArrayToPdf
+                            type="button"
+                            color="primary"
+                            variant="contained"
+                            size="medium"
+                            startIcon={<PrintIcon />}
+                            disabled={selected.length <= 0}
+							reportName ={'Rental Records'}
+							reportTitle = {'Rentals Records'}
+                            headCells={headCells}
+                            dataToPrint={propertyItems.filter(({ id }) => selected.includes(id))}
+                        >
+                            Pdf
+                        </PrintArrayToPdf>
                     </Grid>
                     <Grid item>
                         <ExportToExcelBtn
